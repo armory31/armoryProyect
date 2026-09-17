@@ -145,7 +145,7 @@ import com.arturo254.opentune.ui.component.LocalBottomSheetPageState
 import com.arturo254.opentune.ui.component.LocalMenuState
 import com.arturo254.opentune.ui.component.rememberBottomSheetState
 import com.arturo254.opentune.ui.menu.PlayerMenu
-import com.arturo254.opentune.ui.screens.settings.DarkMode
+import com.arturo254.opentune.constants.DarkMode
 import androidx.compose.ui.unit.Dp
 import com.arturo254.opentune.ui.component.bottomSheetDraggable
 import com.arturo254.opentune.ui.utils.ShowMediaInfo
@@ -217,43 +217,13 @@ fun BottomSheetPlayer(
     var keyboardSkipMultiplier by remember { mutableStateOf(1) }
     var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
 
-
-
-    val (aodAutoTimeoutSeconds) = rememberPreference(AodAutoActivationKey, 30)
-
-    var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var isAodActive by remember { mutableStateOf(false) }
-
-    fun resetAodTimer() {
-        lastInteractionTime = System.currentTimeMillis()
-        if (isAodActive) {
-            isAodActive = false
-        }
-    }
-    LaunchedEffect(aodAutoTimeoutSeconds, state.isExpanded, lastInteractionTime, isAodActive) {
-        if (aodAutoTimeoutSeconds > 0 && state.isExpanded && !isAodActive) {
-            delay(100L)
-            while (isActive) {
-                delay(100L)  // ← Cambiado de 500ms a 100ms (más suave)
-                val elapsedSeconds = (System.currentTimeMillis() - lastInteractionTime) / 1000f  // ← Usar Float
-                if (elapsedSeconds >= aodAutoTimeoutSeconds) {
-                    isAodActive = true
-                    navController.navigate("always_on_display") {
-                        launchSingleTop = true
-                    }
-                    break
-                }
-            }
-        }
-    }
-
     val playerButtonsStyle by rememberEnumPreference(
         key = PlayerButtonsStyleKey,
         defaultValue = PlayerButtonsStyle.DEFAULT
     )
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
-    val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
+    val darkTheme by rememberEnumPreference<DarkMode>(DarkModeKey, defaultValue = DarkMode.AUTO)
     val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
@@ -621,8 +591,7 @@ fun BottomSheetPlayer(
 
     LaunchedEffect(state.isExpanded) {
         if (state.isExpanded) {
-            lastInteractionTime = System.currentTimeMillis()
-            isAodActive = false
+            // Interaction time reset removed
         }
     }
 
@@ -633,10 +602,6 @@ fun BottomSheetPlayer(
             .focusRequester(focusRequester)
             .focusable()
             .onKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown) {
-                    resetAodTimer()
-                }
-
                 if (keyEvent.type != KeyEventType.KeyDown || state.isCollapsed) return@onKeyEvent false
 
                 when (keyEvent.key) {
@@ -880,7 +845,6 @@ fun BottomSheetPlayer(
                 onSliderValueChange = onSliderValueChange,
                 onSliderValueChangeFinished = onSliderValueChangeFinished,
                 currentFormat = if (playerDesignStyle == PlayerDesignStyle.V7) currentFormat else null,
-                onResetTimer = { resetAodTimer() },
             )
         }
 

@@ -179,13 +179,13 @@ class BackupRestoreViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val title = context.getString(R.string.backup_in_progress)
             try {
-                val dbFile = context.getDatabasePath(InternalDatabase.DB_NAME)
+                val dbFile = context.getDatabasePath(MusicDatabase.DB_NAME)
                 val dbFiles =
                     listOf(
                         dbFile,
-                        dbFile.resolveSibling("${InternalDatabase.DB_NAME}-wal"),
-                        dbFile.resolveSibling("${InternalDatabase.DB_NAME}-shm"),
-                        dbFile.resolveSibling("${InternalDatabase.DB_NAME}-journal"),
+                        dbFile.resolveSibling("${MusicDatabase.DB_NAME}-wal"),
+                        dbFile.resolveSibling("${MusicDatabase.DB_NAME}-shm"),
+                        dbFile.resolveSibling("${MusicDatabase.DB_NAME}-journal"),
                     ).filter { it.exists() }
 
                 val totalUnits = 2 + dbFiles.size
@@ -293,7 +293,7 @@ class BackupRestoreViewModel @Inject constructor(
                         var entry = zip.nextEntry
                         while (entry != null) {
                             entryNames.add(entry.name)
-                            if (entry.name == InternalDatabase.DB_NAME) hasDb = true
+                            if (entry.name == MusicDatabase.DB_NAME) hasDb = true
                             entry = zip.nextEntry
                         }
                     }
@@ -304,10 +304,10 @@ class BackupRestoreViewModel @Inject constructor(
                     entryNames.filter { name ->
                         name == SETTINGS_XML_FILENAME ||
                                 name == SETTINGS_FILENAME ||
-                                name == InternalDatabase.DB_NAME ||
-                                name == "${InternalDatabase.DB_NAME}-wal" ||
-                                name == "${InternalDatabase.DB_NAME}-shm" ||
-                                name == "${InternalDatabase.DB_NAME}-journal"
+                                name == MusicDatabase.DB_NAME ||
+                                name == "${MusicDatabase.DB_NAME}-wal" ||
+                                name == "${MusicDatabase.DB_NAME}-shm" ||
+                                name == "${MusicDatabase.DB_NAME}-journal"
                     }
 
                 val totalUnits = 1 + 1 + restoreEntries.size
@@ -349,10 +349,10 @@ class BackupRestoreViewModel @Inject constructor(
                                         zip.copyTo(out)
                                     }
                                 }
-                                InternalDatabase.DB_NAME,
-                                "${InternalDatabase.DB_NAME}-wal",
-                                "${InternalDatabase.DB_NAME}-shm",
-                                "${InternalDatabase.DB_NAME}-journal" -> {
+                                MusicDatabase.DB_NAME,
+                                "${MusicDatabase.DB_NAME}-wal",
+                                "${MusicDatabase.DB_NAME}-shm",
+                                "${MusicDatabase.DB_NAME}-journal" -> {
                                     emit(context.getString(R.string.restore_step_restoring_file, name), indeterminate = true)
                                     val dbFile = context.getDatabasePath(name)
                                     if (dbFile.exists()) {

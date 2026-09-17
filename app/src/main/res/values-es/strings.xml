@@ -333,8 +333,8 @@
     <string name="custom_value">Valor personalizado</string>
     <string name="new_library_design">Nuevo diseño de biblioteca</string>
     <string name="new_library_design_description">Habilita el nuevo diseño de la biblioteca (puede ser inestable)</string>
-    <string name="armory_canvas">ARMORY Canvas</string>
-    <string name="armory_canvas_desc">Animar la portada del álbum mientras se reproduce (Impulsado por BetterLyrics)</string>
+    <string name="opentune_canvas">ARMORY Canvas</string>
+    <string name="opentune_canvas_desc">Animar la portada del álbum mientras se reproduce (Impulsado por BetterLyrics)</string>
     <string name="show_button1_description">Alternar la visibilidad del botón 1 en Discord Rich Presence</string>
     <string name="show_button2_description">Alternar la visibilidad del botón 2 en Discord Rich Presence</string>
     <string name="discord_activity_type">Tipo de actividad</string>
@@ -511,11 +511,6 @@
     <string name="activity_status">Estado de actividad</string>
     <string name="platform_status">Plataforma</string>
     <string name="update_interval">Intervalo de actualización de presencia</string>
-    <string name="translator_options">Opciones de traducción</string>
-    <string name="enable_translator">Activar traductor</string>
-    <string name="enable_translator_desc">Traduce los campos seleccionados antes de enviarlos al RPC de Discord</string>
-    <string name="context_info">Contextos (separación por comas)</string>
-    <string name="translator_info_usage">Ejemplo: {canción}, {artista}, {álbum}</string>
     <string name="target_language">Idioma de destino</string>
     <string name="select_language">Selecciona el idioma</string>
     <string name="close_dialog">Cerrar</string>
@@ -600,8 +595,6 @@
     <string name="about">Acerca</string>
     <string name="app_version">Versión de la aplicación</string>
     <string name="new_version_available">Nueva versión disponible</string>
-    <string name="translation_models">Modelos de traducción</string>
-    <string name="clear_translation_models">Limpiar modelos de traducción</string>
     <string name="updates">Actualizaciones</string>
     <string name="current_version">Versión Actual</string>
     <string name="latest_version_format">Ultima: %s</string>

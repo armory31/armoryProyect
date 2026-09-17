@@ -57,6 +57,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -153,8 +154,8 @@ import com.arturo254.opentune.ui.component.BottomSheetMenu
 import com.arturo254.opentune.ui.player.BottomSheetPlayer
 import com.arturo254.opentune.ui.screens.Screens
 import com.arturo254.opentune.ui.screens.navigationBuilder
-import com.arturo254.opentune.ui.screens.settings.DarkMode
-import com.arturo254.opentune.ui.screens.settings.NavigationTab
+import com.arturo254.opentune.constants.DarkMode
+import com.arturo254.opentune.constants.NavigationTab
 import com.arturo254.opentune.ui.theme.ArmoryTheme
 import com.arturo254.opentune.ui.utils.appBarScrollBehavior
 import com.arturo254.opentune.ui.utils.resetHeightOffset
@@ -203,6 +204,7 @@ class MainActivity : ComponentActivity() {
 
     private var playerConnection by mutableStateOf<PlayerConnection?>(null)
     private var isMusicServiceBound = false
+    private var isMainActivityReady = mutableStateOf(false)
 
     private val serviceConnection =
         object : ServiceConnection {
@@ -257,13 +259,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        isMusicServiceBound =
-            bindService(
-                Intent(this, MusicService::class.java),
-                serviceConnection,
-                BIND_AUTO_CREATE
-            )
-        playPendingDeepLinkSongIfReady()
+        // Liberamos el Main Thread difiriendo de forma asíncrona la vinculación pesada
+        // del servicio de hardware de audio de Media3 a un hilo de background secundario.
+        lifecycleScope.launch(Dispatchers.IO) {
+            val intent = Intent(this@MainActivity, MusicService::class.java)
+            val bound = bindService(intent, serviceConnection, BIND_AUTO_CREATE)
+            withContext(Dispatchers.Main) {
+                isMusicServiceBound = bound
+                playPendingDeepLinkSongIfReady()
+            }
+        }
     }
 
     private fun safeUnbindMusicService() {
@@ -322,7 +327,15 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        
+        var isLoginChecked by mutableStateOf(false)
+
+        splashScreen.setKeepOnScreenCondition {
+            !App.instance.isInitialized.value || !isLoginChecked || !isMainActivityReady.value
+        }
+
         session = SessionManager(this)
         
         lifecycleScope.launch {
@@ -336,9 +349,11 @@ class MainActivity : ComponentActivity() {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                 finish()
             }
+            isLoginChecked = true
         }
 
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
+        window.decorView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -392,8 +407,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+            var isUiReady by remember { mutableStateOf(false) }
+
             LaunchedEffect(Unit) {
-                syncManager.schedulePeriodicSync(this@MainActivity)
+                delay(800) // Reduced delay as we now have Baseline Profiles and Splash Screen hold
+                isUiReady = true
+                isMainActivityReady.value = true
+                lifecycleScope.launch(Dispatchers.IO) {
+                    syncManager.schedulePeriodicSync(this@MainActivity)
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                     ContextCompat.checkSelfPermission(
                         this@MainActivity,
@@ -489,7 +511,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
+            val darkTheme by rememberEnumPreference<DarkMode>(DarkModeKey, defaultValue = DarkMode.AUTO)
             val lyricsSyncOffset by rememberPreference(LyricsSyncOffsetKey, defaultValue = 0)
             val isSystemInDarkTheme = isSystemInDarkTheme()
             val useDarkTheme =
@@ -542,7 +564,7 @@ class MainActivity : ComponentActivity() {
                         MiniPlayerLastAnchorKey,
                         defaultValue = COLLAPSED_ANCHOR
                     )
-                    val defaultOpenTab by rememberEnumPreference(DefaultOpenTabKey, NavigationTab.HOME)
+                    val defaultOpenTab by rememberEnumPreference<NavigationTab>(DefaultOpenTabKey, NavigationTab.HOME)
 
                     val topLevelScreens =
                         listOf(
@@ -889,7 +911,7 @@ class MainActivity : ComponentActivity() {
                                 .add(WindowInsets(top = AppBarHeight, bottom = bottomPadding))
                         }
 
-                    CompositionLocalProvider(
+                     CompositionLocalProvider(
                         LocalDatabase provides database,
                         LocalContentColor provides if (pureBlack) Color.White else contentColorFor(MaterialTheme.colorScheme.surface),
                         LocalPlayerConnection provides playerConnection,
@@ -903,7 +925,9 @@ class MainActivity : ComponentActivity() {
                         LocalMenuState provides menuState,
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            DynamicBackground(thumbnailUrl = nowPlaying?.thumbnailUrl ?: "")
+                            if (isUiReady) {
+                                DynamicBackground(thumbnailUrl = nowPlaying?.thumbnailUrl ?: "")
+                            }
 
                             Scaffold(
                                 containerColor = Color.Transparent,
@@ -1033,18 +1057,20 @@ class MainActivity : ComponentActivity() {
 
                             // OVERLAY: El BottomSheetPlayer ahora está FUERA del Scaffold
                             // para que su Z-index sea superior al de la barra de navegación.
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .fillMaxWidth()
-                            ) {
-                                BottomSheetPlayer(
-                                    state = playerBottomSheetState,
-                                    navController = navController,
-                                    pureBlack = pureBlack,
-                                    lyricsSyncOffset = lyricsSyncOffset,
-                                    navigationBarHeight = if (shouldShowNavigationBar && !useRail) 88.dp else 0.dp
-                                )
+                            if (isUiReady) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                                ) {
+                                    BottomSheetPlayer(
+                                        state = playerBottomSheetState,
+                                        navController = navController,
+                                        pureBlack = pureBlack,
+                                        lyricsSyncOffset = lyricsSyncOffset,
+                                        navigationBarHeight = if (shouldShowNavigationBar && !useRail) 88.dp else 0.dp
+                                    )
+                                }
                             }
 
                             BottomSheetMenu(

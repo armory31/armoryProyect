@@ -97,8 +97,6 @@ import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.LyricsClickKey
 import com.arturo254.opentune.constants.LyricsLineSpacingKey
-import com.arturo254.opentune.constants.LyricsRomanizeJapaneseKey
-import com.arturo254.opentune.constants.LyricsRomanizeKoreanKey
 import com.arturo254.opentune.constants.LyricsScrollKey
 import com.arturo254.opentune.constants.LyricsTextSizeKey
 import com.arturo254.opentune.constants.PlayerBackgroundStyle
@@ -113,8 +111,6 @@ import com.arturo254.opentune.lyrics.LyricsUtils.isKorean
 import com.arturo254.opentune.lyrics.LyricsUtils.isTtml
 import com.arturo254.opentune.lyrics.LyricsUtils.parseLyrics
 import com.arturo254.opentune.lyrics.LyricsUtils.parseTtml
-import com.arturo254.opentune.lyrics.LyricsUtils.romanizeJapanese
-import com.arturo254.opentune.lyrics.LyricsUtils.romanizeKorean
 import com.arturo254.opentune.lyrics.WordTimestamp
 import com.arturo254.opentune.ui.component.shimmer.ShimmerHost
 import com.arturo254.opentune.ui.component.shimmer.TextPlaceholder
@@ -180,8 +176,6 @@ fun LyricsV2(
     val (lyricsScroll) = rememberPreference(LyricsScrollKey, defaultValue = true)
     val (lyricsTextSize) = rememberPreference(LyricsTextSizeKey, defaultValue = 26f)
     val (lyricsLineSpacing) = rememberPreference(LyricsLineSpacingKey, defaultValue = 1.3f)
-    val (romanizeJapanese) = rememberPreference(LyricsRomanizeJapaneseKey, defaultValue = true)
-    val (romanizeKorean) = rememberPreference(LyricsRomanizeKoreanKey, defaultValue = true)
     val (useSystemFont) = rememberPreference(UseSystemFontKey, defaultValue = false)
     val lyricsFontFamily = remember(useSystemFont) {
         if (useSystemFont) null else FontFamily(Font(R.font.sfprodisplaybold))
@@ -319,22 +313,6 @@ fun LyricsV2(
                     currentOffsetMs += wordDurMs
                 }
                 entry.copy(words = words)
-            }
-        }
-    }
-
-    // ── Romanization ──
-    LaunchedEffect(entriesWithWords, romanizeJapanese, romanizeKorean) {
-        if (!romanizeJapanese && !romanizeKorean) return@LaunchedEffect
-        entriesWithWords.forEach { entry ->
-            if (entry.text.isBlank() || entry.romanizedTextFlow.value != null) return@forEach
-            scope.launch(Dispatchers.Default) {
-                val romanized = when {
-                    romanizeJapanese && isJapanese(entry.text) -> romanizeJapanese(entry.text)
-                    romanizeKorean && isKorean(entry.text) -> romanizeKorean(entry.text)
-                    else -> null
-                }
-                if (romanized != null) entry.romanizedTextFlow.value = romanized
             }
         }
     }
@@ -614,26 +592,6 @@ fun LyricsV2(
                             color = textColor.copy(alpha = if (isActive) 1f else inactiveAlpha),
                             textAlign = textAlign,
                             modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-
-                    // ── Romanization ──
-                    val romanizedText by item.romanizedTextFlow.collectAsState()
-                    if (romanizedText != null) {
-                        Text(
-                            text = romanizedText!!,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = (lyricsTextSize * 0.55f).sp,
-                                lineHeight = (lyricsTextSize * 0.75f).sp,
-                                fontWeight = FontWeight.Normal,
-                                fontStyle = if (isAllBackground) FontStyle.Italic else FontStyle.Normal,
-                                fontFamily = lyricsFontFamily ?: MaterialTheme.typography.bodyMedium.fontFamily,
-                            ),
-                            color = textColor.copy(alpha = if (isActive) 0.75f else inactiveAlpha * 0.7f),
-                            textAlign = textAlign,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = (lyricsTextSize * 0.3f).dp),
                         )
                     }
                 }

@@ -29,28 +29,10 @@ fun buildQuickActions(
 ): List<SettingsQuickAction> =
     listOf(
         SettingsQuickAction(
-            icon = painterResource(R.drawable.palette),
-            label = stringResource(R.string.appearance),
-            onClick = { resetSearch(); navController.navigate("settings/appearance") },
-            accentColor = MaterialTheme.colorScheme.primary,
-        ),
-        SettingsQuickAction(
-            icon = painterResource(R.drawable.play),
-            label = stringResource(R.string.player_and_audio),
-            onClick = { resetSearch(); navController.navigate("settings/player") },
-            accentColor = MaterialTheme.colorScheme.tertiary,
-        ),
-        SettingsQuickAction(
             icon = painterResource(R.drawable.storage),
             label = stringResource(R.string.storage),
             onClick = { resetSearch(); navController.navigate("settings/storage") },
             accentColor = MaterialTheme.colorScheme.secondary,
-        ),
-        SettingsQuickAction(
-            icon = painterResource(R.drawable.security),
-            label = stringResource(R.string.privacy),
-            onClick = { resetSearch(); navController.navigate("settings/privacy") },
-            accentColor = MaterialTheme.colorScheme.error,
         ),
     )
 
@@ -60,12 +42,6 @@ fun buildIntegrationActions(
     resetSearch: () -> Unit,
 ): List<SettingsIntegrationAction> =
     listOf(
-        SettingsIntegrationAction(
-            icon = painterResource(R.drawable.bedtime),
-            label = stringResource(R.string.AOD),
-            onClick = { resetSearch(); navController.navigate("settings/appearance/always_on_display") },
-            accentColor = Color(0xFFE3F2FD),
-        ),
         SettingsIntegrationAction(
             icon = painterResource(R.drawable.account),
             label = "Armory Sync",
@@ -89,70 +65,6 @@ fun buildSettingsGroups(
     resetSearch: () -> Unit,
 ): List<SettingsGroup> =
     buildList {
-        add(
-            SettingsGroup(
-                title = stringResource(R.string.settings_section_ui),
-                items = listOf(
-                    SettingsItem(
-                        icon = painterResource(R.drawable.palette),
-                        title = stringResource(R.string.appearance),
-                        subtitle = stringResource(R.string.dark_theme),
-                        accentColor = MaterialTheme.colorScheme.primary,
-                        keywords = listOf("theme", "palette", "material you", "dynamic color", "font", "ui"),
-                        onClick = { resetSearch(); navController.navigate("settings/appearance") },
-                    ),
-                ),
-            ),
-        )
-
-        add(
-            SettingsGroup(
-                title = stringResource(R.string.settings_section_player_content),
-                items = listOf(
-                    SettingsItem(
-                        icon = painterResource(R.drawable.play),
-                        title = stringResource(R.string.player_and_audio),
-                        subtitle = stringResource(R.string.audio_quality),
-                        accentColor = MaterialTheme.colorScheme.tertiary,
-                        keywords = listOf("audio", "playback", "volume", "quality", "equalizer", "crossfade"),
-                        onClick = { resetSearch(); navController.navigate("settings/player") },
-                    ),
-                    SettingsItem(
-                        icon = painterResource(R.drawable.language),
-                        title = stringResource(R.string.content),
-                        subtitle = stringResource(R.string.content_language),
-                        accentColor = MaterialTheme.colorScheme.secondary,
-                        keywords = listOf("language", "content", "lyrics", "translation", "region"),
-                        onClick = { resetSearch(); navController.navigate("settings/content") },
-                    ),
-                    SettingsItem(
-                        icon = painterResource(R.drawable.token),
-                        title = stringResource(R.string.po_token_generation),
-                        subtitle = stringResource(R.string.po_token_generation_subtitle),
-                        accentColor = MaterialTheme.colorScheme.tertiary,
-                        keywords = listOf("po token", "token", "web client", "visitor data", "gvs", "player"),
-                        onClick = { resetSearch(); navController.navigate("settings/po_token") },
-                    ),
-                ),
-            ),
-        )
-
-        add(
-            SettingsGroup(
-                title = stringResource(R.string.settings_section_privacy),
-                items = listOf(
-                    SettingsItem(
-                        icon = painterResource(R.drawable.security),
-                        title = stringResource(R.string.privacy),
-                        subtitle = stringResource(R.string.pause_listen_history),
-                        accentColor = MaterialTheme.colorScheme.error,
-                        keywords = listOf("privacy", "history", "tracking", "security", "permissions"),
-                        onClick = { resetSearch(); navController.navigate("settings/privacy") },
-                    ),
-                ),
-            ),
-        )
-
         add(
             SettingsGroup(
                 title = stringResource(R.string.settings_section_storage),
@@ -272,30 +184,6 @@ fun buildInternalItems(
     resetSearch: () -> Unit,
 ): List<SettingsItem> =
     listOf(
-        SettingsItem(
-            icon = painterResource(R.drawable.palette),
-            title = stringResource(R.string.theme_creator_title),
-            subtitle = stringResource(R.string.theme_creator_subtitle),
-            accentColor = MaterialTheme.colorScheme.primary,
-            keywords = listOf("theme", "creator", "seed", "material", "palette", "import", "export"),
-            onClick = { resetSearch(); navController.navigate("settings/appearance/theme_creator") },
-        ),
-        SettingsItem(
-            icon = painterResource(R.drawable.palette),
-            title = stringResource(R.string.customize_colors),
-            subtitle = stringResource(R.string.appearance),
-            accentColor = MaterialTheme.colorScheme.primary,
-            keywords = listOf("palette", "color", "accent", "tone", "dynamic color"),
-            onClick = { resetSearch(); navController.navigate("settings/appearance/palette_picker") },
-        ),
-        SettingsItem(
-            icon = painterResource(R.drawable.image),
-            title = stringResource(R.string.customize_background_title),
-            subtitle = stringResource(R.string.appearance),
-            accentColor = MaterialTheme.colorScheme.secondary,
-            keywords = listOf("background", "wallpaper", "image", "blur", "gradient"),
-            onClick = { resetSearch(); navController.navigate("customize_background") },
-        ),
         SettingsItem(
             icon = painterResource(R.drawable.account),
             title = "Armory Cloud Sync",

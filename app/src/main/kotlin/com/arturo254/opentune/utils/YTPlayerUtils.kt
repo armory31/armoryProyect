@@ -12,6 +12,7 @@ import android.net.ConnectivityManager
 import androidx.media3.common.PlaybackException
 import com.arturo254.opentune.constants.AudioQuality
 import com.arturo254.opentune.constants.PlayerStreamClient
+import com.arturo254.opentune.constants.YouTubeClientScoresKey
 import com.arturo254.opentune.innertube.NewPipeUtils
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.YouTubeClient
@@ -33,6 +34,12 @@ import com.arturo254.opentune.innertube.models.YouTubeClient.Companion.TVHTML5
 import com.arturo254.opentune.innertube.models.YouTubeClient.Companion.VISIONOS
 import com.arturo254.opentune.innertube.models.YouTubeClient.Companion.WEB
 import com.arturo254.opentune.innertube.models.YouTubeClient.Companion.WEB_CREATOR
+import com.arturo254.opentune.constants.YouTubeClientScoresKey
+import com.arturo254.opentune.App
+import androidx.datastore.preferences.core.edit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import timber.log.Timber
@@ -82,6 +89,8 @@ object YTPlayerUtils {
      * Clients used for fallback streams in case the streams of the main client do not work.
      */
     private val STREAM_FALLBACK_CLIENTS: Array<YouTubeClient> = arrayOf(
+        ANDROID_TESTSUITE,
+        WEB_CREATOR,
         IOS,
         MOBILE,
         ANDROID_MUSIC,
@@ -90,16 +99,50 @@ object YTPlayerUtils {
         ANDROID_VR_1_61_48,
         ANDROID_VR_1_43_32,
         ANDROID_CREATOR,
-        ANDROID_TESTSUITE,
         ANDROID_UNPLUGGED,
         IPADOS,
         VISIONOS,
         TVHTML5,
         TVHTML5_SIMPLY_EMBEDDED_PLAYER,
         WEB,
-        WEB_CREATOR,
         WEB_REMIX
     )
+
+    private val clientScores = ConcurrentHashMap<String, Int>().apply {
+        STREAM_FALLBACK_CLIENTS.forEach { put(it.clientName, 10) }
+        put(MAIN_CLIENT.clientName, 10)
+    }
+
+    fun initScores(json: String?) {
+        if (json.isNullOrBlank()) return
+        try {
+            val scores = json.split(",").associate {
+                val (name, score) = it.split(":")
+                name to score.toInt()
+            }
+            clientScores.putAll(scores)
+            Timber.tag(logTag).d("Initialized scores from persistent storage: $clientScores")
+        } catch (e: Exception) {
+            Timber.tag(logTag).e(e, "Failed to parse client scores")
+        }
+    }
+
+    fun getScoresAsJson(): String {
+        return clientScores.entries.joinToString(",") { "${it.key}:${it.value}" }
+    }
+
+    private fun updateClientScore(clientName: String, delta: Int) {
+        val current = clientScores[clientName] ?: 10
+        clientScores[clientName] = (current + delta).coerceIn(0, 20)
+        Timber.tag(logTag).d("Updated score for $clientName: ${clientScores[clientName]} (delta: $delta)")
+        
+        // Notify app to save scores
+        CoroutineScope(Dispatchers.IO).launch {
+            App.instance.dataStore.edit { settings ->
+                settings[YouTubeClientScoresKey] = getScoresAsJson()
+            }
+        }
+    }
     private data class CachedStreamUrl(
         val url: String,
         val expiresAtMs: Long,
@@ -114,8 +157,11 @@ object YTPlayerUtils {
     }
 
     fun markStreamClientFailed(videoId: String, clientKey: String?, httpStatusCode: Int?) {
-        if (httpStatusCode != 403) return
         val normalizedClientKey = normalizeStreamClientKey(clientKey)
+        if (normalizedClientKey.isNotEmpty()) {
+            updateClientScore(normalizedClientKey, -2)
+        }
+        if (httpStatusCode != 403) return
         if (normalizedClientKey.isEmpty()) return
         failedStreamClientsUntil[buildFailedClientKey(videoId, normalizedClientKey)] =
             System.currentTimeMillis() + FAILED_CLIENT_BACKOFF_MS
@@ -257,13 +303,15 @@ object YTPlayerUtils {
                 add(preferredYouTubeClient)
                 addAll(orderedFallbackClients)
                 if (preferredYouTubeClient != MAIN_CLIENT) add(MAIN_CLIENT)
-            }.distinct().filterNot { client ->
-                val blocked = isStreamClientTemporarilyBlocked(videoId, client.clientName)
-                if (blocked) {
-                    Timber.tag(logTag).w("Temporarily blocked stream client for $videoId: ${client.clientName}")
+            }.distinct()
+                .sortedByDescending { clientScores[it.clientName] ?: 10 }
+                .filterNot { client ->
+                    val blocked = isStreamClientTemporarilyBlocked(videoId, client.clientName)
+                    if (blocked) {
+                        Timber.tag(logTag).w("Temporarily blocked stream client for $videoId: ${client.clientName}")
+                    }
+                    blocked
                 }
-                blocked
-            }
 
         val botDetectedClients = mutableSetOf<String>()
         var gateFailure: PlaybackGateFailure? = null
@@ -300,14 +348,15 @@ object YTPlayerUtils {
                 Timber.tag(logTag).w(
                     "Player response status not OK: ${streamPlayerResponse.playabilityStatus.status}, reason: $reason, loginRecovery: $isLoginRecovery, botDetection: $isBotDetection"
                 )
-                if (isLoginRecovery) {
+                if (isBotDetection) {
+                    updateClientScore(client.clientName, -2)
+                    botDetectedClients.add(client.clientName)
+                } else if (isLoginRecovery) {
                     gateFailure = PlaybackGateFailure(
                         clientName = client.clientName,
                         status = streamPlayerResponse.playabilityStatus.status,
                         reason = streamPlayerResponse.playabilityStatus.reason,
                     )
-                } else if (isBotDetection) {
-                    botDetectedClients.add(client.clientName)
                 }
                 continue
             }
@@ -356,6 +405,7 @@ object YTPlayerUtils {
             val valid = validateStatus(streamUrl, client.userAgent)
             if (valid) {
                 Timber.tag(logTag).i("Stream validated successfully with client: ${client.clientName}")
+                updateClientScore(client.clientName, 1)
                 break
             }
 
@@ -611,15 +661,20 @@ object YTPlayerUtils {
                         .get()
                         .header("User-Agent", resolvedUserAgent)
                         .header("Range", range)
+                        .header("Connection", "keep-alive") // Evitar cierres abruptos
                         .apply {
                             originReferer.origin?.let { header("Origin", it) }
                             originReferer.referer?.let { header("Referer", it) }
                         }.url(url)
                         .build()
 
-                val code = currentStreamClient().newCall(rangeRequest).execute().use { response -> response.code }
-                if (code == 403) return false
-                if (code !in 200..399 && code != 416) return false
+                val success = currentStreamClient().newCall(rangeRequest).execute().use { response ->
+                    // Leer un poco del body para asegurar un cierre de SSL limpio
+                    response.body.source().request(1)
+                    val code = response.code
+                    code in 200..399 || code == 416
+                }
+                if (!success) return false
             }
 
             return true

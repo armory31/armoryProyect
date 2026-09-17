@@ -25,7 +25,9 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -50,15 +52,19 @@ class SyncManager @Inject constructor(
     fun schedulePeriodicSync(context: Context) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .setRequiresCharging(true)
+            .setRequiresDeviceIdle(true)
             .build()
 
         val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(12, TimeUnit.HOURS)
             .setConstraints(constraints)
+            .setInitialDelay(10, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "armory_cloud_sync",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             syncRequest
         )
     }
@@ -85,7 +91,9 @@ class SyncManager @Inject constructor(
             val snapshot = db.collection("users").document(uid).get().await()
             snapshot.toObject(UserLibraryDto::class.java)
         } catch (e: Exception) {
-            Timber.e(e, "SyncManager: Error fetching library")
+            if (e !is CancellationException) {
+                Timber.e(e, "SyncManager: Error fetching library")
+            }
             null
         }
     }
@@ -93,11 +101,15 @@ class SyncManager @Inject constructor(
     suspend fun saveUserLibrary(library: UserLibraryDto) {
         val uid = authManager.currentUserUid.first() ?: return
         val db = getFirestore()
-        try {
-            db.collection("users").document(uid).set(library).await()
-            Timber.d("SyncManager: Library saved to cloud")
-        } catch (e: Exception) {
-            Timber.e(e, "SyncManager: Error saving library")
+        withContext(Dispatchers.IO + NonCancellable) {
+            try {
+                db.collection("users").document(uid).set(library).await()
+                Timber.d("SyncManager: Library saved to cloud")
+            } catch (e: Exception) {
+                if (e !is CancellationException) {
+                    Timber.e(e, "SyncManager: Error saving library")
+                }
+            }
         }
     }
 
@@ -134,7 +146,9 @@ class SyncManager @Inject constructor(
                 }
                 Timber.d("SyncManager: Like toggled atomically")
             } catch (e: Exception) {
-                Timber.e(e, "SyncManager: Error toggling like atomically")
+                if (e !is CancellationException) {
+                    Timber.e(e, "SyncManager: Error toggling like atomically")
+                }
             }
         }
         
@@ -255,7 +269,9 @@ class SyncManager @Inject constructor(
                 pushLibraryToCloud(isMigration = true)
             }
         } catch (e: Exception) {
-            Timber.e(e, "SyncManager: Critical error in syncLibrary")
+            if (e !is CancellationException) {
+                Timber.e(e, "SyncManager: Critical error in syncLibrary")
+            }
         }
     }
 
@@ -325,7 +341,9 @@ class SyncManager @Inject constructor(
             )
         )
 
-        db.collection("users").document(uid).set(libraryDto).await()
+        withContext(Dispatchers.IO + NonCancellable) {
+            db.collection("users").document(uid).set(libraryDto).await()
+        }
         Timber.i("SyncManager: Cloud push completed")
     }
 

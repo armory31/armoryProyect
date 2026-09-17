@@ -110,6 +110,7 @@ interface DatabaseDao {
     @Query("SELECT * FROM song ORDER BY totalPlayTime ASC")
     fun songsByPlayTimeAsc(): Flow<List<Song>>
 
+    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
     @Transaction
     @Query("SELECT * FROM album ORDER BY rowId ASC")
     fun allAlbumsByRowIdAsc(): Flow<List<Album>>

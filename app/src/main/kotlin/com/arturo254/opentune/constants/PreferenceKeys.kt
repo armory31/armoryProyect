@@ -184,10 +184,6 @@ val DiscordSmallImageCustomUrlKey = stringPreferencesKey("discordSmallImageCusto
 // Activity platform (discord client platform) selection
 val DiscordActivityPlatformKey = stringPreferencesKey("discordActivityPlatform")
 
-val TranslatorContextsKey = stringPreferencesKey("translatorContexts")
-val TranslatorTargetLangKey = stringPreferencesKey("translatorTargetLang")
-val EnableTranslatorKey = booleanPreferencesKey("enableTranslator")
-
 val ChipSortTypeKey = stringPreferencesKey("chipSortType")
 val SongSortTypeKey = stringPreferencesKey("songSortType")
 val SongSortDescendingKey = booleanPreferencesKey("songSortDescending")
@@ -434,9 +430,6 @@ val ShowLyricsKey = booleanPreferencesKey("showLyrics")
 val LyricsTextPositionKey = stringPreferencesKey("lyricsTextPosition")
 val LyricsClickKey = booleanPreferencesKey("lyricsClick")
 val LyricsScrollKey = booleanPreferencesKey("lyricsScrollKey")
-val LyricsRomanizeJapaneseKey = booleanPreferencesKey("lyricsRomanizeJapanese")
-val LyricsRomanizeKoreanKey = booleanPreferencesKey("lyricsRomanizeKorean")
-val TranslateLyricsKey = booleanPreferencesKey("translateLyrics")
 val UseLyricsV2Key = booleanPreferencesKey("useLyricsV2")
 
 // Queue lyrics pre-load settings
@@ -470,6 +463,7 @@ val AccountNameKey = stringPreferencesKey("accountName")
 val AccountEmailKey = stringPreferencesKey("accountEmail")
 val AccountChannelHandleKey = stringPreferencesKey("accountChannelHandle")
 val UseLoginForBrowse = booleanPreferencesKey("useLoginForBrowse")
+val YouTubeClientScoresKey = stringPreferencesKey("youtubeClientScores")
 
 // Armory Cloud Sync
 val ArmoryAccountEmailKey = stringPreferencesKey("armory_account_email")
@@ -485,84 +479,17 @@ val PoTokenSourceUrlKey = stringPreferencesKey("poTokenSourceUrl")
 
 val LanguageCodeToName =
     mapOf(
-        "en" to "English (US)",
-        "en-GB" to "English (UK)",
-        "ja" to "日本語",
-        "ko" to "한국어",
-        "vi" to "Tiếng Việt",
-        "zh" to "中文",
-        "zh-CN" to "简体中文",
-        "zh-TW" to "繁體中文",
-        "fr" to "Français",
-        "de" to "Deutsch",
         "es" to "Español",
-        "pt" to "Português",
-        "pt-BR" to "Português (Brasil)",
-        "ru" to "Русский",
-        "it" to "Italiano",
-        "nl" to "Nederlands",
-        "pl" to "Polski",
-        "tr" to "Türkçe",
-        "ar" to "العربية",
-        "hi" to "हिन्दी",
-        "th" to "ไทย",
-        "id" to "Bahasa Indonesia",
-        "ms" to "Bahasa Melayu",
-        "uk" to "Українська",
-        "cs" to "Čeština",
-        "el" to "Ελληνικά",
-        "he" to "עברית",
-        "hu" to "Magyar",
-        "ro" to "Română",
-        "fi" to "Suomi",
-        "da" to "Dansk",
-        "no" to "Norsk",
-        "sv" to "Svenska",
-        "sk" to "Slovenčina",
-        "bg" to "Български",
-        "hr" to "Hrvatski",
-        "sr" to "Срpsки",
-        "lt" to "Lietuvių",
-        "lv" to "Latviešu",
-        "et" to "Eesti",
     )
 
 val CountryCodeToName =
     mapOf(
-        "JP" to "Japan",
-        "KR" to "South Korea",
-        "US" to "United States",
-        "GB" to "United Kingdom",
-        "CN" to "China",
-        "TW" to "Taiwan",
-        "HK" to "Hong Kong",
-        "FR" to "France",
-        "DE" to "Germany",
         "ES" to "Spain",
         "MX" to "Mexico",
-        "BR" to "Brazil",
-        "RU" to "Russia",
-        "IT" to "Italy",
-        "NL" to "Netherlands",
-        "PL" to "Poland",
-        "TR" to "Turkey",
-        "AU" to "Australia",
-        "CA" to "Canada",
-        "IN" to "India",
-        "ID" to "Indonesia",
-        "TH" to "Thailand",
-        "VN" to "Vietnam",
-        "PH" to "Philippines",
-        "MY" to "Malaysia",
-        "SG" to "Singapore",
         "AR" to "Argentina",
         "CL" to "Chile",
         "CO" to "Colombia",
         "PE" to "Peru",
-        "ZA" to "South Africa",
-        "EG" to "Egypt",
-        "SA" to "Saudi Arabia",
-        "AE" to "United Arab Emirates",
     )
 
 // App rating / star prompt preferences

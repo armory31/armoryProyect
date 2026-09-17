@@ -136,7 +136,9 @@ object CanvasArtworkPlaybackCache {
 
     fun init(context: Context) {
         cacheFile = File(context.filesDir, PERSIST_FILE)
-        loadFromDisk()
+        persistScope.launch {
+            loadFromDisk()
+        }
     }
 
     @Synchronized
@@ -192,7 +194,6 @@ object CanvasArtworkPlaybackCache {
         if (evicted) schedulePersist()
     }
 
-    @Synchronized
     private fun loadFromDisk() {
         val file = cacheFile ?: return
         if (!file.exists()) return
@@ -200,18 +201,21 @@ object CanvasArtworkPlaybackCache {
             val raw = file.readText()
             if (raw.isBlank()) return
             val restored = json.decodeFromString(mapSerializer, raw)
-            map.clear()
-            map.putAll(restored)
-            while (maxSize > 0 && map.size > maxSize) {
-                val it = map.entries.iterator()
-                if (it.hasNext()) {
-                    it.next()
-                    it.remove()
-                } else {
-                    break
+            
+            synchronized(this) {
+                map.clear()
+                map.putAll(restored)
+                while (maxSize > 0 && map.size > maxSize) {
+                    val it = map.entries.iterator()
+                    if (it.hasNext()) {
+                        it.next()
+                        it.remove()
+                    } else {
+                        break
+                    }
                 }
             }
-            Timber.d("Canvas cache restored: ${map.size} entries from disk")
+            Timber.d("Canvas cache restored: ${restored.size} entries from disk")
         } catch (e: Exception) {
             Timber.e(e, "Failed to restore canvas cache from disk")
             runCatching { file.delete() }

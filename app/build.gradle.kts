@@ -45,9 +45,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        
-        // Solo procesar recursos para la densidad de tu móvil/emulador en Debug
-        resConfigs("xxhdpi")
 
         val lastfmApiKey =
             localProperties.getProperty("LASTFM_API_KEY")
@@ -234,6 +231,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.palette)
     implementation(libs.multiplatform.markdown)
+    implementation("org.slf4j:slf4j-nop:1.7.36")
 
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
@@ -284,6 +282,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugaring)
 
     implementation(libs.timber)
+    implementation(libs.profileinstaller)
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.core:core-splashscreen:1.2.0")
@@ -293,7 +292,6 @@ dependencies {
     // implementation("com.google.protobuf:protobuf-javalite:4.29.3")
     implementation(libs.kotlinx.coroutines.play.services)
     testImplementation(libs.junit)
-    implementation("com.github.therealbush:translator:1.1.1")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.compose.material3.adaptive:adaptive:1.2.0")
 }

@@ -579,12 +579,6 @@ ARMORY will only extract your token, and everything else is stored locally.</str
     <string name="activity_status">Activity Status</string>
     <string name="platform_status">Platform</string>
     <string name="update_interval">Presence Update Interval</string>
-    <!--Discord Tranalstor Settings-->
-    <string name="translator_options">Translator Options</string>
-    <string name="enable_translator">Enable Translator</string>
-    <string name="enable_translator_desc">Translate selected fields before sending to Discord RPC</string>
-    <string name="context_info">Contexts (comma-separated)</string>
-    <string name="translator_info_usage">Use Example: {song}, {artist}, {album}</string>
     <string name="target_language">Target Language</string>
     <string name="select_language">Select Language</string>
     <string name="close_dialog">Close</string>
@@ -675,8 +669,6 @@ ARMORY will only extract your token, and everything else is stored locally.</str
     <string name="about">About</string>
     <string name="app_version">App version</string>
     <string name="new_version_available">New version available</string>
-    <string name="translation_models">Translation Models</string>
-    <string name="clear_translation_models">Clear translation models</string>
     <string name="updates">Updates</string>
     <string name="current_version">Current Version</string>
     <string name="latest_version_format">Latest: %s</string>

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -142,7 +143,10 @@ fun TrackRow(
 
 // ── Header ARMORY ───────────────────────────────────────────────────────────
 @Composable
-fun ArmoryHeader(onLogout: (() -> Unit)? = null) {
+fun ArmoryHeader(
+    onLogout: (() -> Unit)? = null,
+    onSettings: (() -> Unit)? = null
+) {
     Row(modifier = Modifier
         .statusBarsPadding()
         .fillMaxWidth()
@@ -158,9 +162,17 @@ fun ArmoryHeader(onLogout: (() -> Unit)? = null) {
             letterSpacing = 4.sp
         )
 
-        if (onLogout != null) {
-            IconButton(onClick = onLogout, modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)) {
-                Icon(Icons.Filled.Person, "Perfil", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (onSettings != null) {
+                IconButton(onClick = onSettings, modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)) {
+                    Icon(painterResource(R.drawable.settings), "Ajustes", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                }
+            }
+            
+            if (onLogout != null) {
+                IconButton(onClick = onLogout, modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)) {
+                    Icon(Icons.Filled.Person, "Perfil", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                }
             }
         }
     }
@@ -194,7 +206,10 @@ fun ArmoryFilterChip(
  * Alias de compatibilidad
  */
 @Composable
-fun OpenTuneHeader(onLogout: (() -> Unit)? = null) = ArmoryHeader(onLogout)
+fun OpenTuneHeader(
+    onLogout: (() -> Unit)? = null,
+    onSettings: (() -> Unit)? = null
+) = ArmoryHeader(onLogout, onSettings)
 
 @Composable
 fun GoldDivider(modifier: Modifier = Modifier) {

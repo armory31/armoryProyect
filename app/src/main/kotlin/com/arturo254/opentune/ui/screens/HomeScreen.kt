@@ -160,7 +160,9 @@ fun HomeScreen(
             .background(OpenTuneColors.AbsoluteBlack)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            OpenTuneHeader()
+            OpenTuneHeader(
+                onSettings = { navController.navigate("settings") }
+            )
 
             BoxWithConstraints(
                 modifier = Modifier
@@ -173,7 +175,10 @@ fun HomeScreen(
             ) {
                 val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
                 val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-                val forgottenFavoritesSnapLayoutInfoProvider = remember(forgottenFavoritesLazyGridState) {
+                
+                // Optimizamos el SnapLayoutInfoProvider envolviéndolo en remember con dependencias precisas
+                // para evitar cómputos pesados redundantes que jankean el Main Thread en cada frame de scroll.
+                val forgottenFavoritesSnapLayoutInfoProvider = remember(forgottenFavoritesLazyGridState, horizontalLazyGridItemWidthFactor) {
                     SnapLayoutInfoProvider(
                         lazyGridState = forgottenFavoritesLazyGridState,
                         positionInLayout = { layoutSize, itemSize ->

@@ -10,7 +10,6 @@ package com.arturo254.opentune.utils
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import com.arturo254.opentune.constants.InnerTubeCookieKey
 import com.arturo254.opentune.constants.SelectedYtmPlaylistsKey
 import com.arturo254.opentune.constants.YtmSyncKey
 import com.arturo254.opentune.innertube.YouTube
@@ -95,14 +94,7 @@ class SyncUtils @Inject constructor(
         
         try {
             syncMutex.withLock {
-                if (!isLoggedIn()) {
-                    Timber.w("Skipping full sync - user not logged in")
-                    return@withLock
-                }
-                if (!isYtmSyncEnabled()) {
-                    Timber.w("Skipping full sync - sync disabled")
-                    return@withLock
-                }
+
                 
                 supervisorScope {
                     syncLikedSongs()
@@ -149,15 +141,6 @@ class SyncUtils @Inject constructor(
         }
     }
     
-    /**
-     * Check if user is properly logged in with a valid SAPISID cookie
-     */
-    private suspend fun isLoggedIn(): Boolean {
-        val cookie = context.dataStore.data
-            .map { it[InnerTubeCookieKey] }
-            .first()
-        return cookie?.let { "SAPISID" in parseCookieString(it) } ?: false
-    }
 
     private suspend fun isYtmSyncEnabled(): Boolean {
         val enabled =
@@ -182,14 +165,14 @@ class SyncUtils @Inject constructor(
     }
 
     suspend fun syncLikedSongs() = coroutineScope {
-        if (!isLoggedIn()) {
+        /**if (!isLoggedIn()) {
             Timber.w("Skipping syncLikedSongs - user not logged in")
             return@coroutineScope
-        }
-        if (!isYtmSyncEnabled()) {
+        }*/
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("Skipping syncLikedSongs - sync disabled")
             return@coroutineScope
-        }
+        }*/
         val gen = syncGeneration.get()
         YouTube.playlist("LM").completed().onSuccess { page ->
             if (!isSyncStillEnabled(gen)) return@onSuccess
@@ -245,14 +228,14 @@ class SyncUtils @Inject constructor(
     }
 
     suspend fun syncLibrarySongs() = coroutineScope {
-        if (!isLoggedIn()) {
+        /**if (!isLoggedIn()) {
             Timber.w("Skipping syncLibrarySongs - user not logged in")
             return@coroutineScope
-        }
-        if (!isYtmSyncEnabled()) {
+        }*/
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("Skipping syncLibrarySongs - sync disabled")
             return@coroutineScope
-        }
+        }*/
         val gen = syncGeneration.get()
         YouTube.library("FEmusic_liked_videos").completed().onSuccess { page ->
             if (!isSyncStillEnabled(gen)) return@onSuccess
@@ -283,14 +266,14 @@ class SyncUtils @Inject constructor(
     }
 
     suspend fun syncLikedAlbums() = coroutineScope {
-        if (!isLoggedIn()) {
+        /**if (!isLoggedIn()) {
             Timber.w("Skipping syncLikedAlbums - user not logged in")
             return@coroutineScope
-        }
-        if (!isYtmSyncEnabled()) {
+        }*/
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("Skipping syncLikedAlbums - sync disabled")
             return@coroutineScope
-        }
+        }*/
         val gen = syncGeneration.get()
         YouTube.library("FEmusic_liked_albums").completed().onSuccess { page ->
             if (!isSyncStillEnabled(gen)) return@onSuccess
@@ -348,14 +331,10 @@ class SyncUtils @Inject constructor(
     }
 
     suspend fun syncArtistsSubscriptions() = coroutineScope {
-        if (!isLoggedIn()) {
-            Timber.w("Skipping syncArtistsSubscriptions - user not logged in")
-            return@coroutineScope
-        }
-        if (!isYtmSyncEnabled()) {
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("Skipping syncArtistsSubscriptions - sync disabled")
             return@coroutineScope
-        }
+        }*/
         val gen = syncGeneration.get()
         YouTube.library("FEmusic_library_corpus_artists").completed().onSuccess { page ->
             if (!isSyncStillEnabled(gen)) return@onSuccess
@@ -426,14 +405,10 @@ class SyncUtils @Inject constructor(
     }
 
     suspend fun syncSavedPlaylists() = playlistSyncMutex.withLock {
-        if (!isLoggedIn()) {
-            Timber.w("Skipping syncSavedPlaylists - user not logged in")
-            return@withLock
-        }
-        if (!isYtmSyncEnabled()) {
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("Skipping syncSavedPlaylists - sync disabled")
             return@withLock
-        }
+        }*/
         val gen = syncGeneration.get()
         
         YouTube.library("FEmusic_liked_playlists").completed().onSuccess { page ->
@@ -517,14 +492,10 @@ class SyncUtils @Inject constructor(
     }
 
     suspend fun syncAutoSyncPlaylists() = coroutineScope {
-        if (!isLoggedIn()) {
-            Timber.w("Skipping syncAutoSyncPlaylists - user not logged in")
-            return@coroutineScope
-        }
-        if (!isYtmSyncEnabled()) {
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("Skipping syncAutoSyncPlaylists - sync disabled")
             return@coroutineScope
-        }
+        }*/
         val gen = syncGeneration.get()
         val autoSyncPlaylists = try {
             database.playlistsByNameAsc().first()
@@ -560,10 +531,10 @@ class SyncUtils @Inject constructor(
     }
 
     private suspend fun syncPlaylist(browseId: String, playlistId: String) = coroutineScope {
-        if (!isYtmSyncEnabled()) {
+        /*if (!isYtmSyncEnabled()) {
             Timber.w("syncPlaylist: Skipping - sync disabled")
             return@coroutineScope
-        }
+        }*/
         val gen = syncGeneration.get()
         if (!isSyncStillEnabled(gen)) return@coroutineScope
         Timber.d("syncPlaylist: Starting sync for browseId=$browseId, playlistId=$playlistId")

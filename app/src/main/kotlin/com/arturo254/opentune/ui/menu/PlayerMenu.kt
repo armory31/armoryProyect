@@ -7,6 +7,9 @@
 package com.arturo254.opentune.ui.menu
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.audiofx.AudioEffect
@@ -36,14 +39,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -87,7 +89,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import android.widget.Toast
-import androidx.media3.common.PlaybackParameters
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
@@ -126,13 +127,15 @@ import com.arturo254.opentune.ui.component.TextFieldDialog
 import com.arturo254.opentune.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlin.math.abs
-import kotlin.math.log2
-import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.roundToInt
 import java.util.UUID
+import kotlin.math.ceil
+import kotlin.math.floor
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColumnScope.PlayerMenu(
     mediaMetadata: MediaMetadata?,
@@ -148,10 +151,10 @@ fun ColumnScope.PlayerMenu(
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val playerVolume = playerConnection.service.playerVolume.collectAsState()
-    val activityResultLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
     val librarySong by database.song(mediaMetadata.id).collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
+    val activityResultLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
 
     val download by LocalDownloadUtil.current.getDownload(mediaMetadata.id)
         .collectAsState(initial = null)
@@ -270,11 +273,6 @@ fun ColumnScope.PlayerMenu(
         }
     }
 
-    var showPitchTempoDialog by rememberSaveable { mutableStateOf(false) }
-    if (showPitchTempoDialog) {
-        TempoPitchDialog(onDismiss = { showPitchTempoDialog = false })
-    }
-
     var showEqualizerDialog by rememberSaveable { mutableStateOf(false) }
     if (showEqualizerDialog) {
         EqualizerDialog(
@@ -300,7 +298,6 @@ fun ColumnScope.PlayerMenu(
     }
 
     val configuration = LocalConfiguration.current
-    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     LazyColumn(
         modifier = modifier.weight(1f).fillMaxWidth(),
@@ -460,13 +457,13 @@ fun ColumnScope.PlayerMenu(
                         },
                         text = stringResource(R.string.copy_link),
                         onClick = {
-                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText(
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText(
                                 context.getString(R.string.copy_link),
                                 "https://music.youtube.com/watch?v=${mediaMetadata.id}",
                             )
                             clipboard.setPrimaryClip(clip)
-                            android.widget.Toast.makeText(context, R.string.link_copied, android.widget.Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, R.string.link_copied, Toast.LENGTH_SHORT).show()
                             onDismiss()
                         }
                     ),
@@ -485,26 +482,7 @@ fun ColumnScope.PlayerMenu(
                             playerBottomSheetState.snapTo(playerBottomSheetState.collapsedBound)
                             navController.navigate("settings/music_together")
                         }
-                    ),
-                    // ── Always On Display ─────────────────────────────────────
-                    NewAction(
-                        icon = {
-                            Icon(
-                                // Cambia el drawable si "dark_mode" no existe en tu proyecto
-                                // Alternativas: R.drawable.bedtime, R.drawable.phone_android
-                                painter = painterResource(R.drawable.dark_mode),
-                                contentDescription = null,
-                                modifier = Modifier.size(28.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        text = "Always On Display",
-                        onClick = {
-                            onDismiss()
-                            playerBottomSheetState.collapseSoft()
-                            navController.navigate("always_on_display")
-                        }
-                    ),
+                    )
                 ),
                 modifier = Modifier.padding(vertical = 4.dp)
             )
@@ -612,37 +590,10 @@ fun ColumnScope.PlayerMenu(
                         )
                     }
                 }
-
-                if (externalDownloaderEnabled) {
-                    HorizontalDivider(modifier = Modifier.padding(start = 56.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                    ListItem(
-                        headlineContent = { Text(text = stringResource(R.string.open_with_downloader)) },
-                        leadingContent = { Icon(painter = painterResource(R.drawable.download), contentDescription = null) },
-                        modifier = Modifier.clickable {
-                            onDismiss()
-                            val url = "https://music.youtube.com/watch?v=${mediaMetadata.id}"
-                            if (externalDownloaderPackage.isBlank()) {
-                                Toast.makeText(context, context.getString(R.string.external_downloader_not_configured), Toast.LENGTH_LONG).show()
-                                return@clickable
-                            }
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                setPackage(externalDownloaderPackage)
-                                data = android.net.Uri.parse(url)
-                                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                            try {
-                                context.startActivity(intent)
-                            } catch (e: android.content.ActivityNotFoundException) {
-                                Toast.makeText(context, context.getString(R.string.external_downloader_not_installed), Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                }
             }
         }
 
-        // ── Detalles / Ecualizador / Tempo ───────────────────────────────────
+        // ── Detalles y Ajustes ───────────────────────────────────────────────
         item {
             MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
                 Column {
@@ -665,31 +616,12 @@ fun ColumnScope.PlayerMenu(
                             modifier = Modifier.clickable { showEqualizerDialog = true },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         )
-
-                        HorizontalDivider(modifier = Modifier.padding(start = 56.dp), color = MaterialTheme.colorScheme.outlineVariant)
-
-                        ListItem(
-                            headlineContent = { Text(text = stringResource(R.string.tempo_and_pitch)) },
-                            leadingContent = { Icon(painter = painterResource(R.drawable.speed), contentDescription = null) },
-                            supportingContent = {
-                                val playbackParameters by playerConnection.playbackParameters.collectAsState()
-                                Text(
-                                    text = "x${formatMultiplier(playbackParameters.speed)} • x${formatMultiplier(playbackParameters.pitch)}",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                            modifier = Modifier.clickable { showPitchTempoDialog = true },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        )
                     }
                 }
             }
         }
     }
 }
-
-// ── El resto del archivo permanece igual que el original ─────────────────────
 
 @Composable
 private fun PlayerVolumeCard(
@@ -796,255 +728,6 @@ private fun VolumeSliderL(value: Float, onValueChange: (Float) -> Unit, modifier
     )
 }
 
-@Composable
-fun TempoPitchDialog(onDismiss: () -> Unit) {
-    val playerConnection = LocalPlayerConnection.current ?: return
-    val initialSpeed = remember { playerConnection.player.playbackParameters.speed }
-    val initialPitch = remember { playerConnection.player.playbackParameters.pitch }
-
-    var tempo by remember { mutableFloatStateOf(initialSpeed.safeCoerceIn(TempoMin, TempoMax, fallback = 1f)) }
-    var pitch by remember { mutableFloatStateOf(initialPitch.safeCoerceIn(PitchMin, PitchMax, fallback = 1f)) }
-    var pitchMode by rememberSaveable {
-        mutableStateOf(if (isPitchSemitoneAligned(pitch)) PitchMode.Semitones else PitchMode.Multiplier)
-    }
-
-    val applyPlaybackParameters: (Float, Float) -> Unit = { speed, pitchMultiplier ->
-        playerConnection.player.playbackParameters = PlaybackParameters(
-            speed.coerceIn(TempoMin, TempoMax),
-            pitchMultiplier.coerceIn(PitchMin, PitchMax),
-        )
-    }
-
-    AlertDialog(
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.tempo_and_pitch)) },
-        dismissButton = {
-            TextButton(onClick = {
-                tempo = 1f; pitch = 1f; applyPlaybackParameters(tempo, pitch)
-            }) { Text(stringResource(R.string.reset)) }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.ok)) }
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp),
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(painter = painterResource(R.drawable.speed), contentDescription = null, modifier = Modifier.size(28.dp))
-                    Text(text = stringResource(R.string.tempo), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                    Text(text = "x${formatMultiplier(tempo)}", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.End)
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    IconButton(enabled = tempo > TempoMin, onClick = {
-                        tempo = (tempo - 0.01f).coerceIn(TempoMin, TempoMax).quantize(0.01f)
-                        applyPlaybackParameters(tempo, pitch)
-                    }) { Icon(painter = painterResource(R.drawable.remove), contentDescription = null) }
-
-                    Slider(
-                        value = multiplierToSlider(tempo),
-                        onValueChange = { slider ->
-                            val updated = sliderToMultiplier(slider).quantize(0.01f)
-                            if (abs(updated - tempo) >= 0.005f) { tempo = updated; applyPlaybackParameters(tempo, pitch) }
-                        },
-                        valueRange = 0f..1f,
-                        modifier = Modifier.weight(1f),
-                    )
-
-                    IconButton(enabled = tempo < TempoMax, onClick = {
-                        tempo = (tempo + 0.01f).coerceIn(TempoMin, TempoMax).quantize(0.01f)
-                        applyPlaybackParameters(tempo, pitch)
-                    }) { Icon(painter = painterResource(R.drawable.add), contentDescription = null) }
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                ) {
-                    listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f).forEach { preset ->
-                        FilterChip(
-                            selected = abs(tempo - preset) < 0.005f,
-                            onClick = { tempo = preset; applyPlaybackParameters(tempo, pitch) },
-                            label = { Text("x${formatMultiplier(preset)}") },
-                        )
-                    }
-                }
-
-                HorizontalDivider()
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(painter = painterResource(R.drawable.discover_tune), contentDescription = null, modifier = Modifier.size(28.dp))
-                    Text(text = stringResource(R.string.pitch), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                    Text(
-                        text = when (pitchMode) {
-                            PitchMode.Semitones -> { val s = pitchToSemitones(pitch); "${if (s > 0) "+" else ""}$s" }
-                            PitchMode.Multiplier -> "x${formatMultiplier(pitch)}"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.End,
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                ) {
-                    FilterChip(selected = pitchMode == PitchMode.Semitones, onClick = { pitchMode = PitchMode.Semitones }, label = { Text(stringResource(R.string.pitch_mode_semitones_short)) })
-                    FilterChip(selected = pitchMode == PitchMode.Multiplier, onClick = { pitchMode = PitchMode.Multiplier }, label = { Text(stringResource(R.string.pitch_mode_multiplier_short)) })
-                }
-
-                when (pitchMode) {
-                    PitchMode.Semitones -> {
-                        val currentSemitones = pitchToSemitones(pitch)
-                        Slider(
-                            value = currentSemitones.toFloat(),
-                            onValueChange = { slider ->
-                                val semitones = slider.roundToInt().coerceIn(-12, 12)
-                                val updated = semitonesToPitch(semitones)
-                                if (abs(updated - pitch) >= 0.0005f) { pitch = updated; applyPlaybackParameters(tempo, pitch) }
-                            },
-                            valueRange = -12f..12f,
-                            steps = 23,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        ) {
-                            listOf(-12, -7, -5, 0, 5, 7, 12).forEach { preset ->
-                                FilterChip(
-                                    selected = currentSemitones == preset,
-                                    onClick = { pitch = semitonesToPitch(preset); applyPlaybackParameters(tempo, pitch) },
-                                    label = { Text("${if (preset > 0) "+" else ""}$preset") },
-                                )
-                            }
-                        }
-                    }
-                    PitchMode.Multiplier -> {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            IconButton(enabled = pitch > PitchMin, onClick = {
-                                pitch = (pitch - 0.01f).coerceIn(PitchMin, PitchMax).quantize(0.01f)
-                                applyPlaybackParameters(tempo, pitch)
-                            }) { Icon(painter = painterResource(R.drawable.remove), contentDescription = null) }
-
-                            Slider(
-                                value = multiplierToSlider(pitch),
-                                onValueChange = { slider ->
-                                    val updated = sliderToMultiplier(slider).quantize(0.01f)
-                                    if (abs(updated - pitch) >= 0.005f) { pitch = updated; applyPlaybackParameters(tempo, pitch) }
-                                },
-                                valueRange = 0f..1f,
-                                modifier = Modifier.weight(1f),
-                            )
-
-                            IconButton(enabled = pitch < PitchMax, onClick = {
-                                pitch = (pitch + 0.01f).coerceIn(PitchMin, PitchMax).quantize(0.01f)
-                                applyPlaybackParameters(tempo, pitch)
-                            }) { Icon(painter = painterResource(R.drawable.add), contentDescription = null) }
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        ) {
-                            listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f).forEach { preset ->
-                                FilterChip(
-                                    selected = abs(pitch - preset) < 0.005f,
-                                    onClick = { pitch = preset; applyPlaybackParameters(tempo, pitch) },
-                                    label = { Text("x${formatMultiplier(preset)}") },
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    )
-}
-
-private enum class PitchMode { Semitones, Multiplier }
-
-private const val TempoMin = 0.25f
-private const val TempoMax = 2f
-private const val PitchMin = 0.25f
-private const val PitchMax = 2f
-
-private fun Float.safeCoerceIn(min: Float, max: Float, fallback: Float): Float {
-    val safe = if (this.isFinite()) this else fallback
-    return safe.coerceIn(min, max)
-}
-
-private fun Float.quantize(step: Float): Float {
-    if (step <= 0f) return this
-    return (round(this / step) * step).coerceAtLeast(0f)
-}
-
-private fun pitchToSemitones(pitch: Float): Int {
-    val safePitch = pitch.safeCoerceIn(PitchMin, PitchMax, fallback = 1f).coerceAtLeast(0.0001f)
-    return (12f * log2(safePitch)).roundToInt().coerceIn(-12, 12)
-}
-
-private fun semitonesToPitch(semitones: Int): Float =
-    2f.pow(semitones.toFloat() / 12f).coerceIn(PitchMin, PitchMax)
-
-private fun isPitchSemitoneAligned(pitch: Float): Boolean {
-    val safePitch = pitch.safeCoerceIn(PitchMin, PitchMax, fallback = 1f).coerceAtLeast(0.0001f)
-    val semitones = (12f * log2(safePitch)).roundToInt()
-    val reconstructed = 2f.pow(semitones.toFloat() / 12f)
-    return abs(reconstructed - pitch) < 0.0015f
-}
-
-private fun formatMultiplier(multiplier: Float): String = String.format("%.2f", multiplier)
-
-private fun sliderToMultiplier(slider: Float): Float {
-    val t = slider.coerceIn(0f, 1f)
-    val y = (t - 0.5f) * 2f
-    val curve = 2.2f
-    val absY = abs(y).pow(curve)
-    val shaped = when {
-        y > 0f -> absY
-        y < 0f -> -absY
-        else -> 0f
-    }
-    val exponent = if (y < 0f) 2f * shaped else shaped
-    return 2f.pow(exponent).coerceIn(TempoMin, TempoMax)
-}
-
-private fun multiplierToSlider(multiplier: Float): Float {
-    val m = multiplier.coerceIn(TempoMin, TempoMax)
-    val log = log2(m)
-    val curve = 2.2f
-    val shaped = if (m < 1f) (log / 2f) else log
-    val absShaped = abs(shaped).pow(1f / curve)
-    val y = when {
-        shaped > 0f -> absShaped
-        shaped < 0f -> -absShaped
-        else -> 0f
-    }
-    return (0.5f + y / 2f).coerceIn(0f, 1f)
-}
-
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1104,7 +787,7 @@ fun EqualizerDialog(onDismiss: () -> Unit, openSystemEqualizer: () -> Unit) {
                         outputGainMb = outputGainMb, bassBoostStrength = bassBoostStrength, virtualizerStrength = virtualizerStrength,
                     )
                     val updatedPayload = EqProfilesPayload(profiles = (profiles + newProfile).distinctBy { it.id }.sortedBy { it.name.lowercase() })
-                    setCustomProfilesJson(encodeProfilesPayload(updatedPayload))
+                    setCustomProfilesJson(EqualizerJson.json.encodeToString(updatedPayload))
                     setSelectedProfileId("profile:${newProfile.id}")
                 }
             },
@@ -1136,7 +819,7 @@ fun EqualizerDialog(onDismiss: () -> Unit, openSystemEqualizer: () -> Unit) {
                     p.copy(id = finalId, name = baseName)
                 }
                 val updatedPayload = EqProfilesPayload(profiles = (profiles + normalizedImported).distinctBy { it.id }.sortedBy { it.name.lowercase() })
-                setCustomProfilesJson(encodeProfilesPayload(updatedPayload))
+                setCustomProfilesJson(EqualizerJson.json.encodeToString(updatedPayload))
                 normalizedImported.firstOrNull()?.id?.let { setSelectedProfileId("profile:$it") }
                 Toast.makeText(context, context.getString(R.string.eq_import_success, normalizedImported.size), Toast.LENGTH_SHORT).show()
             },
@@ -1169,7 +852,7 @@ fun EqualizerDialog(onDismiss: () -> Unit, openSystemEqualizer: () -> Unit) {
                     }
                     IconButton(onClick = {
                         val updatedPayload = EqProfilesPayload(profiles = profiles.filterNot { it.id == profile.id })
-                        setCustomProfilesJson(encodeProfilesPayload(updatedPayload))
+                        setCustomProfilesJson(EqualizerJson.json.encodeToString(updatedPayload))
                         if (selectedProfileId == "profile:${profile.id}") setSelectedProfileId("manual")
                     }) {
                         Icon(painter = painterResource(R.drawable.delete), contentDescription = null)
@@ -1352,9 +1035,6 @@ private fun decodeProfilesPayload(raw: String?): EqProfilesPayload {
     return runCatching { EqualizerJson.json.decodeFromString<EqProfilesPayload>(raw) }.getOrNull() ?: EqProfilesPayload()
 }
 
-private fun encodeProfilesPayload(payload: EqProfilesPayload): String =
-    runCatching { EqualizerJson.json.encodeToString(payload) }.getOrNull().orEmpty()
-
 private fun resampleLevelsByIndex(levelsMb: List<Int>, targetCount: Int): List<Int> {
     if (targetCount <= 0) return emptyList()
     if (levelsMb.isEmpty()) return List(targetCount) { 0 }
@@ -1363,8 +1043,8 @@ private fun resampleLevelsByIndex(levelsMb: List<Int>, targetCount: Int): List<I
     val lastIndex = levelsMb.lastIndex.toFloat().coerceAtLeast(1f)
     return List(targetCount) { i ->
         val pos = i.toFloat() * lastIndex / (targetCount - 1).toFloat()
-        val lo = kotlin.math.floor(pos).toInt().coerceIn(0, levelsMb.lastIndex)
-        val hi = kotlin.math.ceil(pos).toInt().coerceIn(0, levelsMb.lastIndex)
+        val lo = floor(pos).toInt().coerceIn(0, levelsMb.lastIndex)
+        val hi = ceil(pos).toInt().coerceIn(0, levelsMb.lastIndex)
         val t = (pos - lo.toFloat()).coerceIn(0f, 1f)
         (levelsMb[lo] + ((levelsMb[hi] - levelsMb[lo]) * t)).toInt()
     }

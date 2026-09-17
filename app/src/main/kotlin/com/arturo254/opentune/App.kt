@@ -37,6 +37,7 @@ import com.arturo254.opentune.kugou.KuGou
 import com.arturo254.opentune.lastfm.LastFM
 import com.arturo254.opentune.ui.player.CanvasArtworkPlaybackCache
 import com.arturo254.opentune.sync.SyncManager
+import com.arturo254.opentune.utils.YTPlayerUtils
 import com.google.firebase.FirebaseApp
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
@@ -50,6 +51,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -79,7 +82,8 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             .build()
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    @Volatile private var isInitialized = false
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized = _isInitialized.asStateFlow()
     private val didRunImageCacheTrim = AtomicBoolean(false)
 
     private fun currentProcessName(): String? {
@@ -113,6 +117,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
         } catch (_: Exception) {}
 
         applicationScope.launch(Dispatchers.IO) {
+            MusicDatabase.warmUp(this@App, database)
             initializeCriticalSync()
         }
         initializeDeferredAsync()
@@ -139,51 +144,62 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
     }
 
     private fun initializeDeferredAsync() {
+        // Collect all necessary preferences in a more granular way to reduce main thread overhead
         applicationScope.launch(Dispatchers.IO) {
             try {
-                // Collect all necessary preferences in a single pass to reduce overhead
                 dataStore.data.collect { prefs ->
-                    withContext(Dispatchers.Main) {
-                        prefs[ContentCountryKey]?.takeIf { it != SYSTEM_DEFAULT }?.let { country ->
-                            YouTube.locale = YouTube.locale.copy(gl = country)
-                        }
-                        prefs[ContentLanguageKey]?.takeIf { it != SYSTEM_DEFAULT }?.let { lang ->
-                            YouTube.locale = YouTube.locale.copy(hl = lang)
-                        }
-                        
-                        LastFM.sessionKey = prefs[LastFMSessionKey]
-
-                        if (prefs[ProxyEnabledKey] == true) {
-                            try {
-                                YouTube.proxy = Proxy(
-                                    prefs[ProxyTypeKey].toEnum(defaultValue = Proxy.Type.HTTP),
-                                    prefs[ProxyUrlKey]!!.toInetSocketAddress()
-                                )
-                            } catch (e: Exception) {
-                                Toast.makeText(this@App, "Failed to parse proxy url.", LENGTH_SHORT).show()
-                                reportException(e)
-                            }
-                            YouTube.streamBypassProxy = prefs[StreamBypassProxyKey] == true
-                        }
-
-                        YouTube.useLoginForBrowse = prefs[UseLoginForBrowse] != false
-                        
-                        YouTube.visitorData = prefs[VisitorDataKey]?.takeIf { it != "null" } ?: YouTube.visitorData
-                        
-                        YouTube.dataSyncId = prefs[DataSyncIdKey]?.let {
-                            it.takeIf { !it.contains("||") }
-                                ?: it.takeIf { it.endsWith("||") }?.substringBefore("||")
-                                ?: it.substringAfter("||")
-                        }
-                        
-                        YouTube.cookie = prefs[InnerTubeCookieKey]
-                        YouTube.webClientPoTokenEnabled = prefs[WebClientPoTokenEnabledKey] ?: false
-                        YouTube.poToken = prefs[PoTokenKey]?.takeIf { it.isNotBlank() }
-                        YouTube.poTokenGvs = prefs[PoTokenGvsKey]?.takeIf { it.isNotBlank() }
-                        YouTube.poTokenPlayer = prefs[PoTokenPlayerKey]?.takeIf { it.isNotBlank() }
-                        
-                        isInitialized = true
+                    // YT Locale
+                    val country = prefs[ContentCountryKey]?.takeIf { it != SYSTEM_DEFAULT }
+                    val lang = prefs[ContentLanguageKey]?.takeIf { it != SYSTEM_DEFAULT }
+                    if (country != null || lang != null) {
+                        YouTube.locale = YouTube.locale.copy(
+                            gl = country ?: YouTube.locale.gl,
+                            hl = lang ?: YouTube.locale.hl
+                        )
                     }
+
+                    // LastFM
+                    LastFM.sessionKey = prefs[LastFMSessionKey]
+
+                    // Proxy - Only re-init if really changed to avoid client recreation overhead
+                    val proxyEnabled = prefs[ProxyEnabledKey] == true
+                    if (proxyEnabled) {
+                        try {
+                            val newProxy = Proxy(
+                                prefs[ProxyTypeKey].toEnum(defaultValue = Proxy.Type.HTTP),
+                                prefs[ProxyUrlKey]!!.toInetSocketAddress()
+                            )
+                            if (YouTube.proxy != newProxy) {
+                                YouTube.proxy = newProxy
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(this@App, "Failed to parse proxy url.", LENGTH_SHORT).show()
+                            }
+                            reportException(e)
+                        }
+                        YouTube.streamBypassProxy = prefs[StreamBypassProxyKey] == true
+                    } else if (YouTube.proxy != null) {
+                        YouTube.proxy = null
+                    }
+
+                    // YT Settings
+                    YouTube.useLoginForBrowse = prefs[UseLoginForBrowse] != false
+                    YouTube.visitorData = prefs[VisitorDataKey]?.takeIf { it != "null" } ?: YouTube.visitorData
+                    YouTube.dataSyncId = prefs[DataSyncIdKey]?.let {
+                        it.takeIf { !it.contains("||") }
+                            ?: it.takeIf { it.endsWith("||") }?.substringBefore("||")
+                            ?: it.substringAfter("||")
+                    }
+                    YouTube.cookie = prefs[InnerTubeCookieKey]
+                    YouTube.webClientPoTokenEnabled = prefs[WebClientPoTokenEnabledKey] ?: false
+                    YouTube.poToken = prefs[PoTokenKey]?.takeIf { it.isNotBlank() }
+                    YouTube.poTokenGvs = prefs[PoTokenGvsKey]?.takeIf { it.isNotBlank() }
+                    YouTube.poTokenPlayer = prefs[PoTokenPlayerKey]?.takeIf { it.isNotBlank() }
+                    
+                    YTPlayerUtils.initScores(prefs[YouTubeClientScoresKey])
+
+                    _isInitialized.value = true
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error during deferred initialization")

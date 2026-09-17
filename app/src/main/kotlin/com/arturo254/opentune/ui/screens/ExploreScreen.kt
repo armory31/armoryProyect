@@ -53,7 +53,9 @@ fun ExploreScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        OpenTuneHeader()
+        OpenTuneHeader(
+            onSettings = { navController.navigate("settings") }
+        )
 
         // Barra de Búsqueda ARMORY (Material 3 Expressive Style)
         Box(

@@ -102,34 +102,16 @@ class AboutViewModel : ViewModel() {
                 profileUrl = "https://github.com/Arturo254",
             ),
             Contributor(
-                avatarUrl = "https://avatars.githubusercontent.com/u/138934847?v=4",
-                name = "𪚐 Fabito02",
-                role = "Translator (PT_BR) · Icon designer",
-                profileUrl = "https://github.com/Fabito02/",
-            ),
-            Contributor(
                 avatarUrl = "https://avatars.githubusercontent.com/u/205341163?v=4",
                 name = "ϟ Xamax-code",
                 role = "Code Refactor",
                 profileUrl = "https://github.com/xamax-code",
             ),
             Contributor(
-                avatarUrl = "https://avatars.githubusercontent.com/u/106829560?v=4",
-                name = "ϟ Derpachi",
-                role = "Translator (RU_RU)",
-                profileUrl = "https://github.com/Derpachi",
-            ),
-            Contributor(
                 avatarUrl = "https://avatars.githubusercontent.com/u/147309938?v=4",
                 name = "「★」 RightSideUpCak3",
                 role = "Language selector",
                 profileUrl = "https://github.com/RightSideUpCak3",
-            ),
-            Contributor(
-                avatarUrl = "https://avatars.githubusercontent.com/gorupa?v=4",
-                name = "⟡ gorupa",
-                role = "Hindi Translator · Bug Fixes",
-                profileUrl = "https://github.com/gorupa",
             ),
         )
     }

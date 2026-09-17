@@ -698,10 +698,12 @@ class MusicService :
         updateNotification()
         player.repeatMode = REPEAT_MODE_OFF
 
-        val sessionToken = SessionToken(this, ComponentName(this, MusicService::class.java))
-        val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-        controllerFuture.addListener({ controllerFuture.get() }, MoreExecutors.directExecutor())
         scope.launch(Dispatchers.IO) {
+            val sessionToken = SessionToken(this@MusicService, ComponentName(this@MusicService, MusicService::class.java))
+            // No necesitamos un MediaController dentro del propio servicio, 
+            // esto consume recursos y genera binder transactions innecesarias.
+            // val controllerFuture = MediaController.Builder(this@MusicService, sessionToken).buildAsync()
+            
             val prefs = dataStore.data.first()
             val repeatMode = prefs[RepeatModeKey] ?: REPEAT_MODE_OFF
             val volume = (prefs[PlayerVolumeKey] ?: 1f).coerceIn(0f, 1f)
@@ -895,26 +897,23 @@ class MusicService :
             
             normalizeFactor.value =
                 if (normalizeAudio) {
-                    // Use loudnessDb if available, otherwise fall back to perceptualLoudnessDb
-                    val loudness = format?.loudnessDb ?: format?.perceptualLoudnessDb
+                    // Usamos loudnessDb o perceptualLoudnessDb de YouTube si existen.
+                    // Si ambos son nulos (por ejemplo, pistas locales o sin metadatos de ganancia remotos),
+                    // aplicamos un valor de 0.0dB (factor 1.0f) para evitar aumentos de volumen indeseados.
+                    val loudness = format?.loudnessDb ?: format?.perceptualLoudnessDb ?: 0.0
                     
-                    if (loudness != null) {
-                        val loudnessDb = loudness.toFloat()
-                        var factor = 10f.pow(-loudnessDb / 20)
-                        
-                        Timber.tag("AudioNormalization").d("Calculated raw normalization factor: $factor (from loudness: $loudnessDb)")
-                        
-                        if (factor > 1f) {
-                            factor = min(factor, maxSafeGainFactor)
-                            Timber.tag("AudioNormalization").d("Factor capped at maxSafeGainFactor: $factor")
-                        }
-                        
-                        Timber.tag("AudioNormalization").i("Applying normalization factor: $factor")
-                        factor
-                    } else {
-                        Timber.tag("AudioNormalization").w("Normalization enabled but no loudness data available - no normalization applied")
-                        1f
+                    val loudnessDb = loudness.toFloat()
+                    var factor = 10f.pow(-loudnessDb / 20)
+                    
+                    Timber.tag("AudioNormalization").d("Calculated raw normalization factor: $factor (from loudness: $loudnessDb)")
+                    
+                    if (factor > 1f) {
+                        factor = min(factor, maxSafeGainFactor)
+                        Timber.tag("AudioNormalization").d("Factor capped at maxSafeGainFactor: $factor")
                     }
+                    
+                    Timber.tag("AudioNormalization").i("Applying normalization factor: $factor")
+                    factor
                 } else {
                     Timber.tag("AudioNormalization").d("Normalization disabled - using factor 1.0")
                     1f
@@ -4498,7 +4497,6 @@ class MusicService :
 
 
     override fun onDestroy() {
-        super.onDestroy()
         unregisterBluetoothReceiver()
         try {
             scope.launch { stopTogetherInternal() }
@@ -4566,6 +4564,7 @@ class MusicService :
             player.release()
         } catch (_: Exception) {}
         scopeJob.cancel()
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): android.os.IBinder? {

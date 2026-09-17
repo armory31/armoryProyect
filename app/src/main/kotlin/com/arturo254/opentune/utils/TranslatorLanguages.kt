@@ -44,13 +44,7 @@ object TranslatorLanguages {
 
         // Fallback list
         return listOf(
-            TranslatorLang("English", "ENGLISH"),
-            TranslatorLang("Japanese", "JAPANESE"),
             TranslatorLang("Spanish", "SPANISH"),
-            TranslatorLang("Chinese", "CHINESE"),
-            TranslatorLang("Korean", "KOREAN"),
-            TranslatorLang("French", "FRENCH"),
-            TranslatorLang("German", "GERMAN")
         )
     }
 }

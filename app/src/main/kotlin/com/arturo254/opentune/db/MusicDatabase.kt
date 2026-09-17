@@ -20,6 +20,7 @@ import androidx.room.DeleteTable
 import androidx.room.RenameColumn
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.RoomDatabase.JournalMode
 import androidx.room.TypeConverters
 import androidx.room.withTransaction
 import androidx.room.migration.AutoMigrationSpec
@@ -55,13 +56,14 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.Date
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
 private const val TAG = "MusicDatabase"
 private const val CURRENT_VERSION = 28
 
 class MusicDatabase(
-    private val delegate: InternalDatabase,
+    internal var delegate: InternalDatabase,
 ) : DatabaseDao by delegate.dao {
     val openHelper: SupportSQLiteOpenHelper
         get() = delegate.openHelper
@@ -103,6 +105,73 @@ class MusicDatabase(
             executor.execute {
                 if (cont.isActive) cont.resume(Unit)
             }
+        }
+    }
+
+    companion object {
+        const val DB_NAME = "song.db"
+
+        fun newInstance(context: Context): MusicDatabase {
+            return MusicDatabase(delegate = build(context))
+        }
+
+        private fun build(context: Context): InternalDatabase {
+            val universalMigrations =
+                (2 until CURRENT_VERSION)
+                    .map { from -> UniversalMigration(context, from, CURRENT_VERSION) }
+                    .toTypedArray()
+
+            return Room
+                .databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
+                .addMigrations(
+                    MIGRATION_1_2,
+                    *universalMigrations,
+                )
+                .addCallback(DatabaseCallback())
+                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigrationOnDowngrade()
+                .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
+                .setTransactionExecutor(Executors.newFixedThreadPool(4))
+                .setQueryExecutor(Executors.newFixedThreadPool(4))
+                .build()
+        }
+
+        fun warmUp(context: Context, database: MusicDatabase) {
+            try {
+                // This triggers the actual open/migrations
+                database.delegate.openHelper.writableDatabase
+            } catch (t: Throwable) {
+                if (!shouldResetDb(t)) {
+                    Log.e(TAG, "Database failed to open with non-recoverable error", t)
+                    return
+                }
+                
+                Log.w(TAG, "Database open failed, attempting schema repair in background", t)
+                runCatching { database.close() }
+                
+                val repaired = runCatching { 
+                    SchemaTools.repairDatabaseFile(context = context, name = DB_NAME) 
+                }.onFailure { Log.e(TAG, "Schema repair failed", it) }.isSuccess
+                
+                if (repaired) {
+                    Log.i(TAG, "Database schema repaired successfully. Next access will re-open.")
+                } else {
+                    Log.e(TAG, "Database schema repair failed, destructive migration will be attempted on next access")
+                    // If repair failed, we might want to force destructive migration now
+                    runCatching { 
+                        context.deleteDatabase(DB_NAME)
+                        Log.w(TAG, "Database deleted due to failed repair")
+                    }
+                }
+            }
+        }
+
+        private fun shouldResetDb(t: Throwable): Boolean {
+            val msg = (t.message ?: "").lowercase()
+            return msg.contains("room cannot verify the data integrity") ||
+                    msg.contains("forgot to update the version number") ||
+                    msg.contains("migration didn't properly handle") ||
+                    msg.contains("room openhelper verification failed")
         }
     }
 }
@@ -161,65 +230,6 @@ class MusicDatabase(
 @TypeConverters(Converters::class)
 abstract class InternalDatabase : RoomDatabase() {
     abstract val dao: DatabaseDao
-
-    companion object {
-        const val DB_NAME = "song.db"
-
-        fun newInstance(context: Context): MusicDatabase {
-            val universalMigrations =
-                (2 until CURRENT_VERSION)
-                    .map { from -> UniversalMigration(context, from, CURRENT_VERSION) }
-                    .toTypedArray()
-
-            fun build(): InternalDatabase =
-                Room
-                    .databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
-                    .addMigrations(
-                        MIGRATION_1_2,
-                        *universalMigrations,
-                    )
-                    .addCallback(DatabaseCallback())
-                    .fallbackToDestructiveMigration()
-                    .fallbackToDestructiveMigrationOnDowngrade()
-                    .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
-                    .setTransactionExecutor(java.util.concurrent.Executors.newFixedThreadPool(4))
-                    .setQueryExecutor(java.util.concurrent.Executors.newFixedThreadPool(4))
-                    .build()
-
-            fun shouldResetDb(t: Throwable): Boolean {
-                val msg = (t.message ?: "").lowercase()
-                return msg.contains("room cannot verify the data integrity") ||
-                    msg.contains("forgot to update the version number") ||
-                    msg.contains("migration didn't properly handle") ||
-                    msg.contains("room openhelper verification failed")
-            }
-
-            var db = build()
-            try {
-                db.openHelper.writableDatabase
-            } catch (t: Throwable) {
-                if (!shouldResetDb(t)) throw t
-                Log.e(TAG, "Database open failed, attempting schema repair", t)
-                runCatching { db.close() }
-
-                val repaired =
-                    runCatching { SchemaTools.repairDatabaseFile(context = context, name = DB_NAME) }
-                        .onFailure { Log.e(TAG, "Schema repair failed, recreating database", it) }
-                        .isSuccess
-
-                db = build()
-                runCatching { db.openHelper.writableDatabase }.getOrElse { openError ->
-                    Log.e(TAG, "Database still failed to open after schema repair=$repaired, recreating database", openError)
-                    runCatching { db.close() }
-                    runCatching { context.deleteDatabase(DB_NAME) }
-                    db = build()
-                    db.openHelper.writableDatabase
-                }
-            }
-
-            return MusicDatabase(delegate = db)
-        }
-    }
 }
 
 private class DatabaseCallback : RoomDatabase.Callback() {
@@ -761,7 +771,7 @@ class Migration11To12 : AutoMigrationSpec {
                     "id" to albumId, "title" to albumName, "songCount" to 0, "duration" to 0, "lastUpdateTime" to 0))
             }
         }
-        db.query("CREATE INDEX IF NOT EXISTS `index_song_albumId` ON `song` (`albumId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_song_albumId` ON `song` (`albumId`)")
     }
 }
 

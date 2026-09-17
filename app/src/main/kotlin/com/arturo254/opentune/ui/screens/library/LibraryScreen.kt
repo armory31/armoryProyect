@@ -100,7 +100,9 @@ fun LibraryScreen(navController: NavController) {
             .background(ArmoryColors.AbsoluteBlack)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            OpenTuneHeader()
+            OpenTuneHeader(
+                onSettings = { navController.navigate("settings") }
+            )
             
             when (filterType) {
                 LibraryFilter.PLAYLISTS -> LibraryPlaylistsScreen(navController, filterContent)

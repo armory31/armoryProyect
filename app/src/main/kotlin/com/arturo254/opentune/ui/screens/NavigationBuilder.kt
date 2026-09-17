@@ -65,27 +65,19 @@ import com.arturo254.opentune.ui.screens.playlist.CachePlaylistScreen
 import com.arturo254.opentune.ui.screens.search.OnlineSearchResult
 import com.arturo254.opentune.ui.screens.settings.AboutScreen
 import com.arturo254.opentune.ui.screens.settings.AccountSettings
-import com.arturo254.opentune.ui.screens.settings.AppearanceSettings
-import com.arturo254.opentune.ui.screens.settings.CustomizeBackground
 import com.arturo254.opentune.ui.screens.settings.BackupAndRestore
 import com.arturo254.opentune.ui.screens.settings.ChangelogScreen
-import com.arturo254.opentune.ui.screens.settings.ContentSettings
-import com.arturo254.opentune.ui.screens.settings.DarkMode
+import com.arturo254.opentune.constants.DarkMode
 import com.arturo254.opentune.ui.screens.settings.DebugSettings
 import com.arturo254.opentune.ui.screens.settings.IntegrationScreen
 import com.arturo254.opentune.ui.screens.settings.LastFMSettings
 import com.arturo254.opentune.ui.screens.settings.MusicTogetherScreen
-import com.arturo254.opentune.ui.screens.settings.PalettePickerScreen
-import com.arturo254.opentune.ui.screens.settings.PlayerSettings
 import com.arturo254.opentune.ui.screens.settings.PoTokenScreen
-import com.arturo254.opentune.ui.screens.settings.PrivacySettings
 import com.arturo254.opentune.ui.screens.settings.SettingsScreen
 import com.arturo254.opentune.ui.screens.settings.StorageSettings
-import com.arturo254.opentune.ui.screens.settings.ThemeCreatorScreen
 import com.arturo254.opentune.ui.screens.settings.UpdateScreen
 import com.arturo254.opentune.ui.screens.musicrecognition.MusicRecognitionRoute
 import com.arturo254.opentune.ui.screens.musicrecognition.MusicRecognitionScreen
-import com.arturo254.opentune.ui.screens.settings.AODSettings
 
 import com.arturo254.opentune.ui.utils.ShowMediaInfo
 import com.arturo254.opentune.utils.rememberEnumPreference
@@ -313,43 +305,9 @@ fun NavGraphBuilder.navigationBuilder(
     composable("settings") {
         SettingsScreen(navController, scrollBehavior, latestVersionName)
     }
-    composable("settings/appearance") {
-        AppearanceSettings(navController, scrollBehavior)
-    }
-    composable("settings/appearance/palette_picker") {
-        PalettePickerScreen(navController)
-    }
-    composable("settings/appearance/theme_creator") {
-        ThemeCreatorScreen(navController)
-    }
-    composable(
-        route = "settings/appearance/always_on_display",
-        enterTransition = {
-            fadeIn(tween(300)) + slideInHorizontally { it / 3 }
-        },
-        exitTransition = {
-            fadeOut(tween(200)) + slideOutHorizontally { -it / 3 }
-        },
-        popEnterTransition = {
-            fadeIn(tween(300)) + slideInHorizontally { -it / 3 }
-        },
-        popExitTransition = {
-            fadeOut(tween(200)) + slideOutHorizontally { it / 3 }
-        },
-    ) {
-        AODSettings(navController, scrollBehavior)
-    }
-    composable("settings/content") {
-        ContentSettings(navController, scrollBehavior)
-    }
-    composable("settings/player") {
-        PlayerSettings(navController, scrollBehavior)
-    }
+
     composable("settings/storage") {
         StorageSettings(navController, scrollBehavior)
-    }
-    composable("settings/privacy") {
-        PrivacySettings(navController, scrollBehavior)
     }
     composable("settings/backup_restore") {
         BackupAndRestore(navController, scrollBehavior)
@@ -378,27 +336,9 @@ fun NavGraphBuilder.navigationBuilder(
     composable("settings/po_token") {
         PoTokenScreen(navController, scrollBehavior)
     }
-    composable("customize_background") {
-        CustomizeBackground(navController)
-    }
 
 
-// ─────────────────────────────────────────────────────────────────────────
-// Always On Display — como diálogo que cubre completamente
-// ─────────────────────────────────────────────────────────────────────────
-    composable(
-        route = "always_on_display",
-        // Esto la hace un diálogo que se superpone
-    ) { backStackEntry ->
-        Dialog(
-            onDismissRequest = { navController.navigateUp() },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                decorFitsSystemWindows = false
-            )
-        ) {
-            AlwaysOnDisplayScreen(navController)
-        }
-    }
+
+
 
 }
