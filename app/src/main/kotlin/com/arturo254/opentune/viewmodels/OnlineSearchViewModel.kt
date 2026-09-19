@@ -17,7 +17,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.innertube.pages.SearchSummaryPage
 import com.arturo254.opentune.constants.HideExplicitKey
@@ -62,7 +62,7 @@ constructor(
                         YouTube
                             .searchSummary(query)
                             .onSuccess {
-                                summaryPage = it.filterExplicit(context.dataStore.get(HideExplicitKey, false)).filterVideo(context.dataStore.get(HideVideoKey, false))
+                                summaryPage = it.filterVideo(context.dataStore.get(HideVideoKey, false))
                             }.onFailure {
                                 reportException(it)
                             }
@@ -75,13 +75,7 @@ constructor(
                                 viewStateMap[filter.value] =
                                     ItemsPage(
                                         result.items
-                                            .distinctBy { it.id }
-                                            .filterExplicit(
-                                                context.dataStore.get(
-                                                    HideExplicitKey,
-                                                    false
-                                                )
-                                            ).filterVideo(context.dataStore.get(HideVideoKey, false)),
+                                            .distinctBy { it.id }.filterVideo(context.dataStore.get(HideVideoKey, false)),
                                         result.continuation,
                                     )
                             }.onFailure {

@@ -47,7 +47,7 @@ import com.arturo254.opentune.extensions.toEnum
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.YTItem
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.innertube.pages.SearchResult
 import com.arturo254.opentune.models.PlaylistSuggestion
@@ -548,15 +548,10 @@ constructor(
     }
 
     private suspend fun filterSuggestionItems(items: List<YTItem>): List<YTItem> {
-        val hideExplicit = context.dataStore.data.first()[HideExplicitKey] ?: false
         val hideVideos = context.dataStore.data.first()[HideVideoKey] ?: false
 
         var filteredItems = items.filter { item ->
             item.id !in suggestedSongIds.value
-        }
-
-        if (hideExplicit) {
-            filteredItems = filteredItems.filterExplicit()
         }
 
         if (hideVideos) {

@@ -12,7 +12,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.innertube.pages.ExplorePage
 import com.arturo254.opentune.constants.HideExplicitKey
@@ -72,7 +72,7 @@ constructor(
                                         }
                                     } ?: Int.MAX_VALUE
                                 firstArtistKey
-                            }.filterExplicit(context.dataStore.get(HideExplicitKey, false)).filterVideo(context.dataStore.get(HideVideoKey, false)),
+                            }.filterVideo(context.dataStore.get(HideVideoKey, false)),
                     )
             }.onFailure {
                 reportException(it)

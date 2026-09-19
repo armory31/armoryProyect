@@ -28,6 +28,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -92,6 +93,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.compose.ui.util.fastAny
 import androidx.core.net.toUri
@@ -331,25 +333,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         var isLoginChecked by mutableStateOf(false)
+        var isRedirecting by mutableStateOf(false)
 
         splashScreen.setKeepOnScreenCondition {
-            !App.instance.isInitialized.value || !isLoginChecked || !isMainActivityReady.value
+            !isRedirecting && (!App.instance.isInitialized.value || !isLoginChecked || !isMainActivityReady.value)
         }
 
         session = SessionManager(this)
         
         lifecycleScope.launch {
-            val armoryLoggedIn = armoryAuthManager.isLoggedIn.first()
-            if (!session.isLoggedIn() || !armoryLoggedIn) {
-                // If either is logged out, ensure full logout and go to Login
-                if (session.isLoggedIn() || armoryLoggedIn) {
-                    session.logout()
-                    armoryAuthManager.clearAccountInfo()
-                }
+            val hasSession = session.isLoggedIn() && armoryAuthManager.isLoggedIn.first()
+            if (!hasSession) {
+                isRedirecting = true
+                session.logout()
+                armoryAuthManager.clearAccountInfo()
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                 finish()
+            } else {
+                isLoginChecked = true
             }
-            isLoginChecked = true
         }
 
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
@@ -511,34 +513,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val darkTheme by rememberEnumPreference<DarkMode>(DarkModeKey, defaultValue = DarkMode.AUTO)
-            val lyricsSyncOffset by rememberPreference(LyricsSyncOffsetKey, defaultValue = 0)
-            val isSystemInDarkTheme = isSystemInDarkTheme()
-            val useDarkTheme =
-                remember(darkTheme, isSystemInDarkTheme) {
-                    if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-                }
-            LaunchedEffect(useDarkTheme) {
-                setSystemBarAppearance(useDarkTheme)
+            LaunchedEffect(Unit) {
+                setSystemBarAppearance(true)
             }
-            val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = false)
-            val pureBlack = pureBlackEnabled && useDarkTheme
 
-            // OpenTune usa OpenTuneColors.Gold1 como color base principal
-            val themeColor = OpenTuneColors.Gold1
-
-            ArmoryTheme(
-                darkTheme = useDarkTheme,
-                pureBlack = pureBlack,
-                themeColor = themeColor,
-            ) {
+            ArmoryTheme {
                 BoxWithConstraints(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(
-                                if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
-                            )
+                            .background(Color.Black)
                 ) {
                     val windowsInsets = WindowInsets.systemBars
 
@@ -913,7 +897,7 @@ class MainActivity : ComponentActivity() {
 
                      CompositionLocalProvider(
                         LocalDatabase provides database,
-                        LocalContentColor provides if (pureBlack) Color.White else contentColorFor(MaterialTheme.colorScheme.surface),
+                        LocalContentColor provides Color.White,
                         LocalPlayerConnection provides playerConnection,
                         LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
                         LocalDownloadUtil provides downloadUtil,
@@ -1066,8 +1050,6 @@ class MainActivity : ComponentActivity() {
                                     BottomSheetPlayer(
                                         state = playerBottomSheetState,
                                         navController = navController,
-                                        pureBlack = pureBlack,
-                                        lyricsSyncOffset = lyricsSyncOffset,
                                         navigationBarHeight = if (shouldShowNavigationBar && !useRail) 88.dp else 0.dp
                                     )
                                 }
@@ -1076,6 +1058,23 @@ class MainActivity : ComponentActivity() {
                             BottomSheetMenu(
                                 state = menuState,
                             )
+
+                            if (!isUiReady) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.logo_armory),
+                                        contentDescription = "Logo",
+                                        modifier = Modifier
+                                            .height(160.dp)
+                                            .fillMaxWidth(0.4f)
+                                    )
+                                }
+                            }
                         }
                     }
 

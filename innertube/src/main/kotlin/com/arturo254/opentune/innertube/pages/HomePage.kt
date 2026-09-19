@@ -20,7 +20,7 @@ import com.arturo254.opentune.innertube.models.SectionListRenderer
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.YTItem
 import com.arturo254.opentune.innertube.models.oddElements
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 
 data class HomePage(
     val chips: List<Chip>?,
@@ -164,11 +164,6 @@ data class HomePage(
         }
     }
 
-    fun filterExplicit(enabled: Boolean = true) =
-        if (enabled) {
-            copy(sections = sections.map {
-                it.copy(items = it.items.filterExplicit())
-            })
-        } else this
+    
 
 }

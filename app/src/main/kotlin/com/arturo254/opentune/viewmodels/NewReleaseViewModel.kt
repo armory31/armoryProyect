@@ -16,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.AlbumItem
 import com.arturo254.opentune.innertube.models.AlbumType
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
@@ -209,18 +209,14 @@ constructor(
     }
 
     private suspend fun applyContentFilters(content: NewReleaseContent): NewReleaseContent {
-        val hideExplicit = context.dataStore.get(HideExplicitKey, false)
         val hideVideo = context.dataStore.get(HideVideoKey, false)
 
         return NewReleaseContent(
             albums = content.albums
-                .filterExplicit(hideExplicit)
                 .filterVideo(hideVideo),
             singles = content.singles
-                .filterExplicit(hideExplicit)
                 .filterVideo(hideVideo),
             eps = content.eps
-                .filterExplicit(hideExplicit)
                 .filterVideo(hideVideo),
         )
     }

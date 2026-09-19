@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.db.entities.Song
-import com.arturo254.opentune.extensions.filterExplicit
+
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,7 +72,6 @@ class CachePlaylistViewModel @Inject constructor(
                 _cachedSongs.value = completeSongs
                     .filter { it.song.dateDownload != null }
                     .sortedByDescending { it.song.dateDownload }
-                    .filterExplicit(hideExplicit)
 
                 delay(1000)
             }

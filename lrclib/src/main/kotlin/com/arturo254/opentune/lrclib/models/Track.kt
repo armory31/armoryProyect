@@ -16,7 +16,7 @@ data class Track(
     val id: Int,
     val trackName: String,
     val artistName: String,
-    val duration: Double,
+    val duration: Double? = null,
     val plainLyrics: String?,
     val syncedLyrics: String?,
 )
@@ -28,8 +28,8 @@ internal fun List<Track>.bestMatchingFor(duration: Int): Track? {
         return firstOrNull { it.syncedLyrics != null } ?: firstOrNull()
     }
 
-    return minByOrNull { abs(it.duration.toInt() - duration) }
-        ?.takeIf { abs(it.duration.toInt() - duration) <= 2 }
+    return minByOrNull { abs((it.duration ?: 0.0).toInt() - duration) }
+        ?.takeIf { abs((it.duration ?: 0.0).toInt() - duration) <= 2 }
 }
 
 internal fun List<Track>.bestMatchingFor(
@@ -47,8 +47,8 @@ internal fun List<Track>.bestMatchingFor(
         return firstOrNull { it.syncedLyrics != null } ?: firstOrNull()
     }
 
-    return minByOrNull { abs(it.duration.toInt() - duration) }
-        ?.takeIf { abs(it.duration.toInt() - duration) <= 2 }
+    return minByOrNull { abs((it.duration ?: 0.0).toInt() - duration) }
+        ?.takeIf { abs((it.duration ?: 0.0).toInt() - duration) <= 2 }
 }
 
 private fun List<Track>.findBestMatch(trackName: String, artistName: String): Track? {

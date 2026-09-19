@@ -21,7 +21,7 @@ import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.constants.SongSortType
 import com.arturo254.opentune.db.MusicDatabase
-import com.arturo254.opentune.extensions.filterExplicit
+
 import com.arturo254.opentune.extensions.reversed
 import com.arturo254.opentune.extensions.toEnum
 import com.arturo254.opentune.playback.DownloadUtil
@@ -84,7 +84,7 @@ constructor(
                 val (sortType, descending) = sortDesc
                 val songSortType = sortType.toSongSortType()
                 when (playlist) {
-                    "liked" -> database.likedSongsByRowIdAsc().map { it.filterExplicit(hideExplicit) }
+                    "liked" -> database.likedSongsByRowIdAsc()
                     "downloaded" -> combine(
                         database.allSongs().flowOn(Dispatchers.IO),
                         downloadUtil.downloads
@@ -101,7 +101,7 @@ constructor(
                                     song.artists.joinToString(separator = "") { it.name }
                                 }
                                 SongSortType.PLAY_TIME -> filteredSongs.sortedBy { it.song.totalPlayTime }
-                            }.reversed(descending).filterExplicit(hideExplicit)
+                            }.reversed(descending)
                         }
                     }
                     else -> MutableStateFlow(emptyList())

@@ -112,7 +112,7 @@ object LrcLib {
                 }
             }
             else -> {
-                tracks.sortedBy { abs(it.duration.toInt() - duration) }
+                tracks.sortedBy { abs((it.duration ?: 0.0).toInt() - duration) }
             }
         }
 
@@ -123,11 +123,11 @@ object LrcLib {
                     count++
                     track.syncedLyrics.let(callback)
                 } else {
-                    if (track.syncedLyrics != null && abs(track.duration.toInt() - duration) <= 2) {
+                    if (track.syncedLyrics != null && abs((track.duration ?: 0.0).toInt() - duration) <= 2) {
                         count++
                         track.syncedLyrics.let(callback)
                     }
-                    if (track.plainLyrics != null && abs(track.duration.toInt() - duration) <= 2 && plain == 0) {
+                    if (track.plainLyrics != null && abs((track.duration ?: 0.0).toInt() - duration) <= 2 && plain == 0) {
                         count++
                         plain++
                         track.plainLyrics.let(callback)

@@ -15,7 +15,7 @@ import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.PlaylistItem
 import com.arturo254.opentune.innertube.models.WatchEndpoint
 import com.arturo254.opentune.innertube.models.YTItem
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.innertube.pages.ExplorePage
 import com.arturo254.opentune.innertube.pages.HomePage
@@ -240,7 +240,7 @@ class HomeViewModel @Inject constructor(
                         homePage.value = page.copy(
                             chips = filterHomeChips(page.chips),
                             sections = page.sections.map { section ->
-                                section.copy(items = section.items.filterExplicit(hideExplicit).filterVideo(hideVideo))
+                                section.copy(items = section.items.filterVideo(hideVideo))
                             }
                         )
                     }.onFailure { reportException(it) }
@@ -272,7 +272,7 @@ class HomeViewModel @Inject constructor(
                                         }
                                     } ?: Int.MAX_VALUE
                                     firstArtistKey
-                                }.filterExplicit(hideExplicit)
+                                }
                         )
                     }.onFailure { reportException(it) }
                 }
@@ -306,7 +306,7 @@ class HomeViewModel @Inject constructor(
                 }
                 SimilarRecommendation(
                     title = it,
-                    items = items.filterExplicit(hideExplicit).filterVideo(hideVideo).shuffled().ifEmpty { return@mapNotNull null }
+                    items = items.filterVideo(hideVideo).shuffled().ifEmpty { return@mapNotNull null }
                 )
             }
 
@@ -323,7 +323,7 @@ class HomeViewModel @Inject constructor(
                             page.albums.shuffled().take(4) +
                             page.artists.shuffled().take(4) +
                             page.playlists.shuffled().take(4))
-                        .filterExplicit(hideExplicit).filterVideo(hideVideo)
+                        .filterVideo(hideVideo)
                         .shuffled()
                         .ifEmpty { return@mapNotNull null }
                 )
@@ -358,7 +358,7 @@ class HomeViewModel @Inject constructor(
             homePage.value = nextSections.copy(
                 chips = homePage.value?.chips,
                 sections = (homePage.value?.sections.orEmpty() + nextSections.sections).map { section ->
-                    section.copy(items = section.items.filterExplicit(hideExplicit).filterVideo(hideVideo))
+                    section.copy(items = section.items.filterVideo(hideVideo))
                 }
             )
             _isLoadingMore.value = false
@@ -385,7 +385,7 @@ class HomeViewModel @Inject constructor(
             homePage.value = nextSections.copy(
                 chips = homePage.value?.chips,
                 sections = nextSections.sections.map { section ->
-                    section.copy(items = section.items.filterExplicit(hideExplicit).filterVideo(hideVideo))
+                    section.copy(items = section.items.filterVideo(hideVideo))
                 }
             )
             selectedChip.value = chip

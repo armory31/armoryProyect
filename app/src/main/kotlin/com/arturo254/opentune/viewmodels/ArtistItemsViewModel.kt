@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.BrowseEndpoint
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
@@ -56,7 +56,6 @@ constructor(
                         ItemsPage(
                             items = artistItemsPage.items
                                 .distinctBy { it.id }
-                                .filterExplicit(context.dataStore.get(HideExplicitKey, false))
                                 .filterVideo(context.dataStore.get(HideVideoKey, false)),
                             continuation = artistItemsPage.continuation,
                         )
@@ -77,8 +76,7 @@ constructor(
                         ItemsPage(
                             items =
                             (oldItemsPage.items + artistItemsContinuationPage.items)
-                                .distinctBy { it.id }
-                                .filterExplicit(context.dataStore.get(HideExplicitKey, false)),
+                                .distinctBy { it.id },
                             continuation = artistItemsContinuationPage.continuation,
                         )
                     }

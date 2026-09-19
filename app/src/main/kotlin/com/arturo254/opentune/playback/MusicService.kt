@@ -156,7 +156,7 @@ import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.queues.EmptyQueue
 import com.arturo254.opentune.playback.queues.Queue
 import com.arturo254.opentune.playback.queues.YouTubeQueue
-import com.arturo254.opentune.playback.queues.filterExplicit
+
 import com.arturo254.opentune.playback.queues.filterVideo
 import com.arturo254.opentune.utils.CoilBitmapLoader
 import com.arturo254.opentune.utils.SyncUtils
@@ -1055,12 +1055,10 @@ class MusicService :
 
     private suspend fun restorePersistentQueue(persistedQueue: PersistQueue) {
         val restoredQueue = persistedQueue.toQueue()
-        val hideExplicit = dataStore.get(HideExplicitKey, false)
         val hideVideo = dataStore.get(HideVideoKey, false)
         val initialStatus =
             restoredQueue
                 .getInitialStatus()
-                .filterExplicit(hideExplicit)
                 .filterVideo(hideVideo)
 
         withContext(Dispatchers.Main) {
@@ -1473,7 +1471,6 @@ class MusicService :
                 val initialStatus =
                     withContext(Dispatchers.IO) {
                         queue.getInitialStatus()
-                            .filterExplicit(dataStore.get(HideExplicitKey, false))
                             .filterVideo(dataStore.get(HideVideoKey, false))
                     }
 
@@ -1548,7 +1545,7 @@ class MusicService :
         scope.launch(SilentHandler) {
             val initialStatus =
                 withContext(Dispatchers.IO) {
-                    queue.getInitialStatus().filterExplicit(dataStore.get(HideExplicitKey, false)).filterVideo(dataStore.get(HideVideoKey, false))
+                    queue.getInitialStatus().filterVideo(dataStore.get(HideVideoKey, false))
                 }
             if (initialStatus.title != null) {
                 queueTitle = initialStatus.title
@@ -1657,7 +1654,7 @@ class MusicService :
                 endpoint = WatchEndpoint(videoId = currentMediaId)
             )
             val initialStatus = withContext(Dispatchers.IO) {
-                radioQueue.getInitialStatus().filterExplicit(dataStore.get(HideExplicitKey, false)).filterVideo(dataStore.get(HideVideoKey, false))
+                radioQueue.getInitialStatus().filterVideo(dataStore.get(HideVideoKey, false))
             }
 
             if (initialStatus.title != null) {
@@ -1794,7 +1791,6 @@ class MusicService :
                             result.items
                                 .map { it.toMediaItem() }
                                 .filter { it.mediaId !in queueIds }
-                                .filterExplicit(hideExplicit)
                                 .filterVideo(hideVideo)
 
                         val relatedCandidates =
@@ -1811,7 +1807,6 @@ class MusicService :
                             relatedCandidates
                                 .map { it.toMediaItem() }
                                 .filter { it.mediaId !in queueIds }
-                                .filterExplicit(hideExplicit)
                                 .filterVideo(hideVideo)
 
                         val poolBase =
@@ -1834,7 +1829,6 @@ class MusicService :
                                         .orEmpty()
                                         .map { it.toMediaItem() }
                                         .filter { it.mediaId !in queueIds }
-                                        .filterExplicit(hideExplicit)
                                         .filterVideo(hideVideo)
 
                                 (poolBase + extra)
@@ -1928,7 +1922,6 @@ class MusicService :
                             result.items
                                 .map { it.toMediaItem() }
                                 .filter { it.mediaId !in initialQueueIds }
-                                .filterExplicit(hideExplicit)
                                 .filterVideo(hideVideo)
 
                         val addedNow = ArrayList<MediaItem>(32)
@@ -1952,7 +1945,6 @@ class MusicService :
                             relatedCandidates
                                 .map { it.toMediaItem() }
                                 .filter { it.mediaId !in queueIdsAfterNext }
-                                .filterExplicit(hideExplicit)
                                 .filterVideo(hideVideo)
 
                         if (addedNow.isEmpty() && filteredRelated.isNotEmpty()) {
@@ -1977,7 +1969,6 @@ class MusicService :
                             automixCandidates
                                 .map { it.toMediaItem() }
                                 .filter { it.mediaId !in queueIdsAfterAdds }
-                                .filterExplicit(hideExplicit)
                                 .filterVideo(hideVideo)
 
                         val addedIds = addedNow.map { it.mediaId }.toSet()
@@ -3536,7 +3527,7 @@ class MusicService :
     ) {
         scope.launch(SilentHandler) {
             val mediaItems =
-                currentQueue.nextPage().filterExplicit(dataStore.get(HideExplicitKey, false)).filterVideo(dataStore.get(HideVideoKey, false))
+                currentQueue.nextPage().filterVideo(dataStore.get(HideVideoKey, false))
             if (player.playbackState != STATE_IDLE) {
                 player.addMediaItems(mediaItems.drop(1))
             }

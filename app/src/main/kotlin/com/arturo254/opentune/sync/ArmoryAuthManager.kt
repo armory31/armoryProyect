@@ -2,6 +2,7 @@ package com.arturo254.opentune.sync
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import com.arturo254.opentune.App
 import com.arturo254.opentune.constants.ArmoryAccountEmailKey
 import com.arturo254.opentune.constants.ArmoryAccountUidKey
 import com.arturo254.opentune.utils.dataStore
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import com.arturo254.opentune.db.MusicDatabase
+import com.google.android.gms.tasks.Tasks
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,12 +39,28 @@ class ArmoryAuthManager @Inject constructor(
         }
     }
 
+    suspend fun refreshSessionSilently(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val auth = getFirebaseAuth()
+            val user = auth.currentUser
+            if (user != null) {
+                // Force token refresh
+                Tasks.await(user.getIdToken(true))
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     suspend fun clearAccountInfo() {
         getFirebaseAuth().signOut()
         context.dataStore.edit {
             it.remove(ArmoryAccountEmailKey)
             it.remove(ArmoryAccountUidKey)
         }
-        (context.applicationContext as? com.arturo254.opentune.App)?.database?.clearUserData()
+        (context.applicationContext as? App)?.database?.clearUserData()
     }
 }

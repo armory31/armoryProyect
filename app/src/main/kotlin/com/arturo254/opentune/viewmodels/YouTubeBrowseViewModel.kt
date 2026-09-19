@@ -45,7 +45,7 @@ constructor(
                 .browse(browseId, params?.takeIf { it.isNotBlank() })
                 .onSuccess {
                     val hideVideo = context.dataStore.get(HideVideoKey, false)
-                    result.value = it.filterExplicit(context.dataStore.get(HideExplicitKey, false)).filterVideo(hideVideo)
+                    result.value = it.filterVideo(hideVideo)
                 }.onFailure {
                     error.value = true
                     reportException(it)

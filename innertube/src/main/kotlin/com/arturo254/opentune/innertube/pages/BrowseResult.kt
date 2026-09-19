@@ -9,7 +9,7 @@
 package com.arturo254.opentune.innertube.pages
 
 import com.arturo254.opentune.innertube.models.YTItem
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 
 data class BrowseResult(
@@ -21,22 +21,7 @@ data class BrowseResult(
         val items: List<YTItem>,
     )
 
-    fun filterExplicit(enabled: Boolean = true) =
-        if (enabled) {
-            copy(
-                items =
-                    items.mapNotNull {
-                        it.copy(
-                            items =
-                                it.items
-                                    .filterExplicit()
-                                    .ifEmpty { return@mapNotNull null },
-                        )
-                    },
-            )
-        } else {
-            this
-        }
+    
 
     fun filterVideo(enabled: Boolean = true) =
         if (enabled) {

@@ -85,6 +85,7 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun getUserLibrary(): UserLibraryDto? {
+        authManager.refreshSessionSilently()
         val uid = authManager.currentUserUid.first() ?: return null
         val db = getFirestore()
         return try {
@@ -99,6 +100,7 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun saveUserLibrary(library: UserLibraryDto) {
+        authManager.refreshSessionSilently()
         val uid = authManager.currentUserUid.first() ?: return
         val db = getFirestore()
         withContext(Dispatchers.IO + NonCancellable) {
@@ -276,6 +278,9 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun pushLibraryToCloud(isMigration: Boolean = false) = withContext(Dispatchers.IO) {
+        // Silent refresh before any upload to ensure token is valid
+        authManager.refreshSessionSilently()
+        
         val uid = authManager.currentUserUid.first() ?: return@withContext
         val db = getFirestore()
         

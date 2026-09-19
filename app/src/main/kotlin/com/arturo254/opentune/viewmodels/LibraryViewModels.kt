@@ -48,8 +48,8 @@ import com.arturo254.opentune.constants.SongSortTypeKey
 import com.arturo254.opentune.constants.TopSize
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.db.entities.Song
-import com.arturo254.opentune.extensions.filterExplicit
-import com.arturo254.opentune.extensions.filterExplicitAlbums
+
+
 import com.arturo254.opentune.extensions.reversed
 import com.arturo254.opentune.extensions.toEnum
 import com.arturo254.opentune.playback.DownloadUtil
@@ -106,14 +106,14 @@ constructor(
             .flatMapLatest { (filterSort, hideExplicit, hideVideo) ->
                 val (filter, sortType, descending) = filterSort
                 when (filter) {
-                    SongFilter.LIBRARY -> database.songs(sortType, descending, hideVideo).map { it.filterExplicit(hideExplicit) }
+                    SongFilter.LIBRARY -> database.songs(sortType, descending, hideVideo)
                     SongFilter.LIKED -> libraryStateHolder.getLibrarySongs().map { songs ->
                         when (sortType) {
                             SongSortType.CREATE_DATE -> songs
                             SongSortType.NAME -> songs.sortedBy { it.song.title }
                             SongSortType.ARTIST -> songs.sortedBy { it.artists.joinToString { a -> a.name } }
                             SongSortType.PLAY_TIME -> songs.sortedBy { it.song.totalPlayTime }
-                        }.let { if (descending) it.reversed() else it }.filterExplicit(hideExplicit)
+                        }.let { if (descending) it.reversed() else it }
                     }
                     SongFilter.DOWNLOADED ->
                         combine(
@@ -138,7 +138,7 @@ constructor(
                                         )
                                     }
                                     SongSortType.PLAY_TIME -> filteredSongs.sortedBy { it.song.totalPlayTime }
-                                }.reversed(descending).filterExplicit(hideExplicit)
+                                }.reversed(descending)
                             }
                         }
                 }
@@ -284,7 +284,6 @@ constructor(
                                 .mapNotNull { it.song.albumId }.toSet()
                         }.flatMapLatest { downloadedAlbumIds ->
                             database.albumsByIds(downloadedAlbumIds, sortType, descending)
-                                .map { albums -> albums.filterExplicitAlbums(hideExplicit) }
                         }
                     
                         AlbumFilter.DOWNLOADED_FULL ->
@@ -303,10 +302,10 @@ constructor(
                                         val totalSongsInAlbum = album.album.songCount
                                         val downloadedSongsCount = downloadedCountByAlbum[album.album.id] ?: 0
                                         totalSongsInAlbum > 0 && downloadedSongsCount >= totalSongsInAlbum
-                                    }.filterExplicitAlbums(hideExplicit)
+                                    }
                                 }
                         }
-                    AlbumFilter.LIBRARY -> database.albums(sortType, descending).map { it.filterExplicitAlbums(hideExplicit) }
+                    AlbumFilter.LIBRARY -> database.albums(sortType, descending)
                     AlbumFilter.LIKED -> libraryStateHolder.getLibraryAlbums().map { albums ->
                         when (sortType) {
                             AlbumSortType.CREATE_DATE -> albums
@@ -316,7 +315,7 @@ constructor(
                             AlbumSortType.LENGTH -> albums.sortedBy { it.album.duration }
                             AlbumSortType.PLAY_TIME -> albums.sortedBy { it.timeListened ?: 0L }
                             AlbumSortType.ARTIST -> albums.sortedBy { it.artists.joinToString { a -> a.name } }
-                        }.let { if (descending) it.reversed() else it }.filterExplicitAlbums(hideExplicit)
+                        }.let { if (descending) it.reversed() else it }
                     }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -428,7 +427,7 @@ constructor(
             }.distinctUntilChanged()
             .flatMapLatest { (sortDesc, hideExplicit) ->
                 val (sortType, descending) = sortDesc
-                database.artistSongs(artistId, sortType, descending).map { it.filterExplicit(hideExplicit) }
+                database.artistSongs(artistId, sortType, descending)
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 }
 
@@ -456,12 +455,8 @@ constructor(
             .distinctUntilChanged()
     var artists =
         libraryStateHolder.getLibraryArtists().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    var albums = context.dataStore.data
-        .map { it[HideExplicitKey] ?: false }
-        .distinctUntilChanged()
-        .flatMapLatest { hideExplicit ->
-            libraryStateHolder.getLibraryAlbums().map { it.filterExplicitAlbums(hideExplicit) }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    var albums = libraryStateHolder.getLibraryAlbums()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     var playlists =
         context.dataStore.data
             .map {

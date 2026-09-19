@@ -181,11 +181,12 @@ private const val V7BackdropBlurHeightFraction = 0.54f // The height of the blur
 fun BottomSheetPlayer(
     state: BottomSheetState,
     navController: NavController,
-    lyricsSyncOffset: Int,
     modifier: Modifier = Modifier,
-    pureBlack: Boolean,
     navigationBarHeight: Dp = 0.dp,
 ) {
+    val pureBlack = true
+    val lyricsSyncOffset = 0
+
     val context = LocalContext.current
     val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val menuState = LocalMenuState.current

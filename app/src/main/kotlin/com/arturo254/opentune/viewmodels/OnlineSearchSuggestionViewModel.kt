@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.SearchSuggestions
 import com.arturo254.opentune.innertube.models.YTItem
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
@@ -89,7 +89,6 @@ constructor(
                             .orEmpty(),
                         items = result
                             ?.recommendedItems
-                            ?.filterExplicit(context.dataStore.get(HideExplicitKey, false))
                             ?.filterVideo(context.dataStore.get(HideVideoKey, false))
                             .orEmpty(),
                     )

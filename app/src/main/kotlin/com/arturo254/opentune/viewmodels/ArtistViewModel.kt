@@ -15,7 +15,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.pages.ArtistPage
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.utils.reportException
@@ -29,8 +29,8 @@ import android.content.Context
 import com.arturo254.opentune.constants.ArtistSongSortType
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.db.entities.Song
-import com.arturo254.opentune.extensions.filterExplicit
-import com.arturo254.opentune.extensions.filterExplicitAlbums
+
+
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
 import com.arturo254.opentune.sync.LibraryStateHolder
@@ -63,14 +63,14 @@ class ArtistViewModel @Inject constructor(
         .map { it[HideExplicitKey] ?: false }
         .distinctUntilChanged()
         .flatMapLatest { hideExplicit ->
-            database.artistSongs(artistId, ArtistSongSortType.CREATE_DATE, false).map { it.filterExplicit(hideExplicit) }
+            database.artistSongs(artistId, ArtistSongSortType.CREATE_DATE, false)
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList<Song>())
     val libraryAlbums = context.dataStore.data
         .map { it[HideExplicitKey] ?: false }
         .distinctUntilChanged()
         .flatMapLatest { hideExplicit ->
-            database.artistAlbumsPreview(artistId).map { it.filterExplicitAlbums(hideExplicit) }
+            database.artistAlbumsPreview(artistId)
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -91,12 +91,7 @@ class ArtistViewModel @Inject constructor(
             val hideExplicit = context.dataStore.get(HideExplicitKey, false)
             YouTube.artist(artistId)
                 .onSuccess { page ->
-                    val filteredSections = page.sections
-                        .map { section ->
-                            section.copy(items = section.items.filterExplicit(hideExplicit))
-                        }
-
-                    artistPage = page.copy(sections = filteredSections)
+                    artistPage = page
                 }.onFailure {
                     reportException(it)
                 }

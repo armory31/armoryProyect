@@ -97,7 +97,7 @@ fun OnlineSearchScreen(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.Black)
     ) {
         items(viewState.history, key = { "history_${it.query}" }) { history ->
             SuggestionItem(

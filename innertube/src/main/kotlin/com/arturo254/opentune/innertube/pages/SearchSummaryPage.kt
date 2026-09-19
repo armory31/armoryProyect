@@ -21,7 +21,7 @@ import com.arturo254.opentune.innertube.models.PlaylistItem
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.YTItem
 import com.arturo254.opentune.innertube.models.clean
-import com.arturo254.opentune.innertube.models.filterExplicit
+
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.innertube.models.oddElements
 import com.arturo254.opentune.innertube.models.splitBySeparator
@@ -35,22 +35,7 @@ data class SearchSummary(
 data class SearchSummaryPage(
     val summaries: List<SearchSummary>,
 ) {
-    fun filterExplicit(enabled: Boolean) =
-        if (enabled) {
-            SearchSummaryPage(
-                summaries.mapNotNull { s ->
-                    SearchSummary(
-                        title = s.title,
-                        items =
-                            s.items.filterExplicit().ifEmpty {
-                                return@mapNotNull null
-                            },
-                    )
-                },
-            )
-        } else {
-            this
-        }
+    
 
     fun filterVideo(enabled: Boolean) =
         if (enabled) {

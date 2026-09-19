@@ -178,6 +178,8 @@ android {
 
 configurations.all {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
+    exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    exclude(group = "org.slf4j", module = "slf4j-simple")
     resolutionStrategy {
         force("com.google.protobuf:protobuf-javalite:3.25.5")
     }
@@ -231,7 +233,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.palette)
     implementation(libs.multiplatform.markdown)
-    implementation("org.slf4j:slf4j-nop:1.7.36")
+    implementation("org.slf4j:slf4j-nop:2.0.16")
 
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
