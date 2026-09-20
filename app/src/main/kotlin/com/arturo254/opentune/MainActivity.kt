@@ -122,7 +122,6 @@ import com.arturo254.opentune.utils.PreferenceStore
 import kotlinx.coroutines.withContext
 import com.arturo254.opentune.constants.AppBarHeight
 import com.arturo254.opentune.constants.AppLanguageKey
-import com.arturo254.opentune.constants.DarkModeKey
 import com.arturo254.opentune.constants.DefaultOpenTabKey
 import com.arturo254.opentune.constants.DisableScreenshotKey
 import com.arturo254.opentune.constants.HasPressedStarKey
@@ -157,7 +156,6 @@ import com.arturo254.opentune.ui.component.BottomSheetMenu
 import com.arturo254.opentune.ui.player.BottomSheetPlayer
 import com.arturo254.opentune.ui.screens.Screens
 import com.arturo254.opentune.ui.screens.navigationBuilder
-import com.arturo254.opentune.constants.DarkMode
 import com.arturo254.opentune.constants.NavigationTab
 import com.arturo254.opentune.ui.theme.ArmoryTheme
 import com.arturo254.opentune.ui.utils.appBarScrollBehavior

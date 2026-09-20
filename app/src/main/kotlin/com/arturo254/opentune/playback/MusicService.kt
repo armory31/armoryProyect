@@ -868,12 +868,14 @@ class MusicService :
                 }
             ).also { it.start(scope) }
 
-        // Initialize lyrics pre-load manager
-        lyricsPreloadManager = LyricsPreloadManager(
-            context = this,
-            database = database,
-            networkConnectivity = connectivityObserver,
-        )
+        // Initialize lyrics pre-load manager asíncronamente para no bloquear el inicio del servicio
+        scope.launch {
+            lyricsPreloadManager = LyricsPreloadManager(
+                context = this@MusicService,
+                database = database,
+                networkConnectivity = connectivityObserver,
+            )
+        }
 
         dataStore.data
             .map(::readEqSettingsFromPrefs)

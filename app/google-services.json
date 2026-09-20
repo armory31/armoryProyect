@@ -9,10 +9,23 @@
       "client_info": {
         "mobilesdk_app_id": "1:389161873726:android:f10c59f58b9068b3e23c6f",
         "android_client_info": {
-          "package_name": "com.Arturo254.opentune"
+          "package_name": "com.ruben.spotitube"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "389161873726-snqh2vlmn0vqf9u0he3httnbl72s48ir.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ruben.spotitube",
+            "certificate_hash": "d92d53dd0caf86fcc922ca6a61eb233b71fdbfcc"
+          }
+        },
+        {
+          "client_id": "389161873726-hjjqaqudgeiejijeki6nnp2oql3iqom2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBUw3VUaddZPfkZzm608agxWhXD5iIJ0MU"
@@ -20,26 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:389161873726:android:f10c59f58b9068b3e23c6f",
-        "android_client_info": {
-          "package_name": "com.Arturo254.opentune.debug"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBUw3VUaddZPfkZzm608agxWhXD5iIJ0MU"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389161873726-hjjqaqudgeiejijeki6nnp2oql3iqom2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

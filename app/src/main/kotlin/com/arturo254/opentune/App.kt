@@ -110,13 +110,13 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
         }
         
         FirebaseApp.initializeApp(this)
-        PreferenceStore.start(this)
         Timber.plant(Timber.DebugTree())
         try {
             Timber.plant(com.arturo254.opentune.utils.GlobalLogTree())
         } catch (_: Exception) {}
 
         applicationScope.launch(Dispatchers.IO) {
+            PreferenceStore.start(this@App)
             MusicDatabase.warmUp(this@App, database)
             initializeCriticalSync()
         }

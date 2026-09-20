@@ -26,7 +26,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -119,7 +119,6 @@ import coil3.toBitmap
 import com.arturo254.opentune.R
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalPlayerConnection
-import com.arturo254.opentune.constants.DarkModeKey
 import com.arturo254.opentune.constants.PlayerDesignStyle
 import com.arturo254.opentune.constants.PlayerDesignStyleKey
 import com.arturo254.opentune.constants.UseNewMiniPlayerDesignKey
@@ -145,7 +144,6 @@ import com.arturo254.opentune.ui.component.LocalBottomSheetPageState
 import com.arturo254.opentune.ui.component.LocalMenuState
 import com.arturo254.opentune.ui.component.rememberBottomSheetState
 import com.arturo254.opentune.ui.menu.PlayerMenu
-import com.arturo254.opentune.constants.DarkMode
 import androidx.compose.ui.unit.Dp
 import com.arturo254.opentune.ui.component.bottomSheetDraggable
 import com.arturo254.opentune.ui.utils.ShowMediaInfo
@@ -223,25 +221,11 @@ fun BottomSheetPlayer(
         defaultValue = PlayerButtonsStyle.DEFAULT
     )
 
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    val darkTheme by rememberEnumPreference<DarkMode>(DarkModeKey, defaultValue = DarkMode.AUTO)
-    val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
-        if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-    }
     val onBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.secondary
-        else ->
-            if (useDarkTheme)
-                MaterialTheme.colorScheme.onSurface
-            else
-                MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.onSurface
     }
-    val useBlackBackground =
-        remember(isSystemInDarkTheme, darkTheme, pureBlack) {
-            val useDarkTheme =
-                if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-            useDarkTheme && pureBlack
-        }
+    val useBlackBackground = pureBlack
     val backgroundColor = if (useBlackBackground && state.value > state.collapsedBound) {
         val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
             .coerceIn(0f, 1f)

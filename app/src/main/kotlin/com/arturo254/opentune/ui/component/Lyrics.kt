@@ -21,7 +21,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.isSystemInDarkTheme
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.Font
@@ -138,7 +138,6 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
-import com.arturo254.opentune.constants.DarkModeKey
 import com.arturo254.opentune.constants.LyricsClickKey
 import com.arturo254.opentune.constants.LyricsScrollKey
 import com.arturo254.opentune.constants.LyricsTextPositionKey
@@ -162,7 +161,6 @@ import com.arturo254.opentune.lyrics.LyricsUtils.parseLyrics
 import com.arturo254.opentune.lyrics.LyricsUtils.parseTtml
 import com.arturo254.opentune.ui.component.shimmer.ShimmerHost
 import com.arturo254.opentune.ui.component.shimmer.TextPlaceholder
-import com.arturo254.opentune.constants.DarkMode
 import com.arturo254.opentune.constants.LyricsPosition
 import com.arturo254.opentune.ui.utils.smoothFadingEdge
 import com.arturo254.opentune.utils.ComposeToImage
@@ -443,16 +441,6 @@ fun Lyrics(
     val lyrics = remember(lyricsEntity) { lyricsEntity?.lyrics?.trim() }
 
 
-    val playerBackground by rememberEnumPreference(
-        key = PlayerBackgroundStyleKey,
-        defaultValue = PlayerBackgroundStyle.DEFAULT
-    )
-
-    val darkTheme by rememberEnumPreference<DarkMode>(DarkModeKey, defaultValue = DarkMode.AUTO)
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
-        if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
-    }
     val lines = remember(lyrics, scope, mediaMetadata?.id, mediaMetadata?.duration) {
         if (lyrics == null || lyrics == LYRICS_NOT_FOUND) {
             emptyList()
@@ -481,8 +469,8 @@ fun Lyrics(
             !lyrics.isNullOrEmpty() && (lyrics.startsWith("[") || isTtml(lyrics))
         }
 
-    val lyricsBaseColor = if (useDarkTheme || playerBackground != PlayerBackgroundStyle.DEFAULT) Color.White else Color.Black
-    val lyricsGlowColor = if (useDarkTheme || playerBackground != PlayerBackgroundStyle.DEFAULT) Color.White else Color.Black
+    val lyricsBaseColor = Color.White
+    val lyricsGlowColor = Color.White
     val textColor = lyricsBaseColor
 
     val wordSyncLeadMs = remember(lyrics) {

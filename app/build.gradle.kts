@@ -34,10 +34,12 @@ val gitCommit = if (System.getenv("CI") == null) "debug-local" else fetchGitComm
 
 android {
     namespace = "com.arturo254.opentune"
+    // namespace = "com.ruben.spotitube"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.Arturo254.opentune"
+        // applicationId = "com.Arturo254.opentune"
+        applicationId = "com.ruben.spotitube"
         minSdk = 26
         targetSdk = 36
         versionCode = 129
@@ -109,7 +111,7 @@ android {
             )
         }
         debug {
-            applicationIdSuffix = ".debug"
+            // applicationIdSuffix = ".debug"
             versionNameSuffix = ".$gitCommit-debug"
             isDebuggable = true
             

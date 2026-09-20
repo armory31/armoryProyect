@@ -45,7 +45,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.arturo254.opentune.R
-import com.arturo254.opentune.constants.DarkModeKey
 import com.arturo254.opentune.constants.PureBlackKey
 import com.arturo254.opentune.ui.component.BottomSheet
 import com.arturo254.opentune.ui.component.BottomSheetMenu
@@ -67,7 +66,6 @@ import com.arturo254.opentune.ui.screens.settings.AboutScreen
 import com.arturo254.opentune.ui.screens.settings.AccountSettings
 import com.arturo254.opentune.ui.screens.settings.BackupAndRestore
 import com.arturo254.opentune.ui.screens.settings.ChangelogScreen
-import com.arturo254.opentune.constants.DarkMode
 import com.arturo254.opentune.ui.screens.settings.DebugSettings
 import com.arturo254.opentune.ui.screens.settings.IntegrationScreen
 import com.arturo254.opentune.ui.screens.settings.LastFMSettings

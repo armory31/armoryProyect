@@ -22,7 +22,7 @@ import com.arturo254.opentune.OpenTuneColors
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ArmoryTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // Forzamos oscuro para ARMORY
     pureBlack: Boolean = true, // Forzamos pureBlack para ARMORY
     themeColor: Color? = null,
     seedPalette: ThemeSeedPalette? = null,

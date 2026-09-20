@@ -25,7 +25,7 @@
         </intent>
     </queries>
     <application
-        android:name=".App"
+        android:name="com.arturo254.opentune.App"
         android:allowBackup="false"
         android:appCategory="audio"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -43,7 +43,7 @@
             android:required="false" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name="com.arturo254.opentune.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.OpenTune.Login">
             <intent-filter>
@@ -53,7 +53,7 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.arturo254.opentune.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.OpenTune"
@@ -149,7 +149,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.FileProvider"
+            android:authorities="com.ruben.spotitube.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -158,7 +158,7 @@
         </provider>
 
         <service
-            android:name=".playback.MusicService"
+            android:name="com.arturo254.opentune.playback.MusicService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             tools:ignore="ExportedService">
@@ -171,7 +171,7 @@
         </service>
 
         <service
-            android:name=".playback.ExoDownloadService"
+            android:name="com.arturo254.opentune.playback.ExoDownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync">
             <intent-filter>
@@ -196,20 +196,20 @@
             android:resource="@drawable/status" />
 
         <activity
-            android:name=".DebugActivity"
+            android:name="com.arturo254.opentune.DebugActivity"
             android:exported="true"
             android:process=":crash"
             android:theme="@style/Theme.OpenTune">
         </activity>
 
         <activity
-            android:name=".ui.screens.settings.PoTokenExtractionActivity"
+            android:name="com.arturo254.opentune.ui.screens.settings.PoTokenExtractionActivity"
             android:exported="false"
             android:theme="@style/Theme.OpenTune" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
+            android:authorities="com.ruben.spotitube.androidx-startup"
             android:exported="false"
             tools:node="merge">
             <meta-data
