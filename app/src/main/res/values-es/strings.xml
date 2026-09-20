@@ -14,6 +14,7 @@
     <string name="stats">Estadísticas</string>
     <string name="mood_and_genres">Géneros</string>
     <string name="account">Cuenta</string>
+    <string name="speed_dial">Marcado rápido</string>
     <string name="quick_picks">Selecciones rápidas</string>
     <string name="quick_picks_empty">Escucha canciones para generar tus selecciones rápidas</string>
     <string name="forgotten_favorites">Tus favoritos del pasado</string>

@@ -64,6 +64,7 @@ object UpdateNotificationManager {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .setRequiresBatteryNotLow(true)
+            .setRequiresDeviceIdle(true)
             .build()
 
         val updateCheckRequest = PeriodicWorkRequestBuilder<UpdateCheckWorker>(

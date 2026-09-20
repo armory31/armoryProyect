@@ -60,7 +60,7 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     val isRefreshing = MutableStateFlow(false)
     val isLoading = MutableStateFlow(false)
-    private val isInitialLoadComplete = MutableStateFlow(false)
+    val isInitialLoadComplete = MutableStateFlow(false)
 
     private val quickPicksEnum = context.dataStore.data.map {
         it[QuickPicksKey].toEnum(QuickPicks.QUICK_PICKS)
@@ -235,6 +235,7 @@ class HomeViewModel @Inject constructor(
                     keepListening.value = (keepListeningSongs + keepListeningAlbums + keepListeningArtists).shuffled()
                 }
 
+                /* Eliminado de forma segura: Carga de YouTube Home
                 launch {
                         YouTube.home().onSuccess { page ->
                         homePage.value = page.copy(
@@ -245,6 +246,7 @@ class HomeViewModel @Inject constructor(
                         )
                     }.onFailure { reportException(it) }
                 }
+                */
 
                 launch {
                     YouTube.explore().onSuccess { page ->

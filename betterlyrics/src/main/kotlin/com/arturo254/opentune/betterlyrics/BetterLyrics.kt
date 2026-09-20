@@ -169,8 +169,7 @@ object BetterLyrics {
             title = title,
             album = album,
             durationSeconds = durationSeconds,
-        )
-            ?: throw IllegalStateException("Lyrics unavailable")
+        ) ?: ""
         ttml
     }
 

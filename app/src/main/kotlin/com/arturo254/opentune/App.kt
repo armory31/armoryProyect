@@ -197,7 +197,10 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
                     YouTube.poTokenGvs = prefs[PoTokenGvsKey]?.takeIf { it.isNotBlank() }
                     YouTube.poTokenPlayer = prefs[PoTokenPlayerKey]?.takeIf { it.isNotBlank() }
                     
-                    YTPlayerUtils.initScores(prefs[YouTubeClientScoresKey])
+                    val scoresJson = prefs[YouTubeClientScoresKey]
+                    if (scoresJson != null) {
+                        YTPlayerUtils.initScores(scoresJson)
+                    }
 
                     _isInitialized.value = true
                 }

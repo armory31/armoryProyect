@@ -89,9 +89,7 @@ object SimpMusicLyrics {
             tracks.firstOrNull()
         }
 
-        val lyrics = bestMatch?.syncedLyrics ?: bestMatch?.plainLyrics
-            ?: throw IllegalStateException("Lyrics unavailable")
-        
+        val lyrics = bestMatch?.syncedLyrics ?: bestMatch?.plainLyrics ?: ""
         lyrics
     }
 

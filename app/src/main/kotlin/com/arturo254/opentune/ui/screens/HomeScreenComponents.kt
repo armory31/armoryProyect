@@ -748,20 +748,28 @@ fun HomePageSectionContent(
 }
 
 /**
+ * Cuadrado estático gris para representar una canción vacía
+ */
+@Composable
+fun StaticItemPlaceholder(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(Color.DarkGray.copy(alpha = 0.3f), RoundedCornerShape(ThumbnailCornerRadius))
+    )
+}
+
+/**
  * Loading shimmer for home page sections
  */
 @Composable
 fun HomeLoadingShimmer(modifier: Modifier = Modifier) {
-    ShimmerHost(modifier = modifier) {
-        TextPlaceholder(
-            height = 36.dp,
-            modifier = Modifier
-                .padding(12.dp)
-                .width(250.dp),
-        )
-        LazyRow {
-            items(4) {
-                GridItemPlaceHolder()
+    Column(modifier = modifier.padding(16.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            repeat(5) {
+                StaticItemPlaceholder(
+                    modifier = Modifier
+                        .size(120.dp)
+                )
             }
         }
     }
@@ -942,7 +950,7 @@ fun AccountPlaylistsTitle(
     modifier: Modifier = Modifier
 ) {
     NavigationTitle(
-        label = stringResource(R.string.your_youtube_playlists),
+        label = "Tus playlists de YouTube",
         title = accountName,
         thumbnail = {
             if (accountImageUrl != null) {
@@ -984,7 +992,7 @@ fun SimilarRecommendationsTitle(
     modifier: Modifier = Modifier
 ) {
     NavigationTitle(
-        label = stringResource(R.string.similar_to),
+        label = "Similar a",
         title = recommendation.title.title,
         thumbnail = recommendation.title.thumbnailUrl?.let { thumbnailUrl ->
             {
@@ -1065,18 +1073,18 @@ fun LazyListScope.AccountPlaylistsContainer(
         val accountPlaylists by viewModel.accountPlaylists.collectAsState()
         val allItemsMetadata by viewModel.allItemsMetadata.collectAsState()
         
-        // Check if list is not null and not empty
-        val currentPlaylists = accountPlaylists
-        if (!currentPlaylists.isNullOrEmpty()) {
-            Column {
-                 AccountPlaylistsTitle(
-                    accountName = accountName ?: "",
-                    accountImageUrl = accountImageUrl,
-                    onClick = { navController.navigate("account") },
-                    modifier = Modifier
-                )
+        Column {
+             AccountPlaylistsTitle(
+                accountName = accountName ?: "",
+                accountImageUrl = accountImageUrl,
+                onClick = { navController.navigate("account") },
+                modifier = Modifier.padding(top = 24.dp)
+            )
+            if (accountPlaylists.isNullOrEmpty()) {
+                HomeLoadingShimmer()
+            } else {
                 AccountPlaylistsSection(
-                    accountPlaylists = currentPlaylists,
+                    accountPlaylists = accountPlaylists!!,
                     accountName = accountName ?: "",
                     accountImageUrl = accountImageUrl,
                     mediaMetadata = mediaMetadata,
@@ -1109,23 +1117,31 @@ fun LazyListScope.SimilarRecommendationsContainer(
         val allItemsMetadata by viewModel.allItemsMetadata.collectAsState()
         
         Column {
-            similarRecommendations?.forEach { recommendation ->
-                SimilarRecommendationsTitle(
-                    recommendation = recommendation,
-                    navController = navController,
-                    modifier = Modifier
+            if (similarRecommendations == null) {
+                NavigationTitle(
+                    title = stringResource(R.string.similar_to),
+                    modifier = Modifier.padding(top = 24.dp)
                 )
-                SimilarRecommendationsSection(
-                    recommendation = recommendation,
-                    mediaMetadata = mediaMetadata,
-                    isPlaying = isPlaying,
-                    navController = navController,
-                    playerConnection = playerConnection,
-                    menuState = menuState,
-                    haptic = haptic,
-                    scope = scope,
-                    metadataMap = allItemsMetadata
-                )
+                HomeLoadingShimmer()
+            } else {
+                similarRecommendations?.forEach { recommendation ->
+                    SimilarRecommendationsTitle(
+                        recommendation = recommendation,
+                        navController = navController,
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
+                    SimilarRecommendationsSection(
+                        recommendation = recommendation,
+                        mediaMetadata = mediaMetadata,
+                        isPlaying = isPlaying,
+                        navController = navController,
+                        playerConnection = playerConnection,
+                        menuState = menuState,
+                        haptic = haptic,
+                        scope = scope,
+                        metadataMap = allItemsMetadata
+                    )
+                }
             }
         }
     }

@@ -70,8 +70,12 @@ import androidx.compose.runtime.getValue
 @Composable
 fun HomeScreen(
     navController: NavController,
+    onVisible: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    LaunchedEffect(Unit) {
+        onVisible()
+    }
     val menuState = LocalMenuState.current
     val bottomSheetPageState = LocalBottomSheetPageState.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -90,8 +94,15 @@ fun HomeScreen(
     val selectedChip by viewModel.selectedChip.collectAsState()
 
     val isLoading: Boolean by viewModel.isLoading.collectAsState()
+    val isInitialLoadComplete by viewModel.isInitialLoadComplete.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
+
+    LaunchedEffect(isInitialLoadComplete) {
+        if (isInitialLoadComplete) {
+            onVisible()
+        }
+    }
 
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
@@ -190,15 +201,111 @@ fun HomeScreen(
                 LazyColumn(
                     state = lazylistState,
                     modifier = Modifier.fillMaxSize(),
-                    // Un margen sutil de 90.dp abajo asegura que la última canción
-                    // de la lista se pueda scrollear y no quede tapada por la barra flotante global
                     contentPadding = PaddingValues(bottom = 90.dp)
                 ) {
-                    if (isLoading) {
-                        item {
-                            HomeLoadingShimmer(modifier = Modifier.animateItem())
+                    // 1. Selecciones rápidas (Quick Picks)
+                    item {
+                        NavigationTitle(
+                            title = "Selecciones rápidas",
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        if (quickPicks.isNullOrEmpty()) {
+                            HomeLoadingShimmer()
+                        } else {
+                            QuickPicksSection(
+                                quickPicks = quickPicks!!,
+                                mediaMetadata = mediaMetadata,
+                                isPlaying = isPlaying,
+                                navController = navController,
+                                playerConnection = playerConnection,
+                                menuState = menuState,
+                                haptic = haptic,
+                                metadataMap = allItemsMetadata
+                            )
                         }
                     }
+
+                    // 2. Marcado rápido (Speed Dial)
+                    item {
+                        NavigationTitle(
+                            title = "Marcado rápido",
+                            modifier = Modifier.padding(top = 24.dp)
+                        )
+                        if (speedDialSongs.isEmpty()) {
+                             HomeLoadingShimmer()
+                        } else {
+                            SpeedDialSection(
+                                speedDialSongs = speedDialSongs,
+                                mediaMetadata = mediaMetadata,
+                                isPlaying = isPlaying,
+                                navController = navController,
+                                playerConnection = playerConnection,
+                                menuState = menuState,
+                                haptic = haptic,
+                                metadataMap = allItemsMetadata
+                            )
+                        }
+                    }
+
+                    // 3. Sigue escuchando (Keep Listening)
+                    item {
+                        NavigationTitle(
+                            title = "Sigue escuchando",
+                            modifier = Modifier.padding(top = 24.dp)
+                        )
+                        if (keepListening.isNullOrEmpty()) {
+                             HomeLoadingShimmer()
+                        } else {
+                            KeepListeningSection(
+                                keepListening = keepListening!!,
+                                mediaMetadata = mediaMetadata,
+                                isPlaying = isPlaying,
+                                navController = navController,
+                                playerConnection = playerConnection,
+                                menuState = menuState,
+                                haptic = haptic,
+                                scope = scope,
+                                metadataMap = allItemsMetadata
+                            )
+                        }
+                    }
+
+                    // 4. Tus favoritos del pasado (Forgotten Favorites)
+                    item {
+                        NavigationTitle(
+                            title = "Tus favoritos del pasado",
+                            modifier = Modifier.padding(top = 24.dp)
+                        )
+                        if (forgottenFavorites.isNullOrEmpty()) {
+                            HomeLoadingShimmer()
+                        } else {
+                            ForgottenFavoritesSection(
+                                forgottenFavorites = forgottenFavorites!!,
+                                mediaMetadata = mediaMetadata,
+                                isPlaying = isPlaying,
+                                horizontalLazyGridItemWidth = horizontalLazyGridItemWidth,
+                                lazyGridState = forgottenFavoritesLazyGridState,
+                                snapLayoutInfoProvider = forgottenFavoritesSnapLayoutInfoProvider,
+                                navController = navController,
+                                playerConnection = playerConnection,
+                                menuState = menuState,
+                                haptic = haptic,
+                                metadataMap = allItemsMetadata
+                            )
+                        }
+                    }
+
+                    // 6. Recomendaciones Similares (Similar to...)
+                    SimilarRecommendationsContainer(
+                        viewModel = viewModel,
+                        mediaMetadata = mediaMetadata,
+                        isPlaying = isPlaying,
+                        navController = navController,
+                        playerConnection = playerConnection,
+                        menuState = menuState,
+                        haptic = haptic,
+                        scope = scope
+                    )
                 }
 
                 Indicator(

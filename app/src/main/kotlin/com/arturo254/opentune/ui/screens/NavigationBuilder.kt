@@ -88,9 +88,10 @@ fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
     scrollBehavior: TopAppBarScrollBehavior,
     latestVersionName: String,
+    onHomeVisible: () -> Unit = {},
 ) {
     composable(Screens.Home.route) {
-        HomeScreen(navController)
+        HomeScreen(navController, onVisible = onHomeVisible)
     }
     composable(Screens.Explore.route) {
         ExploreScreen(navController)

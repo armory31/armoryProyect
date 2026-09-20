@@ -127,6 +127,7 @@ import com.arturo254.opentune.constants.DefaultOpenTabKey
 import com.arturo254.opentune.constants.DisableScreenshotKey
 import com.arturo254.opentune.constants.HasPressedStarKey
 import com.arturo254.opentune.constants.LaunchCountKey
+import com.arturo254.opentune.constants.LastNotifiedVersionKey
 import com.arturo254.opentune.constants.LyricsSyncOffsetKey
 import com.arturo254.opentune.constants.MiniPlayerLastAnchorKey
 import com.arturo254.opentune.constants.PureBlackKey
@@ -330,6 +331,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
+        startMusicServiceSafely()
         super.onCreate(savedInstanceState)
         
         var isLoginChecked by mutableStateOf(false)
@@ -342,7 +344,9 @@ class MainActivity : ComponentActivity() {
         session = SessionManager(this)
         
         lifecycleScope.launch {
-            val hasSession = session.isLoggedIn() && armoryAuthManager.isLoggedIn.first()
+            // Se confía en la sesión local para un inicio instantáneo. 
+            // El backup detectará si el token de Firebase ha caducado en segundo plano.
+            val hasSession = session.isLoggedIn()
             if (!hasSession) {
                 isRedirecting = true
                 session.logout()
@@ -411,28 +415,38 @@ class MainActivity : ComponentActivity() {
 
             var isUiReady by remember { mutableStateOf(false) }
 
-            LaunchedEffect(Unit) {
-                delay(800) // Reduced delay as we now have Baseline Profiles and Splash Screen hold
-                isUiReady = true
-                isMainActivityReady.value = true
-                lifecycleScope.launch(Dispatchers.IO) {
-                    syncManager.schedulePeriodicSync(this@MainActivity)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    ContextCompat.checkSelfPermission(
-                        this@MainActivity,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
+            val lastNotifiedVersion by rememberPreference(LastNotifiedVersionKey, defaultValue = "")
 
-                if (System.currentTimeMillis() - Updater.lastCheckTime > 1.days.inWholeMilliseconds) {
-                    Updater.getLatestVersionName().onSuccess {
-                        latestVersionName = it
+            LaunchedEffect(lastNotifiedVersion) {
+                if (lastNotifiedVersion.isNotBlank() && !Updater.isSameVersion(lastNotifiedVersion, BuildConfig.VERSION_NAME)) {
+                    latestVersionName = lastNotifiedVersion
+                }
+            }
+
+            // El logo de carga solo se irá cuando la pantalla confirme que ha cargado los datos iniciales.
+            val onHomeVisible = remember {
+                {
+                    if (!isUiReady) {
+                        isUiReady = true
+                        isMainActivityReady.value = true
+                        
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            syncManager.schedulePeriodicSync(this@MainActivity)
+                            UpdateNotificationManager.schedulePeriodicUpdateCheck(this@MainActivity)
+                        }
+
+                        lifecycleScope.launch {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(
+                                    this@MainActivity,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
                     }
                 }
-                UpdateNotificationManager.checkForUpdates(this@MainActivity)
             }
 
             // Use remembered instances so the same state object is used everywhere
@@ -778,7 +792,7 @@ class MainActivity : ComponentActivity() {
                         } else {
                             if (!isYearInMusicScreen) {
                                 when (savedMiniPlayerAnchor) {
-                                    EXPANDED_ANCHOR -> playerBottomSheetState.expandSoft()
+                                    EXPANDED_ANCHOR, COLLAPSED_ANCHOR -> playerBottomSheetState.collapseSoft()
                                     else -> playerBottomSheetState.dismiss()
                                 }
                             }
@@ -1033,7 +1047,8 @@ class MainActivity : ComponentActivity() {
                                         navigationBuilder(
                                             navController,
                                             topAppBarScrollBehavior,
-                                            latestVersionName
+                                            latestVersionName,
+                                            onHomeVisible = onHomeVisible
                                         )
                                     }
                                 }

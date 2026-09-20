@@ -74,7 +74,7 @@ object KuGou {
                 Base64.Default.decode(
                     downloadLyrics(candidate.id, candidate.accesskey).content
                 ).decodeToString().normalize()
-            } ?: throw IllegalStateException("No lyrics candidate")
+            } ?: ""
         }
 
     suspend fun getAllPossibleLyricsOptions(

@@ -25,6 +25,7 @@ import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.utils.NetworkConnectivityObserver
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.reportException
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 /**

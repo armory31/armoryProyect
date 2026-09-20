@@ -113,15 +113,18 @@ object YTPlayerUtils {
         put(MAIN_CLIENT.clientName, 10)
     }
 
+    private var lastInitJson: String? = null
+
     fun initScores(json: String?) {
-        if (json.isNullOrBlank()) return
+        if (json.isNullOrBlank() || json == lastInitJson) return
+        lastInitJson = json
         try {
             val scores = json.split(",").associate {
                 val (name, score) = it.split(":")
                 name to score.toInt()
             }
             clientScores.putAll(scores)
-            Timber.tag(logTag).d("Initialized scores from persistent storage: $clientScores")
+            Timber.tag(logTag).d("Initialized scores from persistent storage (RAM Cache updated): $clientScores")
         } catch (e: Exception) {
             Timber.tag(logTag).e(e, "Failed to parse client scores")
         }
@@ -133,13 +136,20 @@ object YTPlayerUtils {
 
     private fun updateClientScore(clientName: String, delta: Int) {
         val current = clientScores[clientName] ?: 10
-        clientScores[clientName] = (current + delta).coerceIn(0, 20)
-        Timber.tag(logTag).d("Updated score for $clientName: ${clientScores[clientName]} (delta: $delta)")
+        val newValue = (current + delta).coerceIn(0, 20)
+        if (current == newValue) return
+
+        clientScores[clientName] = newValue
+        Timber.tag(logTag).d("Updated score for $clientName: $newValue (delta: $delta)")
         
+        // Mantener lastInitJson sincronizado para evitar re-inits inútiles desde App.kt
+        val newJson = getScoresAsJson()
+        lastInitJson = newJson
+
         // Notify app to save scores
         CoroutineScope(Dispatchers.IO).launch {
             App.instance.dataStore.edit { settings ->
-                settings[YouTubeClientScoresKey] = getScoresAsJson()
+                settings[YouTubeClientScoresKey] = newJson
             }
         }
     }
@@ -322,8 +332,8 @@ object YTPlayerUtils {
             streamExpiresInSeconds = null
             streamPlayerResponse = null
 
-            Timber.tag(logTag).v(
-                "Trying ${if (client == MAIN_CLIENT) "MAIN_CLIENT" else "fallback client"} ${index + 1}/${streamClients.size}: ${client.clientName}"
+            Timber.tag("YT_PING").i(
+                "[AUDIT] Attempting playback with client: ${client.clientName} (Attempt ${index + 1}/${streamClients.size}, Score: ${clientScores[client.clientName] ?: 10})"
             )
 
             if (client != MAIN_CLIENT && client.loginRequired && !isLoggedIn) {

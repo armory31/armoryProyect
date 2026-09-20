@@ -80,9 +80,9 @@ object LrcLib {
         }
 
         if (res != null) {
-            return@runCatching res.text
+            res.text
         } else {
-            throw IllegalStateException("Lyrics unavailable")
+            "" // Silently return empty if not found
         }
     }
 

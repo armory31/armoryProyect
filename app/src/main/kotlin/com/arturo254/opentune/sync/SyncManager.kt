@@ -256,23 +256,12 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun syncLibrary() = withContext(Dispatchers.IO) {
-        val uid = authManager.currentUserUid.first() ?: return@withContext
-        val db = getFirestore()
-        val userDocRef = db.collection("users").document(uid)
-
         try {
-            val snapshot = userDocRef.get().await()
-            val library = snapshot.toObject(UserLibraryDto::class.java)
-
-            if (library?.metadata?.migratedToAtomic == true) {
-                Timber.i("SyncManager: Atomic sync started")
-                applyLibraryToLocal(library)
-            } else {
-                pushLibraryToCloud(isMigration = true)
-            }
+            Timber.i("SyncManager: Background backup started (Cloud is backup only)")
+            pushLibraryToCloud(isMigration = false)
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                Timber.e(e, "SyncManager: Critical error in syncLibrary")
+                Timber.e(e, "SyncManager: Critical error in background backup")
             }
         }
     }
