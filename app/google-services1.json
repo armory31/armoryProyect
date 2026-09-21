@@ -1,0 +1,48 @@
+ {
+  "project_info": {
+    "project_number": "389161873726",
+    "project_id": "armory-19193",
+    "storage_bucket": "armory-19193.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389161873726:android:f10c59f58b9068b3e23c6f",
+        "android_client_info": {
+          "package_name": "com.Arturo254.opentune"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUw3VUaddZPfkZzm608agxWhXD5iIJ0MU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389161873726:android:f10c59f58b9068b3e23c6f",
+        "android_client_info": {
+          "package_name": "com.Arturo254.opentune.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUw3VUaddZPfkZzm608agxWhXD5iIJ0MU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

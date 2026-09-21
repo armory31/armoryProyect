@@ -1,40 +1,57 @@
 package com.arturo254.opentune
 
-import android.content.Intent
-import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
+import android.util.Patterns
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.arturo254.opentune.utils.SessionManager
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.arturo254.opentune.sync.ArmoryAuthManager
+import com.arturo254.opentune.ui.theme.ArmoryTheme
+import com.arturo254.opentune.utils.SessionManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : ComponentActivity() {
 
     private lateinit var session: SessionManager
 
     @Inject
     lateinit var armoryAuthManager: ArmoryAuthManager
-
-    private var auth: FirebaseAuth? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -45,6 +62,12 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         session = SessionManager(this)
 
+        // PASO 4: ARRANQUE FLASH. Prioridad absoluta al salto si ya hay sesión local.
+        if (session.isLoggedIn()) {
+            goToMain()
+            return
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -52,137 +75,265 @@ class LoginActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            auth = armoryAuthManager.getFirebaseAuth()
-        }
-
-        if (session.isLoggedIn()) {
-             showBetaDialog()
-             return
-        }
-
-        setContentView(R.layout.activity_login)
-
-        val etEmail     = findViewById<EditText>(R.id.etEmail)
-        val etPassword  = findViewById<EditText>(R.id.etPassword)
-        val etNombre    = findViewById<EditText>(R.id.etNombre)
-        val btnLogin    = findViewById<Button>(R.id.btnLogin)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
-        val tvModo      = findViewById<TextView>(R.id.tvModo)
-        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
-
-        var isRegisterMode = false
-
-        tvModo.setOnClickListener {
-            isRegisterMode = !isRegisterMode
-            etNombre.visibility    = if (isRegisterMode) View.VISIBLE else View.GONE
-            btnLogin.visibility    = if (isRegisterMode) View.GONE    else View.VISIBLE
-            btnRegister.visibility = if (isRegisterMode) View.VISIBLE else View.GONE
-            tvModo.text = if (isRegisterMode)
-                "¿Ya tienes cuenta? Inicia sesión"
-            else
-                "¿No tienes cuenta? Regístrate"
-        }
-
-        btnLogin.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val pass  = etPassword.text.toString()
-            if (!validar(email, pass)) return@setOnClickListener
-
-            progressBar.visibility = View.VISIBLE
-            btnLogin.isEnabled = false
-
-            auth?.signInWithEmailAndPassword(email, pass)
-                ?.addOnCompleteListener(this) { task ->
-                    progressBar.visibility = View.GONE
-                    btnLogin.isEnabled = true
-
-                    if (task.isSuccessful) {
-                        val user = auth?.currentUser
-                        user?.reload()?.addOnCompleteListener {
-                            if (user != null && user.isEmailVerified) {
-                                lifecycleScope.launch {
-                                    armoryAuthManager.saveAccountInfo(email, user.uid)
-                                    session.saveSession(email, user.displayName ?: "Usuario", user.uid)
-                                    // Give a small delay for Firebase Auth state to propagate
-                                    kotlinx.coroutines.delay(500)
-                                    showBetaDialog()
-                                }
-                            } else {
-                                AlertDialog.Builder(this)
-                                    .setTitle("✉️ Cuenta no verificada")
-                                    .setMessage("Para entrar en ARMORY primero debes confirmar tu correo.\n\nBusca el mensaje que te enviamos al registrarte (mira en SPAM si no lo ves).")
-                                    .setPositiveButton("Entendido", null)
-                                    .show()
-                                auth?.signOut()
-                            }
-                        }
-                    } else {
-                        Toast.makeText(baseContext, "Error al iniciar sesión: ${task.exception?.message}",
-                            Toast.LENGTH_SHORT).show()
-                    }
-                }
-        }
-
-        btnRegister.setOnClickListener {
-            val email  = etEmail.text.toString().trim()
-            val pass   = etPassword.text.toString()
-            val nombre = etNombre.text.toString().trim()
-            if (!validar(email, pass, nombre)) return@setOnClickListener
-
-            progressBar.visibility = View.VISIBLE
-            btnRegister.isEnabled = false
-
-            auth?.createUserWithEmailAndPassword(email, pass)
-                ?.addOnCompleteListener(this) { task ->
-                    progressBar.visibility = View.GONE
-                    btnRegister.isEnabled = true
-
-                    if (task.isSuccessful) {
-                        val user = auth?.currentUser
-                        val profileUpdates = UserProfileChangeRequest.Builder()
-                            .setDisplayName(nombre)
-                            .build()
-
-                        user?.updateProfile(profileUpdates)?.addOnCompleteListener {
-                            user.sendEmailVerification().addOnCompleteListener { verifyTask ->
-                                if (verifyTask.isSuccessful) {
-                                    AlertDialog.Builder(this)
-                                        .setTitle("✅ ¡Correo enviado!")
-                                        .setMessage("Hemos enviado un enlace de confirmación a:\n$email\n\nSi no lo recibes en unos minutos, revisa tu carpeta de CORREO NO DESEADO o SPAM.")
-                                        .setPositiveButton("Vale, lo miraré") { _, _ ->
-                                            isRegisterMode = false
-                                            etNombre.visibility = View.GONE
-                                            btnRegister.visibility = View.GONE
-                                            btnLogin.visibility = View.VISIBLE
-                                            tvModo.text = "¿No tienes cuenta? Regístrate"
-                                            etPassword.text.clear()
-                                        }
-                                        .setCancelable(false)
-                                        .show()
+            val auth = armoryAuthManager.getFirebaseAuth()
+            
+            setContent {
+                ArmoryTheme {
+                    var showBetaDialog by remember { mutableStateOf(false) }
+                    
+                    if (showBetaDialog) {
+                        AlertDialog(
+                            onDismissRequest = { },
+                            title = { Text("🚀 Versión Beta") },
+                            text = { Text("ARMORY está en fase de desarrollo y puede contener fallos. ¡Gracias por probar la aplicación!") },
+                            confirmButton = {
+                                TextButton(onClick = { 
+                                    showBetaDialog = false
+                                    goToMain()
+                                }) {
+                                    Text("Entendido")
                                 }
                             }
-                        }
-                    } else {
-                        Toast.makeText(baseContext, "Error al registrar: ${task.exception?.message}",
-                            Toast.LENGTH_LONG).show()
+                        )
                     }
+
+                    LoginScreen(
+                        auth = auth,
+                        onLoginSuccess = { email, user ->
+                            lifecycleScope.launch {
+                                armoryAuthManager.saveAccountInfo(email, user.uid)
+                                session.saveSession(email, user.displayName ?: "Usuario", user.uid)
+                                delay(500)
+                                showBetaDialog = true
+                            }
+                        }
+                    )
                 }
+            }
         }
     }
 
-    private fun showBetaDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("🚀 Versión Beta")
-            .setMessage("ARMORY está en fase de desarrollo y puede contener fallos. ¡Gracias por probar la aplicación!")
-            .setCancelable(false)
-            .setPositiveButton("Entendido") { _, _ ->
-                goToMain()
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun LoginScreen(
+        auth: FirebaseAuth,
+        onLoginSuccess: (String, FirebaseUser) -> Unit
+    ) {
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var name by remember { mutableStateOf("") }
+        var isRegisterMode by remember { mutableStateOf(false) }
+        var isLoading by remember { mutableStateOf(false) }
+        var passwordVisible by remember { mutableStateOf(false) }
+        
+        var showVerificationDialog by remember { mutableStateOf(false) }
+        var showNotVerifiedDialog by remember { mutableStateOf(false) }
+
+        val scrollState = rememberScrollState()
+
+        if (showVerificationDialog) {
+            AlertDialog(
+                onDismissRequest = { showVerificationDialog = false },
+                title = { Text("✅ ¡Correo enviado!") },
+                text = { Text("Hemos enviado un enlace de confirmación a:\n$email\n\nSi no lo recibes en unos minutos, revisa tu carpeta de CORREO NO DESEADO o SPAM.") },
+                confirmButton = {
+                    TextButton(onClick = { 
+                        showVerificationDialog = false
+                        isRegisterMode = false
+                        password = ""
+                    }) {
+                        Text("Vale, lo miraré")
+                    }
+                }
+            )
+        }
+
+        if (showNotVerifiedDialog) {
+            AlertDialog(
+                onDismissRequest = { showNotVerifiedDialog = false },
+                title = { Text("✉️ Cuenta no verificada") },
+                text = { Text("Para entrar en ARMORY primero debes confirmar tu correo.\n\nBusca el mensaje que te enviamos al registrarte (mira en SPAM si no lo ves).") },
+                confirmButton = {
+                    TextButton(onClick = { 
+                        showNotVerifiedDialog = false
+                        auth.signOut()
+                    }) {
+                        Text("Entendido")
+                    }
+                }
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 32.dp, vertical = 64.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Box(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(2.dp)
+                    .background(ArmoryColors.Gold1)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "ARMORY",
+                color = ArmoryColors.Gold1,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.3.sp
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            if (isRegisterMode) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Tu nombre", color = Color(0xFF555555)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = ArmoryColors.Gold1,
+                        unfocusedBorderColor = Color(0xFF333333),
+                        focusedTextColor = Color(0xFFE8E8E8),
+                        unfocusedTextColor = Color(0xFFE8E8E8)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            .show()
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("tu@email.com", color = Color(0xFF555555)) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = ArmoryColors.Gold1,
+                    unfocusedBorderColor = Color(0xFF333333),
+                    focusedTextColor = Color(0xFFE8E8E8),
+                    unfocusedTextColor = Color(0xFFE8E8E8)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Contraseña", color = Color(0xFF555555)) },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(image, contentDescription = null, tint = ArmoryColors.Gold1)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = ArmoryColors.Gold1,
+                    unfocusedBorderColor = Color(0xFF333333),
+                    focusedTextColor = Color(0xFFE8E8E8),
+                    unfocusedTextColor = Color(0xFFE8E8E8)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            if (isLoading) {
+                CircularProgressIndicator(color = ArmoryColors.Gold1)
+                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                Button(
+                    onClick = {
+                        if (isRegisterMode) {
+                            if (validar(email, password, name)) {
+                                isLoading = true
+                                auth.createUserWithEmailAndPassword(email, password)
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            val user = auth.currentUser
+                                            val profileUpdates = UserProfileChangeRequest.Builder()
+                                                .setDisplayName(name)
+                                                .build()
+                                            user?.updateProfile(profileUpdates)?.addOnCompleteListener {
+                                                user.sendEmailVerification().addOnCompleteListener { verifyTask ->
+                                                    isLoading = false
+                                                    if (verifyTask.isSuccessful) {
+                                                        showVerificationDialog = true
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            isLoading = false
+                                            Toast.makeText(this@LoginActivity, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                            }
+                        } else {
+                            if (validar(email, password)) {
+                                isLoading = true
+                                auth.signInWithEmailAndPassword(email, password)
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            val user = auth.currentUser
+                                            user?.reload()?.addOnCompleteListener {
+                                                if (user != null && user.isEmailVerified) {
+                                                    onLoginSuccess(email, user)
+                                                } else {
+                                                    isLoading = false
+                                                    showNotVerifiedDialog = true
+                                                }
+                                            }
+                                        } else {
+                                            isLoading = false
+                                            Toast.makeText(this@LoginActivity, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isRegisterMode) Color(0xFF1E1E1E) else ArmoryColors.Gold1,
+                        contentColor = if (isRegisterMode) ArmoryColors.Gold1 else Color.Black
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = if (isRegisterMode) "CREAR CUENTA" else "ENTRAR",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = if (isRegisterMode) "¿Ya tienes cuenta? Inicia sesión" else "¿No tienes cuenta? Regístrate",
+                color = Color(0xFF6B6B6B),
+                fontSize = 13.sp,
+                modifier = Modifier.clickable { isRegisterMode = !isRegisterMode }
+            )
+        }
     }
 
     private fun validar(email: String, pass: String, nombre: String = "ok"): Boolean {
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Email no válido", Toast.LENGTH_SHORT).show()
             return false
         }

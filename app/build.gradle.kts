@@ -287,8 +287,6 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.profileinstaller)
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.core:core-splashscreen:1.2.0")
     implementation(project.dependencies.platform(libs.firebase.bom))
     implementation(libs.firebase.auth)

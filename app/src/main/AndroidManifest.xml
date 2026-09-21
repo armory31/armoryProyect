@@ -45,7 +45,7 @@
         <activity
             android:name="com.arturo254.opentune.LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.OpenTune.Login">
+            android:theme="@style/Theme.OpenTune">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
