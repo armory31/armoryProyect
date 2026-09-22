@@ -36,8 +36,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,7 +52,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -73,9 +73,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -115,17 +115,17 @@ import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
+import com.arturo254.opentune.R
+import com.arturo254.opentune.shazamkit.Shazam
+import com.arturo254.opentune.shazamkit.ShazamSignatureGenerator
+import com.arturo254.opentune.shazamkit.models.RecognitionResult
+import com.arturo254.opentune.ui.utils.appBarScrollBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.arturo254.opentune.R
-import com.arturo254.opentune.shazamkit.Shazam
-import com.arturo254.opentune.shazamkit.ShazamSignatureGenerator
-import com.arturo254.opentune.shazamkit.models.RecognitionResult
-import com.arturo254.opentune.ui.utils.appBarScrollBehavior
 
 @SuppressLint("LocalContextGetResourceValueCall", "UnrememberedGetBackStackEntry")
 @OptIn(ExperimentalMaterial3Api::class)

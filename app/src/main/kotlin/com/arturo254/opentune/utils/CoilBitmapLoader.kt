@@ -11,7 +11,6 @@
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.arturo254.opentune.utils.reportException
 import android.net.Uri
 import androidx.core.graphics.createBitmap
 import androidx.media3.common.util.BitmapLoader
@@ -21,10 +20,10 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
-import kotlinx.coroutines.delay
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.guava.future
 import kotlin.math.roundToInt
 
@@ -65,9 +64,7 @@ class CoilBitmapLoader(
                         .size(maxIconSizePx, maxIconSizePx)
                         .build()
 
-                    val result = context.imageLoader.execute(request)
-
-                    when (result) {
+                    when (val result = context.imageLoader.execute(request)) {
                         is SuccessResult -> {
                             try {
                                 val bitmap = result.image.toBitmap()

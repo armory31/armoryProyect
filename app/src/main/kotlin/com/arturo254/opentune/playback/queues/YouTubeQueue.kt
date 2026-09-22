@@ -9,9 +9,9 @@
 package com.arturo254.opentune.playback.queues
 
 import androidx.media3.common.MediaItem
+import com.arturo254.opentune.extensions.toMediaItem
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.WatchEndpoint
-import com.arturo254.opentune.extensions.toMediaItem
 import com.arturo254.opentune.models.MediaMetadata
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext

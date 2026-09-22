@@ -8,12 +8,15 @@
 
 package com.arturo254.opentune.extensions
 
+import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.models.PersistQueue
 import com.arturo254.opentune.models.QueueData
 import com.arturo254.opentune.models.QueueType
-import com.arturo254.opentune.models.MediaMetadata
-import com.arturo254.opentune.playback.queues.*
-import com.arturo254.opentune.db.entities.AlbumEntity
+import com.arturo254.opentune.playback.queues.ListQueue
+import com.arturo254.opentune.playback.queues.LocalAlbumRadio
+import com.arturo254.opentune.playback.queues.Queue
+import com.arturo254.opentune.playback.queues.YouTubeAlbumRadio
+import com.arturo254.opentune.playback.queues.YouTubeQueue
 
 fun Queue.toPersistQueue(
     title: String?,

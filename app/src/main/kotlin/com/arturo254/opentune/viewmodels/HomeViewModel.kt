@@ -11,40 +11,48 @@ package com.arturo254.opentune.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.PlaylistItem
-import com.arturo254.opentune.innertube.models.WatchEndpoint
-import com.arturo254.opentune.innertube.models.YTItem
-
-import com.arturo254.opentune.innertube.models.filterVideo
-import com.arturo254.opentune.innertube.pages.ExplorePage
-import com.arturo254.opentune.innertube.pages.HomePage
-import com.arturo254.opentune.innertube.utils.completed
-import com.arturo254.opentune.innertube.utils.parseCookieString
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.constants.InnerTubeCookieKey
+import com.arturo254.opentune.constants.PlaylistSortType
 import com.arturo254.opentune.constants.QuickPicks
 import com.arturo254.opentune.constants.QuickPicksKey
 import com.arturo254.opentune.constants.SpeedDialSongIdsKey
 import com.arturo254.opentune.constants.YtmSyncKey
 import com.arturo254.opentune.db.MusicDatabase
-import com.arturo254.opentune.db.entities.*
+import com.arturo254.opentune.db.entities.Album
+import com.arturo254.opentune.db.entities.LocalItem
+import com.arturo254.opentune.db.entities.Playlist
+import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.extensions.toEnum
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.models.PlaylistItem
+import com.arturo254.opentune.innertube.models.WatchEndpoint
+import com.arturo254.opentune.innertube.models.YTItem
+import com.arturo254.opentune.innertube.models.filterVideo
+import com.arturo254.opentune.innertube.pages.ExplorePage
+import com.arturo254.opentune.innertube.pages.HomePage
+import com.arturo254.opentune.innertube.utils.completed
+import com.arturo254.opentune.innertube.utils.parseCookieString
 import com.arturo254.opentune.models.ItemMetadata
 import com.arturo254.opentune.models.SimilarRecommendation
 import com.arturo254.opentune.playback.DownloadUtil
+import com.arturo254.opentune.sync.LibraryStateHolder
+import com.arturo254.opentune.utils.SyncUtils
 import com.arturo254.opentune.utils.dataStore
-import com.arturo254.opentune.constants.PlaylistSortType
 import com.arturo254.opentune.utils.get
 import com.arturo254.opentune.utils.getAsync
-import com.arturo254.opentune.utils.SyncUtils
 import com.arturo254.opentune.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import com.arturo254.opentune.sync.LibraryStateHolder
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import timber.log.Timber
@@ -417,7 +425,7 @@ class HomeViewModel @Inject constructor(
                         accountName.value = info.name
                         accountImageUrl.value = info.thumbnailUrl
                     }.onFailure {
-                        timber.log.Timber.w(it, "Failed to fetch account info")
+                        Timber.w(it, "Failed to fetch account info")
                     }
 
                     launch {
@@ -425,7 +433,7 @@ class HomeViewModel @Inject constructor(
                             val lists = it.items.filterIsInstance<PlaylistItem>().filterNot { it.id == "SE" }
                             accountPlaylists.value = lists
                         }.onFailure {
-                            timber.log.Timber.w(it, "Failed to fetch playlists")
+                            Timber.w(it, "Failed to fetch playlists")
                         }
                     }
                 } else {
@@ -478,7 +486,7 @@ class HomeViewModel @Inject constructor(
                             try {
                                 YouTube.cookie = cookie
                             } catch (e: Exception) {
-                                timber.log.Timber.e(e, "Failed to set YouTube cookie")
+                                Timber.e(e, "Failed to set YouTube cookie")
                                 return@collect
                             }
 
@@ -502,10 +510,10 @@ class HomeViewModel @Inject constructor(
                                     accountName.value = info.name
                                     accountImageUrl.value = info.thumbnailUrl
                                 }.onFailure { e ->
-                                    timber.log.Timber.w(e, "Failed to fetch account info")
+                                    Timber.w(e, "Failed to fetch account info")
                                 }
                             } catch (e: Exception) {
-                                timber.log.Timber.e(e, "Exception fetching account info")
+                                Timber.e(e, "Exception fetching account info")
                             }
 
                             launch {
@@ -514,10 +522,10 @@ class HomeViewModel @Inject constructor(
                                         val lists = it.items.filterIsInstance<PlaylistItem>().filterNot { it.id == "SE" }
                                         accountPlaylists.value = lists
                                     }.onFailure { e ->
-                                        timber.log.Timber.w(e, "Failed to fetch account playlists")
+                                        Timber.w(e, "Failed to fetch account playlists")
                                     }
                                 } catch (e: Exception) {
-                                    timber.log.Timber.e(e, "Exception fetching account playlists")
+                                    Timber.e(e, "Exception fetching account playlists")
                                 }
                             }
                         } else {
@@ -526,7 +534,7 @@ class HomeViewModel @Inject constructor(
                             accountPlaylists.value = null
                         }
                     } catch (e: Exception) {
-                        timber.log.Timber.e(e, "Error processing cookie change")
+                        Timber.e(e, "Error processing cookie change")
                         accountName.value = "Guest"
                         accountImageUrl.value = null
                         accountPlaylists.value = null

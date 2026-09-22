@@ -8,10 +8,10 @@
 
 package com.arturo254.opentune.ui.player
 
-import androidx.activity.compose.BackHandler
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -54,12 +54,12 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -75,17 +75,18 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import androidx.navigation.NavController
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
+import com.arturo254.opentune.constants.AutoLoadMoreKey
 import com.arturo254.opentune.constants.ListItemHeight
 import com.arturo254.opentune.constants.PlayerDesignStyle
 import com.arturo254.opentune.constants.PlayerDesignStyleKey
 import com.arturo254.opentune.constants.QueueEditLockKey
-import com.arturo254.opentune.constants.AutoLoadMoreKey
 import com.arturo254.opentune.extensions.metadata
 import com.arturo254.opentune.extensions.move
 import com.arturo254.opentune.extensions.togglePlayPause
@@ -108,7 +109,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import androidx.datastore.preferences.core.booleanPreferencesKey
 
 
 @SuppressLint("UnrememberedMutableState", "LocalContextGetResourceValueCall", "StringFormatInvalid")
@@ -508,14 +508,12 @@ fun Queue(
                     if (!playerConnection.player.shuffleModeEnabled) {
                         playerConnection.player.moveMediaItem(safeFrom, safeTo)
                     } else {
-                        playerConnection.player.setShuffleOrder(
-                            DefaultShuffleOrder(
-                                queueWindows.map { it.firstPeriodIndex }
-                                    .toMutableList()
-                                    .move(safeFrom, safeTo)
-                                    .toIntArray(),
-                                System.currentTimeMillis()
-                            )
+                        playerConnection.player.shuffleOrder = DefaultShuffleOrder(
+                            queueWindows.map { it.firstPeriodIndex }
+                                .toMutableList()
+                                .move(safeFrom, safeTo)
+                                .toIntArray(),
+                            System.currentTimeMillis()
                         )
                     }
                     dragInfo = null

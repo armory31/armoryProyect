@@ -235,14 +235,17 @@ fun LibraryPlaylistListItem(
     }
 
     val openPlaylist: () -> Unit = {
+        val browseId = playlist.playlist.browseId
         if (
             !playlist.playlist.isEditable &&
             playlist.songCount == 0 &&
-            playlist.playlist.remoteSongCount != 0
+            playlist.playlist.remoteSongCount != 0 &&
+            browseId != null
         ) {
-            navController.navigate("online_playlist/${playlist.playlist.browseId}")
+            navController.navigate("online_playlist/${browseId}")
         } else {
-            navController.navigate("local_playlist/${playlist.id}")
+            val pId = playlist.id
+            navController.navigate("local_playlist/${pId}")
         }
     }
 

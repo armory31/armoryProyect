@@ -39,13 +39,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.ListThumbnailSize
 import com.arturo254.opentune.db.entities.Playlist
 import com.arturo254.opentune.db.entities.Song
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.ui.component.CreatePlaylistDialog
 import com.arturo254.opentune.ui.component.DefaultDialog
@@ -53,12 +53,12 @@ import com.arturo254.opentune.ui.component.ListDialog
 import com.arturo254.opentune.ui.component.ListItem
 import com.arturo254.opentune.ui.component.PlaylistListItem
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -291,7 +291,7 @@ fun AddToPlaylistDialogOnline(
         CreatePlaylistDialog(
             onDismiss = { showCreatePlaylistDialog = false },
             initialTextFieldValue = initialTextFieldValue,
-            allowSyncing = allowSyncing
+//            allowSyncing = allowSyncing
         )
     }
 

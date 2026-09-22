@@ -19,7 +19,6 @@ import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import com.arturo254.opentune.constants.MaxSongCacheSizeKey
-import com.arturo254.opentune.db.InternalDatabase
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
@@ -28,11 +27,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Qualifier
-import javax.inject.Singleton
 import java.io.File
 import java.util.NavigableSet
 import java.util.TreeSet
+import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -135,8 +134,7 @@ object AppModule {
         @ApplicationContext context: Context,
         databaseProvider: DatabaseProvider,
     ): Cache {
-        val cacheSize = context.dataStore.get(MaxSongCacheSizeKey, 1024)
-        val evictor = when (cacheSize) {
+        val evictor = when (val cacheSize = context.dataStore.get(MaxSongCacheSizeKey, 1024)) {
             -1 -> NoOpCacheEvictor()
             else -> LeastRecentlyUsedCacheEvictor(cacheSize * 1024 * 1024L)
         }

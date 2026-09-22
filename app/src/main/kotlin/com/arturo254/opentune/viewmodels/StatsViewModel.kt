@@ -10,9 +10,10 @@ package com.arturo254.opentune.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.constants.statToPeriod
 import com.arturo254.opentune.db.MusicDatabase
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.sync.LibrarySummary
 import com.arturo254.opentune.ui.screens.OptionStats
 import com.arturo254.opentune.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +37,9 @@ class StatsViewModel
 constructor(
     val database: MusicDatabase,
 ) : ViewModel() {
+    val librarySummary = database.getLibrarySummary()
+        .stateIn(viewModelScope, SharingStarted.Lazily, LibrarySummary())
+
     val selectedOption = MutableStateFlow(OptionStats.CONTINUOUS)
     val indexChips = MutableStateFlow(0)
 

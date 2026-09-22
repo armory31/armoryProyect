@@ -12,10 +12,10 @@ import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata.MEDIA_TYPE_MUSIC
+import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_OMV
 import com.arturo254.opentune.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_UGC
-import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.models.toMediaMetadata
 

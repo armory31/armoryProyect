@@ -5,11 +5,11 @@
 
 package com.arturo254.opentune.ui.theme
 
-import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import com.arturo254.opentune.OpenTuneColors
+import android.graphics.Color as AndroidColor
 
 object PlayerBackgroundColorUtils {
 

@@ -7,7 +7,6 @@
 
 package com.arturo254.opentune.ui.screens.search
 
-import timber.log.Timber
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -59,6 +58,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.arturo254.opentune.LocalPlayerAwareWindowInsets
+import com.arturo254.opentune.LocalPlayerConnection
+import com.arturo254.opentune.R
+import com.arturo254.opentune.constants.AppBarHeight
+import com.arturo254.opentune.constants.SearchFilterHeight
+import com.arturo254.opentune.extensions.togglePlayPause
 import com.arturo254.opentune.innertube.YouTube.SearchFilter.Companion.FILTER_ALBUM
 import com.arturo254.opentune.innertube.YouTube.SearchFilter.Companion.FILTER_ARTIST
 import com.arturo254.opentune.innertube.YouTube.SearchFilter.Companion.FILTER_COMMUNITY_PLAYLIST
@@ -71,12 +76,6 @@ import com.arturo254.opentune.innertube.models.PlaylistItem
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.WatchEndpoint
 import com.arturo254.opentune.innertube.models.YTItem
-import com.arturo254.opentune.LocalPlayerAwareWindowInsets
-import com.arturo254.opentune.LocalPlayerConnection
-import com.arturo254.opentune.R
-import com.arturo254.opentune.constants.AppBarHeight
-import com.arturo254.opentune.constants.SearchFilterHeight
-import com.arturo254.opentune.extensions.togglePlayPause
 import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.queues.YouTubeQueue
 import com.arturo254.opentune.ui.component.ChipsRow
@@ -89,9 +88,9 @@ import com.arturo254.opentune.ui.menu.YouTubeAlbumMenu
 import com.arturo254.opentune.ui.menu.YouTubeArtistMenu
 import com.arturo254.opentune.ui.menu.YouTubePlaylistMenu
 import com.arturo254.opentune.ui.menu.YouTubeSongMenu
-import com.arturo254.opentune.innertube.pages.SearchSummary
 import com.arturo254.opentune.viewmodels.OnlineSearchViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

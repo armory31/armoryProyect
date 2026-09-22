@@ -11,23 +11,23 @@ package com.arturo254.opentune.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.datasource.cache.Cache
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.db.entities.Song
-
+import com.arturo254.opentune.di.DownloadCache
+import com.arturo254.opentune.di.PlayerCache
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import com.arturo254.opentune.di.PlayerCache
-import com.arturo254.opentune.di.DownloadCache
-import androidx.media3.datasource.cache.Cache
-import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import javax.inject.Inject
 
 @HiltViewModel
 class CachePlaylistViewModel @Inject constructor(

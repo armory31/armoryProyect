@@ -6,9 +6,6 @@
 
 package com.arturo254.opentune.constants
 
-import androidx.annotation.StringRes
-import com.arturo254.opentune.R
-
 enum class LyricsPosition {
     LEFT,
     CENTER,

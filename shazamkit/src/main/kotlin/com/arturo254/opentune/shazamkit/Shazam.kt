@@ -284,8 +284,7 @@ object Shazam {
         }
 
         if (!response.status.isSuccess()) {
-            val statusCode = response.status.value
-            when (statusCode) {
+            when (val statusCode = response.status.value) {
                 429 -> throw Exception("Too many requests")
                 404 -> throw Exception("No match found")
                 in 500..599 -> throw Exception("Shazam service temporarily unavailable")

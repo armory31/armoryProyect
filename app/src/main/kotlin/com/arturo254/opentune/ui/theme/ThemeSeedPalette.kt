@@ -2,8 +2,8 @@ package com.arturo254.opentune.ui.theme
 
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import com.arturo254.opentune.OpenTuneColors
 import com.arturo254.opentune.R
 import kotlinx.serialization.KSerializer
@@ -14,7 +14,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 
 /**
  * Representa una semilla de colores para generar un esquema de Material3.

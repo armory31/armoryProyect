@@ -110,9 +110,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
@@ -137,11 +134,11 @@ import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.ExoDownloadService
 import com.arturo254.opentune.playback.queues.ListQueue
 import com.arturo254.opentune.playback.queues.LocalMixQueue
-import com.arturo254.opentune.ui.component.DefaultDialog
-import com.arturo254.opentune.ui.component.EditPlaylistDialog
-import com.arturo254.opentune.ui.component.DraggableScrollbar
-import com.arturo254.opentune.ui.component.EmptyPlaceholder
 import com.arturo254.opentune.ui.component.AssignTagsDialog
+import com.arturo254.opentune.ui.component.DefaultDialog
+import com.arturo254.opentune.ui.component.DraggableScrollbar
+import com.arturo254.opentune.ui.component.EditPlaylistDialog
+import com.arturo254.opentune.ui.component.EmptyPlaceholder
 import com.arturo254.opentune.ui.component.IconButton
 import com.arturo254.opentune.ui.component.LocalMenuState
 import com.arturo254.opentune.ui.component.SongListItem
@@ -156,6 +153,9 @@ import com.arturo254.opentune.utils.makeTimeString
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.LocalPlaylistViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDateTime
@@ -454,8 +454,8 @@ fun LocalPlaylistScreen(
 
     // Gradient colors state for playlist cover
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val fallbackColor = MaterialTheme.colorScheme.background.toArgb() // Inactivado surface para forzar pure black
+    val surfaceColor = MaterialTheme.colorScheme.background // Inactivado surface para forzar pure black
 
     // Extract gradient colors from playlist cover
     LaunchedEffect(playlist?.thumbnails) {

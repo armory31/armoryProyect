@@ -10,17 +10,13 @@ package com.arturo254.opentune.ui.screens.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +64,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -81,17 +76,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.edit
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.launch
 import com.arturo254.opentune.App.Companion.forgetAccount
 import com.arturo254.opentune.BuildConfig
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.AccountChannelHandleKey
-import com.arturo254.opentune.constants.AccountEmailKey
 import com.arturo254.opentune.constants.AccountNameKey
 import com.arturo254.opentune.constants.DataSyncIdKey
 import com.arturo254.opentune.constants.InnerTubeCookieKey
@@ -101,16 +92,16 @@ import com.arturo254.opentune.constants.UseLoginForBrowse
 import com.arturo254.opentune.constants.VisitorDataKey
 import com.arturo254.opentune.constants.YtmSyncKey
 import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.utils.SessionManager
-import com.google.firebase.auth.FirebaseAuth
 import com.arturo254.opentune.innertube.utils.completed
 import com.arturo254.opentune.innertube.utils.parseCookieString
 import com.arturo254.opentune.ui.component.InfoLabel
 import com.arturo254.opentune.ui.component.TextFieldDialog
+import com.arturo254.opentune.utils.SessionManager
 import com.arturo254.opentune.utils.Updater
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.HomeViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AccountSettings(
@@ -849,7 +840,7 @@ private fun PlaylistSelectionDialog(onDismiss: () -> Unit) {
 
     LaunchedEffect(Unit) {
         loading = true
-        com.arturo254.opentune.innertube.YouTube
+        YouTube
             .library("FEmusic_liked_playlists")
             .completed()
             .onSuccess { page ->

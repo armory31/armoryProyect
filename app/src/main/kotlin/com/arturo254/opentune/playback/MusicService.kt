@@ -10,30 +10,39 @@
 
 package com.arturo254.opentune.playback
 
-import android.app.PendingIntent
+// import androidx.media3.session.MediaController
+// import com.google.common.util.concurrent.MoreExecutors
+
 import android.app.ActivityManager
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.bluetooth.BluetoothClass
+import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.BroadcastReceiver
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothClass
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.database.SQLException
-import android.media.AudioManager
 import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.media.MediaCodecList
 import android.media.audiofx.AudioEffect
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.LoudnessEnhancer
-import android.media.MediaCodecList
 import android.media.audiofx.Virtualizer
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
 import android.os.PowerManager
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
@@ -55,9 +64,9 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.ResolvingDataSource
+import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR
-import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -75,22 +84,20 @@ import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.extractor.mp4.Mp4Extractor
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.MoreExecutors
-import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.SongItem
-import com.arturo254.opentune.lyrics.LyricsPreloadManager
-import com.arturo254.opentune.innertube.models.WatchEndpoint
 import com.arturo254.opentune.MainActivity
 import com.arturo254.opentune.R
+import com.arturo254.opentune.constants.AudioCrossfadeDurationKey
 import com.arturo254.opentune.constants.AudioNormalizationKey
 import com.arturo254.opentune.constants.AudioOffload
-import com.arturo254.opentune.constants.AudioCrossfadeDurationKey
 import com.arturo254.opentune.constants.AudioQualityKey
+import com.arturo254.opentune.constants.AutoDownloadOnLikeKey
 import com.arturo254.opentune.constants.AutoLoadMoreKey
+import com.arturo254.opentune.constants.AutoSkipNextOnErrorKey
+import com.arturo254.opentune.constants.AutoStartOnBluetoothKey
+import com.arturo254.opentune.constants.EnableLastFMScrobblingKey
 import com.arturo254.opentune.constants.EqualizerBandLevelsMbKey
 import com.arturo254.opentune.constants.EqualizerBassBoostEnabledKey
 import com.arturo254.opentune.constants.EqualizerBassBoostStrengthKey
@@ -103,10 +110,15 @@ import com.arturo254.opentune.constants.EqualizerVirtualizerStrengthKey
 import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.constants.HistoryDuration
+import com.arturo254.opentune.constants.InnerTubeCookieKey
+import com.arturo254.opentune.constants.LastFMUseNowPlaying
+import com.arturo254.opentune.constants.ListenBrainzEnabledKey
+import com.arturo254.opentune.constants.ListenBrainzTokenKey
+import com.arturo254.opentune.constants.MaxSongCacheSizeKey
 import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleLike
-import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleStartRadio
 import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleRepeatMode
 import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleShuffle
+import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleStartRadio
 import com.arturo254.opentune.constants.PauseListenHistoryKey
 import com.arturo254.opentune.constants.PauseOnDeviceMuteKey
 import com.arturo254.opentune.constants.PermanentShuffleKey
@@ -115,22 +127,25 @@ import com.arturo254.opentune.constants.PlayerStreamClient
 import com.arturo254.opentune.constants.PlayerStreamClientKey
 import com.arturo254.opentune.constants.PlayerVolumeKey
 import com.arturo254.opentune.constants.RepeatModeKey
+import com.arturo254.opentune.constants.ScrobbleDelayPercentKey
+import com.arturo254.opentune.constants.ScrobbleDelaySecondsKey
+import com.arturo254.opentune.constants.ScrobbleMinSongDurationKey
 import com.arturo254.opentune.constants.ShowLyricsKey
 import com.arturo254.opentune.constants.SkipSilenceKey
-import com.arturo254.opentune.constants.MaxSongCacheSizeKey
 import com.arturo254.opentune.constants.SmartTrimmerKey
 import com.arturo254.opentune.constants.StopMusicOnTaskClearKey
+import com.arturo254.opentune.constants.TogetherClientIdKey
 import com.arturo254.opentune.constants.WakelockKey
 import com.arturo254.opentune.constants.YtmSyncKey
 import com.arturo254.opentune.db.MusicDatabase
+import com.arturo254.opentune.db.entities.AlbumEntity
+import com.arturo254.opentune.db.entities.ArtistEntity
 import com.arturo254.opentune.db.entities.Event
 import com.arturo254.opentune.db.entities.FormatEntity
 import com.arturo254.opentune.db.entities.LyricsEntity
 import com.arturo254.opentune.db.entities.RelatedSongMap
 import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.db.entities.SongEntity
-import com.arturo254.opentune.db.entities.ArtistEntity
-import com.arturo254.opentune.db.entities.AlbumEntity
 import com.arturo254.opentune.di.DownloadCache
 import com.arturo254.opentune.di.PlayerCache
 import com.arturo254.opentune.extensions.SilentHandler
@@ -145,42 +160,33 @@ import com.arturo254.opentune.extensions.setOffloadEnabled
 import com.arturo254.opentune.extensions.toMediaItem
 import com.arturo254.opentune.extensions.toPersistQueue
 import com.arturo254.opentune.extensions.toQueue
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.models.SongItem
+import com.arturo254.opentune.innertube.models.WatchEndpoint
+import com.arturo254.opentune.lastfm.LastFM
 import com.arturo254.opentune.lyrics.LyricsHelper
-import com.arturo254.opentune.models.PersistQueue
+import com.arturo254.opentune.lyrics.LyricsPreloadManager
 import com.arturo254.opentune.models.PersistPlayerState
-import com.arturo254.opentune.constants.AutoStartOnBluetoothKey
-import com.arturo254.opentune.constants.InnerTubeCookieKey
-import com.arturo254.opentune.constants.AutoDownloadOnLikeKey
-import com.arturo254.opentune.constants.AutoSkipNextOnErrorKey
+import com.arturo254.opentune.models.PersistQueue
 import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.queues.EmptyQueue
 import com.arturo254.opentune.playback.queues.Queue
 import com.arturo254.opentune.playback.queues.YouTubeQueue
-
 import com.arturo254.opentune.playback.queues.filterVideo
+import com.arturo254.opentune.sync.LibraryStateHolder
+import com.arturo254.opentune.sync.SyncManager
+import com.arturo254.opentune.ui.screens.settings.ListenBrainzManager
 import com.arturo254.opentune.utils.CoilBitmapLoader
+import com.arturo254.opentune.utils.NetworkConnectivityObserver
+import com.arturo254.opentune.utils.StreamClientUtils
 import com.arturo254.opentune.utils.SyncUtils
 import com.arturo254.opentune.utils.YTPlayerUtils
-import com.arturo254.opentune.utils.StreamClientUtils
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.enumPreference
 import com.arturo254.opentune.utils.get
 import com.arturo254.opentune.utils.getAsync
 import com.arturo254.opentune.utils.reportException
-import com.arturo254.opentune.utils.NetworkConnectivityObserver
 import dagger.hilt.android.AndroidEntryPoint
-import com.arturo254.opentune.ui.screens.settings.ListenBrainzManager
-import com.arturo254.opentune.constants.ListenBrainzEnabledKey
-import com.arturo254.opentune.constants.ListenBrainzTokenKey
-import com.arturo254.opentune.lastfm.LastFM
-import com.arturo254.opentune.constants.EnableLastFMScrobblingKey
-import com.arturo254.opentune.constants.LastFMUseNowPlaying
-import com.arturo254.opentune.constants.ScrobbleDelayPercentKey
-import com.arturo254.opentune.constants.ScrobbleMinSongDurationKey
-import com.arturo254.opentune.constants.ScrobbleDelaySecondsKey
-import com.arturo254.opentune.constants.TogetherClientIdKey
-import com.arturo254.opentune.sync.LibraryStateHolder
-import com.arturo254.opentune.sync.SyncManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -203,8 +209,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
+import timber.log.Timber
 import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -218,13 +225,6 @@ import javax.inject.Inject
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.time.Duration.Companion.seconds
-import timber.log.Timber
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Notification
-import android.os.Build
-import android.content.pm.ServiceInfo
-import androidx.core.app.NotificationCompat
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @AndroidEntryPoint
@@ -353,7 +353,7 @@ class MusicService :
     private var lyricsPreloadManager: LyricsPreloadManager? = null
 
     private fun isAppInForeground(): Boolean {
-        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         val appProcesses = activityManager.runningAppProcesses ?: return false
         return appProcesses.any { processInfo ->
             processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
@@ -587,7 +587,7 @@ class MusicService :
         val delayMs =
             when (state) {
                 Player.STATE_READY -> 5 * 60_000L
-                Player.STATE_ENDED, Player.STATE_IDLE -> 30_000L
+                Player.STATE_ENDED, STATE_IDLE -> 30_000L
                 else -> 60_000L
             }
 
@@ -661,8 +661,8 @@ class MusicService :
                     setOffloadEnabled(false)
                 }
 
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager)
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        wakeLock = (getSystemService(POWER_SERVICE) as PowerManager)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ARMORY:Playback")
             .also { it.setReferenceCounted(false) }
         setupAudioFocusRequest()
@@ -724,7 +724,7 @@ class MusicService :
                 if (isConnected && waitingForNetworkConnection.value) {
                     waitingForNetworkConnection.value = false
                     if (player.currentMediaItem != null && player.playWhenReady &&
-                        player.playbackState == Player.STATE_IDLE
+                        player.playbackState == STATE_IDLE
                     ) {
                         player.prepare()
                         player.play()
@@ -1236,7 +1236,7 @@ class MusicService :
             val canPauseNow =
                 player.currentMediaItem != null &&
                     player.playWhenReady &&
-                    player.playbackState != Player.STATE_IDLE &&
+                    player.playbackState != STATE_IDLE &&
                     player.playbackState != Player.STATE_ENDED
 
             if (canPauseNow) {
@@ -1251,7 +1251,7 @@ class MusicService :
         wasAutoPausedByDeviceMute = false
         val canResumeNow =
             player.currentMediaItem != null &&
-                player.playbackState != Player.STATE_IDLE &&
+                player.playbackState != STATE_IDLE &&
                 player.playbackState != Player.STATE_ENDED
         if (canResumeNow) {
             player.play()
@@ -1286,7 +1286,7 @@ class MusicService :
         if (isTogetherGuestSession()) return
 
         if (player.currentMediaItem != null &&
-            player.playbackState != Player.STATE_IDLE &&
+            player.playbackState != STATE_IDLE &&
             player.playbackState != Player.STATE_ENDED
         ) {
             if (!player.playWhenReady) {
@@ -1632,7 +1632,7 @@ class MusicService :
             shuffledIndices[currentPos] = shuffledIndices[0]
         }
         shuffledIndices[0] = currentIndex
-        player.setShuffleOrder(DefaultShuffleOrder(shuffledIndices, System.currentTimeMillis()))
+        player.shuffleOrder = DefaultShuffleOrder(shuffledIndices, System.currentTimeMillis())
     }
 
     fun startRadioSeamlessly() {
@@ -2147,7 +2147,7 @@ class MusicService :
                                     )
                             }
                         }
-                        kotlinx.coroutines.delay(750)
+                        delay(750)
                     }
                 }
         }
@@ -2308,7 +2308,7 @@ class MusicService :
                                     )
                             }
                         }
-                        kotlinx.coroutines.delay(750)
+                        delay(750)
                     }
                 }
         }
@@ -3120,7 +3120,7 @@ class MusicService :
                 while (togetherClient === client) {
                     val now = android.os.SystemClock.elapsedRealtime()
                     client.sendHeartbeat(sessionId = sessionId, pingId = pingId++, clientElapsedRealtimeMs = now)
-                    kotlinx.coroutines.delay(2000)
+                    delay(2000)
                 }
             }
     }
@@ -3612,7 +3612,7 @@ class MusicService :
         }
     }
 
-    if (playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED) {
+    if (playbackState == STATE_IDLE || playbackState == Player.STATE_ENDED) {
         crossfadeAudio?.stop(resetMainFade = true)
         scrobbleManager?.onSongStop()
     }
@@ -3666,7 +3666,7 @@ class MusicService :
         handleDeviceMuteStateChanged()
     }
     if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) &&
-        (this.player.playbackState == Player.STATE_IDLE || this.player.playbackState == Player.STATE_ENDED)
+        (this.player.playbackState == STATE_IDLE || this.player.playbackState == Player.STATE_ENDED)
     ) {
         wasAutoPausedByDeviceMute = false
     }
@@ -4029,7 +4029,7 @@ class MusicService :
 
                     is PlaybackException -> throw throwable
 
-                    is java.net.ConnectException, is java.net.UnknownHostException -> {
+                    is ConnectException, is UnknownHostException -> {
                         throw PlaybackException(
                             getString(R.string.error_no_internet),
                             throwable,
@@ -4037,7 +4037,7 @@ class MusicService :
                         )
                     }
 
-                    is java.net.SocketTimeoutException -> {
+                    is SocketTimeoutException -> {
                         throw PlaybackException(
                             getString(R.string.error_timeout),
                             throwable,
@@ -4560,7 +4560,7 @@ class MusicService :
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent?): android.os.IBinder? {
+    override fun onBind(intent: Intent?): android.os.IBinder {
         hasBoundClients = true
         cancelIdleStop()
         val result = super.onBind(intent) ?: binder
@@ -4598,7 +4598,7 @@ class MusicService :
                     (state is com.arturo254.opentune.together.TogetherSessionState.Joined &&
                         state.role is com.arturo254.opentune.together.TogetherRole.Host)
 
-            val isPlaybackInactive = player.playbackState == Player.STATE_IDLE || player.mediaItemCount == 0
+            val isPlaybackInactive = player.playbackState == STATE_IDLE || player.mediaItemCount == 0
 
             if (shouldStopServiceOnTaskRemoved(stopMusicOnTaskClearEnabled, isHostSessionActive, isPlaybackInactive)) {
                 if (isHostSessionActive && isPlaybackInactive) {

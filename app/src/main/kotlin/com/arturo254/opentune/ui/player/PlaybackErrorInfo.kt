@@ -12,7 +12,6 @@ package com.arturo254.opentune.ui.player
 
 import androidx.media3.common.PlaybackException
 import androidx.media3.datasource.HttpDataSource
-import com.arturo254.opentune.ui.player.findCause
 import com.arturo254.opentune.utils.YTPlayerUtils
 
 internal enum class PlaybackErrorKind {

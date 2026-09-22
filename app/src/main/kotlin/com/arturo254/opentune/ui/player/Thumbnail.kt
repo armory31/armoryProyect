@@ -11,6 +11,7 @@
 package com.arturo254.opentune.ui.player
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,13 +22,11 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,8 +41,10 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,8 +64,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -74,11 +76,15 @@ import androidx.compose.ui.util.fastForEach
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.window.core.layout.WindowWidthSizeClass
 import coil3.compose.AsyncImage
-import androidx.compose.material3.Icon
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
 import com.arturo254.opentune.canvas.models.CanvasArtwork
+import com.arturo254.opentune.constants.CropThumbnailToSquareKey
+import com.arturo254.opentune.constants.HidePlayerThumbnailKey
+import com.arturo254.opentune.constants.MaxCanvasCacheSizeKey
+import com.arturo254.opentune.constants.OpenTuneCanvasKey
 import com.arturo254.opentune.constants.PlayerBackgroundStyle
 import com.arturo254.opentune.constants.PlayerBackgroundStyleKey
 import com.arturo254.opentune.constants.PlayerDesignStyle
@@ -86,11 +92,7 @@ import com.arturo254.opentune.constants.PlayerDesignStyleKey
 import com.arturo254.opentune.constants.PlayerHorizontalPadding
 import com.arturo254.opentune.constants.SeekExtraSeconds
 import com.arturo254.opentune.constants.SwipeThumbnailKey
-import com.arturo254.opentune.constants.OpenTuneCanvasKey
-import com.arturo254.opentune.constants.MaxCanvasCacheSizeKey
 import com.arturo254.opentune.constants.ThumbnailCornerRadiusKey
-import com.arturo254.opentune.constants.CropThumbnailToSquareKey
-import com.arturo254.opentune.constants.HidePlayerThumbnailKey
 import com.arturo254.opentune.extensions.metadata
 import com.arturo254.opentune.extensions.toMediaItem
 import com.arturo254.opentune.ui.utils.highRes
@@ -107,12 +109,8 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
-import java.util.LinkedHashMap
 import java.util.Locale
 import kotlin.math.abs
-import androidx.compose.ui.platform.LocalView
-import android.content.Context
-import android.view.HapticFeedbackConstants
 
 object CanvasArtworkPlaybackCache {
     private const val defaultMaxSize = 256

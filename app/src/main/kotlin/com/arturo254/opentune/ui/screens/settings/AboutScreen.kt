@@ -44,9 +44,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,7 +60,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,10 +71,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -94,14 +91,12 @@ import coil3.compose.AsyncImage
 import com.arturo254.opentune.BuildConfig
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.LocalPlayerConnection
+import com.arturo254.opentune.OpenTuneColors
 import com.arturo254.opentune.R
 import com.arturo254.opentune.ui.component.IconButton
 import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.viewmodels.AboutViewModel
-import com.arturo254.opentune.OpenTuneColors
-import androidx.compose.ui.unit.sp
 import com.arturo254.opentune.viewmodels.Contributor
-import kotlinx.coroutines.delay
 
 // ── Shimmer brush (Material 3 Expressive) ──────────────────────────────────
 
@@ -143,7 +138,6 @@ private data class SocialLink(
 @Composable
 fun AboutScreen(
     navController: NavController,
-    scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AboutViewModel = viewModel()
 ) {
     val uriHandler = LocalUriHandler.current
@@ -248,7 +242,6 @@ fun AboutScreen(
                         ),
                     ),
                     onLinkClick = { uriHandler.openUri(it) },
-                    columns = if (isTablet) 4 else 3,
                 )
             }
 
@@ -550,7 +543,6 @@ private fun DeveloperInfoExpressive() {
 private fun SocialCardExpressive(
     links: List<SocialLink>,
     onLinkClick: (String) -> Unit,
-    columns: Int = 3,
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),

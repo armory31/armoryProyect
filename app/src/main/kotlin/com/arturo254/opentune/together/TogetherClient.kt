@@ -18,8 +18,6 @@ import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
-import java.util.UUID
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +28,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 sealed interface TogetherClientEvent {
     data class Welcome(
@@ -313,7 +313,7 @@ class TogetherClient(
                                 }
                             }
 
-                            is com.arturo254.opentune.together.JoinDecision -> {
+                            is JoinDecision -> {
                                 if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
                                     _events.tryEmit(TogetherClientEvent.JoinDecision(message))
                                 }

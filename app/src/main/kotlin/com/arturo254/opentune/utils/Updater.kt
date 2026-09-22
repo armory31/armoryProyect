@@ -7,7 +7,6 @@
 package com.arturo254.opentune.utils
 
 import androidx.datastore.preferences.core.edit
-import com.arturo254.opentune.BuildConfig
 import com.arturo254.opentune.App
 import com.arturo254.opentune.constants.GitHubReleasesEtagKey
 import com.arturo254.opentune.constants.GitHubReleasesFingerprintKey

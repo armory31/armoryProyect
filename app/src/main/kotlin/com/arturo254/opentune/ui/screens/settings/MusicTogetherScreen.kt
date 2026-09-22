@@ -87,7 +87,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kotlinx.coroutines.flow.MutableStateFlow
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
@@ -102,10 +101,11 @@ import com.arturo254.opentune.together.TogetherLink
 import com.arturo254.opentune.together.TogetherRole
 import com.arturo254.opentune.together.TogetherRoomSettings
 import com.arturo254.opentune.together.TogetherSessionState
-import com.arturo254.opentune.ui.component.IconButton as AtIconButton
 import com.arturo254.opentune.ui.component.TextFieldDialog
 import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.utils.rememberPreference
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.arturo254.opentune.ui.component.IconButton as AtIconButton
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)

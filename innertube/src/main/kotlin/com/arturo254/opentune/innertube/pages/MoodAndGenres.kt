@@ -25,17 +25,17 @@ data class MoodAndGenres(
 
     companion object {
         fun fromSectionListRendererContent(content: SectionListRenderer.Content): MoodAndGenres? {
+            val grid = content.gridRenderer ?: return null
             return MoodAndGenres(
                 title =
-                    content.gridRenderer
-                        ?.header
+                    grid.header
                         ?.gridHeaderRenderer
                         ?.title
                         ?.runs
                         ?.firstOrNull()
-                        ?.text ?: return null,
+                        ?.text ?: "",
                 items =
-                    content.gridRenderer.items
+                    grid.items
                         .mapNotNull(GridRenderer.Item::musicNavigationButtonRenderer)
                         .mapNotNull(::fromMusicNavigationButtonRenderer),
             )

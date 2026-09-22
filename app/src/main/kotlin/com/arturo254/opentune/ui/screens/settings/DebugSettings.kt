@@ -19,7 +19,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -90,9 +89,6 @@ import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.media3.common.Player
 import androidx.navigation.NavController
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
 import com.arturo254.opentune.ui.component.IconButton
@@ -101,8 +97,10 @@ import com.arturo254.opentune.ui.component.SwitchPreference
 import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.utils.GlobalLog
 import com.arturo254.opentune.utils.LogEntry
-import com.arturo254.opentune.utils.makeTimeString
 import com.arturo254.opentune.utils.rememberPreference
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)

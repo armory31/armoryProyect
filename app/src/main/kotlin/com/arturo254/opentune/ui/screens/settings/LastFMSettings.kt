@@ -51,18 +51,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.EnableLastFMScrobblingKey
 import com.arturo254.opentune.constants.LastFMSessionKey
-import com.arturo254.opentune.constants.LastFMUsernameKey
 import com.arturo254.opentune.constants.LastFMUseNowPlaying
+import com.arturo254.opentune.constants.LastFMUsernameKey
 import com.arturo254.opentune.constants.ScrobbleDelayPercentKey
-import com.arturo254.opentune.constants.ScrobbleMinSongDurationKey
 import com.arturo254.opentune.constants.ScrobbleDelaySecondsKey
+import com.arturo254.opentune.constants.ScrobbleMinSongDurationKey
+import com.arturo254.opentune.lastfm.LastFM
 import com.arturo254.opentune.ui.component.IconButton
 import com.arturo254.opentune.ui.component.PreferenceEntry
 import com.arturo254.opentune.ui.component.PreferenceGroupTitle
@@ -70,7 +68,9 @@ import com.arturo254.opentune.ui.component.SwitchPreference
 import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.utils.reportException
-import com.arturo254.opentune.lastfm.LastFM
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.math.roundToInt
 

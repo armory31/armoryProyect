@@ -7,28 +7,16 @@
 package com.arturo254.opentune.viewmodels
 
 import android.content.Context
-import android.net.Uri
-import android.widget.Toast
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import com.arturo254.opentune.R
-import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.reportException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
 import org.json.JSONObject
 import java.io.File
-import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 // Data class para el estado de subida a la nube
@@ -76,7 +64,7 @@ class FilebinService(
                     "file",
                     fileName,
                     object : okhttp3.RequestBody() {
-                        override fun contentType(): okhttp3.MediaType? = mediaType
+                        override fun contentType(): okhttp3.MediaType = mediaType
                         
                         override fun contentLength(): Long = file.length()
                         

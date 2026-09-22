@@ -8,9 +8,12 @@
 
 package com.arturo254.opentune.utils
 
-import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.lastfm.LastFM
-import kotlinx.coroutines.*
+import com.arturo254.opentune.models.MediaMetadata
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.min
 

@@ -9,9 +9,9 @@
 package com.arturo254.opentune.models
 
 import androidx.compose.runtime.Immutable
-import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.db.entities.SongEntity
+import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.ui.utils.resize
 import java.io.Serializable
 import java.time.LocalDateTime

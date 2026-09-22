@@ -3,28 +3,25 @@ package com.arturo254.opentune.sync
 import android.content.Context
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import coil3.SingletonImageLoader
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.arturo254.opentune.db.DatabaseDao
-import com.arturo254.opentune.db.MusicDatabase
+import coil3.SingletonImageLoader
 import com.arturo254.opentune.constants.AlbumSortType
 import com.arturo254.opentune.constants.ArtistSortType
+import com.arturo254.opentune.db.MusicDatabase
+import com.arturo254.opentune.db.entities.AlbumArtistMap
 import com.arturo254.opentune.db.entities.AlbumEntity
 import com.arturo254.opentune.db.entities.ArtistEntity
-import com.arturo254.opentune.db.entities.AlbumArtistMap
 import com.arturo254.opentune.db.entities.PlaylistEntity
 import com.arturo254.opentune.db.entities.PlaylistSongMap
-import com.arturo254.opentune.db.entities.SongAlbumMap
+import com.arturo254.opentune.db.entities.SetVideoIdEntity
 import com.arturo254.opentune.db.entities.SongArtistMap
 import com.arturo254.opentune.db.entities.SongEntity
-import com.arturo254.opentune.db.entities.SetVideoIdEntity
+import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.sync.worker.SyncWorker
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -32,9 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -70,17 +65,11 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun handleLogout(context: Context) = withContext(Dispatchers.IO) {
-        // 1. Firebase Sign Out
         FirebaseAuth.getInstance().signOut()
-
-        // 2. Clear Room Database
         database.clearAllTables()
-
-        // 3. Clear Coil Image Cache (Memory & Disk)
         val imageLoader = SingletonImageLoader.get(context)
         imageLoader.memoryCache?.clear()
         imageLoader.diskCache?.clear()
-
         Timber.i("SyncManager: Logout handled and local data purged")
     }
 
@@ -116,143 +105,86 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun toggleLike(song: SongEntity) {
-        val uid = authManager.currentUserUid.first() ?: return
-        val db = getFirestore()
-        val userDocRef = db.collection("users").document(uid)
-
-        val library = getUserLibrary() ?: UserLibraryDto()
-        val existingFavorite = library.favorites.find { it.videoId == song.id }
-        val isCurrentlyLiked = existingFavorite != null
-        
+        val isCurrentlyLiked = song.isLiked
         withContext(Dispatchers.IO) {
             database.upsert(song.copy(isLiked = !isCurrentlyLiked))
+            Timber.d("[LOCAL_SAVE_DEBUG] Song like state updated in Room: ${song.title}")
 
-            try {
-                if (isCurrentlyLiked) {
-                    database.deleteSetVideoId(song.id)
-                    userDocRef.update("favorites", FieldValue.arrayRemove(existingFavorite)).await()
-                } else {
-                    database.insert(SetVideoIdEntity(videoId = song.id))
-                    val artistName = database.getSongById(song.id)?.artists?.firstOrNull()?.name ?: "Unknown Artist"
-                    val newFavorite = FavoriteSongDto(
-                        videoId = song.id,
-                        title = song.title,
-                        artistName = artistName,
-                        thumbnailUrl = song.thumbnailUrl,
-                        albumId = song.albumId,
-                        albumName = song.albumName,
-                        duration = song.duration.toLong(),
-                        savedAt = System.currentTimeMillis()
-                    )
-                    userDocRef.set(mapOf("favorites" to FieldValue.arrayUnion(newFavorite)), SetOptions.merge()).await()
-                }
-                Timber.d("SyncManager: Like toggled atomically")
-            } catch (e: Exception) {
-                if (e !is CancellationException) {
-                    Timber.e(e, "SyncManager: Error toggling like atomically")
-                }
+            if (!isCurrentlyLiked) {
+                database.insert(SetVideoIdEntity(videoId = song.id))
+                Timber.d("[LOCAL_SAVE_DEBUG] Song added to favorites table (SetVideoId)")
+            } else {
+                database.deleteSetVideoId(song.id)
+                Timber.d("[LOCAL_SAVE_DEBUG] Song removed from favorites table (SetVideoId)")
             }
         }
-        
-        // Sync with YTM (Side effect)
         withContext(Dispatchers.IO) {
-            com.arturo254.opentune.innertube.YouTube.likeVideo(song.id, !isCurrentlyLiked)
+            YouTube.likeVideo(song.id, !isCurrentlyLiked)
         }
     }
 
     suspend fun toggleAlbumLike(album: AlbumEntity) {
-        val uid = authManager.currentUserUid.first() ?: return
-        val db = getFirestore()
-        val userDocRef = db.collection("users").document(uid)
-
-        val library = getUserLibrary() ?: UserLibraryDto()
-        val existingAlbum = library.albums.find { it.id == album.id }
-        val isCurrentlyLiked = existingAlbum != null
-
-        try {
-            // Actualización local
-            database.update(album.copy(isLiked = !isCurrentlyLiked))
-
-            if (isCurrentlyLiked) {
-                userDocRef.update("albums", FieldValue.arrayRemove(existingAlbum)).await()
-            } else {
-                val artistName = database.album(album.id).first()?.artists?.firstOrNull()?.name ?: "Unknown Artist"
-                val newAlbum = FavoriteAlbumDto(
-                    id = album.id,
-                    title = album.title,
-                    artistName = artistName,
-                    thumbnailUrl = album.thumbnailUrl,
-                    songCount = album.songCount,
-                    duration = album.duration,
-                    savedAt = System.currentTimeMillis()
+        val isCurrentlyLiked = album.isLiked
+        withContext(Dispatchers.IO) {
+            try {
+                // Actualización local segura
+                val updatedAlbum = album.copy(
+                    isLiked = !isCurrentlyLiked,
+                    bookmarkedAt = if (!isCurrentlyLiked) LocalDateTime.now() else null
                 )
-                userDocRef.set(mapOf("albums" to FieldValue.arrayUnion(newAlbum)), SetOptions.merge()).await()
+                database.insert(updatedAlbum)
+                database.update(updatedAlbum)
+                Timber.d("[LOCAL_SAVE_DEBUG] Album like state persisted in Room: ${album.title} (Liked: ${!isCurrentlyLiked})")
+            } catch (e: Exception) {
+                Timber.e(e, "SyncManager: Error toggling album like locally")
             }
-            Timber.d("SyncManager: Album like toggled atomically")
-        } catch (e: Exception) {
-            Timber.e(e, "SyncManager: Error toggling album like atomically")
         }
-
         if (album.playlistId != null) {
             withContext(Dispatchers.IO) {
-                com.arturo254.opentune.innertube.YouTube.likePlaylist(album.playlistId, !isCurrentlyLiked)
+                YouTube.likePlaylist(album.playlistId, !isCurrentlyLiked)
             }
         }
     }
 
     suspend fun toggleArtistLike(artist: ArtistEntity) {
-        val uid = authManager.currentUserUid.first() ?: return
-        val db = getFirestore()
-        val userDocRef = db.collection("users").document(uid)
-
-        val library = getUserLibrary() ?: UserLibraryDto()
-        val existingArtist = library.artists.find { it.id == artist.id }
-        val isCurrentlyLiked = existingArtist != null
-
-        try {
-            // Actualización local
-            database.update(artist.copy(isBookmarked = !isCurrentlyLiked))
-
-            if (isCurrentlyLiked) {
-                userDocRef.update("artists", FieldValue.arrayRemove(existingArtist)).await()
-            } else {
-                val newArtist = FavoriteArtistDto(
-                    id = artist.id,
-                    name = artist.name,
-                    thumbnailUrl = artist.thumbnailUrl,
-                    channelId = artist.channelId,
-                    savedAt = System.currentTimeMillis()
-                )
-                userDocRef.set(mapOf("artists" to FieldValue.arrayUnion(newArtist)), SetOptions.merge()).await()
-            }
-            Timber.d("SyncManager: Artist like toggled atomically")
-        } catch (e: Exception) {
-            Timber.e(e, "SyncManager: Error toggling artist like atomically")
-        }
-
+        val isCurrentlyLiked = artist.isBookmarked
         withContext(Dispatchers.IO) {
-            val channelId = artist.channelId ?: com.arturo254.opentune.innertube.YouTube.getChannelId(artist.id)
-            com.arturo254.opentune.innertube.YouTube.subscribeChannel(channelId, !isCurrentlyLiked)
+            try {
+                // Actualización local segura: insertar si no existe, actualizar si ya existe
+                val updatedArtist = artist.copy(
+                    isBookmarked = !isCurrentlyLiked,
+                    bookmarkedAt = if (!isCurrentlyLiked) LocalDateTime.now() else null
+                )
+                database.insert(updatedArtist) 
+                database.update(updatedArtist)
+                Timber.d("[LOCAL_SAVE_DEBUG] Artist bookmark state persisted in Room: ${artist.name} (Subscribed: ${!isCurrentlyLiked})")
+            } catch (e: Exception) {
+                Timber.e(e, "SyncManager: Error toggling artist like locally")
+            }
+        }
+        withContext(Dispatchers.IO) {
+            val channelId = artist.channelId ?: YouTube.getChannelId(artist.id)
+            if (channelId != null) {
+                YouTube.subscribeChannel(channelId, !isCurrentlyLiked)
+            }
         }
     }
 
     suspend fun togglePlaylistLike(playlist: PlaylistEntity) {
-        val library = getUserLibrary() ?: UserLibraryDto()
-        val playlistId = playlist.browseId ?: playlist.id
-        val isCurrentlyLiked = library.playlists.any { it.id == playlistId }
-
-        if (isCurrentlyLiked) {
-            library.playlists = library.playlists.filter { it.id != playlistId }
-        } else {
-            library.playlists = library.playlists + PlaylistDto(
-                id = playlistId,
-                name = playlist.name,
-                thumbnailUrl = playlist.thumbnailUrl,
-                createdAt = playlist.createdAt?.toString()
-            )
+        withContext(Dispatchers.IO) {
+            val pId = playlist.browseId ?: playlist.id
+            val existing = database.getPlaylistById(pId)
+            
+            if (existing != null) {
+                database.deletePlaylistById(existing.playlist.id)
+                Timber.d("[LOCAL_SAVE_DEBUG] Playlist removed from local library: ${playlist.name}")
+            } else {
+                // Generar un ID local si el ID actual no es del formato local LP
+                val localId = if (playlist.id.startsWith("LP")) playlist.id else PlaylistEntity.generatePlaylistId()
+                database.insert(playlist.copy(id = localId))
+                Timber.d("[LOCAL_SAVE_DEBUG] Playlist added to local library: ${playlist.name}")
+            }
         }
-
-        saveUserLibrary(library)
     }
 
     suspend fun syncLibrary() = withContext(Dispatchers.IO) {
@@ -267,12 +199,9 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun pushLibraryToCloud(isMigration: Boolean = false) = withContext(Dispatchers.IO) {
-        // Silent refresh before any upload to ensure token is valid
         authManager.refreshSessionSilently()
-        
         val uid = authManager.currentUserUid.first() ?: return@withContext
         val db = getFirestore()
-        
         val likedSongs = database.likedSongsByRowIdAsc().first()
         val playlists = database.playlistsByRowIdAsc().first().filter { it.playlist.browseId == null || it.playlist.isAutoSync }
         val likedAlbums = database.albumsLiked(AlbumSortType.CREATE_DATE, false).first()
@@ -334,7 +263,6 @@ class SyncManager @Inject constructor(
                 migratedToAtomic = true
             )
         )
-
         withContext(Dispatchers.IO + NonCancellable) {
             db.collection("users").document(uid).set(libraryDto).await()
         }
@@ -343,8 +271,6 @@ class SyncManager @Inject constructor(
 
     suspend fun applyLibraryToLocal(library: UserLibraryDto) = withContext(Dispatchers.IO) {
         Timber.d("SyncManager: Applying cloud data to local")
-        
-        // Ensure all favorite songs exist locally
         library.favorites.forEach { dto ->
             database.insert(SetVideoIdEntity(videoId = dto.videoId))
             val existingSong = database.getSongById(dto.videoId)
@@ -364,8 +290,6 @@ class SyncManager @Inject constructor(
                 database.upsert(existingSong.song.copy(isLiked = true))
             }
         }
-
-        // Ensure all favorite albums exist locally
         library.albums.forEach { aDto ->
             if (database.getAlbumById(aDto.id) == null) {
                 database.insert(AlbumEntity(
@@ -375,14 +299,11 @@ class SyncManager @Inject constructor(
                     songCount = aDto.songCount, 
                     duration = aDto.duration
                 ))
-                // Try to map artist if possible
                 database.artistByName(aDto.artistName)?.let {
                     database.insert(AlbumArtistMap(albumId = aDto.id, artistId = it.id, order = 0))
                 }
             }
         }
-
-        // Ensure all bookmarked artists exist locally
         library.artists.forEach { arDto ->
             if (database.getArtistById(arDto.id) == null) {
                 database.insert(ArtistEntity(
@@ -393,8 +314,6 @@ class SyncManager @Inject constructor(
                 ))
             }
         }
-
-        // Playlists
         library.playlists.forEach { pDto ->
             if (database.getPlaylistById(pDto.id) == null) {
                 database.insert(PlaylistEntity(
@@ -413,7 +332,7 @@ class SyncManager @Inject constructor(
         }
     }
 
-    private suspend fun ensureArtistExists(name: String): String? {
+    private suspend fun ensureArtistExists(name: String): String {
         val existing = database.artistByName(name)
         if (existing != null) return existing.id
         val newId = ArtistEntity.generateArtistId()
@@ -435,64 +354,40 @@ class SyncManager @Inject constructor(
             id = id,
             name = name,
             browseId = browseId,
-            createdAt = LocalDateTime.now()
+            createdAt = LocalDateTime.now(),
+            isLocal = true,
+            isEditable = true
         )
-        database.insert(playlist)
-        
-        // Sync to cloud
-        val library = getUserLibrary() ?: UserLibraryDto()
-        library.playlists = library.playlists + PlaylistDto(
-            id = id,
-            name = name,
-            createdAt = playlist.createdAt.toString()
-        )
-        saveUserLibrary(library)
-        
+        withContext(Dispatchers.IO) {
+            database.insert(playlist)
+        }
+        Timber.d("[LOCAL_SAVE_DEBUG] New playlist created in Room: $name (ID: $id)")
         return id
     }
 
     suspend fun addSongToPlaylist(playlistId: String, songId: String) {
-        val library = getUserLibrary() ?: return
-        val playlist = library.playlists.find { it.id == playlistId } ?: return
-        val song = database.getSongById(songId) ?: return
-        
-        val newSongDto = PlaylistSongDto(
-            id = songId,
-            title = song.song.title,
-            artistName = song.artists.firstOrNull()?.name ?: "Unknown",
-            thumbnailUrl = song.song.thumbnailUrl,
-            position = playlist.songs.size
-        )
-        
-        val updatedPlaylist = playlist.copy(songs = playlist.songs + newSongDto)
-        library.playlists = library.playlists.map { if (it.id == playlistId) updatedPlaylist else it }
-        saveUserLibrary(library)
-        
-        // Local update
-        database.addSongsToPlaylist(playlistId, listOf(songId))
+        withContext(Dispatchers.IO) {
+            database.addSongsToPlaylist(playlistId, listOf(songId))
+            Timber.d("[LOCAL_SAVE_DEBUG] Song $songId added to local playlist $playlistId")
+        }
+    }
+
+    suspend fun addAlbumSongsToPlaylist(playlistId: String, albumId: String) {
+        withContext(Dispatchers.IO) {
+            val songs = database.albumSongs(albumId).first()
+            val songIds = songs.map { it.song.id }
+            if (songIds.isNotEmpty()) {
+                database.addSongsToPlaylist(playlistId, songIds)
+                Timber.d("[LOCAL_SAVE_DEBUG] Added ${songIds.size} songs from album $albumId to playlist $playlistId")
+            }
+        }
     }
 
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String) {
-        val library = getUserLibrary() ?: return
-        val playlist = library.playlists.find { it.id == playlistId } ?: return
-        
-        val updatedSongs = playlist.songs.filter { it.id != songId }
-            .mapIndexed { index, song -> song.copy(position = index) }
-            
-        val updatedPlaylist = playlist.copy(songs = updatedSongs)
-        library.playlists = library.playlists.map { if (it.id == playlistId) updatedPlaylist else it }
-        saveUserLibrary(library)
-        
-        // Local update - we'd ideally have a delete method for mapping
-        // For now, full sync might be easier or adding a specific DAO method
+        // Implementation for local removal needed
     }
 
     suspend fun deletePlaylist(playlistId: String) {
-        val library = getUserLibrary() ?: return
-        library.playlists = library.playlists.filter { it.id != playlistId }
-        saveUserLibrary(library)
-        
         database.deletePlaylistById(playlistId)
     }
-
 }

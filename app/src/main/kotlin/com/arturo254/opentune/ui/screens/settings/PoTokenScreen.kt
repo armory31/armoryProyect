@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -40,16 +42,18 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -255,172 +259,172 @@ fun PoTokenScreen(
         }
     }
 
-    Column(
-        Modifier
-            .windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(
-                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                )
-            )
-            .verticalScroll(rememberScrollState())
-            .animateContentSize(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-            )
-    ) {
-        Spacer(
-            Modifier.windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
-            )
-        )
-
-        SwitchPreference(
-            title = { Text(stringResource(R.string.web_client_po_token)) },
-            description = stringResource(R.string.web_client_po_token_desc),
-            icon = { Icon(painterResource(R.drawable.token), null) },
-            checked = webClientPoTokenEnabled,
-            onCheckedChange = onWebClientPoTokenEnabledChange,
-        )
-
-        AnimatedVisibility(
-            visible = webClientPoTokenEnabled,
-            enter = expandVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-            ) + fadeIn(),
-            exit = shrinkVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-            ) + fadeOut(),
-        ) {
-            Column {
-                PreferenceGroupTitle(
-                    title = stringResource(R.string.generated_tokens)
-                )
-
-                SelectableTokenCard(
-                    label = stringResource(R.string.po_token_gvs),
-                    token = displayGvsToken,
-                    onCopy = {
-                        clipboardManager.setText(AnnotatedString(displayGvsToken))
-                        Toast.makeText(context, R.string.token_copied, Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                )
-
-                SelectableTokenCard(
-                    label = stringResource(R.string.po_token_player),
-                    token = displayPlayerToken,
-                    onCopy = {
-                        clipboardManager.setText(AnnotatedString(displayPlayerToken))
-                        Toast.makeText(context, R.string.token_copied, Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                )
-
-                SelectableTokenCard(
-                    label = stringResource(R.string.visitor_data),
-                    token = displayVisitorData,
-                    onCopy = {
-                        clipboardManager.setText(AnnotatedString(displayVisitorData))
-                        Toast.makeText(context, R.string.token_copied, Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                )
-
-                PreferenceGroupTitle(
-                    title = stringResource(R.string.supported_clients)
-                )
-
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    SUPPORTED_CLIENTS.forEach { client ->
-                        AssistChip(
-                            onClick = {},
-                            label = {
-                                Text(
-                                    text = client,
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            ),
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.po_token_generation)) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = navController::navigateUp,
+                        onLongClick = navController::backToMain
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.arrow_back),
+                            contentDescription = null
                         )
                     }
-                }
-
-                PreferenceGroupTitle(
-                    title = stringResource(R.string.token_settings)
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
                 )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        Column(
+            Modifier.padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .animateContentSize(
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                )
+        ) {
+            SwitchPreference(
+                title = { Text(stringResource(R.string.web_client_po_token)) },
+                description = stringResource(R.string.web_client_po_token_desc),
+                icon = { Icon(painterResource(R.drawable.token), null) },
+                checked = webClientPoTokenEnabled,
+                onCheckedChange = onWebClientPoTokenEnabledChange,
+            )
 
-                SwitchPreference(
-                    title = { Text(stringResource(R.string.use_visitor_data)) },
-                    description = stringResource(R.string.use_visitor_data_desc),
-                    icon = { Icon(painterResource(R.drawable.person), null) },
-                    checked = useVisitorData,
-                    onCheckedChange = { enabled ->
-                        if (enabled && hasCookie) {
-                            Toast.makeText(
-                                context,
-                                R.string.cookies_must_be_disabled,
-                                Toast.LENGTH_LONG
-                            ).show()
-                        } else {
-                            onUseVisitorDataChange(enabled)
+            AnimatedVisibility(
+                visible = webClientPoTokenEnabled,
+                enter = expandVertically(
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                ) + fadeIn(),
+                exit = shrinkVertically(
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                ) + fadeOut(),
+            ) {
+                Column {
+                    PreferenceGroupTitle(
+                        title = stringResource(R.string.generated_tokens)
+                    )
+
+                    SelectableTokenCard(
+                        label = stringResource(R.string.po_token_gvs),
+                        token = displayGvsToken,
+                        onCopy = {
+                            clipboardManager.setText(AnnotatedString(displayGvsToken))
+                            Toast.makeText(context, R.string.token_copied, Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
+
+                    SelectableTokenCard(
+                        label = stringResource(R.string.po_token_player),
+                        token = displayPlayerToken,
+                        onCopy = {
+                            clipboardManager.setText(AnnotatedString(displayPlayerToken))
+                            Toast.makeText(context, R.string.token_copied, Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
+
+                    SelectableTokenCard(
+                        label = stringResource(R.string.visitor_data),
+                        token = displayVisitorData,
+                        onCopy = {
+                            clipboardManager.setText(AnnotatedString(displayVisitorData))
+                            Toast.makeText(context, R.string.token_copied, Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
+
+                    PreferenceGroupTitle(
+                        title = stringResource(R.string.supported_clients)
+                    )
+
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        SUPPORTED_CLIENTS.forEach { client ->
+                            AssistChip(
+                                onClick = {},
+                                label = {
+                                    Text(
+                                        text = client,
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                },
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                ),
+                            )
                         }
-                    },
-                )
+                    }
 
-                Spacer(Modifier.height(12.dp))
+                    PreferenceGroupTitle(
+                        title = stringResource(R.string.token_settings)
+                    )
 
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        showRegenerateSheet = true
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = MaterialTheme.shapes.medium,
-                    icon = {
-                        Icon(
-                        painter = painterResource(R.drawable.sync),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = stringResource(R.string.regenerate),
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    },
-                )
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.use_visitor_data)) },
+                        description = stringResource(R.string.use_visitor_data_desc),
+                        icon = { Icon(painterResource(R.drawable.person), null) },
+                        checked = useVisitorData,
+                        onCheckedChange = { enabled ->
+                            if (enabled && hasCookie) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.cookies_must_be_disabled,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                onUseVisitorDataChange(enabled)
+                            }
+                        },
+                    )
 
-                Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(12.dp))
+
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            showRegenerateSheet = true
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = MaterialTheme.shapes.medium,
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.sync),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                        text = {
+                            Text(
+                                text = stringResource(R.string.regenerate),
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        },
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+                }
             }
         }
     }
-
-    TopAppBar(
-        title = { Text(stringResource(R.string.po_token_generation)) },
-        navigationIcon = {
-            IconButton(
-                onClick = navController::navigateUp,
-                onLongClick = navController::backToMain
-            ) {
-                Icon(
-                    painterResource(R.drawable.arrow_back),
-                    contentDescription = null
-                )
-            }
-        }
-    )
 }
 
 @Composable

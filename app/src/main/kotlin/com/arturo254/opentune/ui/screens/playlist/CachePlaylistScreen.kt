@@ -86,8 +86,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
@@ -113,6 +111,8 @@ import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.CachePlaylistViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -189,8 +189,8 @@ fun CachePlaylistScreen(
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
 
     // Capture fallback color in composable context
-    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val fallbackColor = MaterialTheme.colorScheme.background.toArgb() // Inactivado surface para forzar pure black
+    val surfaceColor = MaterialTheme.colorScheme.background // Inactivado surface para forzar pure black
 
     // Extract gradient colors from playlist cover (first song thumbnail)
     LaunchedEffect(cachedSongs) {

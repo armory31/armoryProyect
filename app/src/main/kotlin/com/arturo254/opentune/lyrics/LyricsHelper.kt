@@ -11,23 +11,23 @@ package com.arturo254.opentune.lyrics
 import android.content.Context
 import android.util.Log
 import android.util.LruCache
-import com.arturo254.opentune.utils.GlobalLog
 import com.arturo254.opentune.constants.PreferredLyricsProvider
 import com.arturo254.opentune.constants.PreferredLyricsProviderKey
 import com.arturo254.opentune.db.entities.LyricsEntity.Companion.LYRICS_NOT_FOUND
 import com.arturo254.opentune.extensions.toEnum
 import com.arturo254.opentune.models.MediaMetadata
+import com.arturo254.opentune.utils.GlobalLog
+import com.arturo254.opentune.utils.NetworkConnectivityObserver
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.reportException
-import com.arturo254.opentune.utils.NetworkConnectivityObserver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.async
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 
 class LyricsHelper

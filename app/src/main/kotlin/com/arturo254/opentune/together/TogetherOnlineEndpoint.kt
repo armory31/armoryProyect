@@ -9,15 +9,15 @@ package com.arturo254.opentune.together
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import com.arturo254.opentune.constants.TogetherOnlineEndpointCacheKey
+import com.arturo254.opentune.constants.TogetherOnlineEndpointLastCheckedAtKey
+import com.arturo254.opentune.utils.getAsync
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import java.net.URI
 import java.util.concurrent.TimeUnit
-import com.arturo254.opentune.constants.TogetherOnlineEndpointCacheKey
-import com.arturo254.opentune.constants.TogetherOnlineEndpointLastCheckedAtKey
-import com.arturo254.opentune.utils.getAsync
 
 object TogetherOnlineEndpoint {
     private const val EndpointSourceUrl =

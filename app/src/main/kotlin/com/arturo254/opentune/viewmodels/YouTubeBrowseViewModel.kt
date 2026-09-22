@@ -12,10 +12,9 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.pages.BrowseResult
-import com.arturo254.opentune.constants.HideExplicitKey
-import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
 import com.arturo254.opentune.utils.reportException

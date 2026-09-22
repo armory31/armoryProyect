@@ -72,3 +72,10 @@ data class SyncMetadataDto(
     val migratedToAtomic: Boolean = false,
     val version: Int = 1
 )
+
+data class LibrarySummary(
+    val songCount: Int = 0,
+    val albumCount: Int = 0,
+    val artistCount: Int = 0,
+    val totalPlayTimeMillis: Long = 0
+)

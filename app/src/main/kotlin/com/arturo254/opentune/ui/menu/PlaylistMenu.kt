@@ -27,13 +27,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,7 +42,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -67,8 +66,8 @@ import com.arturo254.opentune.extensions.toMediaItem
 import com.arturo254.opentune.playback.ExoDownloadService
 import com.arturo254.opentune.playback.queues.ListQueue
 import com.arturo254.opentune.playback.queues.YouTubeQueue
-import com.arturo254.opentune.ui.component.DefaultDialog
 import com.arturo254.opentune.ui.component.AssignTagsDialog
+import com.arturo254.opentune.ui.component.DefaultDialog
 import com.arturo254.opentune.ui.component.EditPlaylistDialog
 import com.arturo254.opentune.ui.component.MenuSurfaceSection
 import com.arturo254.opentune.ui.component.NewAction

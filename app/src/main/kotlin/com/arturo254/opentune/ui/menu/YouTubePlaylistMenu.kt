@@ -22,26 +22,26 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.Switch
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,7 +50,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,10 +65,6 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import coil3.compose.AsyncImage
-import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.PlaylistItem
-import com.arturo254.opentune.innertube.models.SongItem
-import com.arturo254.opentune.innertube.utils.completed
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalLibraryStateHolder
 import com.arturo254.opentune.LocalPlayerConnection
@@ -81,6 +76,10 @@ import com.arturo254.opentune.constants.ThumbnailCornerRadius
 import com.arturo254.opentune.db.entities.PlaylistEntity
 import com.arturo254.opentune.db.entities.PlaylistSongMap
 import com.arturo254.opentune.extensions.toMediaItem
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.models.PlaylistItem
+import com.arturo254.opentune.innertube.models.SongItem
+import com.arturo254.opentune.innertube.utils.completed
 import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.ExoDownloadService
@@ -572,7 +571,7 @@ fun YouTubePlaylistMenu(
                                                         if (snackbarHostState != null) {
                                                             snackbarHostState.showSnackbar(context.getString(R.string.import_failed))
                                                         } else {
-                                                            android.widget.Toast.makeText(context, context.getString(R.string.import_failed), android.widget.Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(context, context.getString(R.string.import_failed), Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
                                                     return@launch
@@ -609,7 +608,7 @@ fun YouTubePlaylistMenu(
                                                         if (snackbarHostState != null) {
                                                             snackbarHostState.showSnackbar(context.getString(R.string.playlist_synced))
                                                         } else {
-                                                            android.widget.Toast.makeText(context, context.getString(R.string.playlist_synced), android.widget.Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
                                                 }
@@ -625,7 +624,7 @@ fun YouTubePlaylistMenu(
                                                         if (snackbarHostState != null) {
                                                             snackbarHostState.showSnackbar(context.getString(R.string.playlist_synced))
                                                         } else {
-                                                            android.widget.Toast.makeText(context, context.getString(R.string.playlist_synced), android.widget.Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
                                                 }
@@ -637,7 +636,7 @@ fun YouTubePlaylistMenu(
                                                 if (snackbarHostState != null) {
                                                     snackbarHostState.showSnackbar(errorMsg)
                                                 } else {
-                                                    android.widget.Toast.makeText(context, errorMsg, android.widget.Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                                                 }
                                             }
                                         }

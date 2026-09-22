@@ -1,22 +1,15 @@
-/*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
- * Licensed Under GPL-3.0 | see git history for contributors
- */
-
-
 
 package com.arturo254.opentune.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import android.content.Context
-import com.arturo254.opentune.sync.SyncManager
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.AlbumItem
 import com.arturo254.opentune.innertube.models.ArtistItem
 import com.arturo254.opentune.innertube.models.PlaylistItem
 import com.arturo254.opentune.innertube.utils.completed
+import com.arturo254.opentune.sync.SyncManager
 import com.arturo254.opentune.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

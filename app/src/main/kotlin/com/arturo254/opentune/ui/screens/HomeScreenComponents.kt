@@ -12,16 +12,18 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -48,8 +51,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +75,6 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import kotlinx.coroutines.CoroutineScope
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.GridThumbnailHeight
 import com.arturo254.opentune.constants.ListItemHeight
@@ -93,21 +96,18 @@ import com.arturo254.opentune.innertube.models.YTItem
 import com.arturo254.opentune.innertube.pages.HomePage
 import com.arturo254.opentune.models.ItemMetadata
 import com.arturo254.opentune.models.MediaMetadata
+import com.arturo254.opentune.models.SimilarRecommendation
 import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.PlayerConnection
 import com.arturo254.opentune.playback.queues.ListQueue
 import com.arturo254.opentune.playback.queues.YouTubeQueue
 import com.arturo254.opentune.ui.component.AlbumGridItem
 import com.arturo254.opentune.ui.component.ArtistGridItem
-import com.arturo254.opentune.ui.component.LocalMenuState
 import com.arturo254.opentune.ui.component.MenuState
 import com.arturo254.opentune.ui.component.NavigationTitle
 import com.arturo254.opentune.ui.component.SongGridItem
 import com.arturo254.opentune.ui.component.SongListItem
 import com.arturo254.opentune.ui.component.YouTubeGridItem
-import com.arturo254.opentune.ui.component.shimmer.GridItemPlaceHolder
-import com.arturo254.opentune.ui.component.shimmer.ShimmerHost
-import com.arturo254.opentune.ui.component.shimmer.TextPlaceholder
 import com.arturo254.opentune.ui.menu.AlbumMenu
 import com.arturo254.opentune.ui.menu.ArtistMenu
 import com.arturo254.opentune.ui.menu.SongMenu
@@ -115,18 +115,11 @@ import com.arturo254.opentune.ui.menu.YouTubeAlbumMenu
 import com.arturo254.opentune.ui.menu.YouTubeArtistMenu
 import com.arturo254.opentune.ui.menu.YouTubePlaylistMenu
 import com.arturo254.opentune.ui.menu.YouTubeSongMenu
-import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
-import com.arturo254.opentune.models.SimilarRecommendation
-import kotlin.math.ceil
-import kotlin.random.Random
-import kotlin.math.min
-
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arturo254.opentune.viewmodels.HomeViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlin.math.ceil
+import kotlin.math.min
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

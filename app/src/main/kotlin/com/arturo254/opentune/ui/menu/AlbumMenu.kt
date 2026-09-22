@@ -33,10 +33,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,8 +52,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,11 +69,10 @@ import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.LocalDownloadUtil
-import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.LocalLibraryStateHolder
+import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.LocalSyncManager
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.ArtistSeparatorsKey
@@ -82,6 +81,7 @@ import com.arturo254.opentune.constants.ListThumbnailSize
 import com.arturo254.opentune.db.entities.Album
 import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.extensions.toMediaItem
+import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.playback.ExoDownloadService
 import com.arturo254.opentune.playback.queues.ListQueue
 import com.arturo254.opentune.ui.component.AlbumListItem

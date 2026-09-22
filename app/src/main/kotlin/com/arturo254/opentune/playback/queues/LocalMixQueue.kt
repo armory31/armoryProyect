@@ -15,8 +15,8 @@ import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.WatchEndpoint
 import com.arturo254.opentune.models.MediaMetadata
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 class LocalMixQueue(
     private val database: MusicDatabase,

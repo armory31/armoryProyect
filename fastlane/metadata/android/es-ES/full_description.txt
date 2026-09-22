@@ -13,7 +13,7 @@ Características:
 - Normalización de audio
 - Control de tempo y tono
 - Tema dinámico
-- Soporte multilingüe
+- soporte multilingüe
 - Compatibilidad con Android Auto
 - Material Design 3
 - Descarga de carátulas

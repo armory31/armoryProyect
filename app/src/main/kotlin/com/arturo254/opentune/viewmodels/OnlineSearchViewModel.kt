@@ -16,12 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.innertube.YouTube
-
 import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.innertube.pages.SearchSummaryPage
-import com.arturo254.opentune.constants.HideExplicitKey
-import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.models.ItemsPage
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get

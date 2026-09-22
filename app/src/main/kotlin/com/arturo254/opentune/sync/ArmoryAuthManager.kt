@@ -6,14 +6,13 @@ import com.arturo254.opentune.App
 import com.arturo254.opentune.constants.ArmoryAccountEmailKey
 import com.arturo254.opentune.constants.ArmoryAccountUidKey
 import com.arturo254.opentune.utils.dataStore
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
-import com.arturo254.opentune.db.MusicDatabase
-import com.google.android.gms.tasks.Tasks
 import javax.inject.Inject
 import javax.inject.Singleton
 

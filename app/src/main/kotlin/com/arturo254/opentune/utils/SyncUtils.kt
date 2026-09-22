@@ -8,51 +8,50 @@
 
 package com.arturo254.opentune.utils
 
+// import com.arturo254.opentune.innertube.utils.parseCookieString
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import com.arturo254.opentune.constants.SelectedYtmPlaylistsKey
 import com.arturo254.opentune.constants.YtmSyncKey
+import com.arturo254.opentune.db.MusicDatabase
+import com.arturo254.opentune.db.entities.ArtistEntity
+import com.arturo254.opentune.db.entities.PlaylistEntity
+import com.arturo254.opentune.db.entities.PlaylistSongMap
+import com.arturo254.opentune.db.entities.SongEntity
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.AlbumItem
 import com.arturo254.opentune.innertube.models.ArtistItem
 import com.arturo254.opentune.innertube.models.PlaylistItem
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.utils.completed
-import com.arturo254.opentune.innertube.utils.parseCookieString
-import com.arturo254.opentune.db.MusicDatabase
-import com.arturo254.opentune.db.entities.ArtistEntity
-import com.arturo254.opentune.db.entities.PlaylistEntity
-import com.arturo254.opentune.db.entities.PlaylistSongMap
-import com.arturo254.opentune.db.entities.SongEntity
 import com.arturo254.opentune.models.toMediaMetadata
+import com.arturo254.opentune.sync.FavoriteAlbumDto
+import com.arturo254.opentune.sync.FavoriteArtistDto
+import com.arturo254.opentune.sync.FavoriteSongDto
 import com.arturo254.opentune.sync.LibraryStateHolder
 import com.arturo254.opentune.sync.SyncManager
 import com.arturo254.opentune.sync.UserLibraryDto
-import com.arturo254.opentune.sync.FavoriteSongDto
-import com.arturo254.opentune.sync.FavoriteAlbumDto
-import com.arturo254.opentune.sync.FavoriteArtistDto
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.async
-import kotlinx.coroutines.supervisorScope
 import timber.log.Timber
 import java.time.LocalDateTime
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -390,7 +389,7 @@ class SyncUtils @Inject constructor(
                                             name = artist.title,
                                             thumbnailUrl = artist.thumbnail,
                                             channelId = artist.channelId,
-                                            lastUpdateTime = java.time.LocalDateTime.now()
+                                            lastUpdateTime = LocalDateTime.now()
                                         )
                                     )
                                 }

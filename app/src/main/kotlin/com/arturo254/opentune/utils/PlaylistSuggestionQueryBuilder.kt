@@ -7,11 +7,10 @@
 
 package com.arturo254.opentune.utils
 
-import com.arturo254.opentune.models.PlaylistSuggestionQuery
 import com.arturo254.opentune.db.entities.PlaylistSong
+import com.arturo254.opentune.models.PlaylistSuggestionQuery
 import java.time.LocalDateTime
 import java.time.Year
-import java.time.format.DateTimeFormatter
 
 object PlaylistSuggestionQueryBuilder {
     

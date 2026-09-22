@@ -210,13 +210,13 @@ fun SettingsScreen(
                     },
                     scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.largeTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                        containerColor = MaterialTheme.colorScheme.background, // Inactivado surface para forzar pure black
+                        scrolledContainerColor = MaterialTheme.colorScheme.background, // Inactivado surface para forzar pure black
                     ),
                 )
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background, // Inactivado surface para forzar pure black
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->

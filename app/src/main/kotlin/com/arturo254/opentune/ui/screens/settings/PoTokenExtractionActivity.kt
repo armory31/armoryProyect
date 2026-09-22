@@ -14,15 +14,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -137,7 +137,7 @@ class PoTokenExtractionActivity : ComponentActivity() {
                     putExtra(EXTRA_ERROR, error)
                 }
             }
-            setResult(Activity.RESULT_CANCELED, data)
+            setResult(RESULT_CANCELED, data)
             finish()
         }
 
@@ -149,7 +149,7 @@ class PoTokenExtractionActivity : ComponentActivity() {
             val playerToken = PoTokenGenerator.generateColdStartToken(visitorData, "player")
 
             setResult(
-                Activity.RESULT_OK,
+                RESULT_OK,
                 Intent().apply {
                     putExtra(EXTRA_VISITOR_DATA, visitorData)
                     putExtra(EXTRA_GVS_TOKEN, gvsToken)

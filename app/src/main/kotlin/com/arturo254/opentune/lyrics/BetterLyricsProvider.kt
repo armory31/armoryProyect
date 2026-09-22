@@ -9,13 +9,12 @@
 package com.arturo254.opentune.lyrics
 
 import android.content.Context
+import android.util.Log
 import com.arturo254.opentune.betterlyrics.BetterLyrics
 import com.arturo254.opentune.constants.EnableBetterLyricsKey
+import com.arturo254.opentune.utils.GlobalLog
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
-
-import com.arturo254.opentune.utils.GlobalLog
-import android.util.Log
 
 object BetterLyricsProvider : LyricsProvider {
     init {

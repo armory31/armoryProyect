@@ -95,17 +95,15 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
-import com.arturo254.opentune.constants.DisableBlurKey
-import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.AutoPlaylistSongSortDescendingKey
 import com.arturo254.opentune.constants.AutoPlaylistSongSortType
 import com.arturo254.opentune.constants.AutoPlaylistSongSortTypeKey
+import com.arturo254.opentune.constants.DisableBlurKey
+import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.YtmSyncKey
 import com.arturo254.opentune.db.entities.Song
 import com.arturo254.opentune.extensions.toMediaItem
@@ -128,6 +126,8 @@ import com.arturo254.opentune.utils.makeTimeString
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.AutoPlaylistViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -284,8 +284,8 @@ fun AutoPlaylistScreen(
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
 
     // Capture fallback color in composable context
-    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val fallbackColor = MaterialTheme.colorScheme.background.toArgb() // Inactivado surface para forzar pure black
+    val surfaceColor = MaterialTheme.colorScheme.background // Inactivado surface para forzar pure black
 
     // Extract gradient colors from playlist cover (first song thumbnail)
     LaunchedEffect(songs) {

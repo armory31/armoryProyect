@@ -1,15 +1,15 @@
 package com.arturo254.opentune
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 
 val GoldGradient = Brush.linearGradient(
     colors = listOf(OpenTuneColors.Gold1, OpenTuneColors.Gold3, OpenTuneColors.Gold5)

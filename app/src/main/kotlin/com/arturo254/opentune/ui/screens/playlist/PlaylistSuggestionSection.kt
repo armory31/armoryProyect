@@ -37,9 +37,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.LocalPlayerConnection
 import com.arturo254.opentune.R
@@ -52,6 +49,9 @@ import com.arturo254.opentune.ui.component.IconButton
 import com.arturo254.opentune.ui.component.NavigationTitle
 import com.arturo254.opentune.ui.component.YouTubeListItem
 import com.arturo254.opentune.viewmodels.LocalPlaylistViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun PlaylistSuggestionsSection(
@@ -62,8 +62,8 @@ fun PlaylistSuggestionsSection(
     val database = LocalDatabase.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current
-    val isPlaying by playerConnection?.isPlaying?.collectAsState() ?: androidx.compose.runtime.mutableStateOf(false)
-    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsState() ?: androidx.compose.runtime.mutableStateOf(null)
+    val isPlaying by playerConnection?.isPlaying?.collectAsState() ?: mutableStateOf(false)
+    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsState() ?: mutableStateOf(null)
     
     val playlistSuggestions by viewModel.playlistSuggestions.collectAsState()
     val isLoading by viewModel.isLoadingSuggestions.collectAsState()

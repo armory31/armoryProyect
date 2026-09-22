@@ -7,16 +7,6 @@
 package com.arturo254.opentune.lyrics
 
 import android.util.Log
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import com.arturo254.opentune.constants.PreloadQueueLyricsEnabledKey
 import com.arturo254.opentune.constants.QueueLyricsPreloadCountKey
 import com.arturo254.opentune.db.MusicDatabase
@@ -25,7 +15,14 @@ import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.utils.NetworkConnectivityObserver
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.reportException
-import kotlinx.coroutines.delay
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**

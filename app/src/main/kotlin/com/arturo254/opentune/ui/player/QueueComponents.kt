@@ -35,7 +35,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -75,12 +74,8 @@ import com.arturo254.opentune.R
 import com.arturo254.opentune.db.entities.FormatEntity
 import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.ui.component.ActionPromptDialog
-import com.arturo254.opentune.ui.component.BottomSheetPageState
 import com.arturo254.opentune.ui.component.BottomSheetState
-import com.arturo254.opentune.ui.component.MenuState
 import com.arturo254.opentune.ui.component.bottomSheetDraggable
-import com.arturo254.opentune.ui.menu.PlayerMenu
-import com.arturo254.opentune.ui.utils.ShowMediaInfo
 import com.arturo254.opentune.utils.makeTimeString
 import kotlin.math.roundToInt
 

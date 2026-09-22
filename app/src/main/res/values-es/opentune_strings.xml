@@ -6,7 +6,7 @@
     <string name="back_button_desc">Atrás</string>
     <string name="no_title">Sin título</string>
     <string name="unknown_artist">Artista desconocido</string>
-    <string name="loading_charts">Cargando rankings...</string>
+    <string name="loading_charts">Cargando rankings…</string>
     <string name="retry_button">Reintentar</string>
     <string name="album_cover_desc">Carátula</string>
     <string name="top_music_videos">Top de vídeos musicales</string>

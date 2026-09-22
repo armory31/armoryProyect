@@ -15,15 +15,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.RewriteQueriesToDropUnusedColumns
+import androidx.room.RoomWarnings
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
-import androidx.room.RoomWarnings
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.arturo254.opentune.innertube.models.PlaylistItem
-import com.arturo254.opentune.innertube.models.SongItem
-import com.arturo254.opentune.innertube.pages.AlbumPage
-import com.arturo254.opentune.innertube.pages.ArtistPage
 import com.arturo254.opentune.constants.AlbumSortType
 import com.arturo254.opentune.constants.ArtistSongSortType
 import com.arturo254.opentune.constants.ArtistSortType
@@ -32,7 +28,6 @@ import com.arturo254.opentune.constants.SongSortType
 import com.arturo254.opentune.db.entities.Album
 import com.arturo254.opentune.db.entities.AlbumArtistMap
 import com.arturo254.opentune.db.entities.AlbumEntity
-import com.arturo254.opentune.db.entities.PlayCountEntity
 import com.arturo254.opentune.db.entities.AlbumWithSongs
 import com.arturo254.opentune.db.entities.Artist
 import com.arturo254.opentune.db.entities.ArtistEntity
@@ -40,10 +35,12 @@ import com.arturo254.opentune.db.entities.Event
 import com.arturo254.opentune.db.entities.EventWithSong
 import com.arturo254.opentune.db.entities.FormatEntity
 import com.arturo254.opentune.db.entities.LyricsEntity
+import com.arturo254.opentune.db.entities.PlayCountEntity
 import com.arturo254.opentune.db.entities.Playlist
 import com.arturo254.opentune.db.entities.PlaylistEntity
 import com.arturo254.opentune.db.entities.PlaylistSong
 import com.arturo254.opentune.db.entities.PlaylistSongMap
+import com.arturo254.opentune.db.entities.PlaylistTagMap
 import com.arturo254.opentune.db.entities.RelatedSongMap
 import com.arturo254.opentune.db.entities.SearchHistory
 import com.arturo254.opentune.db.entities.SetVideoIdEntity
@@ -53,11 +50,15 @@ import com.arturo254.opentune.db.entities.SongArtistMap
 import com.arturo254.opentune.db.entities.SongEntity
 import com.arturo254.opentune.db.entities.SongWithStats
 import com.arturo254.opentune.db.entities.TagEntity
-import com.arturo254.opentune.db.entities.PlaylistTagMap
 import com.arturo254.opentune.extensions.reversed
 import com.arturo254.opentune.extensions.toSQLiteQuery
+import com.arturo254.opentune.innertube.models.PlaylistItem
+import com.arturo254.opentune.innertube.models.SongItem
+import com.arturo254.opentune.innertube.pages.AlbumPage
+import com.arturo254.opentune.innertube.pages.ArtistPage
 import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.models.toMediaMetadata
+import com.arturo254.opentune.sync.LibrarySummary
 import com.arturo254.opentune.ui.utils.resize
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -780,13 +781,13 @@ interface DatabaseDao {
             AlbumSortType.CREATE_DATE -> albumsByRowId(ids)
             AlbumSortType.NAME ->
                 albumsByTitle(ids).map { albums ->
-                    val collator = Collator.getInstance(java.util.Locale.getDefault())
+                    val collator = Collator.getInstance(Locale.getDefault())
                     collator.strength = Collator.PRIMARY
                     albums.sortedWith(compareBy(collator) { it.album.title })
                 }
             AlbumSortType.ARTIST ->
                 albumsByRowId(ids).map { albums ->
-                    val collator = Collator.getInstance(java.util.Locale.getDefault())
+                    val collator = Collator.getInstance(Locale.getDefault())
                     collator.strength = Collator.PRIMARY
                     albums.sortedWith(compareBy(collator) { album -> album.artists.joinToString("") { artist -> artist.name } })
                 }
@@ -915,6 +916,28 @@ interface DatabaseDao {
                 ArtistSortType.PLAY_TIME -> artists
             }.reversed(descending)
         }
+
+    @Query("SELECT id FROM artist WHERE isBookmarked = 1")
+    fun getBookmarkedArtistIds(): Flow<List<String>>
+
+    @Query("SELECT id FROM album WHERE isLiked = 1")
+    fun getLikedAlbumIds(): Flow<List<String>>
+
+    @Query("SELECT videoId FROM set_video_id")
+    fun getLikedSongIds(): Flow<List<String>>
+
+    @Query("SELECT id FROM playlist")
+    fun getLikedPlaylistIds(): Flow<List<String>>
+
+    @Transaction
+    @Query("""
+        SELECT 
+            (SELECT COUNT(*) FROM song WHERE id IN (SELECT videoId FROM set_video_id)) as songCount,
+            (SELECT COUNT(*) FROM album WHERE isLiked = 1) as albumCount,
+            (SELECT COUNT(*) FROM artist WHERE isBookmarked = 1) as artistCount,
+            (SELECT COALESCE(SUM(totalPlayTime), 0) FROM song) as totalPlayTimeMillis
+    """)
+    fun getLibrarySummary(): Flow<LibrarySummary>
 
     @Transaction
     @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId")

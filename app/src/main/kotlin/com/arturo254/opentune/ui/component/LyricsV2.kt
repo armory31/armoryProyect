@@ -1298,7 +1298,7 @@ private fun AnimatedWordV2(
                             val edgeWidth = 8.dp.toPx()
                             val center = (size.width + edgeWidth * 2) * progress - edgeWidth
                             drawRect(
-                                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                brush = Brush.horizontalGradient(
                                     colors = listOf(Color.Black, Color.Transparent),
                                     startX = center - edgeWidth,
                                     endX = center + edgeWidth,

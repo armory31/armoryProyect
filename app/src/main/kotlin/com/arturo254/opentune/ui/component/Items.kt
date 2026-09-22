@@ -12,9 +12,7 @@ import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
@@ -23,20 +21,30 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.border
-import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -47,7 +55,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -67,8 +74,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -81,6 +86,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.media3.common.MediaItem
@@ -92,12 +98,12 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import com.arturo254.opentune.ArmoryColors
-import com.arturo254.opentune.PremiumBodyFont
-import com.arturo254.opentune.PremiumTitleFont
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalLibraryStateHolder
 import com.arturo254.opentune.LocalPlayerConnection
+import com.arturo254.opentune.PremiumBodyFont
+import com.arturo254.opentune.PremiumTitleFont
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.CropThumbnailToSquareKey
 import com.arturo254.opentune.constants.DisableBlurKey
@@ -130,7 +136,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
@@ -283,12 +288,12 @@ fun LibraryPlaylistFeatureCard(
     val thumbnailShape = RoundedCornerShape(12.dp)
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = com.arturo254.opentune.ArmoryColors.Silver5.copy(alpha = 0.4f)
+            containerColor = ArmoryColors.Silver5.copy(alpha = 0.4f)
         ),
         shape = RoundedCornerShape(16.dp),
         modifier = modifier.border(
             width = 0.5.dp,
-            color = com.arturo254.opentune.ArmoryColors.Silver4.copy(alpha = 0.2f),
+            color = ArmoryColors.Silver4.copy(alpha = 0.2f),
             shape = RoundedCornerShape(16.dp)
         ),
     ) {
@@ -305,7 +310,7 @@ fun LibraryPlaylistFeatureCard(
                     Icon(
                         painter = painterResource(playlistPlaceholderIcon(playlist, autoPlaylist)),
                         contentDescription = null,
-                        tint = com.arturo254.opentune.ArmoryColors.Gold3.copy(alpha = 0.7f),
+                        tint = ArmoryColors.Gold3.copy(alpha = 0.7f),
                         modifier = Modifier.size(thumbnailSize / 2.5f),
                     )
                 },
@@ -320,14 +325,14 @@ fun LibraryPlaylistFeatureCard(
                     text = playlist.playlist.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = com.arturo254.opentune.ArmoryColors.Silver1,
+                    color = ArmoryColors.Silver1,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = subtitleText,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = com.arturo254.opentune.ArmoryColors.Silver3,
+                    color = ArmoryColors.Silver3,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

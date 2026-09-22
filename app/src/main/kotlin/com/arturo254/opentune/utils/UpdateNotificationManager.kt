@@ -23,12 +23,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import com.arturo254.opentune.BuildConfig
 import com.arturo254.opentune.MainActivity
 import com.arturo254.opentune.R
@@ -37,6 +31,12 @@ import com.arturo254.opentune.constants.LastNotifiedVersionKey
 import com.arturo254.opentune.constants.LastUpdateCheckKey
 import com.arturo254.opentune.constants.UpdateChannel
 import com.arturo254.opentune.constants.UpdateChannelKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 object UpdateNotificationManager {

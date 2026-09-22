@@ -13,9 +13,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.arturo254.opentune.constants.InnerTubeCookieKey
 import com.arturo254.opentune.constants.YtmSyncKey
+import com.arturo254.opentune.innertube.utils.parseCookieString
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
-import com.arturo254.opentune.innertube.utils.parseCookieString
 
 fun Context.isSyncEnabled(): Boolean {
     return dataStore.get(YtmSyncKey, true) && isUserLoggedIn()

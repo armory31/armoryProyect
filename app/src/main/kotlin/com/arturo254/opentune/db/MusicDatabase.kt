@@ -22,24 +22,23 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabase.JournalMode
 import androidx.room.TypeConverters
-import androidx.room.withTransaction
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
+import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeout
 import com.arturo254.opentune.db.entities.AlbumArtistMap
 import com.arturo254.opentune.db.entities.AlbumEntity
 import com.arturo254.opentune.db.entities.ArtistEntity
 import com.arturo254.opentune.db.entities.Event
 import com.arturo254.opentune.db.entities.FormatEntity
 import com.arturo254.opentune.db.entities.LyricsEntity
-import com.arturo254.opentune.db.entities.PlaylistEntity
 import com.arturo254.opentune.db.entities.PlayCountEntity
+import com.arturo254.opentune.db.entities.PlaylistEntity
 import com.arturo254.opentune.db.entities.PlaylistSongMap
 import com.arturo254.opentune.db.entities.PlaylistSongMapPreview
+import com.arturo254.opentune.db.entities.PlaylistTagMap
 import com.arturo254.opentune.db.entities.RelatedSongMap
 import com.arturo254.opentune.db.entities.SearchHistory
 import com.arturo254.opentune.db.entities.SetVideoIdEntity
@@ -49,8 +48,9 @@ import com.arturo254.opentune.db.entities.SongEntity
 import com.arturo254.opentune.db.entities.SortedSongAlbumMap
 import com.arturo254.opentune.db.entities.SortedSongArtistMap
 import com.arturo254.opentune.db.entities.TagEntity
-import com.arturo254.opentune.db.entities.PlaylistTagMap
 import com.arturo254.opentune.extensions.toSQLiteQuery
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -235,7 +235,7 @@ abstract class InternalDatabase : RoomDatabase() {
 private class DatabaseCallback : RoomDatabase.Callback() {
     override fun onOpen(db: SupportSQLiteDatabase) {
         super.onOpen(db)
-        java.util.concurrent.Executors.newSingleThreadExecutor().execute {
+        Executors.newSingleThreadExecutor().execute {
             try {
                 db.query("PRAGMA busy_timeout = 60000").close()
                 db.query("PRAGMA cache_size = -16000").close()

@@ -6,11 +6,22 @@
 
 package com.arturo254.opentune.utils
 
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
 import android.content.ContextWrapper
-import android.app.Activity
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.RadialGradient
+import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.Shader
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -20,27 +31,26 @@ import android.provider.MediaStore
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.view.PixelCopy
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.withClip
 import androidx.core.graphics.withTranslation
+import androidx.core.view.drawToBitmap
 import coil3.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import android.view.View
-import android.view.PixelCopy
-import androidx.core.view.drawToBitmap
 import com.arturo254.opentune.R
-import com.arturo254.opentune.ui.component.LyricsBackgroundType
 import com.arturo254.opentune.ui.component.LyricsCardConfig
 import com.arturo254.opentune.ui.component.LyricsGlassStyle
 import com.arturo254.opentune.ui.component.LyricsLayoutStyle
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.coroutines.resume
@@ -670,11 +680,11 @@ object ComposeToImage {
         val artBottom = padding + size * 0.4f + padding * 0.5f
         val titlePaint = TextPaint().apply {
             color = mainColor; textSize = cardSize * 0.042f; typeface = Typeface.DEFAULT_BOLD
-            textAlign = android.graphics.Paint.Align.CENTER; isAntiAlias = true; letterSpacing = -0.02f
+            textAlign = Paint.Align.CENTER; isAntiAlias = true; letterSpacing = -0.02f
         }
         val artistPaint = TextPaint().apply {
             color = secColor; textSize = cardSize * 0.030f
-            textAlign = android.graphics.Paint.Align.CENTER; isAntiAlias = true
+            textAlign = Paint.Align.CENTER; isAntiAlias = true
         }
         if (config.showTitle) canvas.drawText(songTitle, size / 2f, artBottom, titlePaint)
         if (config.showArtist) canvas.drawText(artistName, size / 2f, artBottom + cardSize * 0.05f, artistPaint)
@@ -751,11 +761,11 @@ object ComposeToImage {
         // Metadatos arriba centrados
         val titlePaint = TextPaint().apply {
             color = mainColor; textSize = cardSize * 0.038f; typeface = Typeface.DEFAULT_BOLD
-            textAlign = android.graphics.Paint.Align.CENTER; isAntiAlias = true; letterSpacing = 0.01f
+            textAlign = Paint.Align.CENTER; isAntiAlias = true; letterSpacing = 0.01f
         }
         val artistPaint = TextPaint().apply {
             color = secColor; textSize = cardSize * 0.028f
-            textAlign = android.graphics.Paint.Align.CENTER; isAntiAlias = true; letterSpacing = 0.04f
+            textAlign = Paint.Align.CENTER; isAntiAlias = true; letterSpacing = 0.04f
         }
         var headerBottom = padding
         if (config.showTitle) {

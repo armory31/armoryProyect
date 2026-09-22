@@ -11,15 +11,13 @@ package com.arturo254.opentune.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.opentune.innertube.YouTube
-import com.arturo254.opentune.innertube.models.SearchSuggestions
-import com.arturo254.opentune.innertube.models.YTItem
-
-import com.arturo254.opentune.innertube.models.filterVideo
-import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.db.entities.SearchHistory
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.models.SearchSuggestions
+import com.arturo254.opentune.innertube.models.YTItem
+import com.arturo254.opentune.innertube.models.filterVideo
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
 import dagger.hilt.android.lifecycle.HiltViewModel

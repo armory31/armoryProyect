@@ -219,6 +219,7 @@ data class YouTubeClient(
             packageName = "com.google.ios.youtube"
         )
 
+/*
         val MWEB = YouTubeClient(
             clientName = "MWEB",
             clientVersion = "2.20260114.00.00",
@@ -253,6 +254,7 @@ data class YouTubeClient(
             loginSupported = true,
             useSignatureTimestamp = true,
         )
+*/
 
         val ANDROID_MUSIC = YouTubeClient(
             clientName = "ANDROID_MUSIC",

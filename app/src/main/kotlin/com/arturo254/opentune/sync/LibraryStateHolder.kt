@@ -3,7 +3,7 @@
 package com.arturo254.opentune.sync
 
 import com.arturo254.opentune.constants.AlbumSortType
-import com.arturo254.opentune.constants.SongSortType
+import com.arturo254.opentune.constants.ArtistSortType
 import com.arturo254.opentune.db.DatabaseDao
 import com.arturo254.opentune.db.entities.Album
 import com.arturo254.opentune.db.entities.Artist
@@ -12,7 +12,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,30 +49,29 @@ class LibraryStateHolder @Inject constructor(
         }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    // Reactive sets of IDs for quick lookup
-    val likedSongIds: Flow<Set<String>> = libraryDto.map { it?.favorites?.map { s -> s.videoId }?.toSet() ?: emptySet() }
-    val likedAlbumIds: Flow<Set<String>> = libraryDto.map { it?.albums?.map { a -> a.id }?.toSet() ?: emptySet() }
-    val bookmarkedArtistIds: Flow<Set<String>> = libraryDto.map { it?.artists?.map { ar -> ar.id }?.toSet() ?: emptySet() }
-    val likedPlaylistIds: Flow<Set<String>> = libraryDto.map { it?.playlists?.map { p -> p.id }?.toSet() ?: emptySet() }
+    // Reactive sets of IDs for quick lookup (Local-First: Reading directly from local DB Room)
+    val likedSongIds: Flow<Set<String>> = databaseDao.getLikedSongIds()
+        .map { it.toSet() }
+        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked songs") }
+    
+    val likedAlbumIds: Flow<Set<String>> = databaseDao.getLikedAlbumIds()
+        .map { it.toSet() }
+        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked albums") }
+    
+    val bookmarkedArtistIds: Flow<Set<String>> = databaseDao.getBookmarkedArtistIds()
+        .map { it.toSet() }
+        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} bookmarked artists") }
+    
+    val likedPlaylistIds: Flow<Set<String>> = databaseDao.getLikedPlaylistIds()
+        .map { it.toSet() }
+        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} playlists") }
 
     // Merged data for UI
-    fun getLibrarySongs(): Flow<List<Song>> = likedSongIds.flatMapLatest { ids ->
-        databaseDao.songs(SongSortType.CREATE_DATE, false).map { songs ->
-            songs.filter { it.song.id in ids }
-        }
-    }
+    fun getLibrarySongs(): Flow<List<Song>> = databaseDao.likedSongsByRowIdAsc()
 
-    fun getLibraryAlbums(): Flow<List<Album>> = likedAlbumIds.flatMapLatest { ids ->
-        databaseDao.albums(AlbumSortType.CREATE_DATE, false).map { albums ->
-            albums.filter { it.album.id in ids }
-        }
-    }
+    fun getLibraryAlbums(): Flow<List<Album>> = databaseDao.albumsLiked(AlbumSortType.CREATE_DATE, false)
 
-    fun getLibraryArtists(): Flow<List<Artist>> = bookmarkedArtistIds.flatMapLatest { ids ->
-        databaseDao.allArtistsByNameAsc().map { artists ->
-            artists.filter { it.artist.id in ids }
-        }
-    }
+    fun getLibraryArtists(): Flow<List<Artist>> = databaseDao.artistsBookmarked(ArtistSortType.CREATE_DATE, false)
 
     fun isSongLiked(songId: String): Flow<Boolean> = likedSongIds.map { it.contains(songId) }
     fun isAlbumLiked(albumId: String): Flow<Boolean> = likedAlbumIds.map { it.contains(albumId) }

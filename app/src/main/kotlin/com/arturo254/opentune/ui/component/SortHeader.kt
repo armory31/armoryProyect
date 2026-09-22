@@ -33,8 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arturo254.opentune.R
-import com.arturo254.opentune.constants.PlaylistSortType
 import com.arturo254.opentune.constants.PlaylistSongSortType
+import com.arturo254.opentune.constants.PlaylistSortType
 
 @Composable
 inline fun <reified T : Enum<T>> SortHeader(

@@ -102,9 +102,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.valentinilk.shimmer.shimmer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.LocalPlayerConnection
@@ -112,12 +109,9 @@ import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.AppBarHeight
 import com.arturo254.opentune.constants.DisableBlurKey
 import com.arturo254.opentune.constants.HideExplicitKey
-import com.arturo254.opentune.db.entities.PlaylistEntity
-import com.arturo254.opentune.db.entities.PlaylistSongMap
 import com.arturo254.opentune.extensions.metadata
 import com.arturo254.opentune.extensions.toMediaItem
 import com.arturo254.opentune.extensions.togglePlayPause
-import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.WatchEndpoint
 import com.arturo254.opentune.models.toMediaMetadata
 import com.arturo254.opentune.playback.queues.YouTubeQueue
@@ -138,6 +132,9 @@ import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.ui.utils.formatCompactCount
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel
+import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -218,8 +215,8 @@ fun OnlinePlaylistScreen(
 
     // Gradient colors state for playlist cover
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val fallbackColor = MaterialTheme.colorScheme.background.toArgb() // Inactivado surface para forzar pure black
+    val surfaceColor = MaterialTheme.colorScheme.background // Inactivado surface para forzar pure black
 
     // Extract gradient colors from playlist cover
     LaunchedEffect(playlist?.thumbnail) {

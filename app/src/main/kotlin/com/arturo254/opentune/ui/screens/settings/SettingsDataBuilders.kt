@@ -10,12 +10,10 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -142,6 +140,16 @@ fun buildSettingsGroups(
                             accentColor = MaterialTheme.colorScheme.tertiary,
                             keywords = listOf("experimental", "debug", "developer", "labs", "internal"),
                             onClick = { resetSearch(); navController.navigate("settings/misc") },
+                        ),
+                    )
+                    add(
+                        SettingsItem(
+                            icon = painterResource(R.drawable.link),
+                            title = "Configurar PO Token",
+                            subtitle = "Token de origen obligatorio de YouTube",
+                            accentColor = MaterialTheme.colorScheme.primary,
+                            keywords = listOf("po_token", "youtube", "token", "origin", "fix"),
+                            onClick = { resetSearch(); navController.navigate("settings/po_token") },
                         ),
                     )
                     add(

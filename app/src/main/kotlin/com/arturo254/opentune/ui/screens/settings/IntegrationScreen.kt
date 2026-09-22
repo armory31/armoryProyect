@@ -30,12 +30,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.R
-import com.arturo254.opentune.ui.component.PreferenceGroupTitle
 import com.arturo254.opentune.constants.ListenBrainzEnabledKey
 import com.arturo254.opentune.constants.ListenBrainzTokenKey
 import com.arturo254.opentune.ui.component.IconButton
 import com.arturo254.opentune.ui.component.InfoLabel
 import com.arturo254.opentune.ui.component.PreferenceEntry
+import com.arturo254.opentune.ui.component.PreferenceGroupTitle
 import com.arturo254.opentune.ui.component.SwitchPreference
 import com.arturo254.opentune.ui.component.TextFieldDialog
 import com.arturo254.opentune.ui.utils.backToMain

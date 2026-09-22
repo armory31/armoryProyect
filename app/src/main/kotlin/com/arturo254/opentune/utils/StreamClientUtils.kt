@@ -160,8 +160,8 @@ object StreamClientUtils {
             clientName == "WEB_REMIX" -> YouTubeClient.WEB_REMIX
             clientName == "WEB" -> YouTubeClient.WEB
             clientName == "WEB_CREATOR" -> YouTubeClient.WEB_CREATOR
-            clientName == "MWEB" -> YouTubeClient.MWEB
-            clientName == "WEB_EMBEDDED_PLAYER" || clientName == "WEB_EMBEDDED" -> YouTubeClient.WEB_EMBEDDED
+//            clientName == "MWEB" -> YouTubeClient.MWEB
+//            clientName == "WEB_EMBEDDED_PLAYER" || clientName == "WEB_EMBEDDED" -> YouTubeClient.WEB_EMBEDDED
             clientName == "TVHTML5" -> YouTubeClient.TVHTML5
             clientName == "TVHTML5_SIMPLY_EMBEDDED_PLAYER" || clientName == "TVHTML5_SIMPLY" ->
                 YouTubeClient.TVHTML5_SIMPLY_EMBEDDED_PLAYER

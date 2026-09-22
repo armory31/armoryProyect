@@ -32,6 +32,9 @@ package com.arturo254.opentune.ui.screens
  import com.arturo254.opentune.LocalPlayerConnection
  import com.arturo254.opentune.R
  import com.arturo254.opentune.constants.GridThumbnailHeight
+ import com.arturo254.opentune.innertube.models.AlbumItem
+ import com.arturo254.opentune.innertube.models.ArtistItem
+ import com.arturo254.opentune.innertube.models.PlaylistItem
  import com.arturo254.opentune.ui.component.IconButton
  import com.arturo254.opentune.ui.component.LocalMenuState
  import com.arturo254.opentune.ui.component.YouTubeGridItem
@@ -42,11 +45,8 @@ package com.arturo254.opentune.ui.screens
  import com.arturo254.opentune.ui.menu.YouTubePlaylistMenu
  import com.arturo254.opentune.ui.utils.backToMain
  import com.arturo254.opentune.viewmodels.BrowseViewModel
- import com.arturo254.opentune.innertube.models.AlbumItem
- import com.arturo254.opentune.innertube.models.ArtistItem
- import com.arturo254.opentune.innertube.models.PlaylistItem
- 
- @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
  @Composable
  fun BrowseScreen(
     navController: NavController,

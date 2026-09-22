@@ -12,8 +12,8 @@
 
 package com.arturo254.opentune.ui.player
 
-import com.arturo254.opentune.canvas.CanvasArtwork
 import com.arturo254.opentune.canvas.ArmoryCanvas
+import com.arturo254.opentune.canvas.CanvasArtwork
 
 
 internal suspend fun fetchCanvasArtworkForPlayback(

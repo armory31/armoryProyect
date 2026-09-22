@@ -73,7 +73,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import com.arturo254.opentune.BuildConfig
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.R
@@ -91,6 +90,7 @@ import com.arturo254.opentune.utils.UpdateNotificationManager
 import com.arturo254.opentune.utils.Updater
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone

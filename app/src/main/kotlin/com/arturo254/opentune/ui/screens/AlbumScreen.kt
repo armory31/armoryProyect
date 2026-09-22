@@ -8,9 +8,13 @@
 
 package com.arturo254.opentune.ui.screens
 
+import android.content.ContentValues
+import android.os.Build
+import android.provider.MediaStore
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +26,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -32,6 +37,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -67,6 +73,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -82,7 +89,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
@@ -98,18 +104,6 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.size.Size
 import coil3.toBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import android.content.ContentValues
-import android.os.Build
-import android.provider.MediaStore
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalPlayerAwareWindowInsets
@@ -143,6 +137,9 @@ import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.AlbumUiState
 import com.arturo254.opentune.viewmodels.AlbumViewModel
 import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // ============================================================================
 // FUNCIONES DE DESCARGA

@@ -8,28 +8,25 @@ package com.arturo254.opentune.ui.theme
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import com.arturo254.opentune.OpenTuneColors
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ArmoryTheme(
-    darkTheme: Boolean = true, // Forzamos oscuro para ARMORY
+//    darkTheme: Boolean = true, // Forzamos oscuro para ARMORY
     pureBlack: Boolean = true, // Forzamos pureBlack para ARMORY
     themeColor: Color? = null,
     seedPalette: ThemeSeedPalette? = null,
     content: @Composable () -> Unit,
 ) {
     val typography = AppTypography
-    val bg = if (pureBlack) OpenTuneColors.AbsoluteBlack else OpenTuneColors.DeepBlack
+    val bg = OpenTuneColors.AbsoluteBlack // Inactivado DeepBlack para asegurar pure black total
 
     val colorScheme = ColorScheme(
         primary = themeColor ?: seedPalette?.primary ?: OpenTuneColors.Gold3,
@@ -40,7 +37,7 @@ fun ArmoryTheme(
 
         secondary = seedPalette?.secondary ?: OpenTuneColors.Silver2,
         onSecondary = OpenTuneColors.AbsoluteBlack,
-        secondaryContainer = OpenTuneColors.SurfaceBlack,
+        secondaryContainer = OpenTuneColors.AbsoluteBlack, // Inactivado SurfaceBlack
         onSecondaryContainer = OpenTuneColors.Silver1,
 
         tertiary = seedPalette?.tertiary ?: OpenTuneColors.Copper2,
@@ -50,9 +47,9 @@ fun ArmoryTheme(
 
         background = bg,
         onBackground = OpenTuneColors.TextPrimary,
-        surface = OpenTuneColors.SurfaceBlack,
+        surface = OpenTuneColors.AbsoluteBlack, // Inactivado SurfaceBlack para obligar pure black
         onSurface = OpenTuneColors.TextPrimary,
-        surfaceVariant = OpenTuneColors.CardBlack,
+        surfaceVariant = OpenTuneColors.AbsoluteBlack, // Inactivado CardBlack para obligar pure black
         onSurfaceVariant = OpenTuneColors.Silver2,
         inverseSurface = OpenTuneColors.Silver1,
         inverseOnSurface = OpenTuneColors.AbsoluteBlack,
@@ -67,13 +64,13 @@ fun ArmoryTheme(
         errorContainer = OpenTuneColors.Rust4,
         onErrorContainer = OpenTuneColors.Rust1,
 
-        surfaceBright = Color(0xFF242424),
+        surfaceBright = OpenTuneColors.AbsoluteBlack, // Inactivado gris claro
         surfaceDim = bg,
-        surfaceContainer = OpenTuneColors.SurfaceBlack,
+        surfaceContainer = OpenTuneColors.AbsoluteBlack, // Inactivado SurfaceBlack
         surfaceContainerLow = bg,
         surfaceContainerLowest = OpenTuneColors.AbsoluteBlack,
-        surfaceContainerHigh = Color(0xFF2A2A2A),
-        surfaceContainerHighest = Color(0xFF353535),
+        surfaceContainerHigh = OpenTuneColors.AbsoluteBlack, // Inactivado gris
+        surfaceContainerHighest = OpenTuneColors.AbsoluteBlack, // Inactivado gris
     )
 
 

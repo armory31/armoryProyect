@@ -56,19 +56,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.arturo254.opentune.innertube.utils.parseCookieString
 import com.arturo254.opentune.LocalDatabase
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.InnerTubeCookieKey
 import com.arturo254.opentune.db.entities.Playlist
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.utils.parseCookieString
 import com.arturo254.opentune.ui.component.CreatePlaylistDialog
 import com.arturo254.opentune.ui.component.DefaultDialog
 import com.arturo254.opentune.ui.component.PlaylistListItem
 import com.arturo254.opentune.utils.rememberPreference
-import com.arturo254.opentune.innertube.YouTube
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal fun playlistsForAddToPlaylist(playlists: List<Playlist>): List<Playlist> =
@@ -417,7 +417,7 @@ fun AddToPlaylistDialog(
         CreatePlaylistDialog(
             onDismiss = { showCreatePlaylistDialog = false },
             initialTextFieldValue = initialTextFieldValue,
-            allowSyncing = allowSyncing
+//            allowSyncing = allowSyncing
         )
     }
 

@@ -11,17 +11,16 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arturo254.opentune.MainActivity
 import com.arturo254.opentune.R
-import com.arturo254.opentune.db.InternalDatabase
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.db.entities.ArtistEntity
 import com.arturo254.opentune.db.entities.Song
@@ -46,8 +45,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
 import org.json.JSONObject
+import org.xmlpull.v1.XmlPullParser
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -58,9 +57,8 @@ import java.io.StringReader
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import javax.inject.Inject
-import kotlin.system.exitProcess
 import kotlin.math.roundToInt
-import org.xmlpull.v1.XmlPullParser
+import kotlin.system.exitProcess
 
 data class BackupRestoreProgressUi(
     val title: String,
@@ -103,8 +101,7 @@ internal fun readCsvRecords(reader: Reader): Sequence<List<String>> =
                 break
             }
 
-            val ch = value.toChar()
-            when (ch) {
+            when (val ch = value.toChar()) {
                 '"' -> {
                     if (inQuotes) {
                         val next = pushbackReader.read()
@@ -815,7 +812,7 @@ class BackupRestoreViewModel @Inject constructor(
             // Crear el request body con progreso personalizado
             val mediaType = "application/octet-stream".toMediaType()
             val requestBody = object : okhttp3.RequestBody() {
-                override fun contentType(): okhttp3.MediaType? = mediaType
+                override fun contentType(): okhttp3.MediaType = mediaType
 
                 override fun contentLength(): Long = file.length()
 

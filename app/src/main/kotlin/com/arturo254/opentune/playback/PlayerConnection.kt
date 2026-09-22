@@ -22,7 +22,6 @@ import androidx.media3.common.Timeline
 import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.extensions.getCurrentQueueIndex
 import com.arturo254.opentune.extensions.getQueueWindows
-import com.arturo254.opentune.extensions.metadata
 import com.arturo254.opentune.playback.MusicService.MusicBinder
 import com.arturo254.opentune.playback.queues.Queue
 import com.arturo254.opentune.utils.reportException

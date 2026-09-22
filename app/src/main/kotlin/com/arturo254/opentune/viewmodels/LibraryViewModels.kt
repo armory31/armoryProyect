@@ -9,9 +9,7 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.arturo254.opentune.viewmodels
-import com.arturo254.opentune.sync.LibraryStateHolder
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
+
 
 import android.content.Context
 import androidx.compose.runtime.MutableState
@@ -20,7 +18,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
-import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.constants.AlbumFilter
 import com.arturo254.opentune.constants.AlbumFilterKey
 import com.arturo254.opentune.constants.AlbumSortDescendingKey
@@ -47,30 +44,29 @@ import com.arturo254.opentune.constants.SongSortType
 import com.arturo254.opentune.constants.SongSortTypeKey
 import com.arturo254.opentune.constants.TopSize
 import com.arturo254.opentune.db.MusicDatabase
-import com.arturo254.opentune.db.entities.Song
-
-
 import com.arturo254.opentune.extensions.reversed
 import com.arturo254.opentune.extensions.toEnum
+import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.playback.DownloadUtil
+import com.arturo254.opentune.sync.LibraryStateHolder
 import com.arturo254.opentune.utils.SyncUtils
 import com.arturo254.opentune.utils.dataStore
-import com.arturo254.opentune.utils.get
 import com.arturo254.opentune.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import timber.log.Timber
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.Collator
 import java.time.Duration
 import java.time.LocalDateTime

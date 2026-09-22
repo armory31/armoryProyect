@@ -8,39 +8,37 @@
 
 package com.arturo254.opentune.viewmodels
 
+
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.opentune.innertube.YouTube
-
-import com.arturo254.opentune.innertube.pages.ArtistPage
-import com.arturo254.opentune.db.MusicDatabase
-import com.arturo254.opentune.utils.reportException
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import android.content.Context
 import com.arturo254.opentune.constants.ArtistSongSortType
 import com.arturo254.opentune.constants.HideExplicitKey
+import com.arturo254.opentune.db.MusicDatabase
+import com.arturo254.opentune.db.entities.ArtistEntity
 import com.arturo254.opentune.db.entities.Song
-
-
-import com.arturo254.opentune.utils.dataStore
-import com.arturo254.opentune.utils.get
+import com.arturo254.opentune.innertube.YouTube
+import com.arturo254.opentune.innertube.pages.ArtistPage
 import com.arturo254.opentune.sync.LibraryStateHolder
 import com.arturo254.opentune.sync.SyncManager
+import com.arturo254.opentune.utils.dataStore
+import com.arturo254.opentune.utils.get
+import com.arturo254.opentune.utils.reportException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -99,7 +97,17 @@ class ArtistViewModel @Inject constructor(
     }
 
     fun toggleLike() {
-        val artist = libraryArtist.value?.artist ?: return
+        Timber.d("[LOCAL_SAVE_DEBUG] ArtistViewModel: Intentando cambiar estado de suscripción para ${artistPage?.artist?.title ?: "local artist"}")
+        val artist = libraryArtist.value?.artist ?: artistPage?.artist?.let {
+            ArtistEntity(
+                id = it.id,
+                name = it.title,
+                thumbnailUrl = it.thumbnail,
+                channelId = it.channelId,
+                isBookmarked = false
+            )
+        } ?: return
+
         viewModelScope.launch {
             syncManager.toggleArtistLike(artist)
         }

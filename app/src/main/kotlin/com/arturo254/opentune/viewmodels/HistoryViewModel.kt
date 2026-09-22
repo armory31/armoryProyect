@@ -11,11 +11,11 @@ package com.arturo254.opentune.viewmodels
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arturo254.opentune.constants.HistorySource
+import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.pages.HistoryPage
-import com.arturo254.opentune.constants.HistorySource
 import com.arturo254.opentune.utils.reportException
-import com.arturo254.opentune.db.MusicDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

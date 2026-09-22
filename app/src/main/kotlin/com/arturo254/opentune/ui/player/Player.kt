@@ -10,6 +10,7 @@
 
 package com.arturo254.opentune.ui.player
 
+
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
@@ -23,10 +24,10 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,10 +48,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
@@ -69,30 +72,28 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.Layout
-import androidx.compose.foundation.focusable
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -102,61 +103,58 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.media3.common.C
 import androidx.media3.common.Player.STATE_BUFFERING
 import androidx.media3.common.Player.STATE_READY
-import androidx.palette.graphics.Palette
 import androidx.navigation.NavController
+import androidx.palette.graphics.Palette
+import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.arturo254.opentune.R
 import com.arturo254.opentune.LocalDownloadUtil
 import com.arturo254.opentune.LocalPlayerConnection
-import com.arturo254.opentune.constants.PlayerDesignStyle
-import com.arturo254.opentune.constants.PlayerDesignStyleKey
-import com.arturo254.opentune.constants.UseNewMiniPlayerDesignKey
+import com.arturo254.opentune.MiniPlayer
+import com.arturo254.opentune.PlayerStatus
+import com.arturo254.opentune.R
+import com.arturo254.opentune.constants.BlurRadiusKey
+import com.arturo254.opentune.constants.DisableBlurKey
 import com.arturo254.opentune.constants.PlayerBackgroundStyle
 import com.arturo254.opentune.constants.PlayerBackgroundStyleKey
-import com.arturo254.opentune.constants.PlayerCustomImageUriKey
-import com.arturo254.opentune.constants.PlayerCustomBlurKey
-import com.arturo254.opentune.constants.PlayerCustomContrastKey
-import com.arturo254.opentune.constants.PlayerCustomBrightnessKey
-import com.arturo254.opentune.constants.DisableBlurKey
 import com.arturo254.opentune.constants.PlayerButtonsStyle
 import com.arturo254.opentune.constants.PlayerButtonsStyleKey
-import com.arturo254.opentune.ui.theme.PlayerColorExtractor
+import com.arturo254.opentune.constants.PlayerCustomBlurKey
+import com.arturo254.opentune.constants.PlayerCustomBrightnessKey
+import com.arturo254.opentune.constants.PlayerCustomContrastKey
+import com.arturo254.opentune.constants.PlayerCustomImageUriKey
+import com.arturo254.opentune.constants.PlayerDesignStyle
+import com.arturo254.opentune.constants.PlayerDesignStyleKey
 import com.arturo254.opentune.constants.QueuePeekHeight
+import com.arturo254.opentune.constants.SeekExtraSeconds
 import com.arturo254.opentune.constants.SliderStyle
 import com.arturo254.opentune.constants.SliderStyleKey
-import com.arturo254.opentune.extensions.togglePlayPause
 import com.arturo254.opentune.extensions.metadata
+import com.arturo254.opentune.extensions.togglePlayPause
 import com.arturo254.opentune.models.MediaMetadata
 import com.arturo254.opentune.ui.component.BottomSheet
 import com.arturo254.opentune.ui.component.BottomSheetState
+import com.arturo254.opentune.ui.component.COLLAPSED_ANCHOR
 import com.arturo254.opentune.ui.component.LocalBottomSheetPageState
 import com.arturo254.opentune.ui.component.LocalMenuState
+import com.arturo254.opentune.ui.component.bottomSheetDraggable
 import com.arturo254.opentune.ui.component.rememberBottomSheetState
 import com.arturo254.opentune.ui.menu.PlayerMenu
-import androidx.compose.ui.unit.Dp
-import com.arturo254.opentune.ui.component.bottomSheetDraggable
+import com.arturo254.opentune.ui.theme.PlayerColorExtractor
 import com.arturo254.opentune.ui.utils.ShowMediaInfo
 import com.arturo254.opentune.utils.makeTimeString
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import coil3.compose.AsyncImage
-import com.arturo254.opentune.constants.AodAutoActivationKey
-import com.arturo254.opentune.constants.AodFullscreenKey
-import com.arturo254.opentune.constants.BlurRadiusKey
-import com.arturo254.opentune.constants.SeekExtraSeconds
-import com.arturo254.opentune.ui.component.COLLAPSED_ANCHOR
 import com.skydoves.cloudy.cloudy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -165,11 +163,6 @@ import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-
-
-import com.arturo254.opentune.MiniPlayer
-import com.arturo254.opentune.PlayerStatus
-import com.arturo254.opentune.OpenTuneColors
 
 private const val SeekbarSettleToleranceMs = 1_500L
 private const val V7BackdropBlurHeightFraction = 0.54f // The height of the blur layout in PlayerDesignStyle V7
@@ -703,7 +696,7 @@ fun BottomSheetPlayer(
         },
         collapsedContent = {
             val playerStatus = when {
-                playbackState == androidx.media3.common.Player.STATE_BUFFERING -> PlayerStatus.LOADING
+                playbackState == STATE_BUFFERING -> PlayerStatus.LOADING
                 isPlaying -> PlayerStatus.PLAYING
                 else -> PlayerStatus.PAUSED
             }

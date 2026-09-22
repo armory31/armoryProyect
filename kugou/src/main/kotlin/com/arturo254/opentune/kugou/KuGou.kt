@@ -14,9 +14,9 @@ import com.arturo254.opentune.kugou.models.SearchLyricsResponse
 import com.arturo254.opentune.kugou.models.SearchSongResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
@@ -71,7 +71,7 @@ object KuGou {
         runCatching {
             val keyword = generateKeyword(title, artist)
             getLyricsCandidate(keyword, duration)?.let { candidate ->
-                Base64.Default.decode(
+                Base64.decode(
                     downloadLyrics(candidate.id, candidate.accesskey).content
                 ).decodeToString().normalize()
             } ?: ""
@@ -84,14 +84,14 @@ object KuGou {
         searchSongs(keyword).data.info.forEach {
             if (duration == -1 || abs(it.duration - duration) <= DURATION_TOLERANCE) {
                 searchLyricsByHash(it.hash).candidates.firstOrNull()?.let { candidate ->
-                    Base64.Default.decode(
+                    Base64.decode(
                         downloadLyrics(candidate.id, candidate.accesskey).content
                     ).decodeToString().normalize().let(callback)
                 }
             }
         }
         searchLyricsByKeyword(keyword, duration).candidates.forEach { candidate ->
-            Base64.Default.decode(
+            Base64.decode(
                 downloadLyrics(candidate.id, candidate.accesskey).content
             ).decodeToString().normalize().let(callback)
         }

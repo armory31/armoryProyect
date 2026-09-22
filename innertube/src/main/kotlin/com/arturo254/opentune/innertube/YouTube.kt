@@ -460,7 +460,9 @@ object YouTube {
                 id = browseId,
                 title = response.header?.musicImmersiveHeaderRenderer?.title?.runs?.firstOrNull()?.text
                     ?: response.header?.musicVisualHeaderRenderer?.title?.runs?.firstOrNull()?.text
-                    ?: response.header?.musicHeaderRenderer?.title?.runs?.firstOrNull()?.text!!,
+                    ?: response.header?.musicHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                    ?: response.header?.musicDetailHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                    ?: "Artista Desconocido",
                 thumbnail = response.header?.musicImmersiveHeaderRenderer?.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl()
                     ?: response.header?.musicVisualHeaderRenderer?.foregroundThumbnail?.musicThumbnailRenderer?.getThumbnailUrl()
                     ?: response.header?.musicDetailHeaderRenderer?.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl(),
@@ -476,7 +478,7 @@ object YouTube {
             ),
             sections = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
                 ?.tabRenderer?.content?.sectionListRenderer?.contents
-                ?.mapNotNull(ArtistPage::fromSectionListRendererContent)!!,
+                ?.mapNotNull(ArtistPage::fromSectionListRendererContent).orEmpty(),
             description = response.header?.musicImmersiveHeaderRenderer?.description?.runs?.firstOrNull()?.text
         )
     }
@@ -745,14 +747,16 @@ object YouTube {
 
     suspend fun moodAndGenres(): Result<List<MoodAndGenres>> = runCatching {
         val response = innerTube.browse(WEB_REMIX, browseId = "FEmusic_moods_and_genres").body<BrowseResponse>()
-        response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()?.tabRenderer?.content?.sectionListRenderer?.contents!!
+        response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()?.tabRenderer?.content?.sectionListRenderer?.contents.orEmpty()
             .mapNotNull(MoodAndGenres.Companion::fromSectionListRendererContent)
     }
 
     suspend fun browse(browseId: String, params: String?): Result<BrowseResult> = runCatching {
         val response = innerTube.browse(WEB_REMIX, browseId = browseId, params = params).body<BrowseResponse>()
         BrowseResult(
-            title = response.header?.musicHeaderRenderer?.title?.runs?.firstOrNull()?.text,
+            title = response.header?.musicHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                ?: response.header?.musicImmersiveHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                ?: response.header?.musicDetailHeaderRenderer?.title?.runs?.firstOrNull()?.text,
             items = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()?.tabRenderer?.content?.sectionListRenderer?.contents?.mapNotNull { content ->
                 when {
                     content.gridRenderer != null -> {
@@ -770,6 +774,14 @@ object YouTube {
                             items = content.musicCarouselShelfRenderer.contents
                                 .mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
                                 .mapNotNull(RelatedPage.Companion::fromMusicTwoRowItemRenderer)
+                        )
+                    }
+
+                    content.musicShelfRenderer != null -> {
+                        BrowseResult.Item(
+                            title = content.musicShelfRenderer.title?.runs?.firstOrNull()?.text,
+                            items = content.musicShelfRenderer.contents?.mapNotNull { it.musicResponsiveListItemRenderer }
+                                ?.mapNotNull(RelatedPage.Companion::fromMusicResponsiveListItemRenderer).orEmpty()
                         )
                     }
 

@@ -46,10 +46,13 @@ data class RelatedPage(
                     } ?: return null,
                 album =
                     renderer.flexColumns.getOrNull(2)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.let {
-                        Album(
-                            name = it.text,
-                            id = it.navigationEndpoint?.browseEndpoint?.browseId ?: return null,
-                        )
+                        val bId = it.navigationEndpoint?.browseEndpoint?.browseId
+                        if (bId != null) {
+                            Album(
+                                name = it.text,
+                                id = bId,
+                            )
+                        } else null
                     },
                 duration = null,
                 thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: return null,

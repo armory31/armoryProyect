@@ -1,8 +1,6 @@
 package com.arturo254.opentune.ui.component
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.palette.graphics.Palette
 
 data class LyricsGlassStyle(

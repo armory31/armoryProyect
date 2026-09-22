@@ -11,11 +11,11 @@ package com.arturo254.opentune.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.PlaylistItem
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.utils.completed
-import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.sync.LibraryStateHolder
 import com.arturo254.opentune.sync.SyncManager
 import com.arturo254.opentune.utils.reportException

@@ -9,16 +9,19 @@
 package com.arturo254.opentune.ui.screens.settings
 
 import android.content.Context
-import kotlinx.coroutines.*
+import com.arturo254.opentune.db.entities.Song
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.arturo254.opentune.db.entities.Song
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 object ListenBrainzManager {
     private val logTag = "ListenBrainzManager"

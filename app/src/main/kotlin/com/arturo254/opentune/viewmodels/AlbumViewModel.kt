@@ -11,12 +11,12 @@ package com.arturo254.opentune.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.AlbumItem
-import com.arturo254.opentune.db.MusicDatabase
-import com.arturo254.opentune.utils.reportException
 import com.arturo254.opentune.sync.LibraryStateHolder
 import com.arturo254.opentune.sync.SyncManager
+import com.arturo254.opentune.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -116,8 +116,22 @@ constructor(
 
     fun toggleLike() {
         val album = albumWithSongs.value?.album ?: return
+        
         viewModelScope.launch {
+            // Aseguramos que el álbum esté en la base de datos antes de cambiar el estado de Like
+            // Aunque retry() lo hace, este es un doble chequeo de seguridad
+            database.withTransaction {
+                if (getAlbumById(album.id) == null) {
+                    insert(album)
+                }
+            }
             syncManager.toggleAlbumLike(album)
+        }
+    }
+
+    fun addAllToPlaylist(playlistId: String) {
+        viewModelScope.launch {
+            syncManager.addAlbumSongsToPlaylist(playlistId, albumId)
         }
     }
 }

@@ -9,9 +9,9 @@
 package com.arturo254.opentune.lyrics
 
 import android.text.format.DateUtils
+import com.arturo254.opentune.betterlyrics.TTMLParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.arturo254.opentune.betterlyrics.TTMLParser
 
 
 data class LyricsRomanizationPreferences(
