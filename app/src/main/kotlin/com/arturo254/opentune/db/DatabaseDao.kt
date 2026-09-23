@@ -1493,7 +1493,6 @@ interface DatabaseDao {
     fun move(playlistId: String, from: Int, to: Int) {
         if (from == to) return
         val start = minOf(from, to)
-        val end = maxOf(from, to)
         val items = playlistSongMaps(playlistId, start).toMutableList()
         val moving = items.firstOrNull { it.position == from } ?: return
 

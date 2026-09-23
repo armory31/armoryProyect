@@ -251,7 +251,7 @@ fun LyricsV2(
                 val isCjkText = isJapanese(entry.text) || isChinese(entry.text) || isKorean(entry.text)
                 val tokens = if (isCjkText) {
                     val chars = mutableListOf<String>()
-                    var currentWord = StringBuilder()
+                    val currentWord = StringBuilder()
                     entry.text.forEach { char ->
                         if (char.isWhitespace()) {
                             if (currentWord.isNotEmpty()) {
@@ -275,7 +275,7 @@ fun LyricsV2(
 
                     // Group spaces onto the preceding word
                     val groupedTokens = mutableListOf<String>()
-                    var tempStr = StringBuilder()
+                    val tempStr = StringBuilder()
                     chars.forEachIndexed { i, c ->
                         if (c.isBlank()) {
                             if (groupedTokens.isNotEmpty()) {
@@ -1238,7 +1238,7 @@ private fun AnimatedWordV2(
     )
 
     // ── Glow intensity ──
-    // "lines and words that are done animating shouldnt continue to glow"
+    // "lines and words that are done animating should not continue to glow"
     // Make glow build up faster: reach max intensity at 50% progress
     val glowProgress = (progress * 2f).coerceAtMost(1f)
     val glowAlpha = if (isWordActive) glowProgress * 0.45f else 0f

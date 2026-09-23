@@ -1,6 +1,6 @@
 # OpenTune
 
-<div align="center">
+<div >
   <img src="https://github.com/Arturo254/OpenTune/blob/master/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Banner de OpenTune" width="100%"/>
   
   ### Cliente Avanzado de YouTube Music con Material Design 3 para Android
@@ -55,13 +55,13 @@
 
 ## Stack Tecnológico
 
-<div align="center">
+<div >
   
-| Frontend | Backend | Herramientas de Desarrollo |
-|:--------:|:-------:|:-------------------------:|
-| ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white) | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) | ![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=androidstudio&logoColor=white) |
-| ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white) | ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white) | ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white) |
-| ![Material Design 3](https://img.shields.io/badge/Material%20Design%203-757575?style=for-the-badge&logo=materialdesign&logoColor=white) | | ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white) |
+|                                                                Frontend                                                                 |                                                      Backend                                                      |                                                   Herramientas de Desarrollo                                                   |
+|:---------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------:|
+|                  ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)                  |       ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)       | ![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=androidstudio&logoColor=white) |
+|    ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)    | ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white) |             ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)              |
+| ![Material Design 3](https://img.shields.io/badge/Material%20Design%203-757575?style=for-the-badge&logo=materialdesign&logoColor=white) |                                                                                                                   |                  ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)                  |
 
 </div>
 
@@ -72,8 +72,8 @@
 ### Funcionalidad Principal
 <table>
 <tr>
-<th width="30%">Característica</th>
-<th width="70%">Descripción</th>
+<th >Característica</th>
+<th >Descripción</th>
 </tr>
 <tr>
 <td><strong>🎵 Reproducción sin Anuncios</strong></td>
@@ -104,8 +104,8 @@
 ### Mejoras de Audio
 <table>
 <tr>
-<th width="30%">Característica</th>
-<th width="70%">Descripción</th>
+<th >Característica</th>
+<th >Descripción</th>
 </tr>
 <tr>
 <td><strong>🎤 Letras Sincronizadas</strong></td>
@@ -128,8 +128,8 @@
 ### Personalización e Integración
 <table>
 <tr>
-<th width="30%">Característica</th>
-<th width="70%">Descripción</th>
+<th >Característica</th>
+<th >Descripción</th>
 </tr>
 <tr>
 <td><strong>🎨 Temas Dinámicos</strong></td>
@@ -159,7 +159,7 @@
 
 Para información detallada sobre configuración, características avanzadas y guías de uso, consulta nuestra documentación oficial:
 
-<div align="center">
+<div >
   
 [![Documentación](https://img.shields.io/badge/Documentación-GitBook-4285F4?style=for-the-badge&logo=gitbook&logoColor=white)](https://opentune.gitbook.io/)
 
@@ -171,12 +171,12 @@ Para información detallada sobre configuración, características avanzadas y g
 
 ### Requisitos del Sistema
 
-| Componente | Requisito Mínimo |
-|:-----------|:-----------------|
-| Sistema Operativo | Android 6.0 (Marshmallow) o superior |
-| Espacio de Almacenamiento | 10 MB disponibles |
-| Red | Conexión a Internet para streaming |
-| RAM | 2 GB recomendados |
+| Componente                | Requisito Mínimo                     |
+|:--------------------------|:-------------------------------------|
+| Sistema Operativo         | Android 6.0 (Marshmallow) o superior |
+| Espacio de Almacenamiento | 10 MB disponibles                    |
+| Red                       | Conexión a Internet para streaming   |
+| RAM                       | 2 GB recomendados                    |
 
 ### Métodos de Instalación
 
@@ -195,7 +195,7 @@ Para información detallada sobre configuración, características avanzadas y g
 
 #### Opción 3: F-Droid
 
-<div align="center">
+<div>
   
 [<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/es/packages/com.Arturo254.opentune)
 
@@ -203,13 +203,13 @@ Para información detallada sobre configuración, características avanzadas y g
 
 #### Opción 4: OpenApk
 
-<div align="center">
+<div>
   
 [<img src="https://www.openapk.net/images/openapk-badge.png" alt="Get it on OpenApk" height="80">](https://www.openapk.net/opentune/com.Arturo254.opentune/)
 
 </div>
 
-> **Aviso de Seguridad**: Por razones de seguridad, se recomienda obtener la aplicación exclusivamente a través de los canales oficiales mencionados anteriormente. Evita descargar APKs de fuentes no verificadas.
+> **Aviso de Seguridad**: Por razones de seguridad, se recomienda obtener la aplicación exclusivamente a través de los canales oficiales mencionados anteriormente. Evita descargar APK de fuentes no verificadas.
 
 ---
 
@@ -241,7 +241,7 @@ Para información detallada sobre configuración, características avanzadas y g
 <tr>
 <td>JDK</td>
 <td>11 o superior</td>
-<td>Entorno de ejecución Java</td>
+<td>Ámbito de ejecución Java</td>
 </tr>
 <tr>
 <td>Android SDK</td>
@@ -306,7 +306,7 @@ Todos los participantes en este proyecto deben adherirse a nuestro código de co
 
 Ayuda a traducir OpenTune a tu idioma o mejorar las traducciones existentes:
 
-<div align="center">
+<div >
   
 [![POEditor](https://img.shields.io/badge/POEditor-2196F3?style=for-the-badge&logo=translate&logoColor=white)](https://poeditor.com/join/project/208BwCVazA)
 [![Crowdin](https://img.shields.io/badge/Crowdin-2E3440?style=for-the-badge&logo=crowdin&logoColor=white)](https://crowdin.com/project/opentune)
@@ -315,7 +315,7 @@ Ayuda a traducir OpenTune a tu idioma o mejorar las traducciones existentes:
 
 ### Canales de Comunidad
 
-<div align="center">
+<div >
   
 [![Chat de Telegram](https://img.shields.io/badge/Telegram-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/OpenTune_chat)
 [![Actualizaciones de Telegram](https://img.shields.io/badge/Telegram-Actualizaciones-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/opentune_updates)
@@ -346,7 +346,7 @@ Si encuentras valor en **OpenTune** y quieres contribuir a su desarrollo continu
 - Mantener la infraestructura del proyecto
 - Dedicar más tiempo al desarrollo y mantenimiento
 
-<div align="center">
+<div >
   
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/Arturo254)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](mailto:cervantesarturo254@gmail.com)
@@ -363,7 +363,6 @@ Agradecimientos especiales a los siguientes contribuidores y colaboradores:
 
 - **ArchiveTune** - Código Inicial e inspiración
 ‎Vivi Music (Inspiración de diseño)
-- **Fabito02** - Apoyo incondicional desde el principio
 - **Traductores de la comunidad** - Haciendo OpenTune accesible mundialmente
 - **Testers beta** - Ayudando a mejorar la estabilidad y usabilidad
 
@@ -377,7 +376,7 @@ Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo los 
 
 Este programa se distribuye con la esperanza de que sea útil, pero **SIN NINGUNA GARANTÍA**; ni siquiera la garantía implícita de COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR. Consulta la [Licencia Pública General GNU](https://github.com/Arturo254/OpenTune/blob/main/LICENSE) para más detalles.
 
-<div align="center">
+<div >
   
 [![GPL v3](https://img.shields.io/badge/Licencia-GPLv3-blue.svg?style=for-the-badge&logo=gnu&logoColor=white)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -387,7 +386,7 @@ Este programa se distribuye con la esperanza de que sea útil, pero **SIN NINGUN
 
 ---
 
-<div align="center">
+<div >
   <p><strong>© 2023-2024 Proyectos de Código Abierto</strong></p>
   <p>Desarrollado con pasión por <a href="https://github.com/Arturo254">Arturo Cervantes</a></p>
   

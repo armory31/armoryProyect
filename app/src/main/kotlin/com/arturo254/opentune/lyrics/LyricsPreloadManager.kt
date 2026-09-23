@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Manages pre-loading of lyrics for upcoming songs in the queue.
+ * Manages preloading of lyrics for upcoming songs in the queue.
  * This improves user experience by having lyrics ready when songs change.
  */
 class LyricsPreloadManager @Inject constructor(
@@ -43,7 +43,7 @@ class LyricsPreloadManager @Inject constructor(
 
     /**
      * Called when the current song changes in the player.
-     * Triggers pre-loading of lyrics for the next N songs in the queue.
+     * Triggers preloading of lyrics for the next N songs in the queue.
      *
      * @param currentIndex The index of the currently playing song in the queue
      * @param queue List of MediaMetadata for songs in the queue
@@ -52,7 +52,7 @@ class LyricsPreloadManager @Inject constructor(
         // Cancel any existing preload job
         preloadJob?.cancel()
         
-        // Check if pre-load is enabled
+        // Check if preload is enabled
         scope.launch {
             try {
                 val preferences = context.dataStore.data.first()
@@ -113,7 +113,7 @@ class LyricsPreloadManager @Inject constructor(
     }
 
     /**
-     * Pre-load lyrics for the given songs.
+     * Preload lyrics for the given songs.
      * Uses parallel fetching with limited concurrency.
      */
     private fun preloadLyrics(songs: List<MediaMetadata>) {

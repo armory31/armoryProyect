@@ -12,8 +12,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,12 +54,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.arturo254.opentune.sync.ArmoryAuthManager
+import com.arturo254.opentune.sync.SyncManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import com.arturo254.opentune.ui.theme.ArmoryTheme
 import com.arturo254.opentune.utils.SessionManager
+import com.arturo254.opentune.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -74,12 +82,15 @@ class LoginActivity : ComponentActivity() {
     @Inject
     lateinit var armoryAuthManager: ArmoryAuthManager
 
+    @Inject
+    lateinit var syncManager: SyncManager
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ -> }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         session = SessionManager(this)
 
@@ -101,7 +112,29 @@ class LoginActivity : ComponentActivity() {
             setContent {
                 ArmoryTheme {
                     var showBetaDialog by remember { mutableStateOf(false) }
+                    var showRestoringDialog by remember { mutableStateOf(false) }
                     
+                    if (showRestoringDialog) {
+                        AlertDialog(
+                            onDismissRequest = { },
+                            title = { Text("📦 Recuperando tu biblioteca") },
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    CircularProgressIndicator(color = ArmoryColors.Gold1)
+                                    Text("Descargando tus favoritos desde la nube...")
+                                }
+                            },
+                            confirmButton = { },
+                            properties = DialogProperties(
+                                dismissOnBackPress = false,
+                                dismissOnClickOutside = false
+                            )
+                        )
+                    }
+
                     if (showBetaDialog) {
                         AlertDialog(
                             onDismissRequest = { },
@@ -122,8 +155,27 @@ class LoginActivity : ComponentActivity() {
                         auth = auth,
                         onLoginSuccess = { email, user ->
                             lifecycleScope.launch {
+                                showRestoringDialog = true
                                 armoryAuthManager.saveAccountInfo(email, user.uid)
                                 session.saveSession(email, user.displayName ?: "Usuario", user.uid)
+                                
+                                // Restauración única tras login
+                                try {
+                                    if (isInternetAvailable(this@LoginActivity)) {
+                                        val library = syncManager.getUserLibrary()
+                                        if (library != null) {
+                                            syncManager.applyLibraryToLocal(library)
+                                        }
+                                    } else {
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(this@LoginActivity, "Sin internet. La sincronización se hará en segundo plano.", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    Timber.e(e, "LoginActivity: Error recuperando biblioteca")
+                                }
+                                
+                                showRestoringDialog = false
                                 delay(500)
                                 showBetaDialog = true
                             }

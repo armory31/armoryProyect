@@ -8,6 +8,9 @@
 
 package com.arturo254.opentune.ui.screens.settings
 
+import android.app.Activity
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -16,6 +19,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +40,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -76,11 +81,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.arturo254.opentune.App.Companion.forgetAccount
 import com.arturo254.opentune.BuildConfig
+import com.arturo254.opentune.LocalSyncManager
+import com.arturo254.opentune.LoginActivity
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.AccountChannelHandleKey
 import com.arturo254.opentune.constants.AccountNameKey
@@ -99,9 +107,11 @@ import com.arturo254.opentune.ui.component.TextFieldDialog
 import com.arturo254.opentune.utils.SessionManager
 import com.arturo254.opentune.utils.Updater
 import com.arturo254.opentune.utils.dataStore
+import com.arturo254.opentune.utils.isInternetAvailable
 import com.arturo254.opentune.utils.rememberPreference
 import com.arturo254.opentune.viewmodels.HomeViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun AccountSettings(
@@ -120,18 +130,44 @@ fun AccountSettings(
     val (dataSyncId, onDataSyncIdChange) = rememberPreference(DataSyncIdKey, "")
 
     val session = remember { SessionManager(context) }
-    val accountEmail = session.getEmail()
-    val isLoggedIn = session.isLoggedIn()
-    val (useLoginForBrowse, onUseLoginForBrowseChange) = rememberPreference(UseLoginForBrowse, true)
-    val (ytmSync, onYtmSyncChange) = rememberPreference(YtmSyncKey, true)
+    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
 
-    val viewModel: HomeViewModel = hiltViewModel()
-    val accountName by viewModel.accountName.collectAsState()
-    val accountImageUrl by viewModel.accountImageUrl.collectAsState()
+    val accountEmail = session.getEmail().ifEmpty { currentUser?.email ?: "" }
+    val accountName = session.getNombre().takeIf { it.isNotBlank() && it != "Usuario" }
+        ?: accountNamePref.takeIf { it.isNotBlank() }
+        ?: currentUser?.displayName?.takeIf { it.isNotBlank() }
+        ?: currentUser?.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
+        ?: "Usuario"
+    val accountImageUrl = currentUser?.photoUrl?.toString()
 
     var showToken by remember { mutableStateOf(false) }
     var showTokenEditor by remember { mutableStateOf(false) }
     var showPlaylistDialog by remember { mutableStateOf(false) }
+    
+    var showLogoutProgress by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val syncManager = LocalSyncManager.current
+
+    if (showLogoutProgress) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { },
+            title = { Text("Cerrando sesión") },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Text("Guardando copia de seguridad en Firebase y limpiando datos locales...")
+                }
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        )
+    }
 
     val hasUpdate = !Updater.isSameVersion(latestVersionName, BuildConfig.VERSION_NAME)
 
@@ -149,24 +185,28 @@ fun AccountSettings(
         ) {
             // Account Card
             AccountCard(
-                isLoggedIn = isLoggedIn,
+                isLoggedIn = true,
                 accountName = accountName,
                 accountEmail = accountEmail,
                 accountImageUrl = accountImageUrl,
                 onAccountClick = {
                     onClose()
-                    if (isLoggedIn) {
-                        navController.navigate("account")
-                    } else {
-                        // navController.navigate(buildLoginRoute())
-                    }
+                    navController.navigate("account")
                 },
                 onLogout = {
-                    session.logout()
-                    FirebaseAuth.getInstance().signOut()
-                    forgetAccount(context)
-                    (context as? android.app.Activity)?.finish()
-                    context.startActivity(android.content.Intent(context, com.arturo254.opentune.LoginActivity::class.java))
+                    showLogoutProgress = true
+                    coroutineScope.launch {
+                        val success = syncManager.handleLogout(context)
+                        if (success) {
+                            session.logout()
+                            forgetAccount(context)
+                            (context as? Activity)?.finish()
+                            context.startActivity(Intent(context, LoginActivity::class.java))
+                        } else {
+                            showLogoutProgress = false
+                            Toast.makeText(context, "Error al guardar backup. Reintenta con internet.", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
             )
 
@@ -191,57 +231,25 @@ fun AccountSettings(
             }
 
             // Account Options Section
-            AnimatedVisibility(
-                visible = isLoggedIn,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                SettingsSection(title = stringResource(R.string.account)) {
-                    SettingsToggleItem(
-                        icon = painterResource(R.drawable.add_circle),
-                        title = stringResource(R.string.more_content),
-                        subtitle = stringResource(R.string.use_login_for_browse_desc),
-                        checked = useLoginForBrowse,
-                        onCheckedChange = {
-                            YouTube.useLoginForBrowse = it
-                            onUseLoginForBrowseChange(it)
-                        }
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                    )
-
-                    SettingsToggleItem(
-                        icon = painterResource(R.drawable.cached),
-                        title = stringResource(R.string.yt_sync),
-                        checked = ytmSync,
-                        onCheckedChange = onYtmSyncChange
-                    )
-                }
-            }
-
-            // Sync & Integration Section
-            SettingsSection(title = stringResource(R.string.integration)) {
+            SettingsSection(title = stringResource(R.string.account)) {
                 SettingsClickableItem(
-                    icon = painterResource(R.drawable.playlist_add),
-                    title = stringResource(R.string.select_playlist_to_sync),
-                    onClick = { showPlaylistDialog = true }
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 56.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                )
-
-                SettingsClickableItem(
-                    icon = painterResource(R.drawable.integration),
-                    title = stringResource(R.string.integration),
-                    subtitle = "Discord, Last.fm, ListenBrainz",
+                    icon = painterResource(R.drawable.add_circle),
+                    title = "Guardar copia de seguridad en Firebase",
+                    subtitle = "Sincroniza tu biblioteca local con la nube",
                     onClick = {
-                        onClose()
-                        navController.navigate("settings/integration")
+                        coroutineScope.launch {
+                            if (isInternetAvailable(context)) {
+                                Toast.makeText(context, "Subiendo copia a la nube...", Toast.LENGTH_SHORT).show()
+                                try {
+                                    syncManager.pushLibraryToCloud()
+                                    Toast.makeText(context, "Copia guardada con éxito", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error al guardar copia", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 )
 
@@ -250,6 +258,35 @@ fun AccountSettings(
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
 
+                SettingsClickableItem(
+                    icon = painterResource(R.drawable.cached),
+                    title = "Restaurar copia desde Firebase",
+                    subtitle = "Descarga tu biblioteca guardada en la nube",
+                    onClick = {
+                        coroutineScope.launch {
+                            if (isInternetAvailable(context)) {
+                                Toast.makeText(context, "Descargando copia...", Toast.LENGTH_SHORT).show()
+                                try {
+                                    val lib = syncManager.getUserLibrary()
+                                    if (lib != null) {
+                                        syncManager.applyLibraryToLocal(lib)
+                                        Toast.makeText(context, "Biblioteca restaurada con éxito", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "No hay copias guardadas", Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error al restaurar copia", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                )
+            }
+
+            // Sync & Integration Section
+            SettingsSection(title = stringResource(R.string.integration)) {
                 SettingsClickableItem(
                     icon = painterResource(R.drawable.fire),
                     title = stringResource(R.string.music_together),
@@ -264,14 +301,9 @@ fun AccountSettings(
             SettingsSection(title = stringResource(R.string.misc)) {
                 SettingsClickableItem(
                     icon = painterResource(R.drawable.token),
-                    title = when {
-                        !isLoggedIn -> stringResource(R.string.advanced_login)
-                        showToken -> stringResource(R.string.token_shown)
-                        else -> stringResource(R.string.token_hidden)
-                    },
+                    title = if (showToken) stringResource(R.string.token_shown) else stringResource(R.string.token_hidden),
                     onClick = {
-                        if (!isLoggedIn) showTokenEditor = true
-                        else if (!showToken) showToken = true
+                        if (!showToken) showToken = true
                         else showTokenEditor = true
                     }
                 )
@@ -376,31 +408,26 @@ private fun AccountSettingsHeader(onClose: () -> Unit) {
 }
 
 @Composable
-private fun AccountCard(
-    isLoggedIn: Boolean,
+fun AccountCard(
+    isLoggedIn: Boolean = true,
     accountName: String,
     accountEmail: String,
     accountImageUrl: String?,
-    onAccountClick: () -> Unit,
-    onLogout: () -> Unit
+    onAccountClick: () -> Unit = {},
+    onLogout: () -> Unit,
+    onSettingsClick: (() -> Unit)? = null
 ) {
-    val cardColor by animateColorAsState(
-        targetValue = if (isLoggedIn)
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-        else
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        animationSpec = tween(300),
-        label = "cardColor"
-    )
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), RoundedCornerShape(24.dp))
             .clickable(onClick = onAccountClick),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -477,23 +504,39 @@ private fun AccountCard(
                 }
             }
 
-            // Logout Button or Arrow
-            if (isLoggedIn) {
-                FilledTonalButton(
-                    onClick = onLogout,
-                    shape = RoundedCornerShape(12.dp)
+            // Settings and Logout Buttons
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(
+                    onClick = { 
+                        if (onSettingsClick != null) onSettingsClick() else onAccountClick()
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                    )
                 ) {
-                    Text(
-                        text = stringResource(R.string.action_logout),
-                        style = MaterialTheme.typography.labelMedium
+                    Icon(
+                        painter = painterResource(R.drawable.settings),
+                        contentDescription = stringResource(R.string.settings),
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
-            } else {
-                Icon(
-                    painter = painterResource(R.drawable.arrow_forward),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+
+                if (isLoggedIn) {
+                    FilledTonalButton(
+                        onClick = onLogout,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f),
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.action_logout),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                }
             }
         }
     }

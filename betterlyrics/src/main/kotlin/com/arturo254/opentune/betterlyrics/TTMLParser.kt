@@ -103,7 +103,7 @@ object TTMLParser {
                     // Recursively parse all span elements including nested ones (for background vocals)
                     parseSpanElements(pElement, words, lineText, startTime, endTime, false, timingContext)
                     
-                    // If words list is empty but we have text, we need to generate fallback word timings
+                    // If words list is empty, but we have text, we need to generate fallback word timings
                     if (words.isEmpty() && lineText.isNotEmpty()) {
                         val directText = lineText.toString()
                         val isCjkText = isCjk(directText)

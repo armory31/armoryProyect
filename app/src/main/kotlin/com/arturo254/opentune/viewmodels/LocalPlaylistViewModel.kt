@@ -169,7 +169,7 @@ constructor(
             }
         }
         
-        // Auto-load suggestions when playlist or songs change
+        // Autoload suggestions when playlist or songs change
         viewModelScope.launch {
             combine(playlist, playlistSongs) { playlist, songs ->
                 Pair(playlist, songs)

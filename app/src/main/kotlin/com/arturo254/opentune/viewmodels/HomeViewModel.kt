@@ -182,7 +182,7 @@ class HomeViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     // Account display info
-    val accountName = MutableStateFlow("Guest")
+    val accountName = MutableStateFlow("")
     val accountImageUrl = MutableStateFlow<String?>(null)
     
     // Track last processed cookie to avoid unnecessary updates
@@ -437,7 +437,7 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 } else {
-                    accountName.value = "Guest"
+                    accountName.value = ""
                     accountImageUrl.value = null
                     accountPlaylists.value = null
                 }
@@ -529,7 +529,7 @@ class HomeViewModel @Inject constructor(
                                 }
                             }
                         } else {
-                            accountName.value = "Guest"
+                            accountName.value = ""
                             accountImageUrl.value = null
                             accountPlaylists.value = null
                         }

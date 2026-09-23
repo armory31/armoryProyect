@@ -37,7 +37,6 @@ import com.arturo254.opentune.ui.screens.settings.BackupAndRestore
 import com.arturo254.opentune.ui.screens.settings.ChangelogScreen
 import com.arturo254.opentune.ui.screens.settings.DebugSettings
 import com.arturo254.opentune.ui.screens.settings.IntegrationScreen
-import com.arturo254.opentune.ui.screens.settings.LastFMSettings
 import com.arturo254.opentune.ui.screens.settings.MusicTogetherScreen
 import com.arturo254.opentune.ui.screens.settings.PoTokenScreen
 import com.arturo254.opentune.ui.screens.settings.SettingsScreen
@@ -282,9 +281,6 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/music_together") {
         MusicTogetherScreen(navController, scrollBehavior)
-    }
-    composable("settings/lastfm") {
-        LastFMSettings(navController, scrollBehavior)
     }
     composable("settings/misc") {
         DebugSettings(navController)

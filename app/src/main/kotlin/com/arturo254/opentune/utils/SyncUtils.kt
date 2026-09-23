@@ -16,7 +16,7 @@ import com.arturo254.opentune.db.MusicDatabase
 import com.arturo254.opentune.db.entities.ArtistEntity
 import com.arturo254.opentune.db.entities.PlaylistEntity
 import com.arturo254.opentune.db.entities.PlaylistSongMap
-import com.arturo254.opentune.db.entities.SongEntity
+// import com.arturo254.opentune.db.entities.SongEntity
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.AlbumItem
 import com.arturo254.opentune.innertube.models.ArtistItem
@@ -141,26 +141,8 @@ class SyncUtils @Inject constructor(
     }
     
 
-    private suspend fun isYtmSyncEnabled(): Boolean {
-        val enabled =
-            context.dataStore.data
-            .map { it[YtmSyncKey] ?: true }
-            .first()
-        syncEnabled.value = enabled
-        if (!enabled) {
-            syncGeneration.incrementAndGet()
-        }
-        return enabled
-    }
-
     private fun isSyncStillEnabled(gen: Long): Boolean {
         return syncEnabled.value && syncGeneration.get() == gen
-    }
-
-    fun likeSong(s: SongEntity) {
-        syncScope.launch {
-            syncManager.toggleLike(s)
-        }
     }
 
     suspend fun syncLikedSongs() = coroutineScope {

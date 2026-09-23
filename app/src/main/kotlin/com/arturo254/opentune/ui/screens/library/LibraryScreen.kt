@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.arturo254.opentune.ui.screens.library
 
 import androidx.compose.foundation.background
@@ -21,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +37,7 @@ import com.arturo254.opentune.constants.LibraryFilter
 import com.arturo254.opentune.constants.ShowTagsInLibraryKey
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LibraryScreen(navController: NavController) {
@@ -45,6 +45,9 @@ fun LibraryScreen(navController: NavController) {
 
     val (showTagsInLibrary) = rememberPreference(ShowTagsInLibraryKey, true)
     val database = LocalDatabase.current
+
+    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
+    val avatarUrl = currentUser?.photoUrl?.toString()
 
     val filterContent = @Composable {
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -94,7 +97,8 @@ fun LibraryScreen(navController: NavController) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             OpenTuneHeader(
-                onSettings = { navController.navigate("settings") }
+                avatarUrl = avatarUrl,
+                onSettings = { navController.navigate("account") }
             )
             
             when (filterType) {

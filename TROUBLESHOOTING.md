@@ -10,7 +10,7 @@ Este error ocurre cuando el Sistema Operativo Android (en el emulador o disposit
 
 ### Solución
 1.  **Wipe Data:** En el AVD Manager de Android Studio, selecciona tu emulador y haz clic en "Wipe Data". Esto reiniciará el estado de los servicios de sistema.
-2.  **Imagen de Sistema:** Asegúrate de estar usando una imagen de sistema con "Google Play APIs" y que esté actualizada.
+2.  **Imagen de Sistema:** Asegúrate de estar usando una imagen de sistema con "Google Play API" y que esté actualizada.
 3.  **Fecha y Hora:** Verifica que la fecha y hora del emulador sean correctas, ya que esto afecta la validación de certificados de GMS.
 
 ---

@@ -1,9 +1,3 @@
-/*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
- * Licensed Under GPL-3.0 | see git history for contributors
- */
-
 package com.arturo254.opentune.ui.screens.settings
 
 import android.app.Activity
@@ -26,15 +20,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -75,7 +66,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.arturo254.opentune.LocalPlayerAwareWindowInsets
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.InnerTubeCookieKey
 import com.arturo254.opentune.constants.PoTokenGvsKey
@@ -111,27 +101,27 @@ fun PoTokenScreen(
     var showRegenerateSheet by remember { mutableStateOf(false) }
     val regenerateSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    var (webClientPoTokenEnabled, onWebClientPoTokenEnabledChange) = rememberPreference(
+    val (webClientPoTokenEnabled, onWebClientPoTokenEnabledChange) = rememberPreference(
         WebClientPoTokenEnabledKey,
         defaultValue = false
     )
-    var (useVisitorData, onUseVisitorDataChange) = rememberPreference(
+    val (useVisitorData, onUseVisitorDataChange) = rememberPreference(
         UseVisitorDataKey,
         defaultValue = false
     )
-    var (sourceUrl, onSourceUrlChange) = rememberPreference(
+    val (sourceUrl, onSourceUrlChange) = rememberPreference(
         PoTokenSourceUrlKey,
         defaultValue = ""
     )
-    var (storedGvsToken, onStoredGvsTokenChange) = rememberPreference(
+    val (storedGvsToken, onStoredGvsTokenChange) = rememberPreference(
         PoTokenGvsKey,
         defaultValue = ""
     )
-    var (storedPlayerToken, onStoredPlayerTokenChange) = rememberPreference(
+    val (storedPlayerToken, onStoredPlayerTokenChange) = rememberPreference(
         PoTokenPlayerKey,
         defaultValue = ""
     )
-    var (storedVisitorData, onStoredVisitorDataChange) = rememberPreference(
+    val (storedVisitorData, onStoredVisitorDataChange) = rememberPreference(
         VisitorDataKey,
         defaultValue = ""
     )

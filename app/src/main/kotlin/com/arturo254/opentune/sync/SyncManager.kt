@@ -20,6 +20,7 @@ import com.arturo254.opentune.db.entities.SongArtistMap
 import com.arturo254.opentune.db.entities.SongEntity
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.sync.worker.SyncWorker
+import com.arturo254.opentune.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CancellationException
@@ -64,13 +65,46 @@ class SyncManager @Inject constructor(
         )
     }
 
-    suspend fun handleLogout(context: Context) = withContext(Dispatchers.IO) {
-        FirebaseAuth.getInstance().signOut()
-        database.clearAllTables()
-        val imageLoader = SingletonImageLoader.get(context)
-        imageLoader.memoryCache?.clear()
-        imageLoader.diskCache?.clear()
-        Timber.i("SyncManager: Logout handled and local data purged")
+    suspend fun handleLogout(context: Context): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Timber.i("SyncManager: Iniciando protocolo de cierre de sesion seguro...")
+            
+            // Paso 1: Validar enlace con Firebase e Internet
+            if (!isInternetAvailable(context)) {
+                Timber.e("SyncManager: No hay internet. Abortando backup para proteger datos locales.")
+                return@withContext false
+            }
+            
+            val sessionValid = authManager.refreshSessionSilently()
+            if (!sessionValid) {
+                Timber.e("SyncManager: Sesion invalidada. Se requiere re-login antes del backup.")
+                return@withContext false
+            }
+
+            // Paso 2: Subir copia de la base de datos local
+            Timber.d("SyncManager: Paso 2 - Subiendo copia de seguridad local a Firebase...")
+            pushLibraryToCloud()
+            
+            // Paso 3: Borrar datos de caché y Room (Solo si el backup no lanzó excepcion)
+            Timber.d("SyncManager: Paso 3 - Limpiando datos locales y cerrando sesion...")
+            
+            // 1. Firebase Sign Out
+            FirebaseAuth.getInstance().signOut()
+
+            // 2. Clear Room Database
+            database.clearAllTables()
+
+            // 3. Clear Coil Image Cache (Memory & Disk)
+            val imageLoader = SingletonImageLoader.get(context)
+            imageLoader.memoryCache?.clear()
+            imageLoader.diskCache?.clear()
+
+            Timber.i("SyncManager: Logout completado con exito. Datos locales purgados.")
+            true
+        } catch (e: Exception) {
+            Timber.e(e, "SyncManager: ERROR CRITICO en cierre de sesion. Abortando limpieza para proteger datos locales.")
+            false
+        }
     }
 
     suspend fun getUserLibrary(): UserLibraryDto? {

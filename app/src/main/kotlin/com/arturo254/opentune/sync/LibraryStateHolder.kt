@@ -15,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -52,18 +53,22 @@ class LibraryStateHolder @Inject constructor(
     // Reactive sets of IDs for quick lookup (Local-First: Reading directly from local DB Room)
     val likedSongIds: Flow<Set<String>> = databaseDao.getLikedSongIds()
         .map { it.toSet() }
+        .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked songs") }
     
     val likedAlbumIds: Flow<Set<String>> = databaseDao.getLikedAlbumIds()
         .map { it.toSet() }
+        .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked albums") }
     
     val bookmarkedArtistIds: Flow<Set<String>> = databaseDao.getBookmarkedArtistIds()
         .map { it.toSet() }
+        .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} bookmarked artists") }
     
     val likedPlaylistIds: Flow<Set<String>> = databaseDao.getLikedPlaylistIds()
         .map { it.toSet() }
+        .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} playlists") }
 
     // Merged data for UI

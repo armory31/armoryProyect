@@ -646,11 +646,7 @@ object YTPlayerUtils {
         if (expectedDurationMs < 90_000L) return false
         return approx in 1L..(minOf(90_000L, (expectedDurationMs * 9L) / 10L))
     }
-    /**
-     * Checks if the stream url returns a successful status.
-     * If this returns true the url is likely to work.
-     * If this returns false the url might cause an error during playback.
-     */
+
     private fun validateStatus(url: String, userAgent: String): Boolean {
         Timber.tag(logTag).v("Validating stream URL status")
         try {
@@ -711,10 +707,7 @@ object YTPlayerUtils {
             }
             .getOrNull()
     }
-    /**
-     * Wrapper around the [NewPipeUtils.getStreamUrl] function which reports exceptions.
-     * Also patches cver to match the client version.
-     */
+
     private fun findUrlOrNull(
         format: PlayerResponse.StreamingData.Format,
         videoId: String,
@@ -729,7 +722,6 @@ object YTPlayerUtils {
             }
             .getOrNull() ?: return null
 
-        // Patch cver in the URL to match the client we actually used
         if (client != null) {
             url = StreamClientUtils.patchClientVersion(url, client.clientVersion)
         }

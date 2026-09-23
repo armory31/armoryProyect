@@ -47,17 +47,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        val lastfmApiKey =
-            localProperties.getProperty("LASTFM_API_KEY")
-                ?: System.getenv("LASTFM_API_KEY")
-                ?: ""
-        val lastfmSecret =
-            localProperties.getProperty("LASTFM_SECRET")
-                ?: System.getenv("LASTFM_SECRET")
-                ?: ""
-        buildConfigField("String", "LASTFM_API_KEY", "\"$lastfmApiKey\"")
-        buildConfigField("String", "LASTFM_SECRET", "\"$lastfmSecret\"")
-
         val togetherBearerToken =
             localProperties.getProperty("TOGETHER_BEARER_TOKEN")
                 ?: System.getenv("TOGETHER_BEARER_TOKEN")
@@ -265,7 +254,6 @@ dependencies {
     implementation(project(":innertube"))
     implementation(project(":kugou"))
     implementation(project(":lrclib"))
-    implementation(project(":lastfm"))
     implementation(project(":betterlyrics"))
     implementation(project(":simpmusic"))
     implementation(project(":canvas"))

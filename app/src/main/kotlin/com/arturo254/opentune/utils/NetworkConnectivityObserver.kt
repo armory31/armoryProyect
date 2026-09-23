@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
  * Simple NetworkConnectivityObserver based on OuterTune's implementation
- * Provides network connectivity monitoring for auto-play functionality
+ * Provides network connectivity monitoring for autoplay functionality
  */
 class NetworkConnectivityObserver(context: Context) {
     private val connectivityManager =

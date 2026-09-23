@@ -144,7 +144,7 @@ object YouTube {
 
 
     /**
-     * Obtiene todos los nuevos lanzamientos (Álbumes, Singles, EPs) de forma categorizada
+     * Obtiene todos los nuevos lanzamientos (Álbumes, Singles, EP) de forma categorizada
      * Usa el browseId "FEmusic_new_releases" que es la página completa
      */
     suspend fun newReleasesCategorized(): Result<NewReleasesCategorizedResponse> = runCatching {

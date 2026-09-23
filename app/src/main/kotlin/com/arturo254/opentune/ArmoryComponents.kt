@@ -32,8 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.MusicNote
@@ -69,7 +67,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,7 +80,6 @@ import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.request.crossfade
 import coil3.toBitmap
-import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.models.MediaMetadata
 
 val PremiumTitleFont = FontFamily.Serif
@@ -135,57 +131,12 @@ fun TrackThumbnail(url: String, size: Int = 52, radius: Int = 4) {
     )
 }
 
-// ── Fila de Canción Premium ──────────────────────────────────────────────────
-@Composable
-fun TrackRow(
-    track: SongItem,
-    isSaved: Boolean,
-    isPlaying: Boolean,
-    onClick: () -> Unit,
-    onSave: () -> Unit,
-    onAddToQueue: (() -> Unit)? = null
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        TrackThumbnail(track.thumbnail ?: "", size = 48, radius = 8)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = track.title,
-                color = if (isPlaying) ArmoryColors.Gold2 else ArmoryColors.Champagne,
-                fontFamily = PremiumTitleFont,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = track.artists.joinToString { it.name },
-                color = ArmoryColors.TextMuted,
-                fontFamily = PremiumBodyFont,
-                fontSize = 13.sp,
-                maxLines = 1
-            )
-        }
-        IconButton(onClick = onSave) {
-            Icon(
-                if (isSaved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                null,
-                tint = if (isSaved) ArmoryColors.Gold3 else ArmoryColors.Gold5,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
+
 
 // ── Header ARMORY ───────────────────────────────────────────────────────────
 @Composable
 fun ArmoryHeader(
+    avatarUrl: String? = null,
     onLogout: (() -> Unit)? = null,
     onSettings: (() -> Unit)? = null
 ) {
@@ -206,14 +157,25 @@ fun ArmoryHeader(
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (onSettings != null) {
-                IconButton(onClick = onSettings, modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)) {
-                    Icon(painterResource(R.drawable.settings), "Ajustes", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                }
-            }
-            
-            if (onLogout != null) {
-                IconButton(onClick = onLogout, modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)) {
-                    Icon(Icons.Filled.Person, "Perfil", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                IconButton(
+                    onClick = onSettings,
+                    modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    if (avatarUrl != null) {
+                        AsyncImage(
+                            model = avatarUrl,
+                            contentDescription = "Cuenta",
+                            modifier = Modifier.size(24.dp).clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = "Cuenta",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -249,9 +211,10 @@ fun ArmoryFilterChip(
  */
 @Composable
 fun OpenTuneHeader(
+    avatarUrl: String? = null,
     onLogout: (() -> Unit)? = null,
     onSettings: (() -> Unit)? = null
-) = ArmoryHeader(onLogout, onSettings)
+) = ArmoryHeader(avatarUrl, onLogout, onSettings)
 
 @Composable
 fun GoldDivider(modifier: Modifier = Modifier) {
@@ -273,18 +236,7 @@ fun GoldDivider(modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-fun SectionLabel(text: String) {
-    Text(
-        text = text,
-        color = ArmoryColors.GoldBright,
-        fontFamily = PremiumTitleFont,
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Black,
-        letterSpacing = 2.sp,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-    )
-}
+
 
 // ── Playlist Card Metálica ──────────────────────────────────────────────────
 @Composable
@@ -472,7 +424,7 @@ fun MiniPlayer(
     }
 }
 
-// ── Bottom Navigation Premium ──────────────────────────────
+// Bottom Navigation Premium
 @Composable
 fun ArmoryBottomBar(
     selectedTab: Int,

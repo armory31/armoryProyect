@@ -52,21 +52,12 @@ object ArmoryColors {
 
     // SUPERFICIES
     val AbsoluteBlack = Color(0xFF000000)
-    val DeepBlack     = Color(0xFF0A0A0A)
     val SurfaceBlack  = Color(0xFF141414)
-    val CardBlack     = Color(0xFF1C1C1C)
 
     // TEXTO
     val TextPrimary = Color(0xFFF5F5F5)
     val TextMuted   = Color(0xFF707070)
     val Divider     = Color(0xFF2A2A2A)
-
-    // COMPATIBILIDAD
-    val ArmoryCobre = Copper2
-    val ArmoryPlataBg = Silver4
-    val ArmoryGold = Gold1
-    val ActionCopper = Copper2
-    val BackgroundBlack = DeepBlack
 }
 
 /**

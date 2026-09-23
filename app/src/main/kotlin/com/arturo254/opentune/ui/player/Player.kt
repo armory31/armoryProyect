@@ -109,6 +109,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.media3.common.C
+import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_BUFFERING
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
@@ -724,8 +725,15 @@ fun BottomSheetPlayer(
                         nowPlaying = metadata,
                         playerStatus = playerStatus,
                         onToggle = {
-                            if (isPlaying) playerConnection.player.pause()
-                            else playerConnection.player.play()
+                            if (isPlaying) {
+                                playerConnection.player.pause()
+                            } else {
+                                val state = playerConnection.player.playbackState
+                                if (state == Player.STATE_IDLE || state == Player.STATE_ENDED) {
+                                    playerConnection.player.prepare()
+                                }
+                                playerConnection.player.play()
+                            }
                         },
                         onNext = { playerConnection.seekToNext() },
                         onPrevious = { playerConnection.seekToPrevious() },

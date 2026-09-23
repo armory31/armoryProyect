@@ -38,7 +38,7 @@ assignees: Arturo254
 ## Environment Details
 - **Installation Method:** <!-- Play Store / APK / F-Droid -->
 - **First occurrence:** <!-- Version when bug first appeared, if known -->
-- **Network Connection:** <!-- WiFi / Mobile Data / Offline -->
+- **Network Connection:** <!-- Wi-Fi / Mobile Data / Offline -->
 
 ## Evidence
 <!-- Attach screenshots, videos, or GIFs that demonstrate the issue -->

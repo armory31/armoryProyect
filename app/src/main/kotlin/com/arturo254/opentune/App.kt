@@ -35,7 +35,6 @@ import com.arturo254.opentune.constants.CountryCodeToName
 import com.arturo254.opentune.constants.DataSyncIdKey
 import com.arturo254.opentune.constants.InnerTubeCookieKey
 import com.arturo254.opentune.constants.LanguageCodeToName
-import com.arturo254.opentune.constants.LastFMSessionKey
 import com.arturo254.opentune.constants.MaxImageCacheSizeKey
 import com.arturo254.opentune.constants.PoTokenGvsKey
 import com.arturo254.opentune.constants.PoTokenKey
@@ -56,7 +55,6 @@ import com.arturo254.opentune.extensions.toInetSocketAddress
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.YouTubeLocale
 import com.arturo254.opentune.kugou.KuGou
-import com.arturo254.opentune.lastfm.LastFM
 import com.arturo254.opentune.sync.SyncManager
 import com.arturo254.opentune.ui.player.CanvasArtworkPlaybackCache
 import com.arturo254.opentune.utils.PreferenceStore
@@ -156,10 +154,6 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
         if (languageTag == "zh-TW") {
             KuGou.useTraditionalChinese = true
         }
-        LastFM.initialize(
-            apiKey = BuildConfig.LASTFM_API_KEY,
-            secret = BuildConfig.LASTFM_SECRET
-        )
     }
 
     private fun initializeDeferredAsync() {
@@ -176,9 +170,6 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
                             hl = lang ?: YouTube.locale.hl
                         )
                     }
-
-                    // LastFM
-                    LastFM.sessionKey = prefs[LastFMSessionKey]
 
                     // Proxy - Only re-init if really changed to avoid client recreation overhead
                     val proxyEnabled = prefs[ProxyEnabledKey] == true

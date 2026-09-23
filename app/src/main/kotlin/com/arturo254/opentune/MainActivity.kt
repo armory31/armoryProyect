@@ -287,11 +287,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Only clear/stop presence when the activity is actually finishing (not on rotation)
-        // and do not clear it for transient configuration changes.
-        if (isFinishing && !isChangingConfigurations) {
-            // Discord presence stop removed
-        }
 
         val shouldStopOnTaskClear =
             if (!isFinishing) {

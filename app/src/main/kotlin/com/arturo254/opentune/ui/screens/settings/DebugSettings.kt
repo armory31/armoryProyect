@@ -236,17 +236,14 @@ private fun LogViewerPanel() {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
 
-    var filterMode by remember { mutableStateOf(0) }
     var selectedLevels by remember {
         mutableStateOf(setOf(Log.INFO, Log.WARN, Log.ERROR))
     }
     var levelsMenuExpanded by remember { mutableStateOf(false) }
 
-    val filtered = remember(allLogs, filterMode, selectedLevels) {
+    val filtered = remember(allLogs, selectedLevels) {
         allLogs.filter { entry ->
-            val tagMatch = true
-            val levelMatch = selectedLevels.contains(entry.level)
-            tagMatch && levelMatch
+            selectedLevels.contains(entry.level)
         }
     }
 
@@ -389,27 +386,6 @@ private fun LogViewerPanel() {
                             }
                         )
                     }
-                }
-            }
-
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                SegmentedButton(
-                    selected = filterMode == 0,
-                    onClick = { filterMode = 0 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                    icon = { }
-                ) {
-                    Text(stringResource(R.string.filter_discord_only))
-                }
-                SegmentedButton(
-                    selected = filterMode == 1,
-                    onClick = { filterMode = 1 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                    icon = { }
-                ) {
-                    Text(stringResource(R.string.filter_all_logs))
                 }
             }
 

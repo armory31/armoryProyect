@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.arturo254.opentune.utils
 
 import android.content.Context
@@ -40,33 +38,10 @@ object ArtworkStorage {
 
     fun findBySongId(context: Context, songId: String): SavedArtwork? = loadAll(context).firstOrNull { it.songId == songId }
 
-    fun saveOrUpdate(context: Context, artwork: SavedArtwork) {
-        try {
-            val list = loadAll(context).toMutableList()
-            val idx = list.indexOfFirst { it.songId == artwork.songId }
-            if (idx >= 0) list[idx] = artwork else list.add(artwork)
-            fileFor(context).writeText(json.encodeToString(list))
-        } catch (_: Exception) {
-            // ignore write errors
-        }
-    }
-
     fun clear(context: Context) {
         try {
             val f = fileFor(context)
             if (f.exists()) f.writeText("[]")
-        } catch (_: Exception) {
-        }
-    }
-
-    fun removeBySongId(context: Context, songId: String) {
-        try {
-            val list = loadAll(context).toMutableList()
-            val idx = list.indexOfFirst { it.songId == songId }
-            if (idx >= 0) {
-                list.removeAt(idx)
-                fileFor(context).writeText(json.encodeToString(list))
-            }
         } catch (_: Exception) {
         }
     }

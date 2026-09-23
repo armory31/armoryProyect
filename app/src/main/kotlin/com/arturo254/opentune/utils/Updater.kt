@@ -281,7 +281,7 @@ object Updater {
         }.bodyAsText()
         val json = JSONObject(response)
 
-        // El JSON está en /nightly/update.json pero el APK debe servirse sin /nightly/
+        // El JSON está en /nightly/update.json, pero el APK debe servirse sin /nightly/
         val rawApkUrl = json.optString("apkUrl", "")
         val fixedApkUrl = rawApkUrl.replace(
             "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/",

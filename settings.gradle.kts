@@ -29,7 +29,6 @@ include(":app")
 include(":innertube")
 include(":kugou")
 include(":lrclib")
-include(":lastfm")
 include(":simpmusic")
 include(":betterlyrics")
 

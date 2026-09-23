@@ -121,7 +121,7 @@ fun rememberAdjustedFontSize(
 // LyricsImageCard — thin wrapper (backward-compatible)
 //
 // Todos los callers existentes siguen funcionando sin cambios.
-// Internamente delega a GlassCardLayout con un LyricsCardConfig derivado.
+// Internamente, delega a GlassCardLayout con un LyricsCardConfig derivado.
 // Para usar el nuevo sistema con múltiples layouts, usa LyricsShareCarouselSheet
 // o LyricsCardByLayout directamente.
 // ─────────────────────────────────────────────────────────────────────────────

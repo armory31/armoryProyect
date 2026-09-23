@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,6 +48,7 @@ import com.arturo254.opentune.OpenTuneHeader
 import com.arturo254.opentune.PremiumTitleFont
 import com.arturo254.opentune.R
 import com.arturo254.opentune.ui.screens.search.OnlineSearchScreen
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ExploreScreen(
@@ -56,6 +58,9 @@ fun ExploreScreen(
         mutableStateOf(TextFieldValue(""))
     }
     val focusManager = LocalFocusManager.current
+
+    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
+    val avatarUrl = currentUser?.photoUrl?.toString()
 
     val onSearch = { query: String ->
         if (query.isNotBlank()) {
@@ -69,7 +74,8 @@ fun ExploreScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         OpenTuneHeader(
-            onSettings = { navController.navigate("settings") }
+            avatarUrl = avatarUrl,
+            onSettings = { navController.navigate("account") }
         )
 
         // Barra de Búsqueda ARMORY (Material 3 Expressive Style)

@@ -14,14 +14,12 @@ package com.arturo254.opentune.playback
 // import com.google.common.util.concurrent.MoreExecutors
 
 import android.app.ActivityManager
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -54,9 +52,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Player.EVENT_POSITION_DISCONTINUITY
 import androidx.media3.common.Player.EVENT_TIMELINE_CHANGED
-import androidx.media3.common.Player.REPEAT_MODE_ALL
 import androidx.media3.common.Player.REPEAT_MODE_OFF
-import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Player.STATE_IDLE
 import androidx.media3.common.Timeline
 import androidx.media3.common.audio.SonicAudioProcessor
@@ -82,11 +78,10 @@ import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mkv.MatroskaExtractor
 import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.extractor.mp4.Mp4Extractor
-import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionToken
+import androidx.media3.session.MediaStyleNotificationHelper
 import com.arturo254.opentune.MainActivity
 import com.arturo254.opentune.R
 import com.arturo254.opentune.constants.AudioCrossfadeDurationKey
@@ -97,7 +92,6 @@ import com.arturo254.opentune.constants.AutoDownloadOnLikeKey
 import com.arturo254.opentune.constants.AutoLoadMoreKey
 import com.arturo254.opentune.constants.AutoSkipNextOnErrorKey
 import com.arturo254.opentune.constants.AutoStartOnBluetoothKey
-import com.arturo254.opentune.constants.EnableLastFMScrobblingKey
 import com.arturo254.opentune.constants.EqualizerBandLevelsMbKey
 import com.arturo254.opentune.constants.EqualizerBassBoostEnabledKey
 import com.arturo254.opentune.constants.EqualizerBassBoostStrengthKey
@@ -107,18 +101,10 @@ import com.arturo254.opentune.constants.EqualizerOutputGainMbKey
 import com.arturo254.opentune.constants.EqualizerSelectedProfileIdKey
 import com.arturo254.opentune.constants.EqualizerVirtualizerEnabledKey
 import com.arturo254.opentune.constants.EqualizerVirtualizerStrengthKey
-import com.arturo254.opentune.constants.HideExplicitKey
 import com.arturo254.opentune.constants.HideVideoKey
 import com.arturo254.opentune.constants.HistoryDuration
 import com.arturo254.opentune.constants.InnerTubeCookieKey
-import com.arturo254.opentune.constants.LastFMUseNowPlaying
-import com.arturo254.opentune.constants.ListenBrainzEnabledKey
-import com.arturo254.opentune.constants.ListenBrainzTokenKey
 import com.arturo254.opentune.constants.MaxSongCacheSizeKey
-import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleLike
-import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleRepeatMode
-import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleShuffle
-import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleStartRadio
 import com.arturo254.opentune.constants.PauseListenHistoryKey
 import com.arturo254.opentune.constants.PauseOnDeviceMuteKey
 import com.arturo254.opentune.constants.PermanentShuffleKey
@@ -127,13 +113,9 @@ import com.arturo254.opentune.constants.PlayerStreamClient
 import com.arturo254.opentune.constants.PlayerStreamClientKey
 import com.arturo254.opentune.constants.PlayerVolumeKey
 import com.arturo254.opentune.constants.RepeatModeKey
-import com.arturo254.opentune.constants.ScrobbleDelayPercentKey
-import com.arturo254.opentune.constants.ScrobbleDelaySecondsKey
-import com.arturo254.opentune.constants.ScrobbleMinSongDurationKey
 import com.arturo254.opentune.constants.ShowLyricsKey
 import com.arturo254.opentune.constants.SkipSilenceKey
 import com.arturo254.opentune.constants.SmartTrimmerKey
-import com.arturo254.opentune.constants.StopMusicOnTaskClearKey
 import com.arturo254.opentune.constants.TogetherClientIdKey
 import com.arturo254.opentune.constants.WakelockKey
 import com.arturo254.opentune.constants.YtmSyncKey
@@ -163,7 +145,6 @@ import com.arturo254.opentune.extensions.toQueue
 import com.arturo254.opentune.innertube.YouTube
 import com.arturo254.opentune.innertube.models.SongItem
 import com.arturo254.opentune.innertube.models.WatchEndpoint
-import com.arturo254.opentune.lastfm.LastFM
 import com.arturo254.opentune.lyrics.LyricsHelper
 import com.arturo254.opentune.lyrics.LyricsPreloadManager
 import com.arturo254.opentune.models.PersistPlayerState
@@ -175,8 +156,6 @@ import com.arturo254.opentune.playback.queues.YouTubeQueue
 import com.arturo254.opentune.playback.queues.filterVideo
 import com.arturo254.opentune.sync.LibraryStateHolder
 import com.arturo254.opentune.sync.SyncManager
-import com.arturo254.opentune.ui.screens.settings.ListenBrainzManager
-import com.arturo254.opentune.utils.CoilBitmapLoader
 import com.arturo254.opentune.utils.NetworkConnectivityObserver
 import com.arturo254.opentune.utils.StreamClientUtils
 import com.arturo254.opentune.utils.SyncUtils
@@ -195,7 +174,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -419,8 +397,6 @@ class MusicService :
     private var virtualizer: Virtualizer? = null
     private var loudnessEnhancer: LoudnessEnhancer? = null
 
-    private var scrobbleManager: com.arturo254.opentune.utils.ScrobbleManager? = null
-
     val automixItems = MutableStateFlow<List<MediaItem>>(emptyList())
     val automixLoading = MutableStateFlow(false)
     val automixError = MutableStateFlow<String?>(null)
@@ -502,32 +478,35 @@ class MusicService :
 
     private fun ensureStartedAsForeground() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        if (hasCalledStartForeground) return
 
-        val notification =
-            try {
-                val contentIntent =
-                    PendingIntent.getActivity(
-                        this,
-                        0,
-                        Intent(this, MainActivity::class.java),
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
+        val contentIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                Intent(this, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
 
-                NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.logo_armory)
-                    .setContentTitle(getString(R.string.music_player))
-                    .setContentText(getString(R.string.app_name))
-                    .setContentIntent(contentIntent)
-                    .setCategory(Notification.CATEGORY_SERVICE)
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                    .setOngoing(true)
-                    .setOnlyAlertOnce(true)
-                    .build()
-            } catch (e: Exception) {
-                reportException(e)
-                return
-            }
+        val meta = currentMediaMetadata.value
+        val title = meta?.title?.takeIf { it.isNotBlank() } ?: getString(R.string.music_player)
+        val artist = meta?.artists?.joinToString { it.name }?.takeIf { it.isNotBlank() } ?: getString(R.string.app_name)
+
+        val builder =
+            NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.logo_armory)
+                .setContentTitle(title)
+                .setContentText(artist)
+                .setContentIntent(contentIntent)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setOngoing(true)
+
+        if (::mediaSession.isInitialized) {
+            builder.setStyle(MediaStyleNotificationHelper.MediaStyle(mediaSession))
+        }
+
+        val notification = builder.build()
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -542,6 +521,12 @@ class MusicService :
             hasCalledStartForeground = true
         } catch (e: Exception) {
             reportException(e)
+        }
+
+        if (::mediaSession.isInitialized) {
+            runCatching {
+                super.onUpdateNotification(mediaSession, true)
+            }
         }
     }
 
@@ -610,16 +595,6 @@ class MusicService :
         super.onCreate()
         ensureScopesActive()
 
-        scope.launch {
-            currentSong.collectLatest { song ->
-                song?.let {
-                    libraryStateHolder.isSongLiked(it.song.id).collectLatest { _ ->
-                        updateNotification()
-                    }
-                }
-            }
-        }
-
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val nm = getSystemService(NotificationManager::class.java)
@@ -627,7 +602,7 @@ class MusicService :
                     NotificationChannel(
                         CHANNEL_ID,
                         getString(R.string.music_player),
-                        NotificationManager.IMPORTANCE_LOW
+                        NotificationManager.IMPORTANCE_DEFAULT
                     )
                 )
             }
@@ -682,8 +657,7 @@ class MusicService :
                         Intent(this, MainActivity::class.java),
                         PendingIntent.FLAG_IMMUTABLE,
                     ),
-                ).setBitmapLoader(CoilBitmapLoader(this, scope))
-                .build()
+                ).build()
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(
                 this,
@@ -695,15 +669,9 @@ class MusicService :
             }
         )
         
-        updateNotification()
         player.repeatMode = REPEAT_MODE_OFF
 
         scope.launch(Dispatchers.IO) {
-            val sessionToken = SessionToken(this@MusicService, ComponentName(this@MusicService, MusicService::class.java))
-            // No necesitamos un MediaController dentro del propio servicio, 
-            // esto consume recursos y genera binder transactions innecesarias.
-            // val controllerFuture = MediaController.Builder(this@MusicService, sessionToken).buildAsync()
-            
             val prefs = dataStore.data.first()
             val repeatMode = prefs[RepeatModeKey] ?: REPEAT_MODE_OFF
             val volume = (prefs[PlayerVolumeKey] ?: 1f).coerceIn(0f, 1f)
@@ -743,10 +711,6 @@ class MusicService :
             dataStore.edit { settings ->
                 settings[PlayerVolumeKey] = volume
             }
-        }
-
-        currentSong.debounce(300).collect(scope) { song ->
-            updateNotification()
         }
 
         combine(
@@ -938,54 +902,6 @@ class MusicService :
                 trimPlayerCacheToBytes(limitBytes)
             }
 
-        // Last.fm ScrobbleManager setup
-        dataStore.data
-            .map { it[EnableLastFMScrobblingKey] ?: false }
-            .debounce(300)
-            .distinctUntilChanged()
-            .collect(scope) { enabled ->
-                if (enabled && scrobbleManager == null) {
-                    val delayPercent = dataStore.get(ScrobbleDelayPercentKey, LastFM.DEFAULT_SCROBBLE_DELAY_PERCENT)
-                    val minSongDuration = dataStore.get(ScrobbleMinSongDurationKey, LastFM.DEFAULT_SCROBBLE_MIN_SONG_DURATION)
-                    val delaySeconds = dataStore.get(ScrobbleDelaySecondsKey, LastFM.DEFAULT_SCROBBLE_DELAY_SECONDS)
-                    
-                    scrobbleManager = com.arturo254.opentune.utils.ScrobbleManager(
-                        ioScope,
-                        minSongDuration = minSongDuration,
-                        scrobbleDelayPercent = delayPercent,
-                        scrobbleDelaySeconds = delaySeconds
-                    )
-                    scrobbleManager?.useNowPlaying = dataStore.get(LastFMUseNowPlaying, false)
-                } else if (!enabled && scrobbleManager != null) {
-                    scrobbleManager?.destroy()
-                    scrobbleManager = null
-                }
-            }
-
-        dataStore.data
-            .map { it[LastFMUseNowPlaying] ?: false }
-            .distinctUntilChanged()
-            .collectLatest(scope) {
-                scrobbleManager?.useNowPlaying = it
-            }
-
-        dataStore.data
-            .map { prefs ->
-                Triple(
-                    prefs[ScrobbleDelayPercentKey] ?: LastFM.DEFAULT_SCROBBLE_DELAY_PERCENT,
-                    prefs[ScrobbleMinSongDurationKey] ?: LastFM.DEFAULT_SCROBBLE_MIN_SONG_DURATION,
-                    prefs[ScrobbleDelaySecondsKey] ?: LastFM.DEFAULT_SCROBBLE_DELAY_SECONDS
-                )
-            }
-            .distinctUntilChanged()
-            .collect(scope) { (delayPercent, minSongDuration, delaySeconds) ->
-                scrobbleManager?.let {
-                    it.scrobbleDelayPercent = delayPercent
-                    it.minSongDuration = minSongDuration
-                    it.scrobbleDelaySeconds = delaySeconds
-                }
-            }
-
         scope.launch(Dispatchers.IO) {
             if (dataStore.get(PersistentQueueKey, true)) {
                 readPersistentObject<PersistQueue>(PERSISTENT_QUEUE_FILE)
@@ -1020,7 +936,7 @@ class MusicService :
                         }
                         
                         currentMediaMetadata.value = player.currentMetadata
-                        updateNotification()
+                        refreshPlaybackNotification()
                     }
                 }
             }
@@ -1087,7 +1003,7 @@ class MusicService :
             player.prepare()
             player.playWhenReady = false
             currentMediaMetadata.value = player.currentMetadata
-            updateNotification()
+            refreshPlaybackNotification()
 
             if (items.size > initialChunk.size) {
                 scope.launch(SilentHandler) {
@@ -1354,71 +1270,11 @@ class MusicService :
         player.pause()
     }
 
-    private fun updateNotification() {
-        try {
-            val isLiked = currentSong.value?.let { song ->
-                runBlocking { libraryStateHolder.isSongLiked(song.song.id).first() }
-            } ?: false
-
-            val customLayout = listOf(
-                CommandButton
-                    .Builder()
-                    .setDisplayName(
-                        getString(
-                            if (isLiked) {
-                                R.string.action_remove_like
-                            } else {
-                                R.string.action_like
-                            },
-                        ),
-                    )
-                    .setIconResId(if (isLiked) R.drawable.favorite else R.drawable.favorite_border)
-                    .setSessionCommand(CommandToggleLike)
-                    .setEnabled(currentSong.value != null)
-                    .build(),
-                CommandButton
-                    .Builder()
-                    .setDisplayName(
-                        getString(
-                            when (player.repeatMode) {
-                                REPEAT_MODE_OFF -> R.string.repeat_mode_off
-                                REPEAT_MODE_ONE -> R.string.repeat_mode_one
-                                REPEAT_MODE_ALL -> R.string.repeat_mode_all
-                                else -> R.string.repeat_mode_off
-                            },
-                        ),
-                    ).setIconResId(
-                        when (player.repeatMode) {
-                            REPEAT_MODE_OFF -> R.drawable.repeat
-                            REPEAT_MODE_ONE -> R.drawable.repeat_one_on
-                            REPEAT_MODE_ALL -> R.drawable.repeat_on
-                            else -> R.drawable.repeat
-                        },
-                    ).setSessionCommand(CommandToggleRepeatMode)
-                    .build(),
-                CommandButton
-                    .Builder()
-                    .setDisplayName(getString(if (player.shuffleModeEnabled) R.string.action_shuffle_off else R.string.action_shuffle_on))
-                    .setIconResId(if (player.shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle)
-                    .setSessionCommand(CommandToggleShuffle)
-                    .build(),
-                CommandButton.Builder()
-                    .setDisplayName(getString(R.string.start_radio))
-                    .setIconResId(R.drawable.radio)
-                    .setSessionCommand(CommandToggleStartRadio)
-                    .setEnabled(currentSong.value != null)
-                    .build(),
-            )
-            mediaSession.setCustomLayout(customLayout)
-        } catch (e: Exception) {
-            reportException(e)
-        }
-    }
-
     fun refreshPlaybackNotification() {
-        updateNotification()
-        runCatching { super.onUpdateNotification(mediaSession, player.isPlaying) }
-            .onFailure { reportException(it) }
+        if (::mediaSession.isInitialized) {
+            runCatching { super.onUpdateNotification(mediaSession, player.isPlaying) }
+                .onFailure { reportException(it) }
+        }
     }
 
     private suspend fun recoverSong(
@@ -1543,6 +1399,7 @@ class MusicService :
             player.setMediaItem(queue.preloadItem!!.toMediaItem())
             player.prepare()
             player.playWhenReady = playWhenReady
+            refreshPlaybackNotification()
         }
         scope.launch(SilentHandler) {
             val initialStatus =
@@ -1589,6 +1446,7 @@ class MusicService :
                 if (player.shuffleModeEnabled) {
                     applyCurrentFirstShuffleOrder()
                 }
+                refreshPlaybackNotification()
                 
                 // Defer loading the rest of the queue
                 if (items.size > initialChunk.size) {
@@ -1768,7 +1626,6 @@ class MusicService :
         automixError.value = null
         automixSeedMediaId = seedMediaId
 
-        val hideExplicit = dataStore.get(HideExplicitKey, false)
         val hideVideo = dataStore.get(HideVideoKey, false)
 
         automixJob = scope.launch {
@@ -1904,7 +1761,6 @@ class MusicService :
         automixItems.value = emptyList()
         automixSeedMediaId = currentMeta.id.trim().ifBlank { null }
 
-        val hideExplicit = dataStore.get(HideExplicitKey, false)
         val hideVideo = dataStore.get(HideVideoKey, false)
 
         automixJob = scope.launch {
@@ -3454,9 +3310,9 @@ class MusicService :
 
     crossfadeAudio?.onMediaItemTransition(mediaItem, reason)
 
-    // Pre-load lyrics for upcoming songs in queue
+    // Preload lyrics for upcoming songs in queue
     val currentIndex = player.currentMediaItemIndex
-    // Convert media items to MediaMetadata for lyrics pre-loading
+    // Convert media items to MediaMetadata for lyrics preloading
     val queue = player.mediaItems.mapNotNull { it.metadata }
     if (queue.isNotEmpty()) {
         lyricsPreloadManager?.onSongChanged(currentIndex, queue)
@@ -3496,8 +3352,6 @@ class MusicService :
     val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
     currentMediaMetadata.value = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
 
-    scrobbleManager?.onSongStop()
-
     if (!timelineEmpty &&
         dataStore.get(AutoLoadMoreKey, true) &&
         reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT &&
@@ -3518,7 +3372,7 @@ class MusicService :
         }
     }
 
-    // Auto-load more from queue if available
+    // Autoload more from queue if available
     if (!suppressAutoPlayback &&
         !timelineEmpty &&
         dataStore.get(AutoLoadMoreKey, true) &&
@@ -3575,10 +3429,6 @@ class MusicService :
         }
     }
 
-    if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-        scrobbleManager?.onSongStart(player.currentMetadata, duration = player.duration)
-    }
-
     scope.launch {
         val shouldSave = withContext(Dispatchers.IO) { dataStore.get(PersistentQueueKey, true) }
         if (shouldSave) {
@@ -3614,7 +3464,6 @@ class MusicService :
 
     if (playbackState == STATE_IDLE || playbackState == Player.STATE_ENDED) {
         crossfadeAudio?.stop(resetMainFade = true)
-        scrobbleManager?.onSongStop()
     }
     
     // Auto-start recommendations when playback ends
@@ -3724,21 +3573,17 @@ class MusicService :
         }
 
         // Also handle immediate update for play state and media item transition events explicitly
-        if (events.containsAny(Player.EVENT_IS_PLAYING_CHANGED, Player.EVENT_MEDIA_ITEM_TRANSITION)) {
+        if (events.containsAny(Player.EVENT_IS_PLAYING_CHANGED, Player.EVENT_MEDIA_ITEM_TRANSITION, Player.EVENT_PLAYBACK_STATE_CHANGED)) {
             if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) {
                 currentMediaMetadata.value = player.currentMetadata
             }
+            refreshPlaybackNotification()
         }
-
-   if (events.containsAny(Player.EVENT_IS_PLAYING_CHANGED)) {
-        // Scrobble: Track play/pause state
-        scrobbleManager?.onPlayerStateChanged(player.isPlaying, player.currentMetadata, duration = player.duration)
-    }
   }
 
 
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
-        updateNotification()
+        refreshPlaybackNotification()
         val joined = togetherSessionState.value as? com.arturo254.opentune.together.TogetherSessionState.Joined
         if (joined?.role is com.arturo254.opentune.together.TogetherRole.Guest) {
             if (!isTogetherApplyingRemote()) {
@@ -3767,7 +3612,7 @@ class MusicService :
     }
 
     override fun onRepeatModeChanged(repeatMode: Int) {
-        updateNotification()
+        refreshPlaybackNotification()
         val joined = togetherSessionState.value as? com.arturo254.opentune.together.TogetherSessionState.Joined
         if (joined?.role is com.arturo254.opentune.together.TogetherRole.Guest) {
             if (!isTogetherApplyingRemote()) {
@@ -4245,26 +4090,6 @@ class MusicService :
             }
 
             CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val song = database.song(mediaItem.mediaId).first()
-                        ?: return@launch
-
-                    val lbEnabled = dataStore.get(ListenBrainzEnabledKey, false)
-                    val lbToken = dataStore.get(ListenBrainzTokenKey, "")
-                    if (lbEnabled && !lbToken.isNullOrBlank()) {
-                        val endMs = System.currentTimeMillis()
-                        val startMs = endMs - playbackStats.totalPlayTimeMs
-                        try {
-                            ListenBrainzManager.submitFinished(this@MusicService, lbToken, song, startMs, endMs)
-                        } catch (ie: Exception) {
-                            Timber.tag("MusicService").v(ie, "ListenBrainz finished submit failed")
-                        }
-                    }
-                } catch (_: Exception) {
-                }
-            }
-
-            CoroutineScope(Dispatchers.IO).launch {
                 runCatching { registerRemoteListeningHistory(mediaItem.mediaId) }
             }
         }
@@ -4568,7 +4393,7 @@ class MusicService :
             currentMediaMetadata.value = player.currentMetadata
             scope.launch {
                 delay(50)
-                updateNotification()
+                refreshPlaybackNotification()
             }
         }
         return result
@@ -4588,42 +4413,19 @@ class MusicService :
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        val stopMusicOnTaskClearEnabled = dataStore.get(StopMusicOnTaskClearKey, false)
-
         try {
-            val state = togetherSessionState.value
-            val isHostSessionActive =
-                state is com.arturo254.opentune.together.TogetherSessionState.Hosting ||
-                    state is com.arturo254.opentune.together.TogetherSessionState.HostingOnline ||
-                    (state is com.arturo254.opentune.together.TogetherSessionState.Joined &&
-                        state.role is com.arturo254.opentune.together.TogetherRole.Host)
-
-            val isPlaybackInactive = player.playbackState == STATE_IDLE || player.mediaItemCount == 0
-
-            if (shouldStopServiceOnTaskRemoved(stopMusicOnTaskClearEnabled, isHostSessionActive, isPlaybackInactive)) {
-                if (isHostSessionActive && isPlaybackInactive) {
-                    runCatching { scope.launch { stopTogetherInternal() } }
-                    runCatching { togetherSessionState.value = com.arturo254.opentune.together.TogetherSessionState.Idle }
-                    stopSelf()
-                    return
-                }
-
-                if (stopMusicOnTaskClearEnabled) {
-                    if (dataStore.get(PersistentQueueKey, true) && player.mediaItemCount > 0) {
-                        runBlocking { saveQueueToDisk() }
-                    }
-                    runCatching { stopAndClearPlayback() }
-                    runCatching {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            stopForeground(STOP_FOREGROUND_REMOVE)
-                        } else {
-                            stopForeground(true)
-                        }
-                    }
-                    stopSelf()
-                    return
+            if (dataStore.get(PersistentQueueKey, true) && player.mediaItemCount > 0) {
+                runBlocking { saveQueueToDisk() }
+            }
+            runCatching { stopAndClearPlayback() }
+            runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                } else {
+                    stopForeground(true)
                 }
             }
+            stopSelf()
         } catch (_: Exception) {}
     }
 
@@ -4635,9 +4437,11 @@ class MusicService :
     }
 
     override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
-        if (startInForegroundRequired) ensureStartedAsForeground()
-        runCatching { super.onUpdateNotification(session, startInForegroundRequired) }
-            .onFailure { reportException(it) }
+        val result = runCatching { super.onUpdateNotification(session, startInForegroundRequired) }
+        if (startInForegroundRequired && !hasCalledStartForeground) {
+            ensureStartedAsForeground()
+        }
+        result.onFailure { reportException(it) }
     }
 
     inner class MusicBinder : Binder() {
@@ -4658,7 +4462,7 @@ class MusicService :
         const val ALBUM = "album"
         const val PLAYLIST = "playlist"
 
-        const val CHANNEL_ID = "music_channel_01"
+        const val CHANNEL_ID = "music_channel_v2"
         const val NOTIFICATION_ID = 888
         const val ERROR_CODE_NO_STREAM = 1000001
         const val CHUNK_LENGTH = 512 * 1024L

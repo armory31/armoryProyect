@@ -186,7 +186,7 @@ object ComposeToImage {
                     coverArt,
                     cardSize,
                     cardSize,
-                    false  // Cambia a false para mejor calidad
+                    false  // Cambia false para mejor calidad
                 )
             )
             // Reduce la intensidad del blur o usa un blur más suave

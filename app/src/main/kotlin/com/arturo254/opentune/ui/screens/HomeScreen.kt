@@ -48,6 +48,7 @@ import com.arturo254.opentune.constants.DisableBlurKey
 import com.arturo254.opentune.constants.InnerTubeCookieKey
 import com.arturo254.opentune.constants.ShowHomeCategoryChipsKey
 import com.arturo254.opentune.innertube.utils.parseCookieString
+import com.google.firebase.auth.FirebaseAuth
 import com.arturo254.opentune.ui.component.LocalBottomSheetPageState
 import com.arturo254.opentune.ui.component.LocalMenuState
 import com.arturo254.opentune.ui.component.NavigationTitle
@@ -103,7 +104,8 @@ fun HomeScreen(
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
-    val url = if (isLoggedIn) accountImageUrl else null
+    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
+    val url = if (isLoggedIn && !accountImageUrl.isNullOrEmpty()) accountImageUrl else currentUser?.photoUrl?.toString()
 
     val scope = rememberCoroutineScope()
     val lazylistState = rememberLazyListState()
@@ -161,7 +163,8 @@ fun HomeScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             OpenTuneHeader(
-                onSettings = { navController.navigate("settings") }
+                avatarUrl = url,
+                onSettings = { navController.navigate("account") }
             )
 
             BoxWithConstraints(

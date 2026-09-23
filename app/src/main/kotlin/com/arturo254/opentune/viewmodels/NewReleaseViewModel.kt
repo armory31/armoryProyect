@@ -171,7 +171,7 @@ constructor(
         val allEps = mutableListOf<AlbumItem>()
 
         releases.forEach { album ->
-            // Usar inferType() para determinar la categoría basado en el título
+            // Usar inferType() para determinar la categoría basada en el título
             when (album.inferType()) {
                 AlbumType.ALBUM -> allAlbums.add(album)
                 AlbumType.SINGLE -> allSingles.add(album)
