@@ -88,11 +88,11 @@
 
 ## Queue Persistence Rules
 # Keep queue-related classes to prevent serialization issues in release builds
--keep class com.arturo254.opentune.models.PersistQueue { *; }
--keep class com.arturo254.opentune.models.PersistPlayerState { *; }
--keep class com.arturo254.opentune.models.QueueData { *; }
--keep class com.arturo254.opentune.models.QueueType { *; }
--keep class com.arturo254.opentune.playback.queues.** { *; }
+-keep class com.ruben.spotitube.models.PersistQueue { *; }
+-keep class com.ruben.spotitube.models.PersistPlayerState { *; }
+-keep class com.ruben.spotitube.models.QueueData { *; }
+-keep class com.ruben.spotitube.models.QueueType { *; }
+-keep class com.ruben.spotitube.playback.queues.** { *; }
 
 # Keep serialization methods for queue persistence
 -keepclassmembers class * implements java.io.Serializable {

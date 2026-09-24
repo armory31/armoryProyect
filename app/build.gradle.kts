@@ -32,12 +32,10 @@ if (localPropertiesFile.exists()) {
 val gitCommit = if (System.getenv("CI") == null) "debug-local" else fetchGitCommitHash()
 
 android {
-    namespace = "com.arturo254.opentune"
-    // namespace = "com.ruben.spotitube"
+    namespace = "com.ruben.spotitube"
     compileSdk = 36
 
     defaultConfig {
-        // applicationId = "com.Arturo254.opentune"
         applicationId = "com.ruben.spotitube"
         minSdk = 26
         targetSdk = 36
@@ -307,3 +305,4 @@ configurations.configureEach {
         "androidx.compose.animation:animation-graphics:${libs.versions.compose.get()}",
     )
 }
+

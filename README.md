@@ -1,24 +1,18 @@
-# OpenTune
+# Spotitube
 
 <div >
-  <img src="https://github.com/Arturo254/OpenTune/blob/master/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Banner de OpenTune" width="100%"/>
+  <img src="https://github.com/armory31/armoryProyect/blob/master/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Banner de Spotitube" width="100%"/>
   
   ### Cliente Avanzado de YouTube Music con Material Design 3 para Android
   
-  [![Última Versión](https://img.shields.io/github/v/release/Arturo254/OpenTune?style=flat-square&logo=github&color=0D1117&labelColor=161B22)](https://github.com/Arturo254/OpenTune/releases)
-  [![Licencia](https://img.shields.io/github/license/Arturo254/OpenTune?style=flat-square&logo=gnu&color=2B3137&labelColor=161B22)](https://github.com/Arturo254/OpenTune/blob/main/LICENSE)
-  [![Estado de Traducción](https://badges.crowdin.net/opentune/localized.svg)](https://crowdin.com/project/opentune)
+  [![Última Versión](https://img.shields.io/github/v/release/armory31/armoryProyect?style=flat-square&logo=github&color=0D1117&labelColor=161B22)](https://github.com/armory31/armoryProyect/releases)
+  [![Licencia](https://img.shields.io/github/license/armory31/armoryProyect?style=flat-square&logo=gnu&color=2B3137&labelColor=161B22)](https://github.com/armory31/armoryProyect/blob/main/LICENSE)
   [![Android](https://img.shields.io/badge/Plataforma-Android%206.0+-3DDC84.svg?style=flat-square&logo=android&logoColor=white&labelColor=161B22)](https://www.android.com)
-  [![Estrellas](https://img.shields.io/github/stars/Arturo254/OpenTune?style=flat-square&logo=github&color=yellow&labelColor=161B22&cacheSeconds=21600)](https://github.com/Arturo254/OpenTune/stargazers)
-  [![Forks](https://img.shields.io/github/forks/Arturo254/OpenTune?style=flat-square&logo=github&color=blue&labelColor=161B22&cacheSeconds=21600)](https://github.com/Arturo254/OpenTune/network/members)
+  [![Estrellas](https://img.shields.io/github/stars/armory31/armoryProyect?style=flat-square&logo=github&color=yellow&labelColor=161B22&cacheSeconds=21600)](https://github.com/armory31/armoryProyect/stargazers)
+  [![Forks](https://img.shields.io/github/forks/armory31/armoryProyect?style=flat-square&logo=github&color=blue&labelColor=161B22&cacheSeconds=21600)](https://github.com/armory31/armoryProyect/network/members)
 </div>
 
-
-
-
 [![English](https://img.shields.io/badge/readme.md-english-blue?style=for-the-badge)](README.en.md)
-
-
 
 ---
 
@@ -31,15 +25,13 @@
 - [Instalación](#instalación)
 - [Compilación desde Código Fuente](#compilación-desde-código-fuente)
 - [Contribuciones](#contribuciones)
-- [Apoya el Proyecto](#apoya-el-proyecto)
-- [Reconocimientos](#reconocimientos)
 - [Licencia](#licencia)
 
 ---
 
 ## Visión General
 
-**OpenTune** es un cliente de YouTube Music de código abierto diseñado para dispositivos Android. Ofrece una experiencia de usuario superior con una interfaz moderna que implementa Material Design 3, proporcionando funcionalidades avanzadas para explorar, reproducir y gestionar contenido musical sin las limitaciones de la aplicación oficial.
+**Spotitube** es un cliente de YouTube Music de código abierto diseñado para dispositivos Android. Ofrece una experiencia de usuario superior con una interfaz moderna que implementa Material Design 3, proporcionando funcionalidades avanzadas para explorar, reproducir y gestionar contenido musical sin las limitaciones de la aplicación oficial.
 
 ### Beneficios Clave
 
@@ -49,7 +41,7 @@
 - **Interfaz Personalizable**: Personaliza tu experiencia musical
 - **Capacidades Offline**: Descarga y reproduce música sin conexión a internet
 
-> **Nota**: OpenTune es un proyecto independiente y no está afiliado, patrocinado ni respaldado por YouTube o Google.
+> **Nota**: Spotitube es un proyecto independiente y no está afiliado, patrocinado ni respaldado por YouTube o Google.
 
 ---
 
@@ -155,18 +147,6 @@
 
 ---
 
-## Documentación
-
-Para información detallada sobre configuración, características avanzadas y guías de uso, consulta nuestra documentación oficial:
-
-<div >
-  
-[![Documentación](https://img.shields.io/badge/Documentación-GitBook-4285F4?style=for-the-badge&logo=gitbook&logoColor=white)](https://opentune.gitbook.io/)
-
-</div>
-
----
-
 ## Instalación
 
 ### Requisitos del Sistema
@@ -182,34 +162,10 @@ Para información detallada sobre configuración, características avanzadas y g
 
 #### Opción 1: Releases de GitHub (Recomendado)
 
-1. Navega a la sección de [Releases](https://github.com/Arturo254/OpenTune/releases) en GitHub
+1. Navega a la sección de [Releases](https://github.com/armory31/armoryProyect/releases) en GitHub
 2. Descarga el archivo APK de la última versión estable
 3. Habilita "Instalar desde fuentes desconocidas" en la configuración de seguridad de tu dispositivo
 4. Abre el archivo APK descargado para completar la instalación
-
-#### Opción 2: Sitio Web Oficial
-
-1. Visita el [sitio web oficial de OpenTune](https://opentune.netlify.app/)
-2. Selecciona la opción de descarga para Android
-3. Sigue las instrucciones de instalación proporcionadas
-
-#### Opción 3: F-Droid
-
-<div>
-  
-[<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/es/packages/com.Arturo254.opentune)
-
-</div>
-
-#### Opción 4: OpenApk
-
-<div>
-  
-[<img src="https://www.openapk.net/images/openapk-badge.png" alt="Get it on OpenApk" height="80">](https://www.openapk.net/opentune/com.Arturo254.opentune/)
-
-</div>
-
-> **Aviso de Seguridad**: Por razones de seguridad, se recomienda obtener la aplicación exclusivamente a través de los canales oficiales mencionados anteriormente. Evita descargar APK de fuentes no verificadas.
 
 ---
 
@@ -254,13 +210,10 @@ Para información detallada sobre configuración, características avanzadas y g
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/Arturo254/OpenTune.git
+git clone https://github.com/armory31/armoryProyect.git
 
 # Navegar al directorio del proyecto
-cd OpenTune
-
-# Actualizar submódulos (si los hay)
-git submodule update --init --recursive
+cd armoryProyect
 ```
 
 ### Métodos de Compilación
@@ -269,7 +222,7 @@ git submodule update --init --recursive
 
 1. Abre Android Studio
 2. Selecciona "Abrir un proyecto existente de Android Studio"
-3. Navega y selecciona el directorio de OpenTune
+3. Navega y selecciona el directorio del proyecto
 4. Espera a que se complete la sincronización del proyecto y la indexación
 5. Selecciona Construir → Construir Bundle(s) / APK(s) → Construir APK(s)
 
@@ -281,18 +234,7 @@ git submodule update --init --recursive
 
 # Construir versión de depuración
 ./gradlew assembleDebug
-
-# Construcción completa con pruebas
-./gradlew build
-
-# Ejecutar pruebas unitarias
-./gradlew test
-
-# Limpiar construcción
-./gradlew clean
 ```
-
-> **Nota**: Los archivos APK compilados se ubicarán en el directorio `app/build/outputs/apk/`.
 
 ---
 
@@ -300,81 +242,24 @@ git submodule update --init --recursive
 
 ### Código de Conducta
 
-Todos los participantes en este proyecto deben adherirse a nuestro código de conducta que promueve un entorno inclusivo, respetuoso y constructivo. Por favor, revisa el [Código de Conducta completo](https://github.com/Arturo254/OpenTune/blob/master/CODE_OF_CONDUCT.md) antes de contribuir.
-
-### Traducción
-
-Ayuda a traducir OpenTune a tu idioma o mejorar las traducciones existentes:
-
-<div >
-  
-[![POEditor](https://img.shields.io/badge/POEditor-2196F3?style=for-the-badge&logo=translate&logoColor=white)](https://poeditor.com/join/project/208BwCVazA)
-[![Crowdin](https://img.shields.io/badge/Crowdin-2E3440?style=for-the-badge&logo=crowdin&logoColor=white)](https://crowdin.com/project/opentune)
-
-</div>
-
-### Canales de Comunidad
-
-<div >
-  
-[![Chat de Telegram](https://img.shields.io/badge/Telegram-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/OpenTune_chat)
-[![Actualizaciones de Telegram](https://img.shields.io/badge/Telegram-Actualizaciones-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/opentune_updates)
-
-</div>
+Todos los participantes en este proyecto deben adherirse a nuestro código de conducta que promueve un entorno inclusivo, respetuoso y constructivo. Por favor, revisa el [Código de Conducta completo](https://github.com/armory31/armoryProyect/blob/master/CODE_OF_CONDUCT.md) antes de contribuir.
 
 ### Flujo de Trabajo de Desarrollo
 
-1. **Revisión de Issues**: Verifica [issues abiertas](https://github.com/Arturo254/OpenTune/issues) o crea una nueva describiendo el problema o característica
+1. **Revisión de Issues**: Verifica [issues abiertas](https://github.com/armory31/armoryProyect/issues) o crea una nueva
 2. **Fork del Repositorio**: Crea un fork personal del repositorio
-3. **Rama de Característica**: Crea una rama para tu característica (`git checkout -b feature/nueva-caracteristica`)
-4. **Implementación**: Implementa cambios siguiendo las convenciones de código del proyecto
-5. **Pruebas**: Asegúrate de que el código pase todas las pruebas (`./gradlew test`)
-6. **Commit**: Realiza commits con mensajes descriptivos (`git commit -m 'feat: añadir nueva característica'`)
-7. **Push de Cambios**: Sube cambios a tu fork (`git push origin feature/nueva-caracteristica`)
-8. **Pull Request**: Abre un PR detallando los cambios y referenciando la issue correspondiente
-
-> **Directrices de Desarrollo**: Revisa nuestras [directrices de contribución](https://github.com/Arturo254/OpenTune/blob/master/CONTRIBUTING.md) para información detallada sobre el proceso de desarrollo, estándares de código y flujo de trabajo.
-
----
-
-## Apoya el Proyecto
-
-Si encuentras valor en **OpenTune** y quieres contribuir a su desarrollo continuo, considera hacer una donación. Tu apoyo financiero nos permite:
-
-- Implementar nuevas características y mejoras
-- Corregir errores y optimizar el rendimiento
-- Mantener la infraestructura del proyecto
-- Dedicar más tiempo al desarrollo y mantenimiento
-
-<div >
-  
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/Arturo254)
-[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](mailto:cervantesarturo254@gmail.com)
-
-</div>
-
-> **Nota**: Las donaciones son completamente opcionales. OpenTune siempre será gratuito y de código abierto, independientemente del apoyo financiero recibido.
-
----
-
-## Reconocimientos
-
-Agradecimientos especiales a los siguientes contribuidores y colaboradores:
-
-- **ArchiveTune** - Código Inicial e inspiración
-‎Vivi Music (Inspiración de diseño)
-- **Traductores de la comunidad** - Haciendo OpenTune accesible mundialmente
-- **Testers beta** - Ayudando a mejorar la estabilidad y usabilidad
+3. **Rama de Característica**: Crea una rama para tu característica
+4. **Pull Request**: Abre un PR detallando los cambios
 
 ---
 
 ## Licencia
 
-**Copyright © 2025 Arturo Cervantes**
+**Copyright © 2025 Armory31**
 
 Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General GNU publicada por la Free Software Foundation, ya sea la versión 3 de la Licencia, o (a tu elección) cualquier versión posterior.
 
-Este programa se distribuye con la esperanza de que sea útil, pero **SIN NINGUNA GARANTÍA**; ni siquiera la garantía implícita de COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR. Consulta la [Licencia Pública General GNU](https://github.com/Arturo254/OpenTune/blob/main/LICENSE) para más detalles.
+Este programa se distribuye con la esperanza de que sea útil, pero **SIN NINGUNA GARANTÍA**; ni siquiera la garantía implícita de COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR. Consulta la [Licencia Pública General GNU](https://github.com/armory31/armoryProyect/blob/main/LICENSE) para más detalles.
 
 <div >
   
@@ -382,17 +267,8 @@ Este programa se distribuye con la esperanza de que sea útil, pero **SIN NINGUN
 
 </div>
 
-> **Importante**: Cualquier uso comercial no autorizado de este software o sus derivados constituye una violación de los términos de licencia.
-
 ---
 
 <div >
-  <p><strong>© 2023-2024 Proyectos de Código Abierto</strong></p>
-  <p>Desarrollado con pasión por <a href="https://github.com/Arturo254">Arturo Cervantes</a></p>
-  
-  <br>
-  
-  [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Arturo254)
-  [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:cervantesarturo254@gmail.com)
-  
+  <p>Desarrollado por <a href="https://github.com/armory31">Armory31</a></p>
 </div>

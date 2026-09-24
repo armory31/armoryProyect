@@ -1,4 +1,4 @@
-import com.arturo254.opentune.betterlyrics.TTMLParser
+import com.ruben.spotitube.betterlyrics.TTMLParser
 
 fun main(args: Array<String>) {
     val ttml = """
