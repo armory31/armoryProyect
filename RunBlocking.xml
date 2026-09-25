@@ -1,0 +1,41 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/DataStore.kt</file>
+  <line>89</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/DataStore.kt" />
+  <problem_class id="RunBlocking" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">RunBlocking in coroutine</problem_class>
+  <hints />
+  <description>RunBlocking builder called from coroutine</description>
+  <highlighted_element>runBlocking</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>11</length>
+  <trace>
+    <trace_element fq_name="kotlinx.coroutines.runBlocking" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/DownloadUtil.kt#5541" file_and_line="DownloadUtil.kt:132" />
+    <trace_element fq_name="com.arturo254.opentune.utils.get" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/DownloadUtil.kt#5630" file_and_line="DownloadUtil.kt:133" />
+    <trace_element fq_name="--&gt; runBlocking" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/DataStore.kt#2792" file_and_line="DataStore.kt:89" />
+  </trace>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>472</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt" />
+  <problem_class id="RunBlocking" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">RunBlocking in coroutine</problem_class>
+  <hints />
+  <description>RunBlocking builder called from coroutine</description>
+  <highlighted_element>runBlocking</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>11</length>
+  <trace>
+    <trace_element fq_name="com.arturo254.opentune.utils.UpdateNotificationManager.notifyIfNewVersion" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/UpdateNotificationManager.kt#4722" file_and_line="UpdateNotificationManager.kt:127" />
+    <trace_element fq_name="com.arturo254.opentune.utils.UpdateNotificationManager.showUpdateNotification" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/UpdateNotificationManager.kt#5072" file_and_line="UpdateNotificationManager.kt:133" />
+    <trace_element fq_name="com.arturo254.opentune.utils.Updater.getLatestDownloadUrl" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/UpdateNotificationManager.kt#5929" file_and_line="UpdateNotificationManager.kt:155" />
+    <trace_element fq_name="--&gt; runBlocking" url="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt#18065" file_and_line="Updater.kt:472" />
+  </trace>
+</problem>
+</problems>

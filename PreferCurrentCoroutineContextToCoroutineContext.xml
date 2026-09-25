@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudio.kt</file>
+  <line>94</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudio java.lang.Object runLoop(kotlin.coroutines.Continuation&lt;? super kotlin.Unit&gt; $completion)" />
+  <problem_class id="PreferCurrentCoroutineContextToCoroutineContext" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potentially ambiguous 'kotlin.coroutine.coroutineContext' usage</problem_class>
+  <description>Usage of 'kotlin.coroutine.coroutineContext' can be ambiguous</description>
+  <highlighted_element>kotlin.coroutines.coroutineContext</highlighted_element>
+  <language>kotlin</language>
+  <offset>15</offset>
+  <length>34</length>
+</problem>
+</problems>

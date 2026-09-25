@@ -1,0 +1,16 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt" />
+  <problem_class id="AndroidLintIdleBatteryChargingConstraints" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constraints may not be met for some devices</problem_class>
+  <hints />
+  <description>&lt;html&gt;Constraints may not be met for some devices&lt;/html&gt;</description>
+  <highlighted_element>Constraints.Builder() .setRequiredNetworkType(NetworkType.CONNECTED) .setReq...</highlighted_element>
+  <language>kotlin</language>
+  <offset>26</offset>
+  <length>163</length>
+</problem>
+</problems>

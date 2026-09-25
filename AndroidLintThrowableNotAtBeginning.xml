@@ -1,0 +1,44 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt</file>
+  <line>318</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt" />
+  <problem_class id="AndroidLintThrowableNotAtBeginning" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Exception in Timber not at the beginning</problem_class>
+  <hints />
+  <description>&lt;html&gt;Throwable should be first argument&lt;/html&gt;</description>
+  <highlighted_element>Timber.w(&quot;syncLikedAlbums: Failed to insert album ${album.id}&quot;, e)</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>66</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt</file>
+  <line>322</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt" />
+  <problem_class id="AndroidLintThrowableNotAtBeginning" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Exception in Timber not at the beginning</problem_class>
+  <hints />
+  <description>&lt;html&gt;Throwable should be first argument&lt;/html&gt;</description>
+  <highlighted_element>Timber.w(&quot;syncLikedAlbums: Failed to fetch album ${album.id}&quot;, e)</highlighted_element>
+  <language>kotlin</language>
+  <offset>28</offset>
+  <length>65</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt</file>
+  <line>562</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt" />
+  <problem_class id="AndroidLintThrowableNotAtBeginning" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Exception in Timber not at the beginning</problem_class>
+  <hints />
+  <description>&lt;html&gt;Throwable should be first argument&lt;/html&gt;</description>
+  <highlighted_element>Timber.w(&quot;syncPlaylist: Failed to fetch local songs&quot;, e)</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>56</length>
+</problem>
+</problems>

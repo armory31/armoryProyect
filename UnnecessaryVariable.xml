@@ -1,0 +1,158 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>1389</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'linearProgress' and can be inlined</description>
+  <highlighted_element>fillProgress</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt</file>
+  <line>660</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.SongMenuKt void SongMenu(com.arturo254.opentune.db.entities.Song originalSong, com.arturo254.opentune.db.entities.Event event, androidx.navigation.NavController navController, com.arturo254.opentune.db.entities.PlaylistSong playlistSong, java.lang.String playlistBrowseId, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, boolean isFromCache, com.arturo254.opentune.models.ItemMetadata metadata)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'playlistBrowseId' and can be inlined</description>
+  <highlighted_element>browseId</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>222</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'pureBlack' and can be inlined</description>
+  <highlighted_element>useBlackBackground</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>18</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/PlayerComponents.kt</file>
+  <line>2013</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerComponentsKt void PlayerBackground(com.arturo254.opentune.constants.PlayerBackgroundStyle playerBackground, com.arturo254.opentune.models.MediaMetadata mediaMetadata, java.util.List&lt;androidx.compose.ui.graphics.Color&gt; gradientColors, boolean disableBlur, float blurRadius, java.lang.String playerCustomImageUri, float playerCustomBlur, float playerCustomContrast, float playerCustomBrightness)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'playerCustomBlur' and can be inlined</description>
+  <highlighted_element>blurPx</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/PlayerComponents.kt</file>
+  <line>2014</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerComponentsKt void PlayerBackground(com.arturo254.opentune.constants.PlayerBackgroundStyle playerBackground, com.arturo254.opentune.models.MediaMetadata mediaMetadata, java.util.List&lt;androidx.compose.ui.graphics.Color&gt; gradientColors, boolean disableBlur, float blurRadius, java.lang.String playerCustomImageUri, float playerCustomBlur, float playerCustomContrast, float playerCustomBrightness)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'playerCustomContrast' and can be inlined</description>
+  <highlighted_element>contrastVal</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/PlayerComponents.kt</file>
+  <line>2015</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerComponentsKt void PlayerBackground(com.arturo254.opentune.constants.PlayerBackgroundStyle playerBackground, com.arturo254.opentune.models.MediaMetadata mediaMetadata, java.util.List&lt;androidx.compose.ui.graphics.Color&gt; gradientColors, boolean disableBlur, float blurRadius, java.lang.String playerCustomImageUri, float playerCustomBlur, float playerCustomContrast, float playerCustomBrightness)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'playerCustomBrightness' and can be inlined</description>
+  <highlighted_element>brightnessVal</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt</file>
+  <line>421</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.ThumbnailKt void Thumbnail(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier, boolean isPlayerExpanded)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'currentMediaIndex' and can be inlined</description>
+  <highlighted_element>index</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/ComposeToImage.kt</file>
+  <line>668</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.ComposeToImage android.graphics.Bitmap renderCoverFocused(android.content.Context context, android.graphics.Bitmap coverArt, java.lang.String songTitle, java.lang.String artistName, java.lang.String lyrics, com.arturo254.opentune.ui.component.LyricsCardConfig config, int cardSize)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'padding' and can be inlined</description>
+  <highlighted_element>artTop</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/TranslatorLanguages.kt</file>
+  <line>30</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.TranslatorLanguages java.util.List&lt;com.arturo254.opentune.utils.TranslatorLang&gt; load(android.content.Context context)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'o' and can be inlined</description>
+  <highlighted_element>name</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>519</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.Updater java.lang.Object getAllReleases(int perPage, boolean forceRefresh, kotlin.coroutines.Continuation&lt;? super kotlin.Result&lt;? extends java.util.List&lt;? extends com.arturo254.opentune.utils.ReleaseInfo&gt;&gt;&gt; $completion)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'cachedReleases' and can be inlined</description>
+  <highlighted_element>fallback</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>533</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.Updater java.lang.Object getAllReleases(int perPage, boolean forceRefresh, kotlin.coroutines.Continuation&lt;? super kotlin.Result&lt;? extends java.util.List&lt;? extends com.arturo254.opentune.utils.ReleaseInfo&gt;&gt;&gt; $completion)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'cachedReleases' and can be inlined</description>
+  <highlighted_element>fallback</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>561</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.Updater java.lang.Object getAllReleases(int perPage, boolean forceRefresh, kotlin.coroutines.Continuation&lt;? super kotlin.Result&lt;? extends java.util.List&lt;? extends com.arturo254.opentune.utils.ReleaseInfo&gt;&gt;&gt; $completion)" />
+  <problem_class id="UnnecessaryVariable" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Unnecessary local variable</problem_class>
+  <description>Variable is same as 'cachedReleases' and can be inlined</description>
+  <highlighted_element>fallback</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>8</length>
+</problem>
+</problems>

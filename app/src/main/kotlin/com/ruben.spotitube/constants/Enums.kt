@@ -1,0 +1,19 @@
+/*
+ * OpenTune Project Original (2026)
+ * Arturo254 (github.com/Arturo254)
+ * Licensed Under GPL-3.0 | see git history for contributors
+ */
+
+package com.ruben.spotitube.constants
+
+enum class LyricsPosition {
+    LEFT,
+    CENTER,
+    RIGHT
+}
+
+enum class NavigationTab {
+    HOME,
+    LIBRARY,
+    SEARCH
+}

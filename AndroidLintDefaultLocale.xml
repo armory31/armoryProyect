@@ -1,0 +1,16 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>759</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="AndroidLintDefaultLocale" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Implied default locale in case conversion</problem_class>
+  <hints />
+  <description>&lt;html&gt;Implicitly using the default locale is a common source of bugs: Use &lt;code&gt;String.format(Locale, ...)&lt;/code&gt; instead&lt;/html&gt;</description>
+  <highlighted_element>String.format(&quot;%.2f&quot;, it / 1024.0 / 1024.0)</highlighted_element>
+  <language>kotlin</language>
+  <offset>47</offset>
+  <length>43</length>
+</problem>
+</problems>

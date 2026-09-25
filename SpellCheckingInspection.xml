@@ -1,0 +1,1899 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/OpenTuneTheme.kt</file>
+  <line>56</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.OpenTuneThemeKt void DynamicBackground(java.lang.String thumbnailUrl)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'bgDynamic'</description>
+  <highlighted_element>bgDynamic</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/constants/PreferenceKeys.kt</file>
+  <line>425</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.constants</package>
+  <entry_point TYPE="field" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/constants/PreferenceKeys.kt PoTokenGvsKey" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'poTokenGvs'</description>
+  <highlighted_element>poTokenGvs</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsHelper.kt</file>
+  <line>181</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.lyrics.LyricsHelper boolean isMeaningfulLyrics(java.lang.String lyrics)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'uFEFF'</description>
+  <highlighted_element>uFEFF</highlighted_element>
+  <language>kotlin</language>
+  <offset>27</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>32</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils KANA_ROMAJI_MAP" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Yōon'</description>
+  <highlighted_element>Yōon</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>68</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils KANA_ROMAJI_MAP" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Chōonpu'</description>
+  <highlighted_element>Chōonpu</highlighted_element>
+  <language>kotlin</language>
+  <offset>11</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>258</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils java.lang.Object romanizeJapanese(java.lang.String text, kotlin.coroutines.Continuation&lt;? super java.lang.String&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Romanizes'</description>
+  <highlighted_element>Romanizes</highlighted_element>
+  <language>kotlin</language>
+  <offset>7</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>273</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils java.lang.String katakanaToRomaji(java.lang.String katakana, java.lang.String nextKatakana)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sokuon'</description>
+  <highlighted_element>sokuon</highlighted_element>
+  <language>kotlin</language>
+  <offset>97</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>294</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils java.lang.String katakanaToRomaji(java.lang.String katakana, java.lang.String nextKatakana)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sokuon'</description>
+  <highlighted_element>sokuon</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>302</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils java.lang.String katakanaToRomaji(java.lang.String katakana, java.lang.String nextKatakana)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Sokuon'</description>
+  <highlighted_element>Sokuon</highlighted_element>
+  <language>kotlin</language>
+  <offset>19</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/lyrics/LyricsUtils.kt</file>
+  <line>302</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.lyrics</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.lyrics.LyricsUtils java.lang.String katakanaToRomaji(java.lang.String katakana, java.lang.String nextKatakana)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'geminating'</description>
+  <highlighted_element>geminating</highlighted_element>
+  <language>kotlin</language>
+  <offset>88</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudio.kt</file>
+  <line>283</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudio void updateVolumes()" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'denom'</description>
+  <highlighted_element>denom</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudio.kt</file>
+  <line>296</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudio void updateVolumes()" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'denom'</description>
+  <highlighted_element>denom</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudioProcessor.kt</file>
+  <line>398</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudioProcessor void applyFadeOutPcm16(byte[] data, int offset, int frameCount, long startFrameIndex)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'denom'</description>
+  <highlighted_element>denom</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>3690</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void onPlayerError(androidx.media3.common.PlaybackException error)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'silenceskippingaudioprocessor'</description>
+  <highlighted_element>silenceskippingaudioprocessor</highlighted_element>
+  <language>kotlin</language>
+  <offset>2543</offset>
+  <length>29</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>70</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sesion'</description>
+  <highlighted_element>sesion</highlighted_element>
+  <language>kotlin</language>
+  <offset>68</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>80</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Sesion'</description>
+  <highlighted_element>Sesion</highlighted_element>
+  <language>kotlin</language>
+  <offset>39</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>85</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Subiendo'</description>
+  <highlighted_element>Subiendo</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>88</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'excepcion'</description>
+  <highlighted_element>excepcion</highlighted_element>
+  <language>kotlin</language>
+  <offset>80</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>89</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sesion'</description>
+  <highlighted_element>sesion</highlighted_element>
+  <language>kotlin</language>
+  <offset>79</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>102</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'exito'</description>
+  <highlighted_element>exito</highlighted_element>
+  <language>kotlin</language>
+  <offset>57</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>105</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager java.lang.Object handleLogout(android.content.Context context, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sesion'</description>
+  <highlighted_element>sesion</highlighted_element>
+  <language>kotlin</language>
+  <offset>65</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Library.kt</file>
+  <line>217</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LibraryKt void LibraryPlaylistListItem(androidx.navigation.NavController navController, com.arturo254.opentune.ui.component.MenuState menuState, kotlinx.coroutines.CoroutineScope coroutineScope, com.arturo254.opentune.db.entities.Playlist playlist, androidx.compose.ui.Modifier modifier, boolean showDragHandle, androidx.compose.ui.Modifier dragHandleModifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'RDAMPL'</description>
+  <highlighted_element>RDAMPL</highlighted_element>
+  <language>kotlin</language>
+  <offset>54</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsCardLayouts.kt</file>
+  <line>279</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsCardLayoutsKt void GlassBackground(androidx.compose.ui.graphics.painter.Painter artworkPainter, com.arturo254.opentune.ui.component.LyricsGlassStyle glassStyle, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'oscurecedor'</description>
+  <highlighted_element>oscurecedor</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsCardLayouts.kt</file>
+  <line>815</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsCardLayoutsKt void BlurWashLayout(java.lang.String lyricText, com.arturo254.opentune.models.MediaMetadata mediaMetadata, com.arturo254.opentune.ui.component.LyricsCardConfig config, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Superficie'</description>
+  <highlighted_element>Superficie</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsCardLayouts.kt</file>
+  <line>979</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsCardLayoutsKt void StreamingModernLayout(java.lang.String lyricText, com.arturo254.opentune.models.MediaMetadata mediaMetadata, com.arturo254.opentune.ui.component.LyricsCardConfig config, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'comilla'</description>
+  <highlighted_element>comilla</highlighted_element>
+  <language>kotlin</language>
+  <offset>39</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsShareCarouselSheet.kt</file>
+  <line>79</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsShareCarouselSheetKt void LyricsShareCarouselSheet(java.lang.String lyricText, com.arturo254.opentune.models.MediaMetadata mediaMetadata, com.arturo254.opentune.ui.component.LyricsCardConfig initialConfig, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function1&lt;? super com.arturo254.opentune.ui.component.LyricsCardConfig,kotlin.Unit&gt; onShare, kotlin.jvm.functions.Function1&lt;? super com.arturo254.opentune.ui.component.LyricsCardConfig,kotlin.Unit&gt; onSave)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Seleccionar'</description>
+  <highlighted_element>Seleccionar</highlighted_element>
+  <language>kotlin</language>
+  <offset>7</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>3</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'WTTexe'</description>
+  <highlighted_element>WTTexe</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/PlayingIndicator.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.PlayingIndicatorKt void PlayingIndicator(long color, androidx.compose.ui.Modifier modifier, int bars, float barWidth, float cornerRadius)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'animatables'</description>
+  <highlighted_element>animatables</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialog.kt</file>
+  <line>350</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogKt void AddToPlaylistDialog(boolean isVisible, boolean allowSyncing, java.lang.String initialTextFieldValue, kotlin.jvm.functions.Function2&lt;? super com.arturo254.opentune.db.entities.Playlist,? super kotlin.coroutines.Continuation&lt;? super java.util.List&lt;? extends java.lang.String&gt;&gt;,? extends java.lang.Object&gt; onGetSong, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function2&lt;? super java.lang.Integer,? super java.util.List&lt;java.lang.String&gt;,kotlin.Unit&gt; onAddComplete)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Dups'</description>
+  <highlighted_element>Dups</highlighted_element>
+  <language>kotlin</language>
+  <offset>58</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialog.kt</file>
+  <line>350</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogKt void AddToPlaylistDialog(boolean isVisible, boolean allowSyncing, java.lang.String initialTextFieldValue, kotlin.jvm.functions.Function2&lt;? super com.arturo254.opentune.db.entities.Playlist,? super kotlin.coroutines.Continuation&lt;? super java.util.List&lt;? extends java.lang.String&gt;&gt;,? extends java.lang.Object&gt; onGetSong, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function2&lt;? super java.lang.Integer,? super java.util.List&lt;java.lang.String&gt;,kotlin.Unit&gt; onAddComplete)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Dups'</description>
+  <highlighted_element>Dups</highlighted_element>
+  <language>kotlin</language>
+  <offset>80</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialog.kt</file>
+  <line>351</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogKt void AddToPlaylistDialog(boolean isVisible, boolean allowSyncing, java.lang.String initialTextFieldValue, kotlin.jvm.functions.Function2&lt;? super com.arturo254.opentune.db.entities.Playlist,? super kotlin.coroutines.Continuation&lt;? super java.util.List&lt;? extends java.lang.String&gt;&gt;,? extends java.lang.Object&gt; onGetSong, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function2&lt;? super java.lang.Integer,? super java.util.List&lt;java.lang.String&gt;,kotlin.Unit&gt; onAddComplete)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'dups'</description>
+  <highlighted_element>dups</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/CanvasArtworkResolver.kt</file>
+  <line>4</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/CanvasArtworkResolver.kt" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Westia'</description>
+  <highlighted_element>Westia</highlighted_element>
+  <language>kotlin</language>
+  <offset>15</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/PlaybackError.kt</file>
+  <line>166</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlaybackErrorKt void PlaybackError(androidx.media3.common.PlaybackException error, java.lang.String mediaId, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; retry)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'archivetune'</description>
+  <highlighted_element>archivetune</highlighted_element>
+  <language>kotlin</language>
+  <offset>50</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/PlaybackErrorInfo.kt</file>
+  <line>5</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/PlaybackErrorInfo.kt" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Westia'</description>
+  <highlighted_element>Westia</highlighted_element>
+  <language>kotlin</language>
+  <offset>15</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1138</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'CERRAMOS'</description>
+  <highlighted_element>CERRAMOS</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt</file>
+  <line>145</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'FUNCIONES'</description>
+  <highlighted_element>FUNCIONES</highlighted_element>
+  <language>kotlin</language>
+  <offset>3</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt</file>
+  <line>657</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.AlbumScreenKt void AlbumScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.AlbumViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Sombra'</description>
+  <highlighted_element>Sombra</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>111</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'lazylist'</description>
+  <highlighted_element>lazylist</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>158</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'ABSOLUTO'</description>
+  <highlighted_element>ABSOLUTO</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>183</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'jankean'</description>
+  <highlighted_element>jankean</highlighted_element>
+  <language>kotlin</language>
+  <offset>64</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>198</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Selecciones'</description>
+  <highlighted_element>Selecciones</highlighted_element>
+  <language>kotlin</language>
+  <offset>26</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>201</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Selecciones'</description>
+  <highlighted_element>Selecciones</highlighted_element>
+  <language>kotlin</language>
+  <offset>37</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>290</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Similares'</description>
+  <highlighted_element>Similares</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/NewReleaseScreen.kt</file>
+  <line>326</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.NewReleaseScreenKt void NewReleaseHorizontalSection(java.util.List&lt;com.arturo254.opentune.innertube.models.AlbumItem&gt; releases, java.lang.String contentType, java.lang.String activeAlbumId, boolean isPlaying, kotlinx.coroutines.CoroutineScope coroutineScope, kotlin.jvm.functions.Function1&lt;? super com.arturo254.opentune.innertube.models.AlbumItem,kotlin.Unit&gt; onAlbumClick, kotlin.jvm.functions.Function1&lt;? super com.arturo254.opentune.innertube.models.AlbumItem,kotlin.Unit&gt; onAlbumLongClick)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Siempre'</description>
+  <highlighted_element>Siempre</highlighted_element>
+  <language>kotlin</language>
+  <offset>7</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>705</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.YearInMusicScreenKt void WelcomePage(int year, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'dotA'</description>
+  <highlighted_element>dotA</highlighted_element>
+  <language>kotlin</language>
+  <offset>33</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>1336</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.YearInMusicScreenKt void PersonalityPage(com.arturo254.opentune.ui.screens.InsightPersonality personality, com.arturo254.opentune.db.entities.SongWithStats topSong, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'emojiS'</description>
+  <highlighted_element>emojiS</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>1650</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.YearInMusicScreenKt void InsightProgressBar(int totalPages, int currentPage, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'segFill'</description>
+  <highlighted_element>segFill</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/musicrecognition/MusicRecognitionScreen.kt</file>
+  <line>1176</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.musicrecognition</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.musicrecognition.MusicRecognitionScreenKt void FlowChips(java.lang.String album, java.lang.String genre, java.lang.String releaseDate, java.lang.String isrc)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'isrc'</description>
+  <highlighted_element>isrc</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>238</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AccountSettingsKt void AccountSettings(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onClose, java.lang.String latestVersionName)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Sincroniza'</description>
+  <highlighted_element>Sincroniza</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>242</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AccountSettingsKt void AccountSettings(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onClose, java.lang.String latestVersionName)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Subiendo'</description>
+  <highlighted_element>Subiendo</highlighted_element>
+  <language>kotlin</language>
+  <offset>57</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>829</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AccountSettingsKt void TokenEditorDialog(java.lang.String innerTubeCookie, java.lang.String visitorData, java.lang.String dataSyncId, java.lang.String accountNamePref, java.lang.String accountEmail, java.lang.String accountChannelHandle, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onInnerTubeCookieChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onPoTokenChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onVisitorDataChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onDataSyncIdChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onAccountNameChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onAccountEmailChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onAccountChannelHandleChange, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'DATASYNC'</description>
+  <highlighted_element>DATASYNC</highlighted_element>
+  <language>kotlin</language>
+  <offset>11</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>843</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AccountSettingsKt void TokenEditorDialog(java.lang.String innerTubeCookie, java.lang.String visitorData, java.lang.String dataSyncId, java.lang.String accountNamePref, java.lang.String accountEmail, java.lang.String accountChannelHandle, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onInnerTubeCookieChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onPoTokenChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onVisitorDataChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onDataSyncIdChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onAccountNameChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onAccountEmailChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onAccountChannelHandleChange, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'DATASYNC'</description>
+  <highlighted_element>DATASYNC</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt</file>
+  <line>98</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="field" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt SUPPORTED_CLIENTS" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'mweb'</description>
+  <highlighted_element>mweb</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/SettingsComponents.kt</file>
+  <line>433</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.SettingsComponentsKt void SettingsRow(com.arturo254.opentune.ui.screens.settings.SettingsItem item, boolean showDivider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'rowBgAlpha'</description>
+  <highlighted_element>rowBgAlpha</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/UpdateScreen.kt</file>
+  <line>655</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.UpdateScreenKt java.lang.String formatCommitDate(java.lang.String isoDate)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'ss'Z'</description>
+  <highlighted_element>ss'Z</highlighted_element>
+  <language>kotlin</language>
+  <offset>59</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/ThemeSeedPalette.kt</file>
+  <line>83</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.theme</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.ui.theme.ColorSerializer" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Serializador'</description>
+  <highlighted_element>Serializador</highlighted_element>
+  <language>kotlin</language>
+  <offset>3</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/ThemeSeedPalette.kt</file>
+  <line>92</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.theme</package>
+  <entry_point TYPE="field" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/ThemeSeedPalette.kt ColorSaver" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'rememberSaveable'</description>
+  <highlighted_element>rememberSaveable</highlighted_element>
+  <language>kotlin</language>
+  <offset>33</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/YouTubeUtils.kt</file>
+  <line>22</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.YouTubeUtilsKt java.lang.String resize(java.lang.String $this$resize, java.lang.Integer width, java.lang.Integer height)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Ytimg'</description>
+  <highlighted_element>Ytimg</highlighted_element>
+  <language>kotlin</language>
+  <offset>10</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/YouTubeUtils.kt</file>
+  <line>47</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.YouTubeUtilsKt java.lang.String resize(java.lang.String $this$resize, java.lang.Integer width, java.lang.Integer height)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'maxresdefault'</description>
+  <highlighted_element>maxresdefault</highlighted_element>
+  <language>kotlin</language>
+  <offset>51</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/YouTubeUtils.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.YouTubeUtilsKt java.lang.String resize(java.lang.String $this$resize, java.lang.Integer width, java.lang.Integer height)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'maxresdefault'</description>
+  <highlighted_element>maxresdefault</highlighted_element>
+  <language>kotlin</language>
+  <offset>13</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/YouTubeUtils.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.YouTubeUtilsKt java.lang.String resize(java.lang.String $this$resize, java.lang.Integer width, java.lang.Integer height)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sddefault'</description>
+  <highlighted_element>sddefault</highlighted_element>
+  <language>kotlin</language>
+  <offset>30</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/YouTubeUtils.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.YouTubeUtilsKt java.lang.String resize(java.lang.String $this$resize, java.lang.Integer width, java.lang.Integer height)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'hqdefault'</description>
+  <highlighted_element>hqdefault</highlighted_element>
+  <language>kotlin</language>
+  <offset>43</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/YouTubeUtils.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.YouTubeUtilsKt java.lang.String resize(java.lang.String $this$resize, java.lang.Integer width, java.lang.Integer height)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'mqdefault'</description>
+  <highlighted_element>mqdefault</highlighted_element>
+  <language>kotlin</language>
+  <offset>56</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/FilebinUploader.kt</file>
+  <line>31</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.viewmodels.FilebinService" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Servicio'</description>
+  <highlighted_element>Servicio</highlighted_element>
+  <language>kotlin</language>
+  <offset>3</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/betterlyrics/src/main/kotlin/com/arturo254/opentune/betterlyrics/models/Track.kt</file>
+  <line>19</line>
+  <module>ARMORY.betterlyrics.main</module>
+  <package>com.arturo254.opentune.betterlyrics.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.betterlyrics.models.TTMLResponse TTMLResponse(java.lang.String ttml, java.lang.String provider)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'ttml'</description>
+  <highlighted_element>ttml</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/canvas/src/main/kotlin/com/arturo254/opentune/canvas/models/CanvasArtworkModel.kt</file>
+  <line>4</line>
+  <module>ARMORY.canvas.main</module>
+  <package>com.arturo254.opentune.canvas.models</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/canvas/src/main/kotlin/com/arturo254/opentune/canvas/models/CanvasArtworkModel.kt" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'Westia'</description>
+  <highlighted_element>Westia</highlighted_element>
+  <language>kotlin</language>
+  <offset>15</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/gradlew.bat</file>
+  <line>91</line>
+  <module>ARMORY</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/gradlew.bat" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'endlocal'</description>
+  <highlighted_element>endlocal</highlighted_element>
+  <language>textmate</language>
+  <offset>24</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/InnerTube.kt</file>
+  <line>121</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.InnerTube void ytClient(io.ktor.client.request.HttpRequestBuilder $this$ytClient, com.arturo254.opentune.innertube.models.YouTubeClient client, boolean setLogin)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'SAPISIDHASH'</description>
+  <highlighted_element>SAPISIDHASH</highlighted_element>
+  <language>kotlin</language>
+  <offset>49</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/InnerTube.kt</file>
+  <line>175</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.InnerTube java.lang.Object search(com.arturo254.opentune.innertube.models.YouTubeClient client, java.lang.String query, java.lang.String params, java.lang.String continuation, kotlin.coroutines.Continuation&lt;? super io.ktor.client.statement.HttpResponse&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'ctoken'</description>
+  <highlighted_element>ctoken</highlighted_element>
+  <language>kotlin</language>
+  <offset>19</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>1322</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.innertube.YouTube.SearchFilter FILTER_SONG" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'EgWKAQIIAWoKEAkQBRAKEAMQBA'</description>
+  <highlighted_element>EgWKAQIIAWoKEAkQBRAKEAMQBA</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>1323</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.innertube.YouTube.SearchFilter FILTER_VIDEO" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'EgWKAQIQAWoKEAkQChAFEAMQBA'</description>
+  <highlighted_element>EgWKAQIQAWoKEAkQChAFEAMQBA</highlighted_element>
+  <language>kotlin</language>
+  <offset>45</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>1324</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.innertube.YouTube.SearchFilter FILTER_ALBUM" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'EgWKAQIYAWoKEAkQChAFEAMQBA'</description>
+  <highlighted_element>EgWKAQIYAWoKEAkQChAFEAMQBA</highlighted_element>
+  <language>kotlin</language>
+  <offset>45</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>1325</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.innertube.YouTube.SearchFilter FILTER_ARTIST" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'EgWKAQIgAWoKEAkQChAFEAMQBA'</description>
+  <highlighted_element>EgWKAQIgAWoKEAkQChAFEAMQBA</highlighted_element>
+  <language>kotlin</language>
+  <offset>46</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>1326</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.innertube.YouTube.SearchFilter FILTER_FEATURED_PLAYLIST" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'EgeKAQQoADgBagwQDhAKEAMQBRAJEAQ'</description>
+  <highlighted_element>EgeKAQQoADgBagwQDhAKEAMQBRAJEAQ</highlighted_element>
+  <language>kotlin</language>
+  <offset>57</offset>
+  <length>31</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>1327</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.innertube.YouTube.SearchFilter FILTER_COMMUNITY_PLAYLIST" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'EgeKAQQoAEABagoQAxAEEAoQCRAF'</description>
+  <highlighted_element>EgeKAQQoAEABagoQAxAEEAoQCRAF</highlighted_element>
+  <language>kotlin</language>
+  <offset>58</offset>
+  <length>28</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/YouTubeClient.kt</file>
+  <line>25</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.YouTubeClient YouTubeClient(java.lang.String clientName, java.lang.String clientVersion, java.lang.String clientId, java.lang.String userAgent, java.lang.String osName, java.lang.String osVersion, java.lang.String deviceMake, java.lang.String deviceModel, java.lang.String androidSdkVersion, java.lang.String buildId, java.lang.String cronetVersion, java.lang.String packageName, java.lang.String friendlyName, boolean loginSupported, boolean loginRequired, boolean useSignatureTimestamp, boolean isEmbedded)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'cronet'</description>
+  <highlighted_element>cronet</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>93</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking PlaybackTracking(com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsPlaybackUrl videostatsPlaybackUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsWatchtimeUrl videostatsWatchtimeUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.AtrUrl atrUrl)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'videostatsPlaybackUrl'</description>
+  <highlighted_element>videostatsPlaybackUrl</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>21</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>94</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking PlaybackTracking(com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsPlaybackUrl videostatsPlaybackUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsWatchtimeUrl videostatsWatchtimeUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.AtrUrl atrUrl)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'videostats'</description>
+  <highlighted_element>videostats</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>95</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking PlaybackTracking(com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsPlaybackUrl videostatsPlaybackUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsWatchtimeUrl videostatsWatchtimeUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.AtrUrl atrUrl)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'videostatsWatchtimeUrl'</description>
+  <highlighted_element>videostatsWatchtimeUrl</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>22</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>96</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking PlaybackTracking(com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsPlaybackUrl videostatsPlaybackUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsWatchtimeUrl videostatsWatchtimeUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.AtrUrl atrUrl)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'videostats'</description>
+  <highlighted_element>videostats</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>97</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking PlaybackTracking(com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsPlaybackUrl videostatsPlaybackUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsWatchtimeUrl videostatsWatchtimeUrl, com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.AtrUrl atrUrl)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'atrUrl'</description>
+  <highlighted_element>atrUrl</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>101</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsPlaybackUrl" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Videostats'</description>
+  <highlighted_element>Videostats</highlighted_element>
+  <language>kotlin</language>
+  <offset>19</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/PlayerResponse.kt</file>
+  <line>106</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.innertube.models.response.PlayerResponse.PlaybackTracking.VideostatsWatchtimeUrl" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Videostats'</description>
+  <highlighted_element>Videostats</highlighted_element>
+  <language>kotlin</language>
+  <offset>19</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/KuGou.kt</file>
+  <line>116</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.KuGou java.lang.Object searchSongs(com.arturo254.opentune.kugou.models.Keyword keyword, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.kugou.models.SearchSongResponse&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'pagesize'</description>
+  <highlighted_element>pagesize</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/KuGou.kt</file>
+  <line>117</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.KuGou java.lang.Object searchSongs(com.arturo254.opentune.kugou.models.Keyword keyword, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.kugou.models.SearchSongResponse&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'showtype'</description>
+  <highlighted_element>showtype</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/KuGou.kt</file>
+  <line>153</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.KuGou java.lang.Object downloadLyrics(long id, java.lang.String accessKey, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.kugou.models.DownloadLyricsResponse&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'accesskey'</description>
+  <highlighted_element>accesskey</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/KuGou.kt</file>
+  <line>170</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.KuGou java.lang.String normalize(java.lang.String $this$normalize)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'apos'</description>
+  <highlighted_element>apos</highlighted_element>
+  <language>kotlin</language>
+  <offset>18</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/models/SearchLyricsResponse.kt</file>
+  <line>18</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.models.SearchLyricsResponse SearchLyricsResponse(int status, java.lang.String info, int errcode, java.lang.String errmsg, int expire, java.util.List&lt;com.arturo254.opentune.kugou.models.SearchLyricsResponse.Candidate&gt; candidates)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'errcode'</description>
+  <highlighted_element>errcode</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/models/SearchLyricsResponse.kt</file>
+  <line>19</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.models.SearchLyricsResponse SearchLyricsResponse(int status, java.lang.String info, int errcode, java.lang.String errmsg, int expire, java.util.List&lt;com.arturo254.opentune.kugou.models.SearchLyricsResponse.Candidate&gt; candidates)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'errmsg'</description>
+  <highlighted_element>errmsg</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/models/SearchLyricsResponse.kt</file>
+  <line>29</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.models.SearchLyricsResponse.Candidate Candidate(long id, java.lang.String productFrom, long duration, java.lang.String accesskey)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'accesskey'</description>
+  <highlighted_element>accesskey</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/kugou/src/main/kotlin/com/arturo254/opentune/kugou/models/SearchSongResponse.kt</file>
+  <line>16</line>
+  <module>ARMORY.kugou.main</module>
+  <package>com.arturo254.opentune.kugou.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.kugou.models.SearchSongResponse SearchSongResponse(int status, int errcode, java.lang.String error, com.arturo254.opentune.kugou.models.SearchSongResponse.Data data)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'errcode'</description>
+  <highlighted_element>errcode</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/Shazam.kt</file>
+  <line>274</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.Shazam java.lang.Object performRecognition(java.lang.String signature, long sampleDurationMs, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.shazamkit.models.RecognitionResult&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'webv'</description>
+  <highlighted_element>webv</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/Shazam.kt</file>
+  <line>277</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.Shazam java.lang.Object performRecognition(java.lang.String signature, long sampleDurationMs, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.shazamkit.models.RecognitionResult&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'shazamapiversion'</description>
+  <highlighted_element>shazamapiversion</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/Shazam.kt</file>
+  <line>278</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.Shazam java.lang.Object performRecognition(java.lang.String signature, long sampleDurationMs, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.shazamkit.models.RecognitionResult&gt; $completion)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'sharehub'</description>
+  <highlighted_element>sharehub</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/Shazam.kt</file>
+  <line>393</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.Shazam com.arturo254.opentune.shazamkit.models.RecognitionResult toRecognitionResult(com.arturo254.opentune.shazamkit.models.ShazamResponseJson $this$toRecognitionResult)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'spotify'</description>
+  <highlighted_element>spotify</highlighted_element>
+  <language>kotlin</language>
+  <offset>35</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>390</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.ShazamSignatureGeneratorKt void writeLittleInt(java.io.ByteArrayOutputStream $this$writeLittleInt, int value)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'ushr'</description>
+  <highlighted_element>ushr</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>391</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.ShazamSignatureGeneratorKt void writeLittleInt(java.io.ByteArrayOutputStream $this$writeLittleInt, int value)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'ushr'</description>
+  <highlighted_element>ushr</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>392</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.ShazamSignatureGeneratorKt void writeLittleInt(java.io.ByteArrayOutputStream $this$writeLittleInt, int value)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'ushr'</description>
+  <highlighted_element>ushr</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>397</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.ShazamSignatureGeneratorKt void writeLittleShort(java.io.ByteArrayOutputStream $this$writeLittleShort, int value)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'ushr'</description>
+  <highlighted_element>ushr</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>439</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.Fft void fft(double[] real, double[] imag)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'tpre'</description>
+  <highlighted_element>tpre</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>440</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.Fft void fft(double[] real, double[] imag)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'tpim'</description>
+  <highlighted_element>tpim</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/ShazamSignatureGenerator.kt</file>
+  <line>462</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.ShazamSignatureGeneratorKt int reverseBits(int $this$reverseBits, int bitCount)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'ushr'</description>
+  <highlighted_element>ushr</highlighted_element>
+  <language>kotlin</language>
+  <offset>14</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>29</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamRequestJson.Signature Signature(long samplems, long timestamp, java.lang.String uri)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'samplems'</description>
+  <highlighted_element>samplems</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>30</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamRequestJson.Signature Signature(long samplems, long timestamp, java.lang.String uri)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'samplems'</description>
+  <highlighted_element>samplems</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>50</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson ShazamResponseJson(java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Match&gt; matches, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Location location, java.lang.Long timestamp, java.lang.String timezone, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track track, java.lang.String tagid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'tagid'</description>
+  <highlighted_element>tagid</highlighted_element>
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>51</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson ShazamResponseJson(java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Match&gt; matches, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Location location, java.lang.Long timestamp, java.lang.String timezone, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track track, java.lang.String tagid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'tagid'</description>
+  <highlighted_element>tagid</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>59</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Match Match(java.lang.String id, java.lang.Double offset, java.lang.Double timeskew, java.lang.Double frequencyskew)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'timeskew'</description>
+  <highlighted_element>timeskew</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>60</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Match Match(java.lang.String id, java.lang.Double offset, java.lang.Double timeskew, java.lang.Double frequencyskew)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'timeskew'</description>
+  <highlighted_element>timeskew</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>61</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Match Match(java.lang.String id, java.lang.Double offset, java.lang.Double timeskew, java.lang.Double frequencyskew)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'frequencyskew'</description>
+  <highlighted_element>frequencyskew</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>62</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Match Match(java.lang.String id, java.lang.Double offset, java.lang.Double timeskew, java.lang.Double frequencyskew)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'frequencyskew'</description>
+  <highlighted_element>frequencyskew</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>101</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track Track(java.lang.String layout, java.lang.String type, java.lang.String key, java.lang.String title, java.lang.String subtitle, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images images, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share share, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub hub, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section&gt; sections, java.lang.String url, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist&gt; artists, java.lang.String isrc, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Genres genres, java.lang.String relatedtracksurl, java.lang.String albumadamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'isrc'</description>
+  <highlighted_element>isrc</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>102</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track Track(java.lang.String layout, java.lang.String type, java.lang.String key, java.lang.String title, java.lang.String subtitle, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images images, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share share, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub hub, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section&gt; sections, java.lang.String url, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist&gt; artists, java.lang.String isrc, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Genres genres, java.lang.String relatedtracksurl, java.lang.String albumadamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'isrc'</description>
+  <highlighted_element>isrc</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>105</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track Track(java.lang.String layout, java.lang.String type, java.lang.String key, java.lang.String title, java.lang.String subtitle, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images images, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share share, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub hub, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section&gt; sections, java.lang.String url, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist&gt; artists, java.lang.String isrc, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Genres genres, java.lang.String relatedtracksurl, java.lang.String albumadamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'relatedtracksurl'</description>
+  <highlighted_element>relatedtracksurl</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>106</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track Track(java.lang.String layout, java.lang.String type, java.lang.String key, java.lang.String title, java.lang.String subtitle, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images images, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share share, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub hub, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section&gt; sections, java.lang.String url, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist&gt; artists, java.lang.String isrc, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Genres genres, java.lang.String relatedtracksurl, java.lang.String albumadamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'relatedtracksurl'</description>
+  <highlighted_element>relatedtracksurl</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>107</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track Track(java.lang.String layout, java.lang.String type, java.lang.String key, java.lang.String title, java.lang.String subtitle, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images images, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share share, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub hub, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section&gt; sections, java.lang.String url, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist&gt; artists, java.lang.String isrc, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Genres genres, java.lang.String relatedtracksurl, java.lang.String albumadamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'albumadamid'</description>
+  <highlighted_element>albumadamid</highlighted_element>
+  <language>kotlin</language>
+  <offset>21</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>108</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track Track(java.lang.String layout, java.lang.String type, java.lang.String key, java.lang.String title, java.lang.String subtitle, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images images, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share share, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub hub, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section&gt; sections, java.lang.String url, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist&gt; artists, java.lang.String isrc, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Genres genres, java.lang.String relatedtracksurl, java.lang.String albumadamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'albumadamid'</description>
+  <highlighted_element>albumadamid</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>114</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images Images(java.lang.String background, java.lang.String coverart, java.lang.String coverarthq, java.lang.String joecolor)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'coverart'</description>
+  <highlighted_element>coverart</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>115</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images Images(java.lang.String background, java.lang.String coverart, java.lang.String coverarthq, java.lang.String joecolor)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'coverart'</description>
+  <highlighted_element>coverart</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>116</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images Images(java.lang.String background, java.lang.String coverart, java.lang.String coverarthq, java.lang.String joecolor)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'coverarthq'</description>
+  <highlighted_element>coverarthq</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>117</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images Images(java.lang.String background, java.lang.String coverart, java.lang.String coverarthq, java.lang.String joecolor)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'coverarthq'</description>
+  <highlighted_element>coverarthq</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>118</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images Images(java.lang.String background, java.lang.String coverart, java.lang.String coverarthq, java.lang.String joecolor)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'joecolor'</description>
+  <highlighted_element>joecolor</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>119</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Images Images(java.lang.String background, java.lang.String coverart, java.lang.String coverarthq, java.lang.String joecolor)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'joecolor'</description>
+  <highlighted_element>joecolor</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>138</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Share Share(java.lang.String subject, java.lang.String text, java.lang.String href, java.lang.String image, java.lang.String twitter, java.lang.String html, java.lang.String avatar, java.lang.String snapchat)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'snapchat'</description>
+  <highlighted_element>snapchat</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>156</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub Hub(java.lang.String type, java.lang.String image, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Action&gt; actions, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option&gt; options, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Provider&gt; providers, java.lang.Boolean explicit, java.lang.String displayname)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'displayname'</description>
+  <highlighted_element>displayname</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>157</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub Hub(java.lang.String type, java.lang.String image, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Action&gt; actions, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option&gt; options, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Provider&gt; providers, java.lang.Boolean explicit, java.lang.String displayname)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'displayname'</description>
+  <highlighted_element>displayname</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>177</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'beacondata'</description>
+  <highlighted_element>beacondata</highlighted_element>
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>178</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'beacondata'</description>
+  <highlighted_element>beacondata</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>183</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'listcaption'</description>
+  <highlighted_element>listcaption</highlighted_element>
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>184</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'listcaption'</description>
+  <highlighted_element>listcaption</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>185</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'overflowimage'</description>
+  <highlighted_element>overflowimage</highlighted_element>
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>186</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'overflowimage'</description>
+  <highlighted_element>overflowimage</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>187</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'colouroverflowimage'</description>
+  <highlighted_element>colouroverflowimage</highlighted_element>
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>19</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>188</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'colouroverflowimage'</description>
+  <highlighted_element>colouroverflowimage</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>19</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>189</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'providername'</description>
+  <highlighted_element>providername</highlighted_element>
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>190</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option Option(java.lang.String caption, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.OptionAction&gt; actions, com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata beacondata, java.lang.String image, java.lang.String type, java.lang.String listcaption, java.lang.String overflowimage, java.lang.Boolean colouroverflowimage, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'providername'</description>
+  <highlighted_element>providername</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>205</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Beacondata'</description>
+  <highlighted_element>Beacondata</highlighted_element>
+  <language>kotlin</language>
+  <offset>27</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>208</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata Beacondata(java.lang.String type, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'providername'</description>
+  <highlighted_element>providername</highlighted_element>
+  <language>kotlin</language>
+  <offset>33</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>209</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Hub.Option.Beacondata Beacondata(java.lang.String type, java.lang.String providername)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'providername'</description>
+  <highlighted_element>providername</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>248</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section Section(java.lang.String type, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metapage&gt; metapages, java.lang.String tabname, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metadata&gt; metadata, java.lang.String url, java.util.List&lt;java.lang.String&gt; text)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'metapages'</description>
+  <highlighted_element>metapages</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>249</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section Section(java.lang.String type, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metapage&gt; metapages, java.lang.String tabname, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metadata&gt; metadata, java.lang.String url, java.util.List&lt;java.lang.String&gt; text)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'metapages'</description>
+  <highlighted_element>metapages</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>250</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section Section(java.lang.String type, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metapage&gt; metapages, java.lang.String tabname, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metadata&gt; metadata, java.lang.String url, java.util.List&lt;java.lang.String&gt; text)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'tabname'</description>
+  <highlighted_element>tabname</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>251</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section Section(java.lang.String type, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metapage&gt; metapages, java.lang.String tabname, java.util.List&lt;com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metadata&gt; metadata, java.lang.String url, java.util.List&lt;java.lang.String&gt; text)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'tabname'</description>
+  <highlighted_element>tabname</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>260</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Section.Metapage" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'Metapage'</description>
+  <highlighted_element>Metapage</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>280</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist Artist(java.lang.String id, java.lang.String adamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Typo: In word 'adamid'</description>
+  <highlighted_element>adamid</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>281</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.ShazamResponseJson.Track.Artist Artist(java.lang.String id, java.lang.String adamid)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'adamid'</description>
+  <highlighted_element>adamid</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/shazamkit/src/main/kotlin/com/arturo254/opentune/shazamkit/models/ShazamModels.kt</file>
+  <line>306</line>
+  <module>ARMORY.shazamkit.main</module>
+  <package>com.arturo254.opentune.shazamkit.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.shazamkit.models.RecognitionResult RecognitionResult(java.lang.String trackId, java.lang.String title, java.lang.String artist, java.lang.String album, java.lang.String coverArtUrl, java.lang.String coverArtHqUrl, java.lang.String genre, java.lang.String releaseDate, java.lang.String label, java.util.List&lt;java.lang.String&gt; lyrics, java.lang.String shazamUrl, java.lang.String appleMusicUrl, java.lang.String spotifyUrl, java.lang.String isrc, java.lang.String youtubeVideoId)" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Ortografía</problem_class>
+  <description>Error tipográfico: en la palabra 'isrc'</description>
+  <highlighted_element>isrc</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>4</length>
+</problem>
+</problems>

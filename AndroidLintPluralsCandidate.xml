@@ -1,0 +1,158 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml</file>
+  <line>39</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;elements&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;elements_selected&quot;&gt;%1$d elements selected&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>64</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml</file>
+  <line>98</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;seconds&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;seek_forward_dynamic&quot;&gt;+%1$d seconds forwards&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>67</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml</file>
+  <line>99</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;seconds&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;seek_backward_dynamic&quot;&gt;-%1$d seconds backwards&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>69</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml</file>
+  <line>177</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;items&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;canvas_cache_items&quot;&gt;%d items&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>51</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml</file>
+  <line>239</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/opentune_strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;Year&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;your_year_in_music&quot;&gt;Your %d Year in Music&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>64</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>112</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;connected&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;together_connected_count&quot;&gt;%1$d connected&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>63</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>175</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;songs&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;duplicates_description_multiple&quot;&gt;%d songs are already in your playlist&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>93</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>207</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;songs&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;added_n_songs_to_playlist&quot;&gt;Added %1$d songs to %2$s&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>74</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>208</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;playlists&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;added_to_n_playlists&quot;&gt;Added to %d playlists&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>66</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>209</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;songs&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;added_n_songs_to_n_playlists&quot;&gt;Added %1$d songs to %2$d playlists&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>491</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;profiles&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;eq_import_success&quot;&gt;Imported %1$d profiles&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>64</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/values/strings.xml</file>
+  <line>860</line>
+  <module>ARMORY.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+  <problem_class id="AndroidLintPluralsCandidate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Potential Plurals</problem_class>
+  <hints />
+  <description>&lt;html&gt;Formatting %d followed by words (&quot;releases&quot;): This should probably be a plural rather than a string&lt;/html&gt;</description>
+  <highlighted_element>&lt;string name=&quot;n_releases&quot;&gt;%d releases&lt;/string&gt;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>46</length>
+</problem>
+</problems>

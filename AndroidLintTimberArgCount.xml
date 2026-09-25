@@ -1,0 +1,16 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt</file>
+  <line>562</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt" />
+  <problem_class id="AndroidLintTimberArgCount" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Formatting argument types incomplete or inconsistent</problem_class>
+  <hints />
+  <description>&lt;html&gt;Wrong argument count, format string &lt;code&gt;syncPlaylist: Failed to fetch local songs&lt;/code&gt; requires &lt;code&gt;0&lt;/code&gt; but format call supplies &lt;code&gt;1&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>Timber.w(&quot;syncPlaylist: Failed to fetch local songs&quot;, e)</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>56</length>
+</problem>
+</problems>

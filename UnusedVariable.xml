@@ -1,0 +1,977 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/LoginActivity.kt</file>
+  <line>93</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.LoginActivity void onCreate(android.os.Bundle savedInstanceState)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>splashScreen</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/DatabaseDao.kt</file>
+  <line>1496</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.DatabaseDao void move(java.lang.String playlistId, int from, int to)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>end</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>640</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void onCreate()" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>sessionToken</highlighted_element>
+  <language>kotlin</language>
+  <offset>1794</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>1596</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void refreshAutomixForCurrentMedia(boolean force)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hideExplicit</highlighted_element>
+  <language>kotlin</language>
+  <offset>1436</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>1732</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void onInfiniteQueueEnabled()" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hideExplicit</highlighted_element>
+  <language>kotlin</language>
+  <offset>1579</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/BottomSheetPage.kt</file>
+  <line>86</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.BottomSheetPageKt void BottomSheetPage(androidx.compose.ui.Modifier modifier, com.arturo254.opentune.ui.component.BottomSheetPageState state, long background)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>coroutineScope</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>626</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.ItemsKt void SongListItem(com.arturo254.opentune.db.entities.Song song, androidx.compose.ui.Modifier modifier, java.lang.Integer albumIndex, java.lang.String viewCountText, com.arturo254.opentune.models.ItemMetadata metadata, boolean showLikedIcon, boolean showInLibraryIcon, boolean showDownloadIcon, androidx.compose.runtime.internal.ComposableFunction1&lt;? super androidx.compose.foundation.layout.RowScope,kotlin.Unit&gt; badges, boolean isSelected, boolean isActive, boolean isPlaying, boolean isSwipeable, androidx.compose.ui.graphics.Color swipeContentBackgroundColor, androidx.compose.runtime.internal.ComposableFunction1&lt;? super androidx.compose.foundation.layout.RowScope,kotlin.Unit&gt; trailingContent)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>resolvedSwipeContentBackgroundColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>35</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>381</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>menuState</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>448</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>textColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>491</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>showProgressDialog</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>18</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>495</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>showColorPickerDialog</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>21</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>496</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>selectedGlassStyle</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>18</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>497</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>paletteGlassStyle</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>954</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>romanizedText</highlighted_element>
+  <language>kotlin</language>
+  <offset>40</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>1393</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>glowIntensity</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>1464</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>glowIntensity</highlighted_element>
+  <language>kotlin</language>
+  <offset>56</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>1654</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsKt void Lyrics(int lyricsSyncOffset, kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>bounceScale</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>169</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsV2Kt void LyricsV2(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>density</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>278</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsV2Kt void LyricsV2(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>tempStr</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>494</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsV2Kt void LyricsV2(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>isFuture</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>512</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsV2Kt void LyricsV2(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hasBackgroundWords</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>18</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/NewMenuComponents.kt</file>
+  <line>242</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.NewMenuComponentsKt void NewIconButton(androidx.compose.runtime.internal.ComposableFunction0&lt;kotlin.Unit&gt; icon, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onClick, androidx.compose.ui.Modifier modifier, boolean enabled, long backgroundColor, long contentColor)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>animatedContent</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialogOnline.kt</file>
+  <line>90</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogOnlineKt void AddToPlaylistDialogOnline(boolean isVisible, boolean allowSyncing, java.lang.String initialTextFieldValue, androidx.compose.runtime.snapshots.SnapshotStateList&lt;com.arturo254.opentune.db.entities.Song&gt; songs, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function1&lt;? super java.lang.Boolean,kotlin.Unit&gt; onProgressStart, kotlin.jvm.functions.Function1&lt;? super java.lang.Integer,kotlin.Unit&gt; onPercentageChange, kotlin.jvm.functions.Function1&lt;? super java.lang.String,kotlin.Unit&gt; onStatusChange)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>songIds</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt</file>
+  <line>85</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.LyricsMenuKt void LyricsMenu(kotlin.jvm.functions.Function0&lt;com.arturo254.opentune.db.entities.LyricsEntity&gt; lyricsProvider, kotlin.jvm.functions.Function0&lt;com.arturo254.opentune.models.MediaMetadata&gt; mediaMetadataProvider, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, com.arturo254.opentune.viewmodels.LyricsMenuViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>database</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt</file>
+  <line>91</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.LyricsMenuKt void LyricsMenu(kotlin.jvm.functions.Function0&lt;com.arturo254.opentune.db.entities.LyricsEntity&gt; lyricsProvider, kotlin.jvm.functions.Function0&lt;com.arturo254.opentune.models.MediaMetadata&gt; mediaMetadataProvider, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, com.arturo254.opentune.viewmodels.LyricsMenuViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>coroutineScope</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>131</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.SelectionSongsMenuKt void SelectionSongMenu(java.util.List&lt;com.arturo254.opentune.db.entities.Song&gt; songSelection, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; clearAction, java.util.List&lt;com.arturo254.opentune.db.entities.PlaylistSongMap&gt; songPosition)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>notAddedList</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>540</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.SelectionSongsMenuKt void SelectionMediaMetadataMenu(java.util.List&lt;com.arturo254.opentune.models.MediaMetadata&gt; songSelection, java.util.List&lt;androidx.media3.common.Timeline.Window&gt; currentItems, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; clearAction)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>notAddedList</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt</file>
+  <line>129</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.SongMenuKt void SongMenu(com.arturo254.opentune.db.entities.Song originalSong, com.arturo254.opentune.db.entities.Event event, androidx.navigation.NavController navController, com.arturo254.opentune.db.entities.PlaylistSong playlistSong, java.lang.String playlistBrowseId, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, boolean isFromCache, com.arturo254.opentune.models.ItemMetadata metadata)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>syncUtils</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/LyricsScreen.kt</file>
+  <line>241</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.LyricsScreenKt void LyricsScreen(com.arturo254.opentune.models.MediaMetadata mediaMetadata, androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onBackClick, int lyricsSyncOffset, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>icBackgroundColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>218</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>onBackgroundColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>223</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>backgroundColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>241</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>playerVolume</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>345</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>changeBound</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>383</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>download</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>480</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>showChoosePlaylistDialog</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>782</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>nextUpMetadata</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1144</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>queueTextButtonColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>13</offset>
+  <length>20</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1144</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>queueIconButtonColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>35</offset>
+  <length>20</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt</file>
+  <line>132</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.QueueKt void Queue(com.arturo254.opentune.ui.component.BottomSheetState state, com.arturo254.opentune.ui.component.BottomSheetState playerBottomSheetState, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, long backgroundColor, long onBackgroundColor, long TextBackgroundColor, long textButtonColor, long iconButtonColor, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onShowLyrics, boolean pureBlack)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>clipboardManager</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt</file>
+  <line>420</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.QueueKt void Queue(com.arturo254.opentune.ui.component.BottomSheetState state, com.arturo254.opentune.ui.component.BottomSheetState playerBottomSheetState, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, long backgroundColor, long onBackgroundColor, long TextBackgroundColor, long textButtonColor, long iconButtonColor, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onShowLyrics, boolean pureBlack)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>queueTitle</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt</file>
+  <line>438</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.QueueKt void Queue(com.arturo254.opentune.ui.component.BottomSheetState state, com.arturo254.opentune.ui.component.BottomSheetState playerBottomSheetState, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, long backgroundColor, long onBackgroundColor, long TextBackgroundColor, long textButtonColor, long iconButtonColor, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onShowLyrics, boolean pureBlack)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>lastScrolledUid</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt</file>
+  <line>271</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.ThumbnailKt void Thumbnail(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier, boolean isPlayerExpanded)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>view</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt</file>
+  <line>359</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.AlbumScreenKt void AlbumScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.AlbumViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>database</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt</file>
+  <line>1341</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.AlbumScreenKt void AlbumScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.AlbumViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>qualityLabel</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/BrowseScreen.kt</file>
+  <line>60</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.BrowseScreenKt void BrowseScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, java.lang.String browseId, com.arturo254.opentune.viewmodels.BrowseViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>mediaMetadata</highlighted_element>
+  <language>kotlin</language>
+  <offset>9</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>95</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HistoryScreenKt void HistoryScreen(androidx.navigation.NavController navController, com.arturo254.opentune.viewmodels.HistoryViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>database</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>288</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HistoryScreenKt void HistoryScreen(androidx.navigation.NavController navController, com.arturo254.opentune.viewmodels.HistoryViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>events</highlighted_element>
+  <language>kotlin</language>
+  <offset>51</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>70</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>bottomSheetPageState</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>20</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>86</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>isLoading</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>99</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>accountName</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>102</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>disableBlur</highlighted_element>
+  <language>kotlin</language>
+  <offset>9</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>151</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>color1</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>152</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>color2</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>153</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>color3</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>154</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>color4</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>155</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>color5</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreen.kt</file>
+  <line>156</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.HomeScreenKt void HomeScreen(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onVisible, com.arturo254.opentune.viewmodels.HomeViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>surfaceColor</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/MoodAndGenresScreen.kt</file>
+  <line>66</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.MoodAndGenresScreenKt void MoodAndGenresScreen(androidx.navigation.NavController navController, com.arturo254.opentune.viewmodels.MoodAndGenresViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>topPadding</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/NewReleaseScreen.kt</file>
+  <line>101</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.NewReleaseScreenKt void NewReleaseScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.NewReleaseViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>content</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/StatsScreen.kt</file>
+  <line>682</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.StatsScreenKt androidx.compose.foundation.shape.GenericShape PieSliceShape(float startAngle, float sweepAngle)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>endRad</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>247</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.YearInMusicScreenKt void YearInMusicScreen(androidx.navigation.NavController navController, com.arturo254.opentune.viewmodels.YearInMusicViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>playerConnection</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/artist/ArtistScreen.kt</file>
+  <line>159</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.artist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.artist.ArtistScreenKt void ArtistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.ArtistViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>database</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/artist/ArtistScreen.kt</file>
+  <line>177</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.artist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.artist.ArtistScreenKt void ArtistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.ArtistViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>density</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/artist/ArtistSongsScreen.kt</file>
+  <line>87</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.artist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.artist.ArtistSongsScreenKt void ArtistSongsScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.ArtistSongsViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hideExplicit</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/library/LibraryScreen.kt</file>
+  <line>46</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.library</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.library.LibraryScreenKt void LibraryScreen(androidx.navigation.NavController navController)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>showTagsInLibrary</highlighted_element>
+  <language>kotlin</language>
+  <offset>9</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/library/LibraryScreen.kt</file>
+  <line>47</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.library</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.library.LibraryScreenKt void LibraryScreen(androidx.navigation.NavController navController)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>database</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/AutoPlaylistScreen.kt</file>
+  <line>163</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.playlist.AutoPlaylistScreenKt void AutoPlaylistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.AutoPlaylistViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hideExplicit</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/CachePlaylistScreen.kt</file>
+  <line>140</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.playlist.CachePlaylistScreenKt void CachePlaylistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.CachePlaylistViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hideExplicit</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/OnlinePlaylistScreen.kt</file>
+  <line>148</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.playlist.OnlinePlaylistScreenKt void OnlinePlaylistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>database</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/OnlinePlaylistScreen.kt</file>
+  <line>157</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.playlist.OnlinePlaylistScreenKt void OnlinePlaylistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>dbPlaylist</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/search/SearchPreviewScreen.kt</file>
+  <line>78</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.search</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.search.SearchPreviewScreenKt void GenreCard(com.arturo254.opentune.ui.screens.search.GenreItem genre, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onClick)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>darkVariant</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AboutScreen.kt</file>
+  <line>151</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AboutScreenKt void AboutScreen(androidx.navigation.NavController navController, com.arturo254.opentune.viewmodels.AboutViewModel viewModel)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>isTablet</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>128</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AccountSettingsKt void AccountSettings(androidx.navigation.NavController navController, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onClose, java.lang.String latestVersionName)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>poToken</highlighted_element>
+  <language>kotlin</language>
+  <offset>9</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>865</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.AccountSettingsKt void PlaylistSelectionDialog(kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss)" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>coroutineScope</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ArtistViewModel.kt</file>
+  <line>89</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ArtistViewModel void fetchArtistsFromYTM()" />
+  <problem_class id="UnusedVariable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused variable</problem_class>
+  <description>Unused variable</description>
+  <highlighted_element>hideExplicit</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>12</length>
+</problem>
+</problems>

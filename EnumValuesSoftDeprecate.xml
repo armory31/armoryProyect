@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsShareCarouselSheet.kt</file>
+  <line>152</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsShareCarouselSheetKt void LyricsShareCarouselSheet(java.lang.String lyricText, com.arturo254.opentune.models.MediaMetadata mediaMetadata, com.arturo254.opentune.ui.component.LyricsCardConfig initialConfig, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onDismiss, kotlin.jvm.functions.Function1&lt;? super com.arturo254.opentune.ui.component.LyricsCardConfig,kotlin.Unit&gt; onShare, kotlin.jvm.functions.Function1&lt;? super com.arturo254.opentune.ui.component.LyricsCardConfig,kotlin.Unit&gt; onSave)" />
+  <problem_class id="EnumValuesSoftDeprecate" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">'Enum.values()' is recommended to be replaced by 'Enum.entries' since 1.9</problem_class>
+  <description>'Enum.values()' is recommended to be replaced by 'Enum.entries' since 1.9</description>
+  <highlighted_element>values()</highlighted_element>
+  <language>kotlin</language>
+  <offset>34</offset>
+  <length>8</length>
+</problem>
+</problems>

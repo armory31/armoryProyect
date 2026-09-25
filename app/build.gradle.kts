@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.google.services)
+    id("com.github.ben-manes.versions") version "0.64.0"
 }
 
 fun fetchGitCommitHash(): String {
@@ -33,12 +34,12 @@ val gitCommit = if (System.getenv("CI") == null) "debug-local" else fetchGitComm
 
 android {
     namespace = "com.ruben.spotitube"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ruben.spotitube"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 129
         versionName = "3.0.2"
 

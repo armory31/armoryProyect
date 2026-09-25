@@ -1,0 +1,262 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudio.kt</file>
+  <line>130</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudio java.lang.Object runLoop(kotlin.coroutines.Continuation&lt;? super kotlin.Unit&gt; $completion)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'durationMs == C.TIME_UNSET' is always false when reached</description>
+  <highlighted_element>durationMs == C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>86</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudio.kt</file>
+  <line>141</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudio java.lang.Object runLoop(kotlin.coroutines.Continuation&lt;? super kotlin.Unit&gt; $completion)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'durationMs == C.TIME_UNSET' is always false when reached</description>
+  <highlighted_element>durationMs == C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>83</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudioProcessor.kt</file>
+  <line>223</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudioProcessor void applyCrossfadeDurationIfNeeded(boolean force)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'bytesPerFrame &gt; 0' is always true when reached</description>
+  <highlighted_element>bytesPerFrame &gt; 0</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>865</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void onCreate()" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'maxSongCacheSizeMb == -1' is always false when reached</description>
+  <highlighted_element>maxSongCacheSizeMb == -1</highlighted_element>
+  <language>kotlin</language>
+  <offset>2346</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>1293</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsV2Kt void AnimatedWordV2(com.arturo254.opentune.lyrics.WordTimestamp word, int wordIndex, boolean isLineActive, boolean isLinePast, long currentPositionMs, long textColor, float inactiveAlpha, float fontSize, boolean isBackground, androidx.compose.ui.text.font.FontFamily lyricsFontFamily)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition '!isWordComplete' is always true when reached</description>
+  <highlighted_element>!isWordComplete</highlighted_element>
+  <language>kotlin</language>
+  <offset>47</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>507</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'currentPlayerDuration != C.TIME_UNSET' is always true when reached</description>
+  <highlighted_element>currentPlayerDuration != C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>62</offset>
+  <length>37</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>778</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'duration != C.TIME_UNSET' is always true when reached</description>
+  <highlighted_element>duration != C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>43</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>861</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'duration == C.TIME_UNSET' is always false when reached</description>
+  <highlighted_element>duration == C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>50</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1006</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'duration == C.TIME_UNSET' is always false when reached</description>
+  <highlighted_element>duration == C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>50</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1010</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'duration != C.TIME_UNSET' is always true when reached</description>
+  <highlighted_element>duration != C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>55</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1589</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt androidx.compose.ui.Modifier littlePlayerOverlayGestures(androidx.compose.ui.Modifier $this$littlePlayerOverlayGestures, boolean seekEnabled, long durationMs, float progressFraction, boolean canSkipPrevious, boolean canSkipNext, kotlin.jvm.functions.Function1&lt;? super java.lang.Long,kotlin.Unit&gt; onSeekToPositionMs, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onSeekFinished, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onSkipPrevious, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onSkipNext)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'durationMs != C.TIME_UNSET' is always true when reached</description>
+  <highlighted_element>durationMs != C.TIME_UNSET</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>26</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt</file>
+  <line>578</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.ThumbnailKt void Thumbnail(kotlin.jvm.functions.Function0&lt;java.lang.Long&gt; sliderPositionProvider, androidx.compose.ui.Modifier modifier, boolean isPlayerExpanded)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'fetched != null' is always false</description>
+  <highlighted_element>fetched != null</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/OnlinePlaylistScreen.kt</file>
+  <line>787</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.playlist.OnlinePlaylistScreenKt void OnlinePlaylistScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior, com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel viewModel)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition '!isLoading' is always true when reached</description>
+  <highlighted_element>!isLoading</highlighted_element>
+  <language>kotlin</language>
+  <offset>43</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/MusicTogetherScreen.kt</file>
+  <line>174</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.MusicTogetherScreenKt void MusicTogetherScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'isCreatingSessionLoading' is always false when reached</description>
+  <highlighted_element>isCreatingSessionLoading</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/MusicTogetherScreen.kt</file>
+  <line>188</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.MusicTogetherScreenKt void MusicTogetherScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'isHosting' is always false when reached</description>
+  <highlighted_element>isHosting</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/MusicTogetherScreen.kt</file>
+  <line>367</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.MusicTogetherScreenKt void MusicTogetherScreen(androidx.navigation.NavController navController, androidx.compose.material3.TopAppBarScrollBehavior scrollBehavior)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'isHostRole' is always true when reached</description>
+  <highlighted_element>isHostRole</highlighted_element>
+  <language>kotlin</language>
+  <offset>45</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/YTPlayerUtils.kt</file>
+  <line>406</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.YTPlayerUtils java.lang.Object playerResponseForPlaybackOnce(java.lang.String videoId, java.lang.String playlistId, com.arturo254.opentune.constants.AudioQuality audioQuality, android.net.ConnectivityManager connectivityManager, com.arturo254.opentune.constants.PlayerStreamClient preferredStreamClient, java.lang.Boolean networkMetered, java.util.Set&lt;java.lang.String&gt; avoidCodecs, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.utils.YTPlayerUtils.PlaybackData&gt; $completion)" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'selectedUrl == null' is always false when reached</description>
+  <highlighted_element>selectedUrl == null</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>19</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AlbumViewModel.kt</file>
+  <line>77</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.viewmodels.AlbumViewModel uiState" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'data.songs.isEmpty()' is always true when reached</description>
+  <highlighted_element>data.songs.isEmpty()</highlighted_element>
+  <language>kotlin</language>
+  <offset>63</offset>
+  <length>20</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AlbumViewModel.kt</file>
+  <line>78</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.viewmodels.AlbumViewModel uiState" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'fetch is FetchState.Failed &amp;&amp; data != null &amp;&amp; data.songs.isNotEmpty()' is always false</description>
+  <highlighted_element>fetch is FetchState.Failed &amp;&amp; data != null &amp;&amp; data.songs.isNotEmpty()</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>69</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AlbumViewModel.kt</file>
+  <line>78</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.viewmodels.AlbumViewModel uiState" />
+  <problem_class id="KotlinConstantConditions" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constant conditions</problem_class>
+  <description>Condition 'data.songs.isNotEmpty()' is always false when reached</description>
+  <highlighted_element>data.songs.isNotEmpty()</highlighted_element>
+  <language>kotlin</language>
+  <offset>62</offset>
+  <length>23</length>
+</problem>
+</problems>

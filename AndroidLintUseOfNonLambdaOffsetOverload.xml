@@ -1,0 +1,16 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>922</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt" />
+  <problem_class id="AndroidLintUseOfNonLambdaOffsetOverload" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Modifier.offset{ } is preferred over Modifier.offset() for State backed arguments.</problem_class>
+  <hints />
+  <description>&lt;html&gt;State backed values should use the lambda overload of Modifier.offset&lt;/html&gt;</description>
+  <highlighted_element>offset</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>6</length>
+</problem>
+</problems>

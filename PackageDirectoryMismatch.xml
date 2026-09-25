@@ -1,0 +1,28 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/PlaylistDeleteBody.kt</file>
+  <line>9</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.body</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/PlaylistDeleteBody.kt" />
+  <problem_class id="PackageDirectoryMismatch" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Package name does not match containing directory</problem_class>
+  <description>Package directive does not match the file location</description>
+  <highlighted_element>package com.arturo254.opentune.innertube.models.body</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>52</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/NewPipe.kt</file>
+  <line>9</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/NewPipe.kt" />
+  <problem_class id="PackageDirectoryMismatch" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Package name does not match containing directory</problem_class>
+  <description>Package directive does not match the file location</description>
+  <highlighted_element>package com.arturo254.opentune.innertube</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>40</length>
+</problem>
+</problems>

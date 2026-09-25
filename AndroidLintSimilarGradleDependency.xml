@@ -1,0 +1,28 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/gradle/libs.versions.toml</file>
+  <line>148</line>
+  <module>ARMORY</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/gradle/libs.versions.toml" />
+  <problem_class id="AndroidLintSimilarGradleDependency" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Multiple Versions Gradle Dependency</problem_class>
+  <hints />
+  <description>&lt;html&gt;There are multiple dependencies dev.chrisbanes.haze:haze but with different version&lt;/html&gt;</description>
+  <highlighted_element>group = &quot;dev.chrisbanes.haze&quot;, name = &quot;haze&quot;, version.ref = &quot;haze&quot; }</highlighted_element>
+  <language>TOML</language>
+  <offset>8</offset>
+  <length>69</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/gradle/libs.versions.toml</file>
+  <line>157</line>
+  <module>ARMORY</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/gradle/libs.versions.toml" />
+  <problem_class id="AndroidLintSimilarGradleDependency" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Multiple Versions Gradle Dependency</problem_class>
+  <hints />
+  <description>&lt;html&gt;There are multiple dependencies dev.chrisbanes.haze:haze but with different version&lt;/html&gt;</description>
+  <highlighted_element>group = &quot;dev.chrisbanes.haze&quot;, name = &quot;haze&quot;, version.ref = &quot;hazeVersion&quot; }</highlighted_element>
+  <language>TOML</language>
+  <offset>12</offset>
+  <length>76</length>
+</problem>
+</problems>

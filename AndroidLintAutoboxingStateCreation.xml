@@ -1,0 +1,422 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/SleepTimer.kt</file>
+  <line>27</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/SleepTimer.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>833</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>897</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>1925</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableFloatStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>28</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/ThumbnailCornerRadiusSelector.kt</file>
+  <line>144</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/ThumbnailCornerRadiusSelector.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableFloatStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt</file>
+  <line>124</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt</file>
+  <line>223</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>208</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>210</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>45</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt</file>
+  <line>172</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableFloatStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt</file>
+  <line>179</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>41</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt</file>
+  <line>515</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt</file>
+  <line>218</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt</file>
+  <line>442</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/AlbumScreen.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/LocalPlaylistScreen.kt</file>
+  <line>257</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/LocalPlaylistScreen.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/TopPlaylistScreen.kt</file>
+  <line>181</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/TopPlaylistScreen.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>650</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>39</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>651</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>39</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>652</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>653</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableFloatStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt</file>
+  <line>112</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt</file>
+  <line>115</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt</file>
+  <line>118</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt</file>
+  <line>121</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/StorageSettings.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt</file>
+  <line>23</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt</file>
+  <line>24</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>49</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt</file>
+  <line>41</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>42</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt</file>
+  <line>42</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>49</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt</file>
+  <line>59</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/ScrollUtils.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableIntStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>49</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/ComposeDebugUtils.kt</file>
+  <line>48</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/ComposeDebugUtils.kt" />
+  <problem_class id="AndroidLintAutoboxingStateCreation" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">State&lt;T&gt; will autobox values assigned to this state. Use a specialized state type instead.</problem_class>
+  <hints />
+  <description>&lt;html&gt;Prefer &lt;code&gt;mutableLongStateOf&lt;/code&gt; instead of &lt;code&gt;mutableStateOf&lt;/code&gt;&lt;/html&gt;</description>
+  <highlighted_element>mutableStateOf</highlighted_element>
+  <language>kotlin</language>
+  <offset>56</offset>
+  <length>14</length>
+</problem>
+</problems>

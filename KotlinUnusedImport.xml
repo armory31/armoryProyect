@@ -1,0 +1,691 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ArmoryComponents.kt</file>
+  <line>72</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ArmoryComponents.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.ui.res.painterResource</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>46</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>43</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.core.app.NotificationCompat</highlighted_element>
+  <language>kotlin</language>
+  <offset>28</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>55</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.media3.common.Player.REPEAT_MODE_ALL</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>52</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>57</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.media3.common.Player.REPEAT_MODE_ONE</highlighted_element>
+  <language>kotlin</language>
+  <offset>53</offset>
+  <length>52</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>83</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.media3.session.CommandButton</highlighted_element>
+  <language>kotlin</language>
+  <offset>50</offset>
+  <length>44</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>87</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.media3.session.MediaStyleNotificationHelper</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>59</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>113</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleLike</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>79</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>114</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleRepeatMode</highlighted_element>
+  <language>kotlin</language>
+  <offset>80</offset>
+  <length>85</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>115</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleShuffle</highlighted_element>
+  <language>kotlin</language>
+  <offset>86</offset>
+  <length>82</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>116</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.constants.MediaSessionConstants.CommandToggleStartRadio</highlighted_element>
+  <language>kotlin</language>
+  <offset>83</offset>
+  <length>85</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>168</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.utils.CoilBitmapLoader</highlighted_element>
+  <language>kotlin</language>
+  <offset>47</offset>
+  <length>52</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>187</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import kotlinx.coroutines.flow.collectLatest</highlighted_element>
+  <language>kotlin</language>
+  <offset>46</offset>
+  <length>44</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/CreatePlaylistDialog.kt</file>
+  <line>9</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/CreatePlaylistDialog.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.foundation.layout.Column</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>48</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/CreatePlaylistDialog.kt</file>
+  <line>10</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/CreatePlaylistDialog.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.foundation.layout.fillMaxWidth</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>54</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/CreatePlaylistDialog.kt</file>
+  <line>15</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/CreatePlaylistDialog.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.ui.Modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>35</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>14</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.animation.AnimatedVisibility</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>52</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>16</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.animation.core.tween</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>44</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>17</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.animation.expandVertically</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>50</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>18</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.animation.fadeIn</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>40</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>19</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.animation.fadeOut</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>20</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.animation.shrinkVertically</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>50</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>62</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.runtime.collectAsState</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>46</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>85</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>62</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>99</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.constants.UseLoginForBrowse</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>57</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>101</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.constants.YtmSyncKey</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>50</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt</file>
+  <line>112</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/AccountSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.viewmodels.HomeViewModel</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>54</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>57</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.material3.SegmentedButton</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>49</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>58</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.material3.SegmentedButtonDefaults</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>57</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>59</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.material3.SingleChoiceSegmentedButtonRow</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>64</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenExtractionActivity.kt</file>
+  <line>4</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenExtractionActivity.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import android.app.Activity</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>27</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt</file>
+  <line>29</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.foundation.layout.WindowInsetsSides</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>59</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt</file>
+  <line>33</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.foundation.layout.only</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>46</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt</file>
+  <line>37</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import androidx.compose.foundation.layout.windowInsetsPadding</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>61</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt</file>
+  <line>78</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.LocalPlayerAwareWindowInsets</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>58</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/InnerTube.kt</file>
+  <line>28</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/InnerTube.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import io.ktor.client.statement.bodyAsText</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>42</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>26</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.Run</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>50</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>27</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.Runs</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>51</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>70</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.utils.PoTokenGenerator</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>62</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt</file>
+  <line>74</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/YouTube.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import kotlinx.serialization.encodeToString</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/body/BrowseBody.kt</file>
+  <line>12</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.body</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/body/BrowseBody.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.Continuation</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>59</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/AccountMenuResponse.kt</file>
+  <line>14</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/AccountMenuResponse.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.Thumbnail</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>56</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>11</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.Album</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>52</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>13</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.Artist</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>53</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>14</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.ArtistItem</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>57</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>15</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.MusicResponsiveListItemRenderer</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>78</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>17</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.PlaylistItem</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>59</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>18</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.SongItem</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>55</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>19</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.YTItem</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>53</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>20</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.oddElements</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>58</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt</file>
+  <line>21</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/LibraryAlbumsPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.utils.parseTime</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>55</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/SearchSummaryPage.kt</file>
+  <line>15</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/SearchSummaryPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs....</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>164</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/SearchSummaryPage.kt</file>
+  <line>16</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/SearchSummaryPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs....</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>165</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/SearchSummaryPage.kt</file>
+  <line>17</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/SearchSummaryPage.kt" />
+  <problem_class id="KotlinUnusedImport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused import directive</problem_class>
+  <description>Unused import directive</description>
+  <highlighted_element>import com.arturo254.opentune.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs....</highlighted_element>
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>171</length>
+</problem>
+</problems>

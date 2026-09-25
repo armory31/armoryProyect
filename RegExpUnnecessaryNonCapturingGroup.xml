@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/CanvasArtworkResolver.kt</file>
+  <line>92</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.CanvasArtworkResolverKt java.lang.String normalizeCanvasArtistName(java.lang.String raw)" />
+  <problem_class id="RegExpUnnecessaryNonCapturingGroup" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Grupo de no captura innecesario</problem_class>
+  <description>Grupo de no captura innecesario &lt;code&gt;(?:\\s*,\\s*|\\s*&amp;\\s*|\\s+x\\s+|\\bfeat\\.?\\b|\\bft\\.?\\b|\\bfeaturing\\b|\\bwith\\b)&lt;/code&gt;</description>
+  <highlighted_element>(?:</highlighted_element>
+  <language>RegExp</language>
+  <offset>21</offset>
+  <length>3</length>
+</problem>
+</problems>

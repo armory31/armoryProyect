@@ -1,0 +1,1038 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsCardLayouts.kt</file>
+  <line>132</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsCardLayouts.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.app_name)</highlighted_element>
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>36</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt</file>
+  <line>214</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt</file>
+  <line>215</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_playlist, songCount, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt</file>
+  <line>216</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>34</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt</file>
+  <line>217</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/AlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_n_playlists, songCount, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>108</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>40</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>139</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>146</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>191</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>206</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>209</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>212</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>221</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>239</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>256</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>258</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>48</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt</file>
+  <line>267</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/ImportPlaylistDialog.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt</file>
+  <line>192</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.error_no_internet)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>45</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt</file>
+  <line>312</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/LyricsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.lyrics_not_found)</highlighted_element>
+  <language>kotlin</language>
+  <offset>31</offset>
+  <length>44</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt</file>
+  <line>215</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>43</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt</file>
+  <line>216</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt</file>
+  <line>291</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.no_title)</highlighted_element>
+  <language>kotlin</language>
+  <offset>38</offset>
+  <length>36</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt</file>
+  <line>404</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.starting_radio)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>42</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt</file>
+  <line>459</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.copy_link)</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>37</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>145</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>146</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_playlist, songCount, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>147</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>34</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>148</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_n_playlists, songCount, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>555</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>556</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_playlist, songCount, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>557</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>34</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt</file>
+  <line>558</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SelectionSongsMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_n_playlists, songCount, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt</file>
+  <line>268</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>43</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt</file>
+  <line>269</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt</file>
+  <line>804</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.external_downloader_not_configured)</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>62</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt</file>
+  <line>815</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/SongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.external_downloader_not_installed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>61</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt</file>
+  <line>206</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt</file>
+  <line>207</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_playlist, songCount, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt</file>
+  <line>208</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>34</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt</file>
+  <line>209</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeAlbumMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_n_playlists, songCount, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>152</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>61</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>153</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_playlist, songCount, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>154</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>34</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>155</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_n_songs_to_n_playlists, songCount, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>87</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>572</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>91</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>574</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>84</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>609</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>91</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>611</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>84</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>625</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>91</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>627</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>84</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt</file>
+  <line>635</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubePlaylistMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.import_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>63</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt</file>
+  <line>172</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistNames.first())</highlighted_element>
+  <language>kotlin</language>
+  <offset>43</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt</file>
+  <line>173</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_n_playlists, playlistNames.size)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>68</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt</file>
+  <line>549</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.external_downloader_not_configured)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>62</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt</file>
+  <line>560</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/YouTubeSongMenu.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.external_downloader_not_installed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>61</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>138</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.today)</highlighted_element>
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>33</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>139</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.yesterday)</highlighted_element>
+  <language>kotlin</language>
+  <offset>33</offset>
+  <length>37</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>140</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.this_week)</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>37</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>141</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.last_week)</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>37</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>383</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.history)</highlighted_element>
+  <language>kotlin</language>
+  <offset>40</offset>
+  <length>35</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt</file>
+  <line>391</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HistoryScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.history)</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>35</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>275</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.speed_dial)</highlighted_element>
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>38</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/StatsScreen.kt</file>
+  <line>574</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/StatsScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.most_played_songs)</highlighted_element>
+  <language>kotlin</language>
+  <offset>36</offset>
+  <length>45</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>457</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.share_summary)</highlighted_element>
+  <language>kotlin</language>
+  <offset>40</offset>
+  <length>41</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/artist/ArtistSongsScreen.kt</file>
+  <line>168</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.artist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/artist/ArtistSongsScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.queue_all_songs)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/LocalPlaylistScreen.kt</file>
+  <line>979</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/LocalPlaylistScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.playlist_synced)</highlighted_element>
+  <language>kotlin</language>
+  <offset>83</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt</file>
+  <line>102</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistName)</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>59</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt</file>
+  <line>104</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.add_to_playlist)</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt</file>
+  <line>181</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.added_to_playlist, playlistName)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>59</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt</file>
+  <line>183</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.add_to_playlist)</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>43</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt</file>
+  <line>217</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.playlist</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/playlist/PlaylistSuggestionSection.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.you_might_like)</highlighted_element>
+  <language>kotlin</language>
+  <offset>56</offset>
+  <length>42</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/search/LocalSearchScreen.kt</file>
+  <line>249</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.search</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/search/LocalSearchScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.queue_searched_songs)</highlighted_element>
+  <language>kotlin</language>
+  <offset>60</offset>
+  <length>48</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt</file>
+  <line>448</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/DebugSettings.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.share_logs)</highlighted_element>
+  <language>kotlin</language>
+  <offset>73</offset>
+  <length>38</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt</file>
+  <line>159</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenScreen.kt" />
+  <problem_class id="AndroidLintLocalContextGetResourceValueCall" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Querying resource properties using LocalContext.current</problem_class>
+  <hints />
+  <description>&lt;html&gt;Querying resource values using LocalContext.current&lt;/html&gt;</description>
+  <highlighted_element>context.getString(R.string.token_generation_failed)</highlighted_element>
+  <language>kotlin</language>
+  <offset>44</offset>
+  <length>51</length>
+</problem>
+</problems>

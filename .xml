@@ -1,0 +1,2127 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/App.kt</file>
+  <line>85</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.App" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>15</length>
+  <highlighted_element>@HiltAndroidApp</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/App.kt</file>
+  <line>87</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.App workerFactory" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/App.kt</file>
+  <line>90</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.App syncManager" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/App.kt</file>
+  <line>93</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.App database" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/DebugActivity.kt</file>
+  <line>61</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.DebugActivity" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>43</length>
+  <highlighted_element>class DebugActivity : ComponentActivity() {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/LoginActivity.kt</file>
+  <line>77</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.LoginActivity" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>18</length>
+  <highlighted_element>@AndroidEntryPoint</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/LoginActivity.kt</file>
+  <line>82</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.LoginActivity armoryAuthManager" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/LoginActivity.kt</file>
+  <line>85</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.LoginActivity syncManager" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>173</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.MainActivity" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>64</length>
+  <highlighted_element>@Suppress(&quot;DEPRECATION&quot;, &quot;ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE&quot;)</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>176</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.MainActivity database" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>179</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.MainActivity downloadUtil" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>182</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.MainActivity syncUtils" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>185</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.MainActivity libraryStateHolder" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>188</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.MainActivity syncManager" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>191</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.MainActivity armoryAuthManager" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/Converters.kt</file>
+  <line>17</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.Converters java.time.LocalDateTime fromTimestamp(java.lang.Long value)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>14</length>
+  <highlighted_element>@TypeConverter</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/DatabaseDao.kt</file>
+  <line>1467</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.DatabaseDao java.lang.Object togglePlaylistTag(java.lang.String playlistId, java.lang.String tagId, kotlin.coroutines.Continuation&lt;? super kotlin.Unit&gt; $completion)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>12</length>
+  <highlighted_element>@Transaction</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/entities/Artist.kt</file>
+  <line>15</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db.entities</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.entities.Artist Artist(com.arturo254.opentune.db.entities.ArtistEntity artist, int songCount, java.lang.Integer timeListened)" />
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>1</length>
+  <highlighted_element>(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/entities/EventWithSong.kt</file>
+  <line>16</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db.entities</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.entities.EventWithSong EventWithSong(com.arturo254.opentune.db.entities.Event event, com.arturo254.opentune.db.entities.Song song)" />
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>1</length>
+  <highlighted_element>(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/entities/PlaylistSong.kt</file>
+  <line>14</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db.entities</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.entities.PlaylistSong PlaylistSong(com.arturo254.opentune.db.entities.PlaylistSongMap map, com.arturo254.opentune.db.entities.Song song)" />
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>1</length>
+  <highlighted_element>(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/db/entities/SongWithStats.kt</file>
+  <line>14</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.db.entities</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.db.entities.SongWithStats SongWithStats(java.lang.String id, java.lang.String title, java.lang.String thumbnailUrl, int songCountListened, java.lang.Long timeListened)" />
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>1</length>
+  <highlighted_element>(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>36</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.di.PlayerCache" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>10</length>
+  <highlighted_element>@Qualifier</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>@interface no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>40</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.di.DownloadCache" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>10</length>
+  <highlighted_element>@Qualifier</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>@interface no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>111</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.di.AppModule" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Module</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>114</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.di.AppModule com.arturo254.opentune.db.MusicDatabase provideDatabase(android.content.Context context)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>10</length>
+  <highlighted_element>@Singleton</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>120</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.di.AppModule com.arturo254.opentune.db.DatabaseDao provideDatabaseDao(com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>10</length>
+  <highlighted_element>@Singleton</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>124</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.di.AppModule androidx.media3.database.DatabaseProvider provideDatabaseProvider(android.content.Context context)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>10</length>
+  <highlighted_element>@Singleton</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>130</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.di.AppModule androidx.media3.datasource.cache.Cache providePlayerCache(android.content.Context context, androidx.media3.database.DatabaseProvider databaseProvider)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>10</length>
+  <highlighted_element>@Singleton</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/AppModule.kt</file>
+  <line>150</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.di.AppModule androidx.media3.datasource.cache.Cache provideDownloadCache(android.content.Context context, androidx.media3.database.DatabaseProvider databaseProvider)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>10</length>
+  <highlighted_element>@Singleton</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/NetworkModule.kt</file>
+  <line>20</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.di.NetworkModule" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Module</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/di/NetworkModule.kt</file>
+  <line>24</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.di</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.di.NetworkModule com.arturo254.opentune.utils.NetworkConnectivityObserver provideNetworkConnectivityObserver(android.content.Context context)" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>9</length>
+  <highlighted_element>@Provides</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/MediaMetadata.kt</file>
+  <line>34</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.MediaMetadata serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/MediaMetadata.kt</file>
+  <line>45</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.MediaMetadata.Artist serialVersionUID" />
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/MediaMetadata.kt</file>
+  <line>54</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.MediaMetadata.Album serialVersionUID" />
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistPlayerState.kt</file>
+  <line>24</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.PersistPlayerState serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>22</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.PersistQueue serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>28</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueType.LIST serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>31</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueType.YOUTUBE serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>34</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueType.YOUTUBE_ALBUM_RADIO serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>37</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueType.LOCAL_ALBUM_RADIO serialVersionUID" />
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>47</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueData.YouTubeData serialVersionUID" />
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>58</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueData.YouTubeAlbumRadioData serialVersionUID" />
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/models/PersistQueue.kt</file>
+  <line>70</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.models</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.models.QueueData.LocalAlbumRadioData serialVersionUID" />
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>39</length>
+  <highlighted_element>private const val serialVersionUID = 1L</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/DownloadUtil.kt</file>
+  <line>58</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.DownloadUtil DownloadUtil(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, androidx.media3.database.DatabaseProvider databaseProvider, androidx.media3.datasource.cache.Cache downloadCache, androidx.media3.datasource.cache.Cache playerCache)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/ExoDownloadService.kt</file>
+  <line>29</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.playback.ExoDownloadService" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>18</length>
+  <highlighted_element>@AndroidEntryPoint</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/ExoDownloadService.kt</file>
+  <line>37</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.ExoDownloadService downloadUtil" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MediaLibrarySessionCallback.kt</file>
+  <line>55</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MediaLibrarySessionCallback MediaLibrarySessionCallback(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.playback.DownloadUtil downloadUtil)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>219</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.playback.MusicService" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>60</length>
+  <highlighted_element>@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>225</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService database" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>228</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService lyricsHelper" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>231</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService syncUtils" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo no se utiliza nunca.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>234</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService syncManager" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>237</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService libraryStateHolder" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>240</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService mediaLibrarySessionCallback" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>378</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService playerCache" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>382</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.playback.MusicService downloadCache" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El campo nunca se asigna.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/ArmoryAuthManager.kt</file>
+  <line>20</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.ArmoryAuthManager ArmoryAuthManager(android.content.Context context)" />
+  <language>kotlin</language>
+  <offset>24</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/LibraryStateHolder.kt</file>
+  <line>30</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.LibraryStateHolder LibraryStateHolder(com.arturo254.opentune.sync.SyncManager syncManager, com.arturo254.opentune.sync.ArmoryAuthManager authManager, com.arturo254.opentune.db.DatabaseDao databaseDao)" />
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/SyncManager.kt</file>
+  <line>39</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.SyncManager SyncManager(com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.sync.ArmoryAuthManager authManager)" />
+  <language>kotlin</language>
+  <offset>18</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/worker/SyncWorker.kt</file>
+  <line>13</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync.worker</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.worker.SyncWorker SyncWorker(android.content.Context context, androidx.work.WorkerParameters workerParams, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <language>kotlin</language>
+  <offset>17</offset>
+  <length>28</length>
+  <highlighted_element>@AssistedInject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenExtractionActivity.kt</file>
+  <line>46</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.ui.screens.settings.PoTokenExtractionActivity" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>55</length>
+  <highlighted_element>class PoTokenExtractionActivity : ComponentActivity() {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/SyncUtils.kt</file>
+  <line>59</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.SyncUtils SyncUtils(com.arturo254.opentune.db.MusicDatabase database, android.content.Context context, com.arturo254.opentune.sync.SyncManager syncManager, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AccountViewModel.kt</file>
+  <line>24</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.AccountViewModel AccountViewModel(com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <language>kotlin</language>
+  <offset>23</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AlbumViewModel.kt</file>
+  <line>50</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.AlbumViewModel AlbumViewModel(com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ArtistAlbumsViewModel.kt</file>
+  <line>21</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ArtistAlbumsViewModel ArtistAlbumsViewModel(com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>28</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ArtistItemsViewModel.kt</file>
+  <line>32</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ArtistItemsViewModel ArtistItemsViewModel(android.content.Context context, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ArtistViewModel.kt</file>
+  <line>45</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ArtistViewModel ArtistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AutoPlaylistViewModel.kt</file>
+  <line>48</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.AutoPlaylistViewModel AutoPlaylistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.playback.DownloadUtil downloadUtil, androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.utils.SyncUtils syncUtils)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/BackupRestoreViewModel.kt</file>
+  <line>151</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.BackupRestoreViewModel BackupRestoreViewModel(com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/BrowseViewModel.kt</file>
+  <line>23</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.BrowseViewModel BrowseViewModel(androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/CachePlaylistViewModel.kt</file>
+  <line>33</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.CachePlaylistViewModel CachePlaylistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, androidx.media3.datasource.cache.Cache playerCache, androidx.media3.datasource.cache.Cache downloadCache)" />
+  <language>kotlin</language>
+  <offset>29</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ChartsViewModel.kt</file>
+  <line>22</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ChartsViewModel ChartsViewModel()" />
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>21</length>
+  <highlighted_element>@Inject constructor()</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ExploreViewModel.kt</file>
+  <line>33</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ExploreViewModel ExploreViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/HistoryViewModel.kt</file>
+  <line>33</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.HistoryViewModel HistoryViewModel(com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/HomeViewModel.kt</file>
+  <line>62</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.HomeViewModel HomeViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.playback.DownloadUtil downloadUtil, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>20</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>78</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibrarySongsViewModel LibrarySongsViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.playback.DownloadUtil downloadUtil, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>172</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibraryArtistsViewModel LibraryArtistsViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>248</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibraryAlbumsViewModel LibraryAlbumsViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.playback.DownloadUtil downloadUtil, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>367</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibraryPlaylistsViewModel LibraryPlaylistsViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>403</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ArtistSongsViewModel ArtistSongsViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>432</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibraryMixViewModel LibraryMixViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>512</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibraryViewModel LibraryViewModel()" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>65</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel LocalPlaylistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalSearchViewModel.kt</file>
+  <line>33</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalSearchViewModel LocalSearchViewModel(com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LyricsMenuViewModel.kt</file>
+  <line>32</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LyricsMenuViewModel LyricsMenuViewModel(com.arturo254.opentune.lyrics.LyricsHelper lyricsHelper, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.NetworkConnectivityObserver networkConnectivity)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/MoodAndGenresViewModel.kt</file>
+  <line>23</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.MoodAndGenresViewModel MoodAndGenresViewModel()" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/NewReleaseViewModel.kt</file>
+  <line>60</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.NewReleaseViewModel NewReleaseViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/OnlinePlaylistViewModel.kt</file>
+  <line>40</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel OnlinePlaylistViewModel(androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <language>kotlin</language>
+  <offset>30</offset>
+  <length>20</length>
+  <highlighted_element>@Inject constructor(</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/OnlineSearchSuggestionViewModel.kt</file>
+  <line>38</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.OnlineSearchSuggestionViewModel OnlineSearchSuggestionViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/OnlineSearchViewModel.kt</file>
+  <line>36</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.OnlineSearchViewModel OnlineSearchViewModel(android.content.Context context, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/PoTokenViewModel.kt</file>
+  <line>30</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.PoTokenViewModel PoTokenViewModel()" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/StatsViewModel.kt</file>
+  <line>36</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.StatsViewModel StatsViewModel(com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/TopPlaylistViewModel.kt</file>
+  <line>28</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.TopPlaylistViewModel TopPlaylistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/YearInMusicViewModel.kt</file>
+  <line>32</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.YearInMusicViewModel YearInMusicViewModel(com.arturo254.opentune.db.MusicDatabase database)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/YouTubeBrowseViewModel.kt</file>
+  <line>29</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.YouTubeBrowseViewModel YouTubeBrowseViewModel(android.content.Context context, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>7</length>
+  <highlighted_element>@Inject</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El constructor nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/innertube/utils/CookieParsingTest.kt</file>
+  <line>7</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.innertube.utils</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.innertube.utils.CookieParsingTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>25</length>
+  <highlighted_element>class CookieParsingTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/innertube/utils/CookieParsingTest.kt</file>
+  <line>9</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.innertube.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.utils.CookieParsingTest void parseCookieString_handlesWebViewCookieWithoutSpaces()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/innertube/utils/CookieParsingTest.kt</file>
+  <line>20</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.innertube.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.utils.CookieParsingTest void parseCookieString_trimsPartsAndIgnoresMalformed()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/playback/StopMusicOnTaskClearTest.kt</file>
+  <line>7</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.playback.StopMusicOnTaskClearTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>32</length>
+  <highlighted_element>class StopMusicOnTaskClearTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/playback/StopMusicOnTaskClearTest.kt</file>
+  <line>8</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.StopMusicOnTaskClearTest void shouldStopServiceOnTaskRemoved_stopsWhenSettingEnabled()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/playback/StopMusicOnTaskClearTest.kt</file>
+  <line>19</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.StopMusicOnTaskClearTest void shouldStopServiceOnTaskRemoved_stopsWhenHostSessionAndPlaybackInactive()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/playback/StopMusicOnTaskClearTest.kt</file>
+  <line>30</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.StopMusicOnTaskClearTest void shouldStopServiceOnTaskRemoved_doesNotStopOtherwise()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherCoreTest.kt</file>
+  <line>14</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.together.TogetherCoreTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>24</length>
+  <highlighted_element>class TogetherCoreTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherCoreTest.kt</file>
+  <line>15</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherCoreTest void deepLink_roundTrip()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherCoreTest.kt</file>
+  <line>29</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherCoreTest void wsUrl_decode()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherCoreTest.kt</file>
+  <line>40</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherCoreTest void protocol_serialization_roundTrip()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherCoreTest.kt</file>
+  <line>56</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherCoreTest void protocol_seekToTrack_roundTrip()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherCoreTest.kt</file>
+  <line>74</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherCoreTest void clock_estimates_offset_and_rtt()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherGuestPlaybackPlannerTest.kt</file>
+  <line>6</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.together.TogetherGuestPlaybackPlannerTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>40</length>
+  <highlighted_element>class TogetherGuestPlaybackPlannerTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherGuestPlaybackPlannerTest.kt</file>
+  <line>7</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherGuestPlaybackPlannerTest void planPlayTrackNow_returnsEmpty_whenControlDisabled()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherGuestPlaybackPlannerTest.kt</file>
+  <line>22</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherGuestPlaybackPlannerTest void planPlayTrackNow_seeks_whenTrackExistsInHostQueue()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherGuestPlaybackPlannerTest.kt</file>
+  <line>42</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherGuestPlaybackPlannerTest void planPlayTrackNow_addsAndSkips_whenTrackMissingAndAddAllowed()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/together/TogetherGuestPlaybackPlannerTest.kt</file>
+  <line>63</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherGuestPlaybackPlannerTest void planPlayTrackNow_requestsPlay_whenHostPausedAndPlayWhenReadyTrue()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialogFilterTest.kt</file>
+  <line>8</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogFilterTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>37</length>
+  <highlighted_element>class AddToPlaylistDialogFilterTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialogFilterTest.kt</file>
+  <line>9</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogFilterTest void playlistsForAddToPlaylist_includesEditableLocalPlaylists()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialogFilterTest.kt</file>
+  <line>21</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogFilterTest void playlistsForAddToPlaylist_includesSyncedPlaylistsEvenIfNotEditable()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialogFilterTest.kt</file>
+  <line>39</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogFilterTest void playlistsForAddToPlaylist_excludesNonEditableNonSyncedPlaylists()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/ui/menu/AddToPlaylistDialogFilterTest.kt</file>
+  <line>57</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.menu.AddToPlaylistDialogFilterTest void playlistsForAddToPlaylist_preservesOrder()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/utils/SyncLikedSongsOrderingTest.kt</file>
+  <line>7</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.utils.SyncLikedSongsOrderingTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>34</length>
+  <highlighted_element>class SyncLikedSongsOrderingTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/utils/SyncLikedSongsOrderingTest.kt</file>
+  <line>8</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.SyncLikedSongsOrderingTest void likedSongTimestamp_decrementsBySecondsPerIndex()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/utils/UpdaterSemVerTest.kt</file>
+  <line>9</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.utils.UpdaterSemVerTest" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>25</length>
+  <highlighted_element>class UpdaterSemVerTest {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>Clase no está instanciado.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/utils/UpdaterSemVerTest.kt</file>
+  <line>10</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.UpdaterSemVerTest void findLatestRelease_picksHighestStableSemverEvenIfNotFirst()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/utils/UpdaterSemVerTest.kt</file>
+  <line>35</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.UpdaterSemVerTest void findLatestRelease_ignoresPrereleaseWhenStableExists()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/test/kotlin/com/arturo254/opentune/utils/UpdaterSemVerTest.kt</file>
+  <line>60</line>
+  <module>ARMORY.app.unitTest</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.UpdaterSemVerTest void isSameVersion_matchesSemverRegardlessOfPrefixOrText()" />
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+  <highlighted_element>@Test</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método nunca se utiliza.</description>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/betterlyrics/src/main/kotlin/TestTTML.kt</file>
+  <line>3</line>
+  <module>ARMORY.betterlyrics.main</module>
+  <package>&lt;default&gt;</package>
+  <entry_point TYPE="method" FQNAME="TestTTMLKt void main(java.lang.String[] args)" />
+  <language>kotlin</language>
+  <offset>0</offset>
+  <length>31</length>
+  <highlighted_element>fun main(args: Array&lt;String&gt;) {</highlighted_element>
+  <problem_class id="" severity="WARNING" attribute_key="NOT_USED_ELEMENT_ATTRIBUTES">declaración no utilizada</problem_class>
+  <hints>
+    <hint value="comment" />
+    <hint value="delete" />
+  </hints>
+  <description>El método no se utiliza.</description>
+</problem>
+</problems>

@@ -1,0 +1,366 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/MainActivity.kt</file>
+  <line>1186</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.MainActivity void setSystemBarAppearance(boolean isDark)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;isDark&lt;/code&gt; is always 'true'</description>
+  <highlighted_element>isDark</highlighted_element>
+  <language>kotlin</language>
+  <offset>39</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudioProcessor.kt</file>
+  <line>269</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudioProcessor void drainTailToArray(byte[] target, int offset, int length)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;offset&lt;/code&gt; is always '0'</description>
+  <highlighted_element>offset</highlighted_element>
+  <language>kotlin</language>
+  <offset>52</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudioProcessor.kt</file>
+  <line>303</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudioProcessor void enqueueOutput(byte[] source, int offset, int length)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;offset&lt;/code&gt; is always '0'</description>
+  <highlighted_element>offset</highlighted_element>
+  <language>kotlin</language>
+  <offset>49</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudioProcessor.kt</file>
+  <line>370</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudioProcessor void applyFadeInPcm16(byte[] data, int offset, int length, long startFrameIndex)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;offset&lt;/code&gt; is always '0'</description>
+  <highlighted_element>offset</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/CrossfadeAudioProcessor.kt</file>
+  <line>392</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.CrossfadeAudioProcessor void applyFadeOutPcm16(byte[] data, int offset, int frameCount, long startFrameIndex)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;offset&lt;/code&gt; is always '0'</description>
+  <highlighted_element>offset</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/DownloadUtil.kt</file>
+  <line>228</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.DownloadUtil boolean deviceSupportsMimeType(java.lang.String mimeType)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;mimeType&lt;/code&gt; is always '&quot;audio/opus&quot;'</description>
+  <highlighted_element>mimeType</highlighted_element>
+  <language>kotlin</language>
+  <offset>39</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>2786</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService java.lang.Object buildTogetherRoomState(java.lang.String sessionId, java.lang.String hostId, kotlin.coroutines.Continuation&lt;? super com.arturo254.opentune.together.TogetherRoomState&gt; $completion)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;hostId&lt;/code&gt; is always '&quot;host&quot;'</description>
+  <highlighted_element>hostId</highlighted_element>
+  <language>kotlin</language>
+  <offset>1919</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>3959</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService boolean deviceSupportsMimeType(java.lang.String mimeType)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;mimeType&lt;/code&gt; is always '&quot;audio/opus&quot;'</description>
+  <highlighted_element>mimeType</highlighted_element>
+  <language>kotlin</language>
+  <offset>1933</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsGlassStyle.kt</file>
+  <line>17</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsGlassStyle LyricsGlassStyle(java.lang.String name, long surfaceTint, float surfaceAlpha, int cloudyRadius, float refraction, float curve, float dispersion, float glassSaturation, float glassContrast, float glassEdge, float glassCornerRadius, long glassTint, long textColor, long secondaryTextColor, long overlayColor, float overlayAlpha, boolean isDark, float backgroundDimAlpha)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;glassCornerRadius&lt;/code&gt; is always '40.0'</description>
+  <highlighted_element>glassCornerRadius</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsShareCarouselSheet.kt</file>
+  <line>249</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsShareCarouselSheetKt void CardPreviewBox(java.lang.String lyricText, com.arturo254.opentune.models.MediaMetadata mediaMetadata, com.arturo254.opentune.ui.component.LyricsCardConfig config, int previewSizeDp)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;previewSizeDp&lt;/code&gt; is always '264'</description>
+  <highlighted_element>previewSizeDp</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsShareCarouselSheet.kt</file>
+  <line>585</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsShareCarouselSheetKt void AlignButton(androidx.compose.ui.graphics.painter.Painter painter, java.lang.String label, boolean isSelected, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onClick, androidx.compose.ui.Modifier modifier)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;label&lt;/code&gt; is always '&quot;Izquierda&quot;'</description>
+  <highlighted_element>label</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/LyricsV2.kt</file>
+  <line>1097</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.LyricsV2Kt void LyricsLineV2(java.util.List&lt;com.arturo254.opentune.lyrics.WordTimestamp&gt; words, boolean isActive, boolean isPast, long currentPositionMs, long textColor, float inactiveAlpha, float baseFontSize, boolean isLineAllBackground, int textAlign, androidx.compose.ui.text.font.FontFamily lyricsFontFamily)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;inactiveAlpha&lt;/code&gt; is always '0.35'</description>
+  <highlighted_element>inactiveAlpha</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/PlayerSlider.kt</file>
+  <line>66</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.PlayerSliderKt void drawTrack(androidx.compose.ui.graphics.drawscope.DrawScope $this$drawTrack, float[] tickFractions, float activeRangeStart, float activeRangeEnd, long inactiveTrackColor, long activeTrackColor, long inactiveTickColor, long activeTickColor, float trackHeight)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;activeRangeStart&lt;/code&gt; is always '0.0'</description>
+  <highlighted_element>activeRangeStart</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Queue.kt</file>
+  <line>128</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.QueueKt void Queue(com.arturo254.opentune.ui.component.BottomSheetState state, com.arturo254.opentune.ui.component.BottomSheetState playerBottomSheetState, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, long backgroundColor, long onBackgroundColor, long TextBackgroundColor, long textButtonColor, long iconButtonColor, kotlin.jvm.functions.Function0&lt;kotlin.Unit&gt; onShowLyrics, boolean pureBlack)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;pureBlack&lt;/code&gt; is always 'true'</description>
+  <highlighted_element>pureBlack</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/YearInMusicScreen.kt</file>
+  <line>1936</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.YearInMusicScreenKt long rememberAnimatedLong(long target, int durationMs)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;durationMs&lt;/code&gt; is always '1800'</description>
+  <highlighted_element>durationMs</highlighted_element>
+  <language>kotlin</language>
+  <offset>47</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/musicrecognition/MusicRecognitionScreen.kt</file>
+  <line>555</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.musicrecognition</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.musicrecognition.MusicRecognitionScreenKt java.lang.Object recordMicPcm16Mono(int sampleRateHz, long recordMs, kotlin.coroutines.Continuation&lt;? super kotlin.Pair&lt;short[],java.lang.Integer&gt;&gt; $completion)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;sampleRateHz&lt;/code&gt; is always '16000'</description>
+  <highlighted_element>sampleRateHz</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/musicrecognition/MusicRecognitionScreen.kt</file>
+  <line>556</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.musicrecognition</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.musicrecognition.MusicRecognitionScreenKt java.lang.Object recordMicPcm16Mono(int sampleRateHz, long recordMs, kotlin.coroutines.Continuation&lt;? super kotlin.Pair&lt;short[],java.lang.Integer&gt;&gt; $completion)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;recordMs&lt;/code&gt; is always '4200L'</description>
+  <highlighted_element>recordMs</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/PlayerColorExtractor.kt</file>
+  <line>146</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.theme</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.theme.PlayerColorExtractor long tuneColorForMesh(long color, float saturationMin, float saturationBoost, float valueTarget, float valueMin, float valueMax)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;saturationMin&lt;/code&gt; is always '0.62'</description>
+  <highlighted_element>saturationMin</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/PlayerColorExtractor.kt</file>
+  <line>147</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.theme</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.theme.PlayerColorExtractor long tuneColorForMesh(long color, float saturationMin, float saturationBoost, float valueTarget, float valueMin, float valueMax)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;saturationBoost&lt;/code&gt; is always '1.08'</description>
+  <highlighted_element>saturationBoost</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/PlayerColorExtractor.kt</file>
+  <line>149</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.theme</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.theme.PlayerColorExtractor long tuneColorForMesh(long color, float saturationMin, float saturationBoost, float valueTarget, float valueMin, float valueMax)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;valueMin&lt;/code&gt; is always '0.38'</description>
+  <highlighted_element>valueMin</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/theme/PlayerColorExtractor.kt</file>
+  <line>150</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.theme</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.theme.PlayerColorExtractor long tuneColorForMesh(long color, float saturationMin, float saturationBoost, float valueTarget, float valueMin, float valueMax)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;valueMax&lt;/code&gt; is always '0.9'</description>
+  <highlighted_element>valueMax</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>365</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.Updater java.lang.Object checkForUpdate(java.lang.String currentVersionName, kotlin.coroutines.Continuation&lt;? super kotlin.Result&lt;? extends com.arturo254.opentune.utils.UpdateInfo&gt;&gt; $completion)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;currentVersionName&lt;/code&gt; is always 'BuildConfig.VERSION_NAME'</description>
+  <highlighted_element>currentVersionName</highlighted_element>
+  <language>kotlin</language>
+  <offset>31</offset>
+  <length>18</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>443</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.utils.Updater java.lang.Object getCommitHistory(int count, java.lang.String branch, kotlin.coroutines.Continuation&lt;? super kotlin.Result&lt;? extends java.util.List&lt;? extends com.arturo254.opentune.utils.GitCommit&gt;&gt;&gt; $completion)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;count&lt;/code&gt; is always '30'</description>
+  <highlighted_element>count</highlighted_element>
+  <language>kotlin</language>
+  <offset>33</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/NewPipe.kt</file>
+  <line>131</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.NewPipeUtils T retryWithBackoff(int maxAttempts, long initialDelayMs, long maxDelayMs, kotlin.jvm.functions.Function0&lt;? extends T&gt; block)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;maxAttempts&lt;/code&gt; is always '3'</description>
+  <highlighted_element>maxAttempts</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/NewPipe.kt</file>
+  <line>132</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.NewPipeUtils T retryWithBackoff(int maxAttempts, long initialDelayMs, long maxDelayMs, kotlin.jvm.functions.Function0&lt;? extends T&gt; block)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;initialDelayMs&lt;/code&gt; is always '250L'</description>
+  <highlighted_element>initialDelayMs</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/NewPipe.kt</file>
+  <line>133</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.NewPipeUtils T retryWithBackoff(int maxAttempts, long initialDelayMs, long maxDelayMs, kotlin.jvm.functions.Function0&lt;? extends T&gt; block)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints />
+  <description>Value of parameter &lt;code&gt;maxDelayMs&lt;/code&gt; is always '2000L'</description>
+  <highlighted_element>maxDelayMs</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>10</length>
+</problem>
+</problems>

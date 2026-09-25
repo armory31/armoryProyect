@@ -1,0 +1,67 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/together/TogetherOnlineEndpoint.kt</file>
+  <line>23</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.together.TogetherOnlineEndpoint EndpointSourceUrl" />
+  <problem_class id="ConstPropertyName" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Const property naming convention</problem_class>
+  <description>Const property name &lt;code&gt;EndpointSourceUrl&lt;/code&gt; should not contain lowercase letters</description>
+  <highlighted_element>EndpointSourceUrl</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>17</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/together/TogetherOnlineEndpoint.kt</file>
+  <line>26</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.together.TogetherOnlineEndpoint CacheTtlMs" />
+  <problem_class id="ConstPropertyName" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Const property naming convention</problem_class>
+  <description>Const property name &lt;code&gt;CacheTtlMs&lt;/code&gt; should not contain lowercase letters</description>
+  <highlighted_element>CacheTtlMs</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt</file>
+  <line>116</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.ui.player.CanvasArtworkPlaybackCache defaultMaxSize" />
+  <problem_class id="ConstPropertyName" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Const property naming convention</problem_class>
+  <description>Const property name &lt;code&gt;defaultMaxSize&lt;/code&gt; should not contain lowercase letters</description>
+  <highlighted_element>defaultMaxSize</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/Updater.kt</file>
+  <line>80</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.utils.Updater ReleaseCacheCheckIntervalMs" />
+  <problem_class id="ConstPropertyName" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Const property naming convention</problem_class>
+  <description>Const property name &lt;code&gt;ReleaseCacheCheckIntervalMs&lt;/code&gt; should not contain lowercase letters</description>
+  <highlighted_element>ReleaseCacheCheckIntervalMs</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>27</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/utils/YTPlayerUtils.kt</file>
+  <line>52</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.utils</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.utils.YTPlayerUtils logTag" />
+  <problem_class id="ConstPropertyName" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Const property naming convention</problem_class>
+  <description>Const property name &lt;code&gt;logTag&lt;/code&gt; should not contain lowercase letters</description>
+  <highlighted_element>logTag</highlighted_element>
+  <language>kotlin</language>
+  <offset>22</offset>
+  <length>6</length>
+</problem>
+</problems>

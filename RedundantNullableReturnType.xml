@@ -1,0 +1,28 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/ArtistPage.kt</file>
+  <line>48</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.pages.ArtistPage.Companion com.arturo254.opentune.innertube.pages.ArtistSection fromMusicShelfRenderer(com.arturo254.opentune.innertube.models.MusicShelfRenderer renderer)" />
+  <problem_class id="RedundantNullableReturnType" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Redundant nullable return type</problem_class>
+  <description>'fromMusicShelfRenderer' always returns non-null type</description>
+  <highlighted_element>?</highlighted_element>
+  <language>kotlin</language>
+  <offset>87</offset>
+  <length>1</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/pages/ArtistPage.kt</file>
+  <line>58</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.pages</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.pages.ArtistPage.Companion com.arturo254.opentune.innertube.pages.ArtistSection fromMusicCarouselShelfRenderer(com.arturo254.opentune.innertube.models.MusicCarouselShelfRenderer renderer)" />
+  <problem_class id="RedundantNullableReturnType" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Redundant nullable return type</problem_class>
+  <description>'fromMusicCarouselShelfRenderer' always returns non-null type</description>
+  <highlighted_element>?</highlighted_element>
+  <language>kotlin</language>
+  <offset>103</offset>
+  <length>1</length>
+</problem>
+</problems>

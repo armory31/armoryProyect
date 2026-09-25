@@ -1,0 +1,28 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>855</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="CascadeIf" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Cascade 'if' can be replaced with 'when'</problem_class>
+  <description>Cascade 'if' should be replaced with 'when'</description>
+  <highlighted_element>if</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>2</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Player.kt</file>
+  <line>1000</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.PlayerKt void BottomSheetPlayer(com.arturo254.opentune.ui.component.BottomSheetState state, androidx.navigation.NavController navController, androidx.compose.ui.Modifier modifier, float navigationBarHeight)" />
+  <problem_class id="CascadeIf" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Cascade 'if' can be replaced with 'when'</problem_class>
+  <description>Cascade 'if' should be replaced with 'when'</description>
+  <highlighted_element>if</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>2</length>
+</problem>
+</problems>

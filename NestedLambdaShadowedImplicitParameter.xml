@@ -1,0 +1,54 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>1533</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void getAutomix(java.lang.String playlistId)" />
+  <problem_class id="NestedLambdaShadowedImplicitParameter" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Nested lambda has shadowed implicit parameter</problem_class>
+  <description>Implicit parameter 'it' of enclosing lambda is shadowed</description>
+  <highlighted_element>it</highlighted_element>
+  <language>kotlin</language>
+  <offset>1662</offset>
+  <length>2</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/playback/MusicService.kt</file>
+  <line>1536</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.playback</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.playback.MusicService void getAutomix(java.lang.String playlistId)" />
+  <problem_class id="NestedLambdaShadowedImplicitParameter" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Nested lambda has shadowed implicit parameter</problem_class>
+  <description>Implicit parameter 'it' of enclosing lambda is shadowed</description>
+  <highlighted_element>it</highlighted_element>
+  <language>kotlin</language>
+  <offset>1812</offset>
+  <length>2</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AccountViewModel.kt</file>
+  <line>38</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="class" FQNAME="com.arturo254.opentune.viewmodels.AccountViewModel" />
+  <problem_class id="NestedLambdaShadowedImplicitParameter" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Nested lambda has shadowed implicit parameter</problem_class>
+  <description>Implicit parameter 'it' of enclosing lambda is shadowed</description>
+  <highlighted_element>it</highlighted_element>
+  <language>kotlin</language>
+  <offset>33</offset>
+  <length>2</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/OnlinePlaylistViewModel.kt</file>
+  <line>97</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel void loadMoreSongs()" />
+  <problem_class id="NestedLambdaShadowedImplicitParameter" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Nested lambda has shadowed implicit parameter</problem_class>
+  <description>Implicit parameter 'it' of enclosing lambda is shadowed</description>
+  <highlighted_element>it</highlighted_element>
+  <language>kotlin</language>
+  <offset>72</offset>
+  <length>2</length>
+</problem>
+</problems>

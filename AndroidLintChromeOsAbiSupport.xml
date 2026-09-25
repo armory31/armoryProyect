@@ -1,0 +1,44 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/build.gradle.kts</file>
+  <line>63</line>
+  <module>ARMORY.app</module>
+  <package>&lt;default&gt;</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/build.gradle.kts" />
+  <problem_class id="AndroidLintChromeOsAbiSupport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Missing ABI Support for ChromeOS</problem_class>
+  <hints />
+  <description>&lt;html&gt;Missing x86_64 ABI support for ChromeOS&lt;/html&gt;</description>
+  <highlighted_element>&quot;arm64-v8a&quot;</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/build.gradle.kts</file>
+  <line>68</line>
+  <module>ARMORY.app</module>
+  <package>&lt;default&gt;</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/build.gradle.kts" />
+  <problem_class id="AndroidLintChromeOsAbiSupport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Missing ABI Support for ChromeOS</problem_class>
+  <hints />
+  <description>&lt;html&gt;Missing x86_64 ABI support for ChromeOS&lt;/html&gt;</description>
+  <highlighted_element>&quot;armeabi-v7a&quot;</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/build.gradle.kts</file>
+  <line>73</line>
+  <module>ARMORY.app</module>
+  <package>&lt;default&gt;</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/build.gradle.kts" />
+  <problem_class id="AndroidLintChromeOsAbiSupport" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Missing ABI Support for ChromeOS</problem_class>
+  <hints />
+  <description>&lt;html&gt;Missing x86_64 ABI support for ChromeOS&lt;/html&gt;</description>
+  <highlighted_element>&quot;x86&quot;</highlighted_element>
+  <language>kotlin</language>
+  <offset>32</offset>
+  <length>5</length>
+</problem>
+</problems>

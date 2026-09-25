@@ -1,0 +1,268 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>1484</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>1513</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt</file>
+  <line>1542</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Items.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt</file>
+  <line>205</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/Lyrics.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/NewMenuComponents.kt</file>
+  <line>116</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/NewMenuComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/NewMenuComponents.kt</file>
+  <line>201</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/NewMenuComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/TagChip.kt</file>
+  <line>56</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/TagChip.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/TagChip.kt</file>
+  <line>92</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/TagChip.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt</file>
+  <line>144</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.menu</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/menu/PlayerMenu.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>135</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>260</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>475</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>539</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>630</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>674</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>716</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>788</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt</file>
+  <line>856</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/HomeScreenComponents.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/SettingsQuickActions.kt</file>
+  <line>48</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/SettingsQuickActions.kt" />
+  <problem_class id="AndroidLintModifierParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Guidelines for Modifier parameters in a Composable function</problem_class>
+  <hints />
+  <description>&lt;html&gt;Modifier parameter should be the first optional parameter&lt;/html&gt;</description>
+  <highlighted_element>modifier</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+</problems>

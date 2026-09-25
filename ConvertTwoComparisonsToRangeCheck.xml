@@ -1,0 +1,54 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/PlayerSlider.kt</file>
+  <line>113</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.component.PlayerSliderKt void drawTrack(androidx.compose.ui.graphics.drawscope.DrawScope $this$drawTrack, float[] tickFractions, float activeRangeStart, float activeRangeEnd, long inactiveTrackColor, long activeTrackColor, long inactiveTickColor, long activeTickColor, float trackHeight)" />
+  <problem_class id="ConvertTwoComparisonsToRangeCheck" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Two comparisons should be converted to a range check</problem_class>
+  <description>Two comparisons should be converted to a range check</description>
+  <highlighted_element>tick &gt; activeRangeEnd || tick &lt; activeRangeStart</highlighted_element>
+  <language>kotlin</language>
+  <offset>25</offset>
+  <length>48</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/player/Thumbnail.kt</file>
+  <line>772</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.player</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.player.ThumbnailKt$-1 kotlin.ranges.ClosedFloatingPointRange&lt;java.lang.Float&gt; calculateSnappingOffsetBounds()" />
+  <problem_class id="ConvertTwoComparisonsToRangeCheck" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Two comparisons should be converted to a range check</problem_class>
+  <description>Two comparisons should be converted to a range check</description>
+  <highlighted_element>offset &gt;= 0 &amp;&amp; offset &lt; upperBoundOffset</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>40</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/utils/LazyGridSnapLayoutInfoProvider.kt</file>
+  <line>50</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.utils</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.utils.LazyGridSnapLayoutInfoProviderKt$-1 kotlin.ranges.ClosedFloatingPointRange&lt;java.lang.Float&gt; calculateSnappingOffsetBounds()" />
+  <problem_class id="ConvertTwoComparisonsToRangeCheck" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Two comparisons should be converted to a range check</problem_class>
+  <description>Two comparisons should be converted to a range check</description>
+  <highlighted_element>offset &gt;= 0 &amp;&amp; offset &lt; upperBoundOffset</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>40</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>300</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="field" FQNAME="com.arturo254.opentune.viewmodels.LibraryAlbumsViewModel allAlbums" />
+  <problem_class id="ConvertTwoComparisonsToRangeCheck" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Two comparisons should be converted to a range check</problem_class>
+  <description>Two comparisons should be converted to a range check</description>
+  <highlighted_element>totalSongsInAlbum &gt; 0 &amp;&amp; downloadedSongsCount &gt;= totalSongsInAlbum</highlighted_element>
+  <language>kotlin</language>
+  <offset>40</offset>
+  <length>66</length>
+</problem>
+</problems>

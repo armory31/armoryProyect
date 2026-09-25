@@ -1,0 +1,67 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>275</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel void loadPlaylistSuggestions(boolean forceReset)" />
+  <problem_class id="ReplaceWithOperatorAssignment" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Assignment can be replaced with operator assignment</problem_class>
+  <description>Replaceable with operator-assignment</description>
+  <highlighted_element>suggestedSongIds.value = suggestedSongIds.value + currentSongs.map { it.song.id }.toSet()</highlighted_element>
+  <language>kotlin</language>
+  <offset>16</offset>
+  <length>89</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>363</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel void markSuggestionAsAdded(java.lang.String songId)" />
+  <problem_class id="ReplaceWithOperatorAssignment" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Assignment can be replaced with operator assignment</problem_class>
+  <description>Replaceable with operator-assignment</description>
+  <highlighted_element>suggestedSongIds.value = suggestedSongIds.value + songId</highlighted_element>
+  <language>kotlin</language>
+  <offset>8</offset>
+  <length>56</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>418</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel java.lang.Object addSongToPlaylist(com.arturo254.opentune.innertube.models.SongItem song, java.lang.String browseId, kotlin.coroutines.Continuation&lt;? super java.lang.Boolean&gt; $completion)" />
+  <problem_class id="ReplaceWithOperatorAssignment" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Assignment can be replaced with operator assignment</problem_class>
+  <description>Replaceable with operator-assignment</description>
+  <highlighted_element>suggestedSongIds.value = suggestedSongIds.value + song.id</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>57</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>461</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel java.lang.Object loadNextSuggestionPage(kotlin.coroutines.Continuation&lt;? super kotlin.Unit&gt; $completion)" />
+  <problem_class id="ReplaceWithOperatorAssignment" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Assignment can be replaced with operator assignment</problem_class>
+  <description>Replaceable with operator-assignment</description>
+  <highlighted_element>suggestedSongIds.value = suggestedSongIds.value + newIds</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>56</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>521</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel java.lang.Object loadMoreFromContinuation(java.lang.String continuation, kotlin.coroutines.Continuation&lt;? super kotlin.Unit&gt; $completion)" />
+  <problem_class id="ReplaceWithOperatorAssignment" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Assignment can be replaced with operator assignment</problem_class>
+  <description>Replaceable with operator-assignment</description>
+  <highlighted_element>suggestedSongIds.value = suggestedSongIds.value + moreIds</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>57</length>
+</problem>
+</problems>

@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/response/BrowseResponse.kt</file>
+  <line>135</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models.response</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.response.BrowseResponse.Header.MusicThumbnailRenderer MusicThumbnailRenderer(com.arturo254.opentune.innertube.models.response.BrowseResponse.Header.MusicThumbnailRenderer musicThumbnailRenderer, java.util.List&lt;com.arturo254.opentune.innertube.models.response.BrowseResponse.Header.MusicThumbnail&gt; thumbnails)" />
+  <problem_class id="SelfReferenceConstructorParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor can never be complete</problem_class>
+  <description>Constructor has non-null self reference parameter</description>
+  <highlighted_element>( val musicThumbnailRenderer: MusicThumbnailRenderer, val thumbnails: List&lt;M...</highlighted_element>
+  <language>kotlin</language>
+  <offset>41</offset>
+  <length>126</length>
+</problem>
+</problems>

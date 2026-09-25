@@ -1,0 +1,132 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/sync/LibraryStateHolder.kt</file>
+  <line>32</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.sync</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.sync.LibraryStateHolder LibraryStateHolder(com.arturo254.opentune.sync.SyncManager syncManager, com.arturo254.opentune.sync.ArmoryAuthManager authManager, com.arturo254.opentune.db.DatabaseDao databaseDao)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/together/TogetherClient.kt</file>
+  <line>82</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherClient TogetherClient(kotlinx.coroutines.CoroutineScope externalScope, java.lang.String clientId, java.lang.String bearerToken)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/together/TogetherClient.kt</file>
+  <line>84</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherClient TogetherClient(kotlinx.coroutines.CoroutineScope externalScope, java.lang.String clientId, java.lang.String bearerToken)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/together/TogetherOnlineApi.kt</file>
+  <line>58</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherOnlineApi TogetherOnlineApi(java.lang.String baseUrl, java.lang.String bearerToken)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/together/TogetherOnlineHost.kt</file>
+  <line>51</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.together</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.together.TogetherOnlineHost TogetherOnlineHost(kotlinx.coroutines.CoroutineScope externalScope, java.lang.String sessionId, java.lang.String sessionKey, java.lang.String hostId, java.lang.String hostDisplayName, com.arturo254.opentune.together.TogetherRoomSettings initialSettings, java.lang.String clientId, java.lang.String bearerToken)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/AlbumViewModel.kt</file>
+  <line>54</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.AlbumViewModel AlbumViewModel(com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/ArtistViewModel.kt</file>
+  <line>49</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.ArtistViewModel ArtistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LibraryViewModels.kt</file>
+  <line>437</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LibraryMixViewModel LibraryMixViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/LocalPlaylistViewModel.kt</file>
+  <line>70</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.LocalPlaylistViewModel LocalPlaylistViewModel(android.content.Context context, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.utils.SyncUtils syncUtils, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager, androidx.lifecycle.SavedStateHandle savedStateHandle)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/OnlinePlaylistViewModel.kt</file>
+  <line>43</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.OnlinePlaylistViewModel OnlinePlaylistViewModel(androidx.lifecycle.SavedStateHandle savedStateHandle, com.arturo254.opentune.db.MusicDatabase database, com.arturo254.opentune.sync.LibraryStateHolder libraryStateHolder, com.arturo254.opentune.sync.SyncManager syncManager)" />
+  <problem_class id="CanBeParameter" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Constructor parameter is never used as a property</problem_class>
+  <description>Constructor parameter is never used as a property</description>
+  <highlighted_element>val</highlighted_element>
+  <language>kotlin</language>
+  <offset>12</offset>
+  <length>3</length>
+</problem>
+</problems>

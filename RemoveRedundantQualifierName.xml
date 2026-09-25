@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/innertube/src/main/kotlin/com/arturo254/opentune/innertube/models/YouTubeDataPage.kt</file>
+  <line>114</line>
+  <module>ARMORY.innertube.main</module>
+  <package>com.arturo254.opentune.innertube.models</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.innertube.models.YouTubeDataPage.Contents.TwoColumnWatchNextResults.Results.Results.Content.VideoPrimaryInfoRenderer.ViewCount.VideoViewCountRenderer VideoViewCountRenderer(com.arturo254.opentune.innertube.models.YouTubeDataPage.Contents.TwoColumnWatchNextResults.Results.Results.Content.VideoPrimaryInfoRenderer.ViewCount.VideoViewCountRenderer.ViewCount viewCount)" />
+  <problem_class id="RemoveRedundantQualifierName" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Redundant qualifier name</problem_class>
+  <description>Remove redundant qualifier name</description>
+  <highlighted_element>VideoViewCountRenderer</highlighted_element>
+  <language>kotlin</language>
+  <offset>51</offset>
+  <length>22</length>
+</problem>
+</problems>

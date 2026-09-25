@@ -1,0 +1,16 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/DebugPanel.kt</file>
+  <line>20</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.component</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/component/DebugPanel.kt" />
+  <problem_class id="AndroidLintComposableNaming" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Incorrect naming for @Composable functions</problem_class>
+  <hints />
+  <description>&lt;html&gt;Composable functions with a return type should start with a lowercase letter&lt;/html&gt;</description>
+  <highlighted_element>DebugPanelItem</highlighted_element>
+  <language>kotlin</language>
+  <offset>4</offset>
+  <length>14</length>
+</problem>
+</problems>

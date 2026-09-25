@@ -1,0 +1,28 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/ui/screens/settings/PoTokenExtractionActivity.kt</file>
+  <line>98</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.ui.screens.settings</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.ui.screens.settings.PoTokenExtractionActivity void PoTokenExtractionContent(java.lang.String targetUrl)" />
+  <problem_class id="ReplaceIsEmptyWithIfEmpty" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">'if' condition can be replaced with lambda call</problem_class>
+  <description>Replace with 'ifBlank {...}'</description>
+  <highlighted_element>if</highlighted_element>
+  <language>kotlin</language>
+  <offset>19</offset>
+  <length>2</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/kotlin/com/arturo254/opentune/viewmodels/BackupRestoreViewModel.kt</file>
+  <line>582</line>
+  <module>ARMORY.app.main</module>
+  <package>com.arturo254.opentune.viewmodels</package>
+  <entry_point TYPE="method" FQNAME="com.arturo254.opentune.viewmodels.BackupRestoreViewModel java.lang.Object importPlaylistFromCsv(android.content.Context context, android.net.Uri uri, kotlin.coroutines.Continuation&lt;? super java.util.ArrayList&lt;com.arturo254.opentune.db.entities.Song&gt;&gt; $completion)" />
+  <problem_class id="ReplaceIsEmptyWithIfEmpty" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">'if' condition can be replaced with lambda call</problem_class>
+  <description>Replace with 'ifEmpty {...}'</description>
+  <highlighted_element>if</highlighted_element>
+  <language>kotlin</language>
+  <offset>46</offset>
+  <length>2</length>
+</problem>
+</problems>

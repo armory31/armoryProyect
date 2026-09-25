@@ -1,0 +1,26 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/README.en.md</file>
+  <line>53</line>
+  <module>ARMORY</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/README.en.md" />
+  <problem_class id="MarkdownIncorrectTableFormatting" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Formato de tabla incorrecto</problem_class>
+  <description>La tabla no tiene el formato correcto</description>
+  <highlighted_element>| Frontend | Backend | Development Tools | |:--------:|:-------:|:----------------:| | ![Kotlin](htt...</highlighted_element>
+  <language>Markdown</language>
+  <offset>0</offset>
+  <length>1014</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/README.en.md</file>
+  <line>167</line>
+  <module>ARMORY</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/README.en.md" />
+  <problem_class id="MarkdownIncorrectTableFormatting" severity="WEAK WARNING" attribute_key="INFO_ATTRIBUTES">Formato de tabla incorrecto</problem_class>
+  <description>La tabla no tiene el formato correcto</description>
+  <highlighted_element>| Component | Minimum Requirement | |:----------|:--------------------| | Operating System | Android...</highlighted_element>
+  <language>Markdown</language>
+  <offset>0</offset>
+  <length>241</length>
+</problem>
+</problems>
