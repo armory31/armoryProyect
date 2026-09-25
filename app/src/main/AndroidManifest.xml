@@ -166,6 +166,7 @@
                 <action android:name="androidx.media3.session.MediaSessionService" />
                 <action android:name="androidx.media3.session.MediaLibraryService" />
                 <action android:name="android.media.browse.MediaBrowserService" />
+                <action android:name="android.service.media.MediaBrowserService" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
