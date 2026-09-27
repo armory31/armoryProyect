@@ -380,7 +380,7 @@ fun PlayerTopActions(
                         context.startActivity(Intent.createChooser(intent, null))
                     },
                     shape = RoundedCornerShape(14.dp),
-                    color = textBackgroundColor.copy(alpha = 0.12f),
+                    color = OpenTuneColors.Diamond2.copy(alpha = 0.12f),
                     modifier = Modifier
                         .height(44.dp)
                         .width(44.dp)
@@ -389,7 +389,7 @@ fun PlayerTopActions(
                         Icon(
                             painter = painterResource(R.drawable.share),
                             contentDescription = null,
-                            tint = textBackgroundColor,
+                            tint = OpenTuneColors.Diamond2,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -398,9 +398,7 @@ fun PlayerTopActions(
                 Surface(
                     onClick = { playerConnection.toggleLike() },
                     shape = RoundedCornerShape(14.dp),
-                    color = if (currentSongLiked)
-                        MaterialTheme.colorScheme.error.copy(alpha = 0.25f)
-                    else textBackgroundColor.copy(alpha = 0.12f),
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.25f),
                     modifier = Modifier
                         .height(44.dp)
                         .width(44.dp)
@@ -412,9 +410,7 @@ fun PlayerTopActions(
                                 else R.drawable.favorite_border
                             ),
                             contentDescription = null,
-                            tint = if (currentSongLiked)
-                                MaterialTheme.colorScheme.error
-                            else textBackgroundColor,
+                            tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -440,7 +436,7 @@ fun PlayerTopActions(
                         }
                     },
                     shape = RoundedCornerShape(14.dp),
-                    color = textBackgroundColor.copy(alpha = 0.12f),
+                    color = OpenTuneColors.GoldPrimary.copy(alpha = 0.12f),
                     modifier = Modifier
                         .height(44.dp)
                         .width(44.dp)
@@ -449,7 +445,7 @@ fun PlayerTopActions(
                         Icon(
                             painter = painterResource(R.drawable.more_horiz),
                             contentDescription = null,
-                            tint = textBackgroundColor,
+                            tint = OpenTuneColors.GoldPrimary,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -1008,7 +1004,7 @@ fun PlayerPlaybackControls(
                         modifier = Modifier
                             .size(52.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(textBackgroundColor.copy(alpha = 0.08f))
+                            .background(OpenTuneColors.GoldPrimary.copy(alpha = 0.15f))
                             .clickable(enabled = canSkipPrevious) {
                                 playerConnection.seekToPrevious()
                             },
@@ -1017,7 +1013,7 @@ fun PlayerPlaybackControls(
                         Icon(
                             painter = painterResource(R.drawable.skip_previous),
                             contentDescription = null,
-                            tint = textBackgroundColor.copy(alpha = if (canSkipPrevious) 0.9f else 0.4f),
+                            tint = OpenTuneColors.GoldPrimary.copy(alpha = if (canSkipPrevious) 1f else 0.4f),
                             modifier = Modifier.size(26.dp)
                         )
                     }
@@ -1026,7 +1022,7 @@ fun PlayerPlaybackControls(
                         modifier = Modifier
                             .size(70.dp)
                             .clip(RoundedCornerShape(50))
-                            .background(textBackgroundColor)
+                            .background(OpenTuneColors.GoldPrimary)
                             .clickable {
                                 if (playbackState == STATE_ENDED) {
                                     playerConnection.player.seekTo(0, 0)
@@ -1040,7 +1036,7 @@ fun PlayerPlaybackControls(
                         if (isLoading) {
                             CircularWavyProgressIndicator(
                                 modifier = Modifier.size(32.dp),
-                                color = icBackgroundColor,
+                                color = Color.Black,
                             )
                         } else {
                             Icon(
@@ -1052,7 +1048,7 @@ fun PlayerPlaybackControls(
                                     }
                                 ),
                                 contentDescription = null,
-                                tint = icBackgroundColor,
+                                tint = Color.Black,
                                 modifier = Modifier.size(34.dp)
                             )
                         }
@@ -1062,7 +1058,7 @@ fun PlayerPlaybackControls(
                         modifier = Modifier
                             .size(52.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(textBackgroundColor.copy(alpha = 0.08f))
+                            .background(OpenTuneColors.GoldPrimary.copy(alpha = 0.15f))
                             .clickable(enabled = canSkipNext) {
                                 playerConnection.seekToNext()
                             },
@@ -1071,7 +1067,7 @@ fun PlayerPlaybackControls(
                         Icon(
                             painter = painterResource(R.drawable.skip_next),
                             contentDescription = null,
-                            tint = textBackgroundColor.copy(alpha = if (canSkipNext) 0.9f else 0.4f),
+                            tint = OpenTuneColors.GoldPrimary.copy(alpha = if (canSkipNext) 1f else 0.4f),
                             modifier = Modifier.size(26.dp)
                         )
                     }
@@ -1168,7 +1164,7 @@ fun PlayerPlaybackControls(
                             onClick = { playerConnection.seekToPrevious() },
                             enabled = canSkipPrevious,
                             shape = RoundedCornerShape(largeRadius),
-                            color = textBackgroundColor.copy(alpha = 0.15f),
+                            color = OpenTuneColors.GoldPrimary.copy(alpha = 0.15f),
                             modifier = Modifier.size(large)
                         ) {
                             Box(
@@ -1178,7 +1174,7 @@ fun PlayerPlaybackControls(
                                 Icon(
                                     painter = painterResource(R.drawable.skip_previous),
                                     contentDescription = null,
-                                    tint = textBackgroundColor.copy(
+                                    tint = OpenTuneColors.GoldPrimary.copy(
                                         alpha = if (canSkipPrevious) 1f else 0.4f
                                     ),
                                     modifier = Modifier.size(largeIcon)
@@ -1236,7 +1232,7 @@ fun PlayerPlaybackControls(
                             onClick = { playerConnection.seekToNext() },
                             enabled = canSkipNext,
                             shape = RoundedCornerShape(largeRadius),
-                            color = textBackgroundColor.copy(alpha = 0.15f),
+                            color = OpenTuneColors.GoldPrimary.copy(alpha = 0.15f),
                             modifier = Modifier.size(large)
                         ) {
                             Box(
@@ -1246,7 +1242,7 @@ fun PlayerPlaybackControls(
                                 Icon(
                                     painter = painterResource(R.drawable.skip_next),
                                     contentDescription = null,
-                                    tint = textBackgroundColor.copy(
+                                    tint = OpenTuneColors.GoldPrimary.copy(
                                         alpha = if (canSkipNext) 1f else 0.4f
                                     ),
                                     modifier = Modifier.size(largeIcon)
@@ -1733,6 +1729,12 @@ fun PlayerControlsContent(
         label = "playPauseRoundness",
     )
 
+    val goldColor = OpenTuneColors.GoldPrimary
+    val effectiveButtonColor = goldColor
+    val effectiveIconColor = goldColor
+    val effectiveTextBackgroundColor = goldColor
+    val effectiveIcBackgroundColor = Color.Black
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -1743,7 +1745,7 @@ fun PlayerControlsContent(
         Column(modifier = Modifier.weight(1f)) {
             PlayerTitleSection(
                 mediaMetadata = mediaMetadata,
-                textBackgroundColor = textBackgroundColor,
+                textBackgroundColor = effectiveTextBackgroundColor,
                 navController = navController,
                 state = state,
                 clipboardManager = clipboardManager,
@@ -1756,9 +1758,9 @@ fun PlayerControlsContent(
         PlayerTopActions(
             mediaMetadata = mediaMetadata,
             playerDesignStyle = playerDesignStyle,
-            textButtonColor = textButtonColor,
-            iconButtonColor = iconButtonColor,
-            textBackgroundColor = textBackgroundColor,
+            textButtonColor = effectiveButtonColor,
+            iconButtonColor = effectiveIconColor,
+            textBackgroundColor = effectiveTextBackgroundColor,
             playerConnection = playerConnection,
             navController = navController,
             menuState = menuState,
@@ -1777,7 +1779,7 @@ fun PlayerControlsContent(
         position = position,
         duration = duration,
         isPlaying = isPlaying,
-        textButtonColor = textButtonColor,
+        textButtonColor = effectiveButtonColor,
         onValueChange = onSliderValueChange,
         onValueChangeFinished = onSliderValueChangeFinished,
         modifier = Modifier.padding(horizontal = horizontalPadding)
@@ -1789,7 +1791,7 @@ fun PlayerControlsContent(
         sliderPosition = sliderPosition,
         position = position,
         duration = duration,
-        textBackgroundColor = textBackgroundColor,
+        textBackgroundColor = effectiveTextBackgroundColor,
         showRemainingTime = playerDesignStyle == PlayerDesignStyle.V7,
         modifier = Modifier.padding(horizontal = horizontalPadding + 4.dp),
         centerContent = if (playerDesignStyle == PlayerDesignStyle.V7 && currentFormat != null) {
@@ -1805,7 +1807,7 @@ fun PlayerControlsContent(
                 }
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = textBackgroundColor.copy(alpha = 0.12f),
+                    color = effectiveTextBackgroundColor.copy(alpha = 0.12f),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -1815,13 +1817,13 @@ fun PlayerControlsContent(
                             painter = painterResource(R.drawable.graphic_eq),
                             contentDescription = null,
                             modifier = Modifier.size(14.dp),
-                            tint = textBackgroundColor.copy(alpha = 0.8f),
+                            tint = effectiveTextBackgroundColor.copy(alpha = 0.8f),
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall,
-                            color = textBackgroundColor.copy(alpha = 0.8f),
+                            color = effectiveTextBackgroundColor.copy(alpha = 0.8f),
                         )
                     }
                 }
@@ -1839,10 +1841,10 @@ fun PlayerControlsContent(
         repeatMode = repeatMode,
         canSkipPrevious = canSkipPrevious,
         canSkipNext = canSkipNext,
-        textButtonColor = textButtonColor,
-        iconButtonColor = iconButtonColor,
-        textBackgroundColor = textBackgroundColor,
-        icBackgroundColor = icBackgroundColor,
+        textButtonColor = effectiveButtonColor,
+        iconButtonColor = effectiveIconColor,
+        textBackgroundColor = effectiveTextBackgroundColor,
+        icBackgroundColor = effectiveIcBackgroundColor,
         playPauseRoundness = playPauseRoundness,
         playerConnection = playerConnection,
         currentSongLiked = currentSongLiked

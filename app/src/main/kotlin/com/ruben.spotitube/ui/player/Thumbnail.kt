@@ -78,6 +78,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.window.core.layout.WindowWidthSizeClass
 import coil3.compose.AsyncImage
+import com.ruben.spotitube.OpenTuneColors
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.canvas.models.CanvasArtwork
@@ -298,17 +299,7 @@ fun Thumbnail(
         defaultValue = PlayerBackgroundStyle.DEFAULT
     )
 
-    val textBackgroundColor = when (playerBackground) {
-        PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
-        PlayerBackgroundStyle.BLUR -> Color.White
-        PlayerBackgroundStyle.GRADIENT -> Color.White
-        PlayerBackgroundStyle.COLORING -> Color.White
-        PlayerBackgroundStyle.BLUR_GRADIENT -> Color.White
-        PlayerBackgroundStyle.GLOW -> Color.White
-        PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
-        PlayerBackgroundStyle.CUSTOM -> Color.White
-        else -> MaterialTheme.colorScheme.onBackground
-    }
+    val textBackgroundColor = OpenTuneColors.GoldPrimary
 
     LaunchedEffect(maxCanvasCacheSize) {
         CanvasArtworkPlaybackCache.setMaxSize(maxCanvasCacheSize)

@@ -29,8 +29,10 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -596,6 +598,8 @@ class MainActivity : ComponentActivity() {
                                     navBackStackEntry?.destination?.route?.startsWith("search/") == true
                         }
 
+                    val nowPlaying by (playerConnection?.mediaMetadata ?: MutableStateFlow(null)).collectAsState()
+
                     val route = navBackStackEntry?.destination?.route
                     val canShowNav = (route == null ||
                             navigationItems.fastAny { it.first == route } ||
@@ -608,7 +612,7 @@ class MainActivity : ComponentActivity() {
                     val playerBottomSheetState =
                         rememberBottomSheetState(
                             dismissedBound = 0.dp,
-                            collapsedBound = 72.dp + navigationBarHeight, // Altura del MiniPlayer + Barra
+                            collapsedBound = 72.dp + navigationBarHeight,
                             expandedBound = maxHeight,
                         )
 
@@ -865,8 +869,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val nowPlaying by (playerConnection?.mediaMetadata ?: MutableStateFlow(null)).collectAsState()
-
                     var position by remember { mutableLongStateOf(0L) }
                     LaunchedEffect(playerConnection, playerStatus) {
                         while (playerStatus == PlayerStatus.PLAYING) {
@@ -1043,8 +1045,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            // OVERLAY: El BottomSheetPlayer ahora está FUERA del Scaffold
-                            // para que su Z-index sea superior al de la barra de navegación.
                             if (isUiReady) {
                                 Box(
                                     modifier = Modifier

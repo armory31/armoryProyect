@@ -42,6 +42,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -680,7 +681,7 @@ fun SimilarRecommendationsSection(
         modifier = modifier
     ) {
         items(
-            items = recommendation.items,
+            items = recommendation.items.take(4),
             key = { it.id }
         ) { item ->
             YouTubeGridItemWrapper(
@@ -985,7 +986,6 @@ fun SimilarRecommendationsTitle(
     modifier: Modifier = Modifier
 ) {
     NavigationTitle(
-        label = "Similar a",
         title = recommendation.title.title,
         thumbnail = recommendation.title.thumbnailUrl?.let { thumbnailUrl ->
             {
@@ -1109,19 +1109,31 @@ fun LazyListScope.SimilarRecommendationsContainer(
         val similarRecommendations by viewModel.similarRecommendations.collectAsState()
         val allItemsMetadata by viewModel.allItemsMetadata.collectAsState()
         
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             if (similarRecommendations == null) {
                 NavigationTitle(
                     title = stringResource(R.string.similar_to),
-                    modifier = Modifier.padding(top = 24.dp)
+                    modifier = Modifier.padding(top = 16.dp)
                 )
                 HomeLoadingShimmer()
             } else {
-                similarRecommendations?.forEach { recommendation ->
+                Text(
+                    text = stringResource(R.string.similar_to),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                similarRecommendations?.take(2)?.forEach { recommendation ->
                     SimilarRecommendationsTitle(
                         recommendation = recommendation,
                         navController = navController,
-                        modifier = Modifier.padding(top = 24.dp)
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                     SimilarRecommendationsSection(
                         recommendation = recommendation,
@@ -1132,7 +1144,8 @@ fun LazyListScope.SimilarRecommendationsContainer(
                         menuState = menuState,
                         haptic = haptic,
                         scope = scope,
-                        metadataMap = allItemsMetadata
+                        metadataMap = allItemsMetadata,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
             }

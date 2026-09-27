@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -84,9 +85,13 @@ fun BottomSheet(
                     topEnd = if (!state.isExpanded) 16.dp else 0.dp,
                 ),
             ).background(
-                backgroundColor.copy(
-                    alpha = backgroundColor.alpha * state.progress.coerceIn(0f, 1f)
-                )
+                if (state.isCollapsed) {
+                    Color.Transparent
+                } else {
+                    backgroundColor.copy(
+                        alpha = backgroundColor.alpha * state.progress.coerceIn(0f, 1f)
+                    )
+                }
             ),
     ) {
         if (!state.isCollapsed && !state.isDismissed) {
@@ -113,6 +118,7 @@ fun BottomSheet(
                         alpha = 1f - (state.progress * 4).coerceAtMost(1f)
                     }.fillMaxWidth()
                     .height(state.collapsedBound),
+                contentAlignment = Alignment.BottomCenter,
                 content = collapsedContent,
             )
         }

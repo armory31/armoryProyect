@@ -648,6 +648,9 @@ class MusicService :
             toggleLike = ::toggleLike
             toggleStartRadio = ::toggleStartRadio
             toggleLibrary = ::toggleLibrary
+            onCustomCommandHandled = {
+                updateNotification()
+            }
         }
         mediaSession =
             MediaLibrarySession

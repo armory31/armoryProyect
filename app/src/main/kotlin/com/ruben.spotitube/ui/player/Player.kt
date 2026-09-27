@@ -123,6 +123,7 @@ import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.MiniPlayer
 import com.ruben.spotitube.PlayerStatus
+import com.ruben.spotitube.OpenTuneColors
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.BlurRadiusKey
 import com.ruben.spotitube.constants.DisableBlurKey
@@ -344,18 +345,7 @@ fun BottomSheetPlayer(
 
     val changeBound = state.expandedBound / 3
 
-    val TextBackgroundColor =
-        if (playerDesignStyle == PlayerDesignStyle.V7) Color.White
-        else when (playerBackground) {
-            PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
-            PlayerBackgroundStyle.BLUR -> Color.White
-            PlayerBackgroundStyle.GRADIENT -> Color.White
-            PlayerBackgroundStyle.COLORING -> Color.White
-            PlayerBackgroundStyle.BLUR_GRADIENT -> Color.White
-            PlayerBackgroundStyle.GLOW -> Color.White
-            PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
-            PlayerBackgroundStyle.CUSTOM -> Color.White
-        }
+    val TextBackgroundColor = OpenTuneColors.GoldPrimary
 
     val icBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V7) Color.Black
@@ -1138,7 +1128,7 @@ fun BottomSheetPlayer(
         // --- AQUÍ CERRAMOS EL BOX DEL MAIN PLAYER CONTENIDO ---
         }
 
-        val queueOnBackgroundColor = if (useBlackBackground) Color.White else MaterialTheme.colorScheme.onSurface
+        val queueOnBackgroundColor = OpenTuneColors.GoldPrimary
         val queueSurfaceColor = if (useBlackBackground) Color.Black else MaterialTheme.colorScheme.surface
 
         val (queueTextButtonColor, queueIconButtonColor) = when (playerButtonsStyle) {

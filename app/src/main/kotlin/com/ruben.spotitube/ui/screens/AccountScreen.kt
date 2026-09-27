@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.ruben.spotitube.BuildConfig
 import com.ruben.spotitube.App.Companion.forgetAccount
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
@@ -230,7 +231,7 @@ fun AccountScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // ── Lista Vertical de Opciones ──
+            // ── Copia de Seguridad en Firebase ──
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -297,39 +298,79 @@ fun AccountScreen(
                             }
                         }
                     )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-                    )
-
-                    // 3. ⚙️ Ajustes Generales
-                    AccountOptionRow(
-                        icon = painterResource(R.drawable.settings),
-                        title = "Ajustes Generales",
-                        subtitle = "Abre la pantalla de Ajustes de la aplicación",
-                        onClick = {
-                            navController.navigate("settings")
-                        }
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-                    )
-
-                    // 4. 🚪 Cerrar Sesión
-                    AccountOptionRow(
-                        icon = painterResource(R.drawable.logout),
-                        title = stringResource(R.string.action_logout),
-                        subtitle = "Cierra tu sesión previa copia de seguridad",
-                        titleColor = MaterialTheme.colorScheme.error,
-                        iconTint = MaterialTheme.colorScheme.error,
-                        onClick = {
-                            showLogoutConfirmation = true
-                        }
-                    )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Cabecera de Ajustes ──
+            Text(
+                text = "Ajustes",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // ── Recuadro de Ajustes Integrados ──
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            ) {
+                Column {
+                    val settingsItems = listOf(
+                        AccountSettingItem(R.drawable.storage, stringResource(R.string.storage), stringResource(R.string.cache)) { navController.navigate("settings/storage") },
+                        AccountSettingItem(R.drawable.restore, stringResource(R.string.backup_restore), stringResource(R.string.action_backup)) { navController.navigate("settings/backup_restore") },
+                        AccountSettingItem(R.drawable.account, "Armory Sync", "Sincroniza tus datos en la nube") { navController.navigate("settings/armory_sync") },
+                        AccountSettingItem(R.drawable.fire, stringResource(R.string.music_together), stringResource(R.string.integration)) { navController.navigate("settings/music_together") },
+                        AccountSettingItem(R.drawable.experiment, stringResource(R.string.experiment_settings), stringResource(R.string.misc)) { navController.navigate("settings/misc") },
+                        AccountSettingItem(R.drawable.link, "Configurar PO Token", "Token de origen de YouTube") { navController.navigate("settings/po_token") },
+                        AccountSettingItem(R.drawable.update, stringResource(R.string.updates), BuildConfig.VERSION_NAME) { navController.navigate("settings/update") },
+                        AccountSettingItem(R.drawable.info, stringResource(R.string.about), "ARMORY") { navController.navigate("settings/about") },
+                    )
+
+                    settingsItems.forEachIndexed { index, item ->
+                        AccountOptionRow(
+                            icon = painterResource(item.iconRes),
+                            title = item.title,
+                            subtitle = item.subtitle,
+                            onClick = item.onClick
+                        )
+                        if (index < settingsItems.size - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 56.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Cerrar Sesión ──
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            ) {
+                AccountOptionRow(
+                    icon = painterResource(R.drawable.logout),
+                    title = stringResource(R.string.action_logout),
+                    subtitle = "Cierra tu sesión previa copia de seguridad",
+                    titleColor = MaterialTheme.colorScheme.error,
+                    iconTint = MaterialTheme.colorScheme.error,
+                    onClick = {
+                        showLogoutConfirmation = true
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -402,3 +443,10 @@ private fun AccountOptionRow(
         )
     }
 }
+
+private data class AccountSettingItem(
+    val iconRes: Int,
+    val title: String,
+    val subtitle: String,
+    val onClick: () -> Unit
+)

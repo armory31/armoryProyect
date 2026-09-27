@@ -16,6 +16,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
@@ -63,6 +64,7 @@ constructor(
     var toggleLike: () -> Unit = {}
     var toggleStartRadio: () -> Unit = {}
     var toggleLibrary: () -> Unit = {}
+    var onCustomCommandHandled: () -> Unit = {}
 
     private fun browsableExtras(
         browsableHint: Int = CONTENT_STYLE_GRID_ITEM,
@@ -94,10 +96,27 @@ constructor(
             .add(MediaSessionConstants.CommandToggleRepeatMode)
             .build()
 
-        if (session.isMediaNotificationController(controller)) {
+        val playerCommands = connectionResult.availablePlayerCommands.buildUpon()
+            .add(Player.COMMAND_PLAY_PAUSE)
+            .add(Player.COMMAND_SEEK_TO_DEFAULT_POSITION)
+            .add(Player.COMMAND_SEEK_TO_MEDIA_ITEM)
+            .add(Player.COMMAND_SEEK_BACK)
+            .add(Player.COMMAND_SEEK_FORWARD)
+            .add(Player.COMMAND_SEEK_TO_NEXT)
+            .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+            .add(Player.COMMAND_SET_REPEAT_MODE)
+            .add(Player.COMMAND_SET_SHUFFLE_MODE)
+            .build()
+
+        val isSystemOrNotification = session.isMediaNotificationController(controller) ||
+            controller.packageName == "com.android.systemui" ||
+            controller.packageName.contains("miui") ||
+            controller.packageName.contains("systemui")
+
+        if (isSystemOrNotification) {
             return MediaSession.ConnectionResult.AcceptedResultBuilder(session, controller)
                 .setAvailableSessionCommands(sessionCommands)
-                .setAvailablePlayerCommands(MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS)
+                .setAvailablePlayerCommands(playerCommands)
                 .build()
         }
 
@@ -122,6 +141,7 @@ constructor(
 
             MediaSessionConstants.ACTION_TOGGLE_REPEAT_MODE -> session.player.toggleRepeatMode()
         }
+        onCustomCommandHandled()
         return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
     }
 
