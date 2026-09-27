@@ -607,12 +607,12 @@ class MainActivity : ComponentActivity() {
                             !active &&
                             route?.startsWith("search/") != true
 
-                    val navigationBarHeight = if (canShowNav && !useRail) 88.dp else 0.dp
+                    val navigationBarHeight = if (canShowNav && !useRail) 68.dp else 0.dp
 
                     val playerBottomSheetState =
                         rememberBottomSheetState(
                             dismissedBound = 0.dp,
-                            collapsedBound = 72.dp + navigationBarHeight,
+                            collapsedBound = 200.dp,
                             expandedBound = maxHeight,
                         )
 

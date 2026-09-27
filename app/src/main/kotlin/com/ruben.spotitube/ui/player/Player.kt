@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -700,6 +701,7 @@ fun BottomSheetPlayer(
             mediaMetadata?.let { metadata ->
                 Box(
                     modifier = Modifier
+                        .navigationBarsPadding()
                         .padding(bottom = navigationBarHeight) // Primero el padding para definir el límite táctil inferior
                         .fillMaxWidth()
                         .graphicsLayer { alpha = miniPlayerAlpha }

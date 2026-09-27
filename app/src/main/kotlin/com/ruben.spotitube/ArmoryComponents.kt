@@ -548,7 +548,7 @@ fun OpenTuneNavigationBar(
         shape = RoundedCornerShape(26.dp),
         tonalElevation = 8.dp,
         modifier = modifier
-            .height(76.dp)
+            .height(62.dp)
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
