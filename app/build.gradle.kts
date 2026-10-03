@@ -101,7 +101,7 @@ android {
             // applicationIdSuffix = ".debug"
             versionNameSuffix = ".$gitCommit-debug"
             isDebuggable = true
-            
+
             // Desactivar optimizaciones costosas en Debug
             extra["enableCrunchPngs"] = false
             extra["alwaysUpdateBuildId"] = false

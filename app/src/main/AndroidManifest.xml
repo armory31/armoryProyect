@@ -151,7 +151,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.ruben.spotitube.FileProvider"
+            android:authorities="${applicationId}.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -193,6 +193,10 @@
         </receiver>
 
         <meta-data
+            android:name="androidx.media3.session.notification.small_icon"
+            android:resource="@drawable/small_icon" />
+
+        <meta-data
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc" />
         <meta-data
@@ -213,7 +217,7 @@
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.ruben.spotitube.androidx-startup"
+            android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
             <meta-data
