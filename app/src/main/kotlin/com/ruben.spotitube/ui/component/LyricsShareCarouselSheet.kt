@@ -6,6 +6,8 @@
 
 package com.ruben.spotitube.ui.component
 
+import com.ruben.spotitube.LyricsGlassStyle
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState

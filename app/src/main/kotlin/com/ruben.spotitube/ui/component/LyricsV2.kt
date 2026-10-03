@@ -6,6 +6,8 @@
 
 package com.ruben.spotitube.ui.component
 
+import com.ruben.spotitube.LyricsGlassStyle
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
@@ -123,6 +125,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import kotlin.math.abs
 
 

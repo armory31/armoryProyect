@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.ui.theme.PlayerSliderColors
+import com.ruben.spotitube.PlayerSliderColors
 @Composable
 fun PlayerSliderTrack(
     sliderState: SliderState,

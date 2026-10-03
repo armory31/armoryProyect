@@ -8,6 +8,8 @@
 
 package com.ruben.spotitube.ui.component
 
+import com.ruben.spotitube.LyricsGlassStyle
+
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Build

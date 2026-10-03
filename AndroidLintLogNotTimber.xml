@@ -218,7 +218,7 @@
   <problem_class id="AndroidLintLogNotTimber" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Logging call to Log instead of Timber</problem_class>
   <hints />
   <description>&lt;html&gt;Using 'Log' instead of 'Timber'&lt;/html&gt;</description>
-  <highlighted_element>Log.d(TAG, &quot;Starting pre-load for ${nextSongs.size} songs&quot;)</highlighted_element>
+  <highlighted_element>Log.d(TAG, &quot;Starting preload for ${nextSongs.size} songs&quot;)</highlighted_element>
   <language>kotlin</language>
   <offset>16</offset>
   <length>59</length>
@@ -260,7 +260,7 @@
   <problem_class id="AndroidLintLogNotTimber" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Logging call to Log instead of Timber</problem_class>
   <hints />
   <description>&lt;html&gt;Using 'Log' instead of 'Timber'&lt;/html&gt;</description>
-  <highlighted_element>Log.w(TAG, &quot;Failed to pre-load lyrics for ${song.title}: ${e.message}&quot;)</highlighted_element>
+  <highlighted_element>Log.w(TAG, &quot;Failed to preload lyrics for ${song.title}: ${e.message}&quot;)</highlighted_element>
   <language>kotlin</language>
   <offset>24</offset>
   <length>71</length>

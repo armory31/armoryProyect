@@ -399,7 +399,7 @@ private fun HeroCardExpressive(shimmerBrush: Brush) {
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Image(
-                            painter = painterResource(R.drawable.logo_armory),
+                            painter = painterResource(R.drawable.armory_logo),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(if (isExpanded) 68.dp else 56.dp)

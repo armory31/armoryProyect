@@ -627,7 +627,7 @@ fun Thumbnail(
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
-                                                painter = painterResource(R.drawable.logo_armory),
+                                                painter = painterResource(R.drawable.armory_logo),
                                                 contentDescription = stringResource(R.string.hide_player_thumbnail),
                                                 tint = Color.Unspecified,
                                                 modifier = Modifier.size(120.dp)

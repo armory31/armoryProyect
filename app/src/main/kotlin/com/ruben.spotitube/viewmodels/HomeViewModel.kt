@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import timber.log.Timber
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -77,6 +78,7 @@ class HomeViewModel @Inject constructor(
     val quickPicks = MutableStateFlow<List<Song>?>(null)
     val speedDialSongs = MutableStateFlow<List<Song>>(emptyList())
     val forgottenFavorites = MutableStateFlow<List<Song>?>(null)
+    val forgottenFavoritesDaysRemaining = MutableStateFlow<Int?>(null)
     val keepListening = MutableStateFlow<List<LocalItem>?>(null)
     val similarRecommendations = MutableStateFlow<List<SimilarRecommendation>?>(null)
     val accountPlaylists = MutableStateFlow<List<PlaylistItem>?>(null)
@@ -198,7 +200,14 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun getQuickPicks(){
         when (quickPicksEnum.first()) {
-            QuickPicks.QUICK_PICKS -> quickPicks.value = database.quickPicks().first().shuffled().take(20)
+            QuickPicks.QUICK_PICKS -> {
+                val picks = database.quickPicks().first().shuffled().take(20)
+                if (picks.isNotEmpty()) {
+                    quickPicks.value = picks
+                } else {
+                    quickPicks.value = database.allSongs().first().shuffled().take(20)
+                }
+            }
             QuickPicks.LAST_LISTEN -> songLoad()
         }
     }
@@ -459,6 +468,21 @@ class HomeViewModel @Inject constructor(
                 .collect {
                     loadSpeedDialSongs()
                 }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            database.firstEvent().collect { firstEvent ->
+                if (firstEvent != null) {
+                    val firstEventMs = firstEvent.event.timestamp
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
+                    val daysElapsed = ((System.currentTimeMillis() - firstEventMs) / (1000L * 60 * 60 * 24)).toInt()
+                    forgottenFavoritesDaysRemaining.value = (30 - daysElapsed).coerceAtLeast(0)
+                } else {
+                    forgottenFavoritesDaysRemaining.value = 30
+                }
+            }
         }
 
         viewModelScope.launch(Dispatchers.IO) {

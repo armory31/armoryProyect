@@ -144,7 +144,7 @@ import com.ruben.spotitube.ui.component.shimmer.ShimmerTheme
 import com.ruben.spotitube.ui.player.BottomSheetPlayer
 import com.ruben.spotitube.ui.screens.Screens
 import com.ruben.spotitube.ui.screens.navigationBuilder
-import com.ruben.spotitube.ui.theme.ArmoryTheme
+import com.ruben.spotitube.ArmoryTheme
 import com.ruben.spotitube.ui.utils.appBarScrollBehavior
 import com.ruben.spotitube.ui.utils.resetHeightOffset
 import com.ruben.spotitube.utils.PreferenceStore
@@ -1075,7 +1075,7 @@ class MainActivity : ComponentActivity() {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Image(
-                                        painter = painterResource(id = R.drawable.logo_armory),
+                                        painter = painterResource(id = R.drawable.armory_logo),
                                         contentDescription = "Logo",
                                         modifier = Modifier
                                             .height(160.dp)

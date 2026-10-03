@@ -161,7 +161,7 @@ object UpdateNotificationManager {
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.logo_armory)
+            .setSmallIcon(R.drawable.armory_logo)
             .setContentTitle(context.getString(R.string.update_notification_title))
             .setContentText(context.getString(R.string.update_notification_text, newVersion))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

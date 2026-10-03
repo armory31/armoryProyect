@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -70,9 +71,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -87,14 +90,6 @@ import coil3.request.allowHardware
 import coil3.request.crossfade
 import coil3.toBitmap
 import com.ruben.spotitube.models.MediaMetadata
-
-val PremiumTitleFont = FontFamily.Serif
-val PremiumBodyFont = FontFamily.SansSerif
-
-object ArmoryFont {
-    val Title = PremiumTitleFont
-    val Body = PremiumBodyFont
-}
 
 enum class PlayerStatus { PLAYING, PAUSED, LOADING }
 
@@ -146,26 +141,54 @@ fun ArmoryHeader(
     onLogout: (() -> Unit)? = null,
     onSettings: (() -> Unit)? = null
 ) {
-    Row(modifier = Modifier
-        .statusBarsPadding()
-        .fillMaxWidth()
-        .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        
-        Text(
-            text = "ARMORY",
-            color = MaterialTheme.colorScheme.primary,
-            fontFamily = PremiumTitleFont,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 4.sp
-        )
+    Row(
+        modifier = Modifier
+            .statusBarsPadding()
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 1/5 (20%) - Logo en la parte superior izquierda
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Image(
+                painter = painterResource(R.drawable.armory_logo),
+                contentDescription = "Logo",
+                modifier = Modifier.size(40.dp)
+            )
+        }
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // 3/5 (60%) - Palabra ARMORY con color gradiente gold nuevo
+        Box(
+            modifier = Modifier.weight(3f),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "ARMORY",
+                style = TextStyle(
+                    brush = ArmoryColors.Gold
+                ),
+                fontFamily = PremiumTitleFont,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 4.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        // 1/5 (20%) - Botón de cuenta en el 1/5 restante
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.CenterEnd
+        ) {
             if (onSettings != null) {
                 IconButton(
                     onClick = onSettings,
-                    modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
                 ) {
                     if (avatarUrl != null) {
                         AsyncImage(

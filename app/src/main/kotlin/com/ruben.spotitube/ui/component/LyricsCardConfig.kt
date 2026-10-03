@@ -9,6 +9,7 @@ package com.ruben.spotitube.ui.component
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.ruben.spotitube.LyricsGlassStyle
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Layout styles — cada valor representa un diseño visual distinto para la tarjeta

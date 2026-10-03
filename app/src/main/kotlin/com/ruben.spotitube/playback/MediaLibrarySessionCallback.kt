@@ -10,8 +10,10 @@ package com.ruben.spotitube.playback
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.annotation.DrawableRes
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -143,6 +145,48 @@ constructor(
         }
         onCustomCommandHandled()
         return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+    }
+
+    override fun onMediaButtonEvent(
+        session: MediaSession,
+        controllerInfo: MediaSession.ControllerInfo,
+        intent: Intent,
+    ): Boolean {
+        if (Intent.ACTION_MEDIA_BUTTON == intent.action) {
+            val keyEvent = intent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+            if (keyEvent != null && keyEvent.action == KeyEvent.ACTION_DOWN) {
+                when (keyEvent.keyCode) {
+                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                    KeyEvent.KEYCODE_HEADSETHOOK -> {
+                        if (session.player.isPlaying) {
+                            session.player.pause()
+                        } else {
+                            session.player.play()
+                        }
+                        return true
+                    }
+                    KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                        session.player.play()
+                        return true
+                    }
+                    KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                        session.player.pause()
+                        return true
+                    }
+                    KeyEvent.KEYCODE_MEDIA_NEXT,
+                    KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> {
+                        session.player.seekToNext()
+                        return true
+                    }
+                    KeyEvent.KEYCODE_MEDIA_PREVIOUS,
+                    KeyEvent.KEYCODE_MEDIA_REWIND -> {
+                        session.player.seekToPrevious()
+                        return true
+                    }
+                }
+            }
+        }
+        return super.onMediaButtonEvent(session, controllerInfo, intent)
     }
 
     override fun onGetLibraryRoot(

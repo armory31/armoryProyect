@@ -34,6 +34,7 @@ import android.text.TextPaint
 import android.view.PixelCopy
 import android.view.View
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
@@ -46,7 +47,7 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import com.ruben.spotitube.R
 import com.ruben.spotitube.ui.component.LyricsCardConfig
-import com.ruben.spotitube.ui.component.LyricsGlassStyle
+import com.ruben.spotitube.LyricsGlassStyle
 import com.ruben.spotitube.ui.component.LyricsLayoutStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -382,8 +383,8 @@ object ComposeToImage {
         textColor: Int,
     ) {
         val baseSize  = cardSize.toFloat()
-        val logoSize  = (baseSize * 0.045f).toInt()
-        val rawLogo   = context.getDrawable(R.drawable.opentune)?.toBitmap(logoSize, logoSize)
+        val logoSize  = (baseSize * 0.045f).toInt().coerceAtLeast(24)
+        val rawLogo   = ContextCompat.getDrawable(context, R.drawable.armory_logo)?.toBitmap(logoSize, logoSize)
         val logo = rawLogo?.let { source ->
             val colored = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
             Canvas(colored).drawBitmap(source, 0f, 0f, Paint().apply {

@@ -374,7 +374,7 @@
     <string name="brightness">Brightness</string>
     <string name="custom_value">Custom value</string>
     <string name="new_library_design">New library design</string>
-    <string name="new_library_design_description">Enable the new library design (may be unstable)</string>
+    <string name="new_library_design_description">Enable the new library design (maybe unstable)</string>
     <string name="opentune_canvas">ARMORY Canvas</string>
     <string name="opentune_canvas_desc">Animate album artwork while playing (Powered by BetterLyrics)</string>
     <string name="show_button1_description">Toggle visibility of button 1 in Discord Rich Presence</string>
@@ -534,7 +534,7 @@
     <string name="action_restore">Restore</string>
     <string name="imported_playlist">Imported playlist</string>
     <string name="backup_create_success">Backup created successfully</string>
-    <string name="backup_create_failed">Couldn\'t create backup</string>
+    <string name="backup_create_failed">Could not create backup</string>
     <string name="restore_success">Backup restored successfully</string>
     <string name="restore_failed">Failed to restore backup</string>
     <string name="discord_integration">Discord Integration</string>
@@ -740,8 +740,8 @@ ARMORY will only extract your token, and everything else is stored locally.</str
     <string name="invalid_code">Invalid code</string>
     <string name="not_allowed">Not allowed</string>
     <string name="network_unavailable">Network unavailable</string>
-    <string name="together_online_not_configured">Online sessions aren\'t configured</string>
-    <string name="together_token_missing">Online sessions aren\'t available in this build</string>
+    <string name="together_online_not_configured">Online sessions are not configured</string>
+    <string name="together_token_missing">Online sessions are not available in this build</string>
     <string name="together_server_unreachable">Server unreachable</string>
     <string name="together_connection_timed_out">Connection timed out</string>
     <string name="together_session_not_found">Session not found</string>

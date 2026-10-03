@@ -493,7 +493,7 @@ class MusicService :
                     )
 
                 val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.logo_armory)
+                    .setSmallIcon(R.drawable.armory_logo)
                     .setContentTitle(getString(R.string.music_player))
                     .setContentText(getString(R.string.app_name))
                     .setContentIntent(contentIntent)
@@ -510,7 +510,7 @@ class MusicService :
             } catch (e: Exception) {
                 reportException(e)
                 NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.logo_armory)
+                    .setSmallIcon(R.drawable.armory_logo)
                     .setContentTitle("ARMORY")
                     .build()
             }
@@ -670,7 +670,7 @@ class MusicService :
                 CHANNEL_ID,
                 R.string.music_player
             ).apply {
-                setSmallIcon(R.drawable.logo_armory)
+                setSmallIcon(R.drawable.armory_logo)
             }
         )
         

@@ -63,7 +63,7 @@ import com.ruben.spotitube.sync.SyncManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import com.ruben.spotitube.ui.theme.ArmoryTheme
+import com.ruben.spotitube.ArmoryTheme
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth

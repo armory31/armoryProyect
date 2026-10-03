@@ -62,7 +62,7 @@
   <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/gradle/libs.versions.toml" />
   <problem_class id="AndroidLintNewerVersionAvailable" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Newer Library Versions Available</problem_class>
   <hints />
-  <description>&lt;html&gt;A newer version of org.json:json than 20250517 is available: 20260814&lt;/html&gt;</description>
+  <description>&lt;html&gt;A newer version of org.json:JSON than 20250517 is available: 20260814&lt;/html&gt;</description>
   <highlighted_element>&quot;20250517&quot;</highlighted_element>
   <language>TOML</language>
   <offset>7</offset>

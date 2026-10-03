@@ -6,6 +6,8 @@
 
 package com.ruben.spotitube.ui.component
 
+import com.ruben.spotitube.LyricsGlassStyle
+
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
