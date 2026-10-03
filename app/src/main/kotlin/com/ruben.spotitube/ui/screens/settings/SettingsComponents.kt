@@ -224,7 +224,7 @@ fun SettingsUpdateBanner(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) SettingsAnimations.PressScale else 1f,
+        targetValue = if (isPressed) SettingsAnimations.PRESS_SCALE else 1f,
         animationSpec = SettingsAnimations.pressSpring(),
         label = "updateScale",
     )

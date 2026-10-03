@@ -8,6 +8,7 @@
 
 package com.ruben.spotitube.ui.menu
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.widget.Toast
@@ -75,7 +76,6 @@ import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
-import com.ruben.spotitube.LocalSyncUtils
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSeparatorsKey
 import com.ruben.spotitube.constants.ExternalDownloaderEnabledKey
@@ -106,6 +106,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun SongMenu(
     originalSong: Song,
@@ -126,7 +127,6 @@ fun SongMenu(
         .collectAsState(initial = null)
     val downloadState = metadata?.downloadState ?: download?.state
     val coroutineScope = rememberCoroutineScope()
-    val syncUtils = LocalSyncUtils.current
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
@@ -154,7 +154,7 @@ fun SongMenu(
     }
     val isInSpeedDial = remember(speedDialSongs, song.id) { song.id in speedDialSongs }
 
-    val orderedArtists by produceState(initialValue = emptyList<ArtistEntity>(), song) {
+    val orderedArtists by produceState(initialValue = emptyList(), song) {
         withContext(Dispatchers.IO) {
             val artistMaps = database.songArtistMap(song.id).sortedBy { it.position }
             val sorted = artistMaps.mapNotNull { map ->
@@ -194,16 +194,16 @@ fun SongMenu(
         mutableStateOf(false)
     }
 
-    val TextFieldValueSaver: Saver<TextFieldValue, *> = Saver(
+    val textBackgroundColor: Saver<TextFieldValue, *> = Saver(
         save = { it.text },
         restore = { text -> TextFieldValue(text, TextRange(text.length)) }
     )
 
-    var titleField by rememberSaveable(stateSaver = TextFieldValueSaver) {
+    var titleField by rememberSaveable(stateSaver = textBackgroundColor) {
         mutableStateOf(TextFieldValue(song.song.title))
     }
 
-    var artistField by rememberSaveable(stateSaver = TextFieldValueSaver) {
+    var artistField by rememberSaveable(stateSaver = textBackgroundColor) {
         mutableStateOf(TextFieldValue(song.artists.firstOrNull()?.name.orEmpty()))
     }
 
@@ -263,7 +263,7 @@ fun SongMenu(
         onDismiss = {
             showChoosePlaylistDialog = false
         },
-        onAddComplete = { songCount, playlistNames ->
+        onAddComplete = { _, playlistNames ->
             val message = when {
                 playlistNames.size == 1 -> context.getString(R.string.added_to_playlist, playlistNames.first())
                 else -> context.getString(R.string.added_to_n_playlists, playlistNames.size)
@@ -657,11 +657,10 @@ fun SongMenu(
                                             }
                                             delete(map)
                                         }
-                                        val browseId = playlistBrowseId
-                                        if (browseId != null) {
+                                        if (playlistBrowseId != null) {
                                             val setVideoId = map.setVideoId ?: database.getSetVideoId(map.songId)?.setVideoId
                                             if (setVideoId != null) {
-                                                YouTube.removeFromPlaylist(browseId, map.songId, setVideoId)
+                                                YouTube.removeFromPlaylist(playlistBrowseId, map.songId, setVideoId)
                                             }
                                         }
                                         withContext(Dispatchers.Main) {
@@ -806,12 +805,12 @@ fun SongMenu(
                                 }
                                 val intent = Intent(Intent.ACTION_VIEW).apply {
                                     setPackage(externalDownloaderPackage)
-                                    data = android.net.Uri.parse(url)
+                                    data = url.toUri()
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
                                 try {
                                     context.startActivity(intent)
-                                } catch (e: android.content.ActivityNotFoundException) {
+                                } catch (_: android.content.ActivityNotFoundException) {
                                     Toast.makeText(context, context.getString(R.string.external_downloader_not_installed), Toast.LENGTH_SHORT).show()
                                 }
                             },

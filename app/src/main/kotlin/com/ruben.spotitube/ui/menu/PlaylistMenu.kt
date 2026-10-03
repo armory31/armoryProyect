@@ -120,7 +120,7 @@ fun PlaylistMenu(
         mutableIntStateOf(Download.STATE_STOPPED)
     }
 
-    val editable: Boolean = playlist.playlist.isEditable == true
+    val editable: Boolean = playlist.playlist.isEditable
 
     LaunchedEffect(songs) {
         if (songs.isEmpty()) return@LaunchedEffect
@@ -281,7 +281,7 @@ fun PlaylistMenu(
             playlist = playlist,
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
             trailingContent = {
-                if (playlist.playlist.isEditable != true) {
+                if (!playlist.playlist.isEditable) {
                     IconButton(
                         onClick = {
                             coroutineScope.launch {

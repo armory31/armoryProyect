@@ -130,7 +130,7 @@ class InnerTube {
     /**
      * Simple retry wrapper for transient IO errors (socket aborts, timeouts).
      * Retries the given block up to [maxAttempts] times with exponential backoff.
-     * Cancellation is respected since [delay] will throw if the coroutine is cancelled.
+     * Cancellation is respected since [delay] will throw if the coroutine is canceled.
      */
     private suspend fun <T> withRetry(
         maxAttempts: Int = 3,

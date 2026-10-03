@@ -95,7 +95,7 @@ class PoTokenExtractionActivity : ComponentActivity() {
 
         fun normalizePath(url: String): String {
             val path = Uri.parse(url).path.orEmpty().trimEnd('/')
-            return if (path.isBlank()) "/" else path
+            return path.ifBlank { "/" }
         }
 
         fun isAtDestination(current: String, destination: String): Boolean {

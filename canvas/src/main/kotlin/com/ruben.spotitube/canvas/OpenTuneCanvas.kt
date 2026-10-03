@@ -64,7 +64,7 @@ object OpenTuneCanvas {
     )
 
     private val cache = ConcurrentHashMap<String, CacheEntry>()
-    private val ttlMs = 60_000L
+    private const val TTL_MS = 60_000L
 
     suspend fun getBySongArtist(
         song: String,
@@ -95,7 +95,7 @@ object OpenTuneCanvas {
         cache[key] =
             CacheEntry(
                 value = value,
-                expiresAtMs = System.currentTimeMillis() + ttlMs,
+                expiresAtMs = System.currentTimeMillis() + TTL_MS,
             )
 
         return value
@@ -124,7 +124,7 @@ object OpenTuneCanvas {
         cache[key] =
             CacheEntry(
                 value = value,
-                expiresAtMs = System.currentTimeMillis() + ttlMs,
+                expiresAtMs = System.currentTimeMillis() + TTL_MS,
             )
 
         return value
@@ -153,7 +153,7 @@ object OpenTuneCanvas {
         cache[key] =
             CacheEntry(
                 value = value,
-                expiresAtMs = System.currentTimeMillis() + ttlMs,
+                expiresAtMs = System.currentTimeMillis() + TTL_MS,
             )
 
         return value

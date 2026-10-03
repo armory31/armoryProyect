@@ -185,7 +185,7 @@ fun LyricsV2(
     }
     val playerBackground by rememberEnumPreference(PlayerBackgroundStyleKey, PlayerBackgroundStyle.DEFAULT)
 
-    // ── Text colour derived from background style ──
+    // ── Text color derived from background style ──
     val textColor = if (playerBackground == PlayerBackgroundStyle.DEFAULT)
         MaterialTheme.colorScheme.onBackground
     else

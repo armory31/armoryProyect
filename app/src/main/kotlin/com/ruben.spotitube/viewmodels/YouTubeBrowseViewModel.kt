@@ -34,8 +34,8 @@ constructor(
     private val browseId = savedStateHandle.get<String>("browseId")!!
     private val params = savedStateHandle.get<String>("params")
 
-    val result = MutableStateFlow<BrowseResult?>(null)
-    val error = MutableStateFlow<Boolean>(false)
+    val result = MutableStateFlow<BrowseResult?>(value = null)
+    val error = MutableStateFlow(value = false)
 
     init {
         viewModelScope.launch {

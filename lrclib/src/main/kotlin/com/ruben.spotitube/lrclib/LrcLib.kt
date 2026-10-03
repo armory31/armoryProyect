@@ -79,11 +79,7 @@ object LrcLib {
             }
         }
 
-        if (res != null) {
-            res.text
-        } else {
-            "" // Silently return empty if not found
-        }
+        res?.text ?: "" // Silently return empty if not found
     }
 
     suspend fun getAllLyrics(

@@ -120,7 +120,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.MiniPlayer
 import com.ruben.spotitube.PlayerStatus
@@ -142,7 +141,6 @@ import com.ruben.spotitube.constants.QueuePeekHeight
 import com.ruben.spotitube.constants.SeekExtraSeconds
 import com.ruben.spotitube.constants.SliderStyle
 import com.ruben.spotitube.constants.SliderStyleKey
-import com.ruben.spotitube.extensions.metadata
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.ui.component.BottomSheet
@@ -217,21 +215,6 @@ fun BottomSheetPlayer(
         defaultValue = PlayerButtonsStyle.DEFAULT
     )
 
-    val onBackgroundColor = when (playerBackground) {
-        PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-    val useBlackBackground = pureBlack
-    val backgroundColor = if (useBlackBackground && state.value > state.collapsedBound) {
-        val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
-            .coerceIn(0f, 1f)
-        Color.Black.copy(alpha = progress)
-    } else {
-        val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
-            .coerceIn(0f, 1f)
-        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = progress)
-    }
-
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
@@ -240,7 +223,6 @@ fun BottomSheetPlayer(
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
     val queueWindows by playerConnection.queueWindows.collectAsState()
     val currentWindowIndex by playerConnection.currentWindowIndex.collectAsState()
-    val playerVolume = playerConnection.service.playerVolume.collectAsState()
 
     val repeatMode by playerConnection.repeatMode.collectAsState()
 
@@ -344,9 +326,7 @@ fun BottomSheetPlayer(
         }
     }
 
-    val changeBound = state.expandedBound / 3
-
-    val TextBackgroundColor = OpenTuneColors.GoldPrimary
+    val textBackgroundColor = OpenTuneColors.GoldPrimary
 
     val icBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V7) Color.Black
@@ -362,7 +342,7 @@ fun BottomSheetPlayer(
         }
 
     val (textButtonColor, iconButtonColor) = when (playerButtonsStyle) {
-        PlayerButtonsStyle.DEFAULT -> Pair(TextBackgroundColor, icBackgroundColor)
+        PlayerButtonsStyle.DEFAULT -> Pair(textBackgroundColor, icBackgroundColor)
         PlayerButtonsStyle.SECONDARY -> Pair(
             MaterialTheme.colorScheme.secondary,
             MaterialTheme.colorScheme.onSecondary
@@ -370,9 +350,6 @@ fun BottomSheetPlayer(
     }.let { (tb, ib) ->
         if (playerDesignStyle == PlayerDesignStyle.V7) Pair(Color.White, Color.Black) else Pair(tb, ib)
     }
-
-    val download by LocalDownloadUtil.current.getDownload(mediaMetadata?.id ?: "")
-        .collectAsState(initial = null)
 
     val sleepTimerEnabled =
         remember(
@@ -468,11 +445,6 @@ fun BottomSheetPlayer(
         )
     }
 
-    var showChoosePlaylistDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-
     LaunchedEffect(mediaMetadata?.id, playbackState) {
         val startTime = SystemClock.elapsedRealtime()
         if (playbackState == STATE_READY) {
@@ -559,11 +531,7 @@ fun BottomSheetPlayer(
 
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(state.isExpanded) {
-        if (state.isExpanded) {
-            // Interaction time reset removed
-        }
-    }
+    LaunchedEffect(state.isExpanded) {}
 
     BottomSheet(
 
@@ -676,7 +644,7 @@ fun BottomSheetPlayer(
                 } else {
                     0f
                 }
-                if (useBlackBackground) {
+                if (pureBlack) {
                     Color.Black.copy(alpha = 1f - fadeProgress)
                 } else {
                     MaterialTheme.colorScheme.surface.copy(alpha = 1f - fadeProgress)
@@ -771,11 +739,6 @@ fun BottomSheetPlayer(
         val updatedOnSliderValueChange by rememberUpdatedState(onSliderValueChange)
         val updatedOnSliderValueChangeFinished by rememberUpdatedState(onSliderValueChangeFinished)
 
-        val nextUpMetadata =
-            remember(queueWindows, currentWindowIndex) {
-                queueWindows.getOrNull(currentWindowIndex + 1)?.mediaItem?.metadata
-            }
-
         val enrichedMetadata = remember(mediaMetadata, currentSong) {
             val meta = mediaMetadata ?: return@remember null
             if (meta.album != null) return@remember meta
@@ -808,7 +771,7 @@ fun BottomSheetPlayer(
                 canSkipNext = canSkipNext,
                 textButtonColor = textButtonColor,
                 iconButtonColor = iconButtonColor,
-                textBackgroundColor = TextBackgroundColor,
+                textBackgroundColor = textBackgroundColor,
                 icBackgroundColor = icBackgroundColor,
                 sliderPosition = sliderPosition,
                 position = position,
@@ -844,200 +807,54 @@ fun BottomSheetPlayer(
 
         when (LocalConfiguration.current.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
-                if (playerDesignStyle == PlayerDesignStyle.V5) {
-                    val littleBackground = MaterialTheme.colorScheme.primaryContainer
-                    val littleTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    val displayPositionMs = sliderPosition ?: position
-                    val progressFraction =
-                        remember(displayPositionMs, duration) {
-                            if (duration <= 0L || duration == C.TIME_UNSET) 0f
-                            else (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                        }
-                    val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                when (playerDesignStyle) {
+                    PlayerDesignStyle.V5 -> {
+                        val littleBackground = MaterialTheme.colorScheme.primaryContainer
+                        val littleTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        val displayPositionMs = sliderPosition ?: position
+                        val progressFraction =
+                            remember(displayPositionMs, duration) {
+                                if (duration <= 0L || duration == C.TIME_UNSET) 0f
+                                else (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+                            }
+                        val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
 
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(littleBackground),
-                    ) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(progressFraction)
-                                    .align(Alignment.TopStart)
-                                    .background(progressOverlayColor),
-                        )
                         Box(
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .littlePlayerOverlayGestures(
-                                        seekEnabled = seekEnabled,
-                                        durationMs = duration,
-                                        progressFraction = progressFraction,
-                                        canSkipPrevious = canSkipPrevious,
-                                        canSkipNext = canSkipNext,
-                                        onSeekToPositionMs = updatedOnSliderValueChange,
-                                        onSeekFinished = updatedOnSliderValueChangeFinished,
-                                        onSkipPrevious = playerConnection::seekToPrevious,
-                                        onSkipNext = playerConnection::seekToNext,
-                                    )
-                                    .windowInsetsPadding(
-                                        WindowInsets.systemBars.only(
-                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Top + WindowInsetsSides.Bottom
-                                        )
-                                    ),
+                                    .background(littleBackground),
                         ) {
-                            enrichedMetadata?.let { metadata ->
-                                LittlePlayerContent(
-                                    mediaMetadata = metadata,
-                                    sliderPosition = sliderPosition,
-                                    positionMs = position,
-                                    durationMs = duration,
-                                    textColor = littleTextColor,
-                                    liked = currentSongLiked,
-                                    onCollapse = state::collapseSoft,
-                                    onToggleLike = playerConnection::toggleLike,
-                                    onExpandQueue = queueSheetState::expandSoft,
-                                    onMenuClick = {
-                                        menuState.show {
-                                            PlayerMenu(
-                                                mediaMetadata = metadata,
-                                                navController = navController,
-                                                playerBottomSheetState = state,
-                                                onShowDetailsDialog = {
-                                                    bottomSheetPageState.show {
-                                                        ShowMediaInfo(metadata.id)
-                                                    }
-                                                },
-                                                onDismiss = menuState::dismiss
-                                            )
-                                        }
-                                    },
-                                )
-                            }
-                        }
-                    }
-                } else if (playerDesignStyle == PlayerDesignStyle.V7) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                    ) {
-                        V7PlayerBackdrop(
-                            thumbnailUrl = mediaMetadata?.thumbnailUrl,
-                            disableBlur = disableBlur,
-                            label = "v7BackdropLandscape",
-                        )
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = queueSheetState.collapsedBound)
-                                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-                                .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                        ) {
-                            enrichedMetadata?.let {
-                                controlsContent(it)
-                            }
-
-                            Spacer(Modifier.height(16.dp))
-                        }
-                    }
-                } else {
-                    Row(
-                        modifier =
-                            Modifier
-                                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                                .padding(bottom = queueSheetState.collapsedBound + 48.dp),
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            val screenWidth = LocalConfiguration.current.screenWidthDp
-                            val thumbnailSize = (screenWidth * 0.4).dp
-                            Thumbnail(
-                                sliderPositionProvider = { sliderPosition },
-                                modifier = Modifier.size(thumbnailSize),
-                                isPlayerExpanded = state.isExpanded
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(progressFraction)
+                                        .align(Alignment.TopStart)
+                                        .background(progressOverlayColor),
                             )
-                        }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .windowInsetsPadding(
-                                        WindowInsets.systemBars.only(
-                                            WindowInsetsSides.Top
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .littlePlayerOverlayGestures(
+                                            seekEnabled = seekEnabled,
+                                            durationMs = duration,
+                                            progressFraction = progressFraction,
+                                            canSkipPrevious = canSkipPrevious,
+                                            canSkipNext = canSkipNext,
+                                            onSeekToPositionMs = updatedOnSliderValueChange,
+                                            onSeekFinished = updatedOnSliderValueChangeFinished,
+                                            onSkipPrevious = playerConnection::seekToPrevious,
+                                            onSkipNext = playerConnection::seekToNext,
                                         )
-                                    ),
-                        ) {
-                            Spacer(Modifier.weight(1f))
-
-                            enrichedMetadata?.let {
-                                controlsContent(it)
-                            }
-
-                            Spacer(Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-
-            else -> {
-                if (playerDesignStyle == PlayerDesignStyle.V5) {
-                    val littleBackground = MaterialTheme.colorScheme.primaryContainer
-                    val littleTextColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    val displayPositionMs = sliderPosition ?: position
-                    val progressFraction =
-                        remember(displayPositionMs, duration) {
-                            if (duration <= 0L || duration == C.TIME_UNSET) 0f
-                            else (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                        }
-                    val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
-                    val seekEnabled = duration > 0L && duration != C.TIME_UNSET
-
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(littleBackground),
-                    ) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(progressFraction)
-                                    .align(Alignment.TopStart)
-                                    .background(progressOverlayColor),
-                        )
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .littlePlayerOverlayGestures(
-                                        seekEnabled = seekEnabled,
-                                        durationMs = duration,
-                                        progressFraction = progressFraction,
-                                        canSkipPrevious = canSkipPrevious,
-                                        canSkipNext = canSkipNext,
-                                        onSeekToPositionMs = updatedOnSliderValueChange,
-                                        onSeekFinished = updatedOnSliderValueChangeFinished,
-                                        onSkipPrevious = playerConnection::seekToPrevious,
-                                        onSkipNext = playerConnection::seekToNext,
-                                    )
-                                    .windowInsetsPadding(
-                                        WindowInsets.systemBars.only(
-                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Top + WindowInsetsSides.Bottom
-                                        )
-                                    ),
-                        ) {
-                            enrichedMetadata?.let { metadata ->
-                                LandscapeLikeBox(modifier = Modifier.fillMaxSize()) {
+                                        .windowInsetsPadding(
+                                            WindowInsets.systemBars.only(
+                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top + WindowInsetsSides.Bottom
+                                            )
+                                        ),
+                            ) {
+                                enrichedMetadata?.let { metadata ->
                                     LittlePlayerContent(
                                         mediaMetadata = metadata,
                                         sliderPosition = sliderPosition,
@@ -1068,60 +885,214 @@ fun BottomSheetPlayer(
                             }
                         }
                     }
-                } else if (playerDesignStyle == PlayerDesignStyle.V7) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                    ) {
-                        V7PlayerBackdrop(
-                            thumbnailUrl = mediaMetadata?.thumbnailUrl,
-                            disableBlur = disableBlur,
-                            label = "v7BackdropPortrait",
-                        )
+                    PlayerDesignStyle.V7 -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                        ) {
+                            V7PlayerBackdrop(
+                                thumbnailUrl = mediaMetadata?.thumbnailUrl,
+                                disableBlur = disableBlur,
+                                label = "v7BackdropLandscape",
+                            )
 
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = queueSheetState.collapsedBound)
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                                    .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                            ) {
+                                enrichedMetadata?.let {
+                                    controlsContent(it)
+                                }
+
+                                Spacer(Modifier.height(16.dp))
+                            }
+                        }
+                    }
+                    else -> {
+                        Row(
+                            modifier =
+                                Modifier
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .padding(bottom = queueSheetState.collapsedBound + 48.dp),
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                val screenWidth = LocalConfiguration.current.screenWidthDp
+                                val thumbnailSize = (screenWidth * 0.4).dp
+                                Thumbnail(
+                                    sliderPositionProvider = { sliderPosition },
+                                    modifier = Modifier.size(thumbnailSize),
+                                    isPlayerExpanded = state.isExpanded
+                                )
+                            }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .windowInsetsPadding(
+                                            WindowInsets.systemBars.only(
+                                                WindowInsetsSides.Top
+                                            )
+                                        ),
+                            ) {
+                                Spacer(Modifier.weight(1f))
+
+                                enrichedMetadata?.let {
+                                    controlsContent(it)
+                                }
+
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                when (playerDesignStyle) {
+                    PlayerDesignStyle.V5 -> {
+                        val littleBackground = MaterialTheme.colorScheme.primaryContainer
+                        val littleTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        val displayPositionMs = sliderPosition ?: position
+                        val progressFraction =
+                            remember(displayPositionMs, duration) {
+                                if (duration <= 0L || duration == C.TIME_UNSET) 0f
+                                else (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+                            }
+                        val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                        val seekEnabled = duration > 0L && duration != C.TIME_UNSET
+
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(littleBackground),
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(progressFraction)
+                                        .align(Alignment.TopStart)
+                                        .background(progressOverlayColor),
+                            )
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .littlePlayerOverlayGestures(
+                                            seekEnabled = seekEnabled,
+                                            durationMs = duration,
+                                            progressFraction = progressFraction,
+                                            canSkipPrevious = canSkipPrevious,
+                                            canSkipNext = canSkipNext,
+                                            onSeekToPositionMs = updatedOnSliderValueChange,
+                                            onSeekFinished = updatedOnSliderValueChangeFinished,
+                                            onSkipPrevious = playerConnection::seekToPrevious,
+                                            onSkipNext = playerConnection::seekToNext,
+                                        )
+                                        .windowInsetsPadding(
+                                            WindowInsets.systemBars.only(
+                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top + WindowInsetsSides.Bottom
+                                            )
+                                        ),
+                            ) {
+                                enrichedMetadata?.let { metadata ->
+                                    LandscapeLikeBox(modifier = Modifier.fillMaxSize()) {
+                                        LittlePlayerContent(
+                                            mediaMetadata = metadata,
+                                            sliderPosition = sliderPosition,
+                                            positionMs = position,
+                                            durationMs = duration,
+                                            textColor = littleTextColor,
+                                            liked = currentSongLiked,
+                                            onCollapse = state::collapseSoft,
+                                            onToggleLike = playerConnection::toggleLike,
+                                            onExpandQueue = queueSheetState::expandSoft,
+                                            onMenuClick = {
+                                                menuState.show {
+                                                    PlayerMenu(
+                                                        mediaMetadata = metadata,
+                                                        navController = navController,
+                                                        playerBottomSheetState = state,
+                                                        onShowDetailsDialog = {
+                                                            bottomSheetPageState.show {
+                                                                ShowMediaInfo(metadata.id)
+                                                            }
+                                                        },
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    PlayerDesignStyle.V7 -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                        ) {
+                            V7PlayerBackdrop(
+                                thumbnailUrl = mediaMetadata?.thumbnailUrl,
+                                disableBlur = disableBlur,
+                                label = "v7BackdropPortrait",
+                            )
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = queueSheetState.collapsedBound)
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                            ) {
+                                enrichedMetadata?.let {
+                                    controlsContent(it)
+                                }
+
+                                Spacer(Modifier.height(24.dp))
+                            }
+                        }
+                    }
+                    else -> {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = queueSheetState.collapsedBound)
-                                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                                .nestedScroll(state.preUpPostDownNestedScrollConnection),
+                            modifier =
+                                Modifier
+                                    .windowInsetsPadding(
+                                        WindowInsets.systemBars.only(
+                                            WindowInsetsSides.Horizontal
+                                        )
+                                    )
+                                    .padding(bottom = queueSheetState.collapsedBound),
                         ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Thumbnail(
+                                    sliderPositionProvider = { sliderPosition },
+                                    modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                    isPlayerExpanded = state.isExpanded
+                                )
+                            }
+
                             enrichedMetadata?.let {
                                 controlsContent(it)
                             }
 
-                            Spacer(Modifier.height(24.dp))
+                            Spacer(Modifier.height(30.dp))
                         }
-                    }
-                } else {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier =
-                            Modifier
-                                .windowInsetsPadding(
-                                    WindowInsets.systemBars.only(
-                                        WindowInsetsSides.Horizontal
-                                    )
-                                )
-                                .padding(bottom = queueSheetState.collapsedBound),
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Thumbnail(
-                                sliderPositionProvider = { sliderPosition },
-                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                isPlayerExpanded = state.isExpanded
-                            )
-                        }
-
-                        enrichedMetadata?.let {
-                            controlsContent(it)
-                        }
-
-                        Spacer(Modifier.height(30.dp))
                     }
                 }
             }
@@ -1131,9 +1102,9 @@ fun BottomSheetPlayer(
         }
 
         val queueOnBackgroundColor = OpenTuneColors.GoldPrimary
-        val queueSurfaceColor = if (useBlackBackground) Color.Black else MaterialTheme.colorScheme.surface
+        val queueSurfaceColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
 
-        val (queueTextButtonColor, queueIconButtonColor) = when (playerButtonsStyle) {
+        val (_, _) = when (playerButtonsStyle) {
             PlayerButtonsStyle.DEFAULT -> Pair(queueOnBackgroundColor, queueSurfaceColor)
             PlayerButtonsStyle.SECONDARY -> Pair(
                 MaterialTheme.colorScheme.secondary,
@@ -1146,13 +1117,13 @@ fun BottomSheetPlayer(
             playerBottomSheetState = state,
             navController = navController,
             backgroundColor =
-                if (useBlackBackground) {
+                if (pureBlack) {
                     Color.Black
                 } else {
                     MaterialTheme.colorScheme.surfaceContainer
                 },
             onBackgroundColor = queueOnBackgroundColor,
-            TextBackgroundColor = TextBackgroundColor,
+            textBackgroundColor = textBackgroundColor,
             textButtonColor = textButtonColor,
             iconButtonColor = iconButtonColor,
             onShowLyrics = { lyricsSheetState.expandSoft() },
@@ -1564,7 +1535,7 @@ private fun Modifier.littlePlayerOverlayGestures(
     return pointerInput(seekEnabled, durationMs, canSkipPrevious, canSkipNext) {
         var lastTapUptimeMs = 0L
         var lastTapPosition: Offset? = null
-        val doubleTapTimeoutMs = viewConfiguration.doubleTapTimeoutMillis.toLong()
+        val doubleTapTimeoutMs = viewConfiguration.doubleTapTimeoutMillis
         val touchSlop = viewConfiguration.touchSlop
 
         awaitEachGesture {

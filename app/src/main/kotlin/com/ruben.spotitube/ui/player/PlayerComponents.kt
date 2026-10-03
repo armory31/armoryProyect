@@ -46,9 +46,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -1717,9 +1714,6 @@ fun PlayerControlsContent(
     )
 
     val goldColor = OpenTuneColors.GoldPrimary
-    val effectiveButtonColor = goldColor
-    val effectiveIconColor = goldColor
-    val effectiveTextBackgroundColor = goldColor
     val effectiveIcBackgroundColor = Color.Black
 
     Row(
@@ -1732,7 +1726,7 @@ fun PlayerControlsContent(
         Column(modifier = Modifier.weight(1f)) {
             PlayerTitleSection(
                 mediaMetadata = mediaMetadata,
-                textBackgroundColor = effectiveTextBackgroundColor,
+                textBackgroundColor = goldColor,
                 navController = navController,
                 state = state,
                 clipboardManager = clipboardManager,
@@ -1745,9 +1739,9 @@ fun PlayerControlsContent(
         PlayerTopActions(
             mediaMetadata = mediaMetadata,
             playerDesignStyle = playerDesignStyle,
-            textButtonColor = effectiveButtonColor,
-            iconButtonColor = effectiveIconColor,
-            textBackgroundColor = effectiveTextBackgroundColor,
+            textButtonColor = goldColor,
+            iconButtonColor = goldColor,
+            textBackgroundColor = goldColor,
             playerConnection = playerConnection,
             navController = navController,
             menuState = menuState,
@@ -1766,7 +1760,7 @@ fun PlayerControlsContent(
         position = position,
         duration = duration,
         isPlaying = isPlaying,
-        textButtonColor = effectiveButtonColor,
+        textButtonColor = goldColor,
         onValueChange = onSliderValueChange,
         onValueChangeFinished = onSliderValueChangeFinished,
         modifier = Modifier.padding(horizontal = horizontalPadding)
@@ -1778,7 +1772,7 @@ fun PlayerControlsContent(
         sliderPosition = sliderPosition,
         position = position,
         duration = duration,
-        textBackgroundColor = effectiveTextBackgroundColor,
+        textBackgroundColor = goldColor,
         showRemainingTime = playerDesignStyle == PlayerDesignStyle.V7,
         modifier = Modifier.padding(horizontal = horizontalPadding + 4.dp),
         centerContent = if (playerDesignStyle == PlayerDesignStyle.V7 && currentFormat != null) {
@@ -1794,7 +1788,7 @@ fun PlayerControlsContent(
                 }
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = effectiveTextBackgroundColor.copy(alpha = 0.12f),
+                    color = goldColor.copy(alpha = 0.12f),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -1804,13 +1798,13 @@ fun PlayerControlsContent(
                             painter = painterResource(R.drawable.graphic_eq),
                             contentDescription = null,
                             modifier = Modifier.size(14.dp),
-                            tint = effectiveTextBackgroundColor.copy(alpha = 0.8f),
+                            tint = goldColor.copy(alpha = 0.8f),
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall,
-                            color = effectiveTextBackgroundColor.copy(alpha = 0.8f),
+                            color = goldColor.copy(alpha = 0.8f),
                         )
                     }
                 }
@@ -1828,9 +1822,9 @@ fun PlayerControlsContent(
         repeatMode = repeatMode,
         canSkipPrevious = canSkipPrevious,
         canSkipNext = canSkipNext,
-        textButtonColor = effectiveButtonColor,
-        iconButtonColor = effectiveIconColor,
-        textBackgroundColor = effectiveTextBackgroundColor,
+        textButtonColor = goldColor,
+        iconButtonColor = goldColor,
+        textBackgroundColor = goldColor,
         icBackgroundColor = effectiveIcBackgroundColor,
         playPauseRoundness = playPauseRoundness,
         playerConnection = playerConnection,
@@ -1999,15 +1993,12 @@ fun PlayerBackground(
                 ) { uri ->
                     if (uri.isNotBlank()) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            val blurPx = playerCustomBlur
-                            val contrastVal = playerCustomContrast
-                            val brightnessVal = playerCustomBrightness
 
-                            val t = (1f - contrastVal) * 128f + (brightnessVal - 1f) * 255f
+                            val t = (1f - playerCustomContrast) * 128f + (playerCustomBrightness - 1f) * 255f
                             val matrix = floatArrayOf(
-                                contrastVal, 0f, 0f, 0f, t,
-                                0f, contrastVal, 0f, 0f, t,
-                                0f, 0f, contrastVal, 0f, t,
+                                playerCustomContrast, 0f, 0f, 0f, t,
+                                0f, playerCustomContrast, 0f, 0f, t,
+                                0f, 0f, playerCustomContrast, 0f, t,
                                 0f, 0f, 0f, 1f, 0f,
                             )
 
@@ -2018,7 +2009,7 @@ fun PlayerBackground(
                                 contentDescription = "Custom background",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize().let {
-                                    if (disableBlur) it else it.blur(radius = blurPx.dp)
+                                    if (disableBlur) it else it.blur(radius = playerCustomBlur.dp)
                                 },
                                 colorFilter = ColorFilter.colorMatrix(cm)
                             )

@@ -63,7 +63,7 @@ fun IntegrationPill(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) SettingsAnimations.PillPressScale else 1f,
+        targetValue = if (isPressed) SettingsAnimations.PILL_PRESS_SCALE else 1f,
         animationSpec = SettingsAnimations.pressSpring(),
         label = "pillScale",
     )

@@ -272,7 +272,7 @@ constructor(
                 currentSuggestionQueryIndex.value = 0
                 // Keep previously suggested IDs to avoid showing them again on refresh
                 // but ensure songs already in playlist are always included in the filter
-                suggestedSongIds.value = suggestedSongIds.value + currentSongs.map { it.song.id }.toSet()
+                suggestedSongIds.value += currentSongs.map { it.song.id }.toSet()
                 suggestionsCacheTimestamp.value = 0L
                 currentSuggestionPage = null
                 
@@ -360,7 +360,7 @@ constructor(
      * Mark a suggested song as added to prevent it from appearing again
      */
     fun markSuggestionAsAdded(songId: String) {
-        suggestedSongIds.value = suggestedSongIds.value + songId
+        suggestedSongIds.value += songId
         
         // Also remove from current suggestions list
         val currentSuggestions = _playlistSuggestions.value
@@ -415,7 +415,7 @@ constructor(
             }
             
             // Update suggested song IDs to avoid duplicates
-            suggestedSongIds.value = suggestedSongIds.value + song.id
+            suggestedSongIds.value += song.id
             
             true
         } catch (e: Exception) {
@@ -458,7 +458,7 @@ constructor(
 
             // Update suggested song IDs to avoid duplicates
             val newIds = filteredItems.map { item: YTItem -> item.id }.toSet()
-            suggestedSongIds.value = suggestedSongIds.value + newIds
+            suggestedSongIds.value += newIds
 
             // Update suggestions state
             val currentSuggestions = _playlistSuggestions.value
@@ -518,7 +518,7 @@ constructor(
             
             // Update suggested song IDs to avoid duplicates
             val moreIds = filteredItems.map { item: YTItem -> item.id }.toSet()
-            suggestedSongIds.value = suggestedSongIds.value + moreIds
+            suggestedSongIds.value += moreIds
             
             // Update suggestions state
             val currentSuggestions = _playlistSuggestions.value

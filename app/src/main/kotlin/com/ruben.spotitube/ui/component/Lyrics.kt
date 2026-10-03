@@ -1003,8 +1003,8 @@ fun Lyrics(
                                                             val charEndMs = wordStartMs + (wordDuration * (charIdx + 1) / chars.size)
                                                             // Add space only at the last/first character boundary with next/prev word
                                                             val charText = when {
-                                                                includeSpace && !lineIsRtl && charIdx == chars.lastIndex -> "${char} "
-                                                                includeSpace && lineIsRtl && charIdx == 0 -> " ${char}"
+                                                                includeSpace && !lineIsRtl && charIdx == chars.lastIndex -> "$char "
+                                                                includeSpace && lineIsRtl && charIdx == 0 -> " $char"
                                                                 else -> char.toString()
                                                             }
                                                             Triple(charText, charStartMs to charEndMs, word.isBackground)
@@ -1388,19 +1388,17 @@ fun Lyrics(
                                             val timeElapsed = currentPlaybackPosition - firstWordStartMs
                                             val linearProgress = (timeElapsed.toFloat() / lineDuration.toFloat()).coerceIn(0f, 1f)
 
-                                            val fillProgress = linearProgress
-
                                             val breatheValue = (timeElapsed % 3000) / 3000f
                                             val breatheEffect = (sin(breatheValue * Math.PI.toFloat() * 2f) * 0.03f).coerceIn(0f, 0.03f)
-                                            val glowIntensity = (0.3f + fillProgress * 0.7f + breatheEffect).coerceIn(0f, 1.1f)
+                                            val glowIntensity = (0.3f + linearProgress * 0.7f + breatheEffect).coerceIn(0f, 1.1f)
 
                                             val slideBrush = rtlAwareHorizontalGradient(
                                                 isRtl = lineIsRtl,
                                                 0.0f to lyricsBaseColor,
-                                                (fillProgress * 0.95f).coerceIn(0f, 1f) to lyricsBaseColor,
-                                                fillProgress to lyricsBaseColor.copy(alpha = 0.9f),
-                                                (fillProgress + 0.02f).coerceIn(0f, 1f) to lyricsBaseColor.copy(alpha = 0.5f),
-                                                (fillProgress + 0.08f).coerceIn(0f, 1f) to lyricsBaseColor.copy(alpha = 0.35f),
+                                                (linearProgress * 0.95f).coerceIn(0f, 1f) to lyricsBaseColor,
+                                                linearProgress to lyricsBaseColor.copy(alpha = 0.9f),
+                                                (linearProgress + 0.02f).coerceIn(0f, 1f) to lyricsBaseColor.copy(alpha = 0.5f),
+                                                (linearProgress + 0.08f).coerceIn(0f, 1f) to lyricsBaseColor.copy(alpha = 0.35f),
                                                 1.0f to lyricsBaseColor.copy(alpha = 0.35f)
                                             )
 

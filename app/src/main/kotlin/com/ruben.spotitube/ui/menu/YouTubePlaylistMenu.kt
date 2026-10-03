@@ -568,11 +568,8 @@ fun YouTubePlaylistMenu(
 
                                                 if (fetchedSongs.isEmpty() && newValue) {
                                                     withContext(Dispatchers.Main) {
-                                                        if (snackbarHostState != null) {
-                                                            snackbarHostState.showSnackbar(context.getString(R.string.import_failed))
-                                                        } else {
-                                                            Toast.makeText(context, context.getString(R.string.import_failed), Toast.LENGTH_SHORT).show()
-                                                        }
+                                                        snackbarHostState?.showSnackbar(context.getString(R.string.import_failed))
+                                                            ?: Toast.makeText(context, context.getString(R.string.import_failed), Toast.LENGTH_SHORT).show()
                                                     }
                                                     return@launch
                                                 }
@@ -605,11 +602,8 @@ fun YouTubePlaylistMenu(
 
                                                 if (newValue) {
                                                     withContext(Dispatchers.Main) {
-                                                        if (snackbarHostState != null) {
-                                                            snackbarHostState.showSnackbar(context.getString(R.string.playlist_synced))
-                                                        } else {
-                                                            Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
-                                                        }
+                                                        snackbarHostState?.showSnackbar(context.getString(R.string.playlist_synced))
+                                                            ?: Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
                                             } else {
@@ -621,11 +615,8 @@ fun YouTubePlaylistMenu(
                                                 if (newValue) {
                                                     syncUtils.syncAutoSyncPlaylists()
                                                     withContext(Dispatchers.Main) {
-                                                        if (snackbarHostState != null) {
-                                                            snackbarHostState.showSnackbar(context.getString(R.string.playlist_synced))
-                                                        } else {
-                                                            Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
-                                                        }
+                                                        snackbarHostState?.showSnackbar(context.getString(R.string.playlist_synced))
+                                                            ?: Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
                                             }
@@ -633,11 +624,8 @@ fun YouTubePlaylistMenu(
                                             e.printStackTrace()
                                             withContext(Dispatchers.Main) {
                                                 val errorMsg = context.getString(R.string.import_failed) + ": ${e.message ?: "Unknown error"}"
-                                                if (snackbarHostState != null) {
-                                                    snackbarHostState.showSnackbar(errorMsg)
-                                                } else {
-                                                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
-                                                }
+                                                snackbarHostState?.showSnackbar(errorMsg)
+                                                    ?: Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                                             }
                                         }
                                     }

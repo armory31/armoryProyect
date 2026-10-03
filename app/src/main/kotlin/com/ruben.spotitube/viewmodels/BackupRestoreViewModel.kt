@@ -73,7 +73,7 @@ private val CLOUD_BACKUP_ENABLED_KEY = booleanPreferencesKey("cloud_backup_enabl
 
 internal fun readCsvRecords(reader: Reader): Sequence<List<String>> =
     sequence {
-        val pushbackReader = if (reader is PushbackReader) reader else PushbackReader(reader, 1)
+        val pushbackReader = reader as? PushbackReader ?: PushbackReader(reader, 1)
         val record = ArrayList<String>(8)
         val field = StringBuilder(64)
         var inQuotes = false
@@ -579,7 +579,7 @@ class BackupRestoreViewModel @Inject constructor(
                             out.add(
                                 Song(
                                     song = SongEntity(id = "", title = title),
-                                    artists = if (artists.isEmpty()) listOf(ArtistEntity("", "")) else artists,
+                                    artists = artists.ifEmpty { listOf(ArtistEntity("", "")) },
                                 )
                             )
                         }

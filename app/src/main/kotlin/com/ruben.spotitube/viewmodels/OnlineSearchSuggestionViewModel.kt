@@ -73,9 +73,9 @@ constructor(
                     if (query.isEmpty()) {
                         flowOf<SearchSuggestions?>(null)
                     } else {
-                        flow<SearchSuggestions?> {
-                            emit(null) // clear stale suggestions immediately
-                            emit(YouTube.searchSuggestions(query).getOrNull())
+                        flow{
+                            emit(value = null) // clear stale suggestions immediately
+                            emit(value = YouTube.searchSuggestions(query).getOrNull())
                         }
                     }
                 }.collect { result ->

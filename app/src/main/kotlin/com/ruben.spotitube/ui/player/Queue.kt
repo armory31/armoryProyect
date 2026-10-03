@@ -121,7 +121,7 @@ fun Queue(
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     onBackgroundColor: Color,
-    TextBackgroundColor: Color,
+    textBackgroundColor: Color,
     textButtonColor: Color,
     iconButtonColor: Color,
     onShowLyrics: () -> Unit = {},
@@ -206,7 +206,7 @@ fun Queue(
                     QueueCollapsedContentV2(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         textButtonColor = textButtonColor,
                         iconButtonColor = iconButtonColor,
                         sleepTimerEnabled = sleepTimerEnabled,
@@ -247,7 +247,7 @@ fun Queue(
                     QueueCollapsedContentV3(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         sleepTimerEnabled = sleepTimerEnabled,
                         sleepTimerTimeLeft = sleepTimerTimeLeft,
                         onExpandQueue = { state.expandSoft() },
@@ -283,7 +283,7 @@ fun Queue(
                     QueueCollapsedContentV3(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         sleepTimerEnabled = sleepTimerEnabled,
                         sleepTimerTimeLeft = sleepTimerTimeLeft,
                         onExpandQueue = { state.expandSoft() },
@@ -319,7 +319,7 @@ fun Queue(
                     QueueCollapsedContentV4(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         textButtonColor = textButtonColor,
                         iconButtonColor = iconButtonColor,
                         sleepTimerEnabled = sleepTimerEnabled,
@@ -341,7 +341,7 @@ fun Queue(
                     QueueCollapsedContentV1(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         sleepTimerEnabled = sleepTimerEnabled,
                         sleepTimerTimeLeft = sleepTimerTimeLeft,
                         onExpandQueue = { state.expandSoft() },
@@ -360,7 +360,7 @@ fun Queue(
                     QueueCollapsedContentV4(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         textButtonColor = textButtonColor,
                         iconButtonColor = iconButtonColor,
                         sleepTimerEnabled = sleepTimerEnabled,
@@ -388,7 +388,7 @@ fun Queue(
                     QueueCollapsedContentV7(
                         showCodecOnPlayer = showCodecOnPlayer,
                         currentFormat = currentFormat,
-                        textBackgroundColor = TextBackgroundColor,
+                        textBackgroundColor = textBackgroundColor,
                         onExpandQueue = { state.expandSoft() },
                         onShowLyrics = onShowLyrics,
                         onDeviceClick = {

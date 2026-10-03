@@ -38,7 +38,7 @@ class LibraryStateHolder @Inject constructor(
     val libraryDto: StateFlow<UserLibraryDto?> = authManager.isLoggedIn
         .flatMapLatest { loggedIn ->
             if (loggedIn) {
-                flow<UserLibraryDto?> {
+                flow{
                     while (true) {
                         emit(syncManager.getUserLibrary())
                         kotlinx.coroutines.delay(300000) // Poll every 5 mins or use listeners

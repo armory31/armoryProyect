@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SettingsQuickActionsSection(
     actions: List<SettingsQuickAction>,
-    columns: Int = SettingsDimensions.CompactColumns,
+    columns: Int = SettingsDimensions.COMPACT_COLUMNS,
     modifier: Modifier = Modifier,
 ) {
     if (actions.isEmpty()) return
@@ -81,12 +81,12 @@ fun QuickActionCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) SettingsAnimations.TilePressScale else 1f,
+        targetValue = if (isPressed) SettingsAnimations.TILE_PRESS_SCALE else 1f,
         animationSpec = SettingsAnimations.pressSpring(),
         label = "tileScale",
     )
     val iconRotation by animateFloatAsState(
-        targetValue = if (isPressed) SettingsAnimations.IconPressRotation else 0f,
+        targetValue = if (isPressed) SettingsAnimations.ICON_PRESS_ROTATION else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "iconRotation",
     )
@@ -94,7 +94,7 @@ fun QuickActionCard(
     Surface(
         modifier = modifier
             .scale(scale)
-            .aspectRatio(SettingsDimensions.QuickActionTileAspectRatio),
+            .aspectRatio(SettingsDimensions.QUICK_ACTION_TILE_ASPECT_RATIO),
         shape = RoundedCornerShape(SettingsDimensions.QuickActionCardCornerRadius),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         onClick = action.onClick,

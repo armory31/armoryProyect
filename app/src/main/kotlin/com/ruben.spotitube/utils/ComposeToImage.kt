@@ -666,8 +666,7 @@ object ComposeToImage {
         if (config.showCoverArt && coverArt != null) {
             val artSize   = size * 0.4f
             val artLeft   = (size - artSize) / 2f
-            val artTop    = padding
-            val artRect   = RectF(artLeft, artTop, artLeft + artSize, artTop + artSize)
+            val artRect   = RectF(artLeft, padding, artLeft + artSize, padding + artSize)
             val artCorner = cardSize * 0.04f
             val path = Path().apply { addRoundRect(artRect, artCorner, artCorner, Path.Direction.CW) }
             canvas.withClip(path) { drawBitmap(coverArt, null, artRect, null) }

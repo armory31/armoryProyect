@@ -516,10 +516,9 @@ object Updater {
             }.getOrNull()
 
             if (networkResult == null) {
-                val fallback = cachedReleases
-                if (fallback != null) {
+                if (cachedReleases != null) {
                     lastCheckTime = now
-                    return@runCatching fallback
+                    return@runCatching cachedReleases
                 }
                 throw IllegalStateException("Failed to fetch releases")
             }
@@ -530,10 +529,9 @@ object Updater {
                         settings[GitHubReleasesLastCheckedAtKey] = now
                         networkResult.etag?.let { settings[GitHubReleasesEtagKey] = it }
                     }
-                    val fallback = cachedReleases
-                    if (fallback != null) {
+                    if (cachedReleases != null) {
                         lastCheckTime = now
-                        return@runCatching fallback
+                        return@runCatching cachedReleases
                     }
                     throw IllegalStateException("Release cache is empty")
                 }
@@ -558,10 +556,9 @@ object Updater {
                 }
 
                 else -> {
-                    val fallback = cachedReleases
-                    if (fallback != null) {
+                    if (cachedReleases != null) {
                         lastCheckTime = now
-                        fallback
+                        cachedReleases
                     } else {
                         throw IllegalStateException("Failed to fetch releases: HTTP ${networkResult.status.value}")
                     }

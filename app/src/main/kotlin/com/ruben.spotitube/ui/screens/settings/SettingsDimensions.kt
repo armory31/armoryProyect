@@ -19,7 +19,6 @@ object SettingsDimensions {
     val RowIconCornerRadius = 12.dp
 
     val ScreenHorizontalPadding = 16.dp
-    val CardInternalPadding = 16.dp
     val SectionSpacing = 14.dp
     val RowVerticalPadding = 14.dp
     val RowHorizontalPadding = 16.dp
@@ -42,28 +41,25 @@ object SettingsDimensions {
     val SectionHeaderBottomPadding = 6.dp
     val SectionHeaderHorizontalPadding = 20.dp
 
-    val QuickActionTileAspectRatio = 1.4f
+    const val QUICK_ACTION_TILE_ASPECT_RATIO = 1.4f
 
-    val CompactColumns = 2
-    val MediumColumns = 4
-    val ExpandedColumns = 4
+    const val COMPACT_COLUMNS = 2
+    const val MEDIUM_COLUMNS = 4
+    const val EXPANDED_COLUMNS = 4
 
-    val MediumPaneLeftWeight = 0.42f
-    val MediumPaneRightWeight = 0.58f
+    const val MEDIUM_PANE_LEFT_WEIGHT = 0.42f
+    const val MEDIUM_PANE_RIGHT_WEIGHT = 0.58f
     val ExpandedListPaneWidth = 380.dp
 }
 
 object SettingsAnimations {
-    val PressScale = 0.97f
-    val TilePressScale = 0.94f
-    val PillPressScale = 0.95f
-    val IconPressRotation = 5f
+    const val PRESS_SCALE = 0.97f
+    const val TILE_PRESS_SCALE = 0.94f
+    const val PILL_PRESS_SCALE = 0.95f
+    const val ICON_PRESS_ROTATION = 5f
     val PillPressLift = (-2).dp
-
-    val EntranceFadeDuration = 300
-    val EntranceSlideDuration = 350
-    val StaggerDelayPerItem = 80
-    val ExitFadeDuration = 200
+    const val ENTRANCE_SLIDE_DURATION = 350
+    const val STAGGER_DELAY_PER_ITEM = 80
 
     fun <T> pressSpring() = spring<T>(stiffness = Spring.StiffnessHigh)
     fun <T> entranceSpring() = spring<T>(

@@ -23,8 +23,6 @@ import com.ruben.spotitube.innertube.models.MusicCarouselShelfRenderer
 import com.ruben.spotitube.innertube.models.MusicShelfRenderer
 import com.ruben.spotitube.innertube.models.PlaylistItem
 import com.ruben.spotitube.innertube.models.SearchSuggestions
-import com.ruben.spotitube.innertube.models.Run
-import com.ruben.spotitube.innertube.models.Runs
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.models.WatchEndpoint
 import com.ruben.spotitube.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_ATV
@@ -67,11 +65,8 @@ import com.ruben.spotitube.innertube.pages.SearchResult
 import com.ruben.spotitube.innertube.pages.SearchSuggestionPage
 import com.ruben.spotitube.innertube.pages.SearchSummary
 import com.ruben.spotitube.innertube.pages.SearchSummaryPage
-import com.ruben.spotitube.innertube.utils.PoTokenGenerator
 import io.ktor.client.call.body
 import io.ktor.client.statement.bodyAsText
-
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull

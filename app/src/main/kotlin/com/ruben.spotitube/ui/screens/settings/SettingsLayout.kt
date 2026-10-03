@@ -99,9 +99,9 @@ fun AdaptiveSettingsLayout(
     }
 
     val quickActionColumns = when (layoutMode) {
-        SettingsLayoutMode.COMPACT -> SettingsDimensions.CompactColumns
-        SettingsLayoutMode.MEDIUM -> SettingsDimensions.MediumColumns
-        SettingsLayoutMode.EXPANDED -> SettingsDimensions.ExpandedColumns
+        SettingsLayoutMode.COMPACT -> SettingsDimensions.COMPACT_COLUMNS
+        SettingsLayoutMode.MEDIUM -> SettingsDimensions.MEDIUM_COLUMNS
+        SettingsLayoutMode.EXPANDED -> SettingsDimensions.EXPANDED_COLUMNS
     }
 
     when (layoutMode) {
@@ -296,14 +296,14 @@ private fun CompactSettingsLayout(
                     visible = categoriesVisible,
                     enter = fadeIn(
                         tween(
-                            SettingsAnimations.EntranceSlideDuration,
-                            delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                            SettingsAnimations.ENTRANCE_SLIDE_DURATION,
+                            delayMillis = index * SettingsAnimations.STAGGER_DELAY_PER_ITEM,
                         )
                     ) + slideInVertically(
                         initialOffsetY = { it / 5 },
                         animationSpec = tween(
-                            SettingsAnimations.EntranceSlideDuration,
-                            delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                            SettingsAnimations.ENTRANCE_SLIDE_DURATION,
+                            delayMillis = index * SettingsAnimations.STAGGER_DELAY_PER_ITEM,
                         ),
                     ),
                 ) {
@@ -347,7 +347,7 @@ private fun MediumSettingsLayout(
     ) {
         LazyColumn(
             modifier = Modifier
-                .weight(SettingsDimensions.MediumPaneLeftWeight)
+                .weight(SettingsDimensions.MEDIUM_PANE_LEFT_WEIGHT)
                 .fillMaxHeight(),
             contentPadding = PaddingValues(top = topPadding, bottom = 32.dp),
         ) {
@@ -425,7 +425,7 @@ private fun MediumSettingsLayout(
 
         LazyColumn(
             modifier = Modifier
-                .weight(SettingsDimensions.MediumPaneRightWeight)
+                .weight(SettingsDimensions.MEDIUM_PANE_RIGHT_WEIGHT)
                 .fillMaxHeight(),
             contentPadding = PaddingValues(top = topPadding, bottom = 32.dp),
         ) {
@@ -452,14 +452,14 @@ private fun MediumSettingsLayout(
                         visible = categoriesVisible,
                         enter = fadeIn(
                             tween(
-                                SettingsAnimations.EntranceSlideDuration,
-                                delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                                SettingsAnimations.ENTRANCE_SLIDE_DURATION,
+                                delayMillis = index * SettingsAnimations.STAGGER_DELAY_PER_ITEM,
                             )
                         ) + slideInVertically(
                             initialOffsetY = { it / 5 },
                             animationSpec = tween(
-                                SettingsAnimations.EntranceSlideDuration,
-                                delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                                SettingsAnimations.ENTRANCE_SLIDE_DURATION,
+                                delayMillis = index * SettingsAnimations.STAGGER_DELAY_PER_ITEM,
                             ),
                         ),
                     ) {
@@ -607,14 +607,14 @@ private fun ExpandedSettingsLayout(
                         visible = categoriesVisible,
                         enter = fadeIn(
                             tween(
-                                SettingsAnimations.EntranceSlideDuration,
-                                delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                                SettingsAnimations.ENTRANCE_SLIDE_DURATION,
+                                delayMillis = index * SettingsAnimations.STAGGER_DELAY_PER_ITEM,
                             )
                         ) + slideInVertically(
                             initialOffsetY = { it / 5 },
                             animationSpec = tween(
-                                SettingsAnimations.EntranceSlideDuration,
-                                delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                                SettingsAnimations.ENTRANCE_SLIDE_DURATION,
+                                delayMillis = index * SettingsAnimations.STAGGER_DELAY_PER_ITEM,
                             ),
                         ),
                     ) {

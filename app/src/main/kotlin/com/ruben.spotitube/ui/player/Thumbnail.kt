@@ -346,14 +346,11 @@ fun Thumbnail(
         // Fallback to player's current item if mediaMetadata is null,
         // but prefer mediaMetadata for immediate updates during crossfade.
         val metadata = mediaMetadata
-        if (metadata != null) {
-            // Use extension to convert metadata to a proper MediaItem with all fields (uri, artwork, tag)
-            metadata.toMediaItem()
-        } else {
-            try {
+        metadata?.// Use extension to convert metadata to a proper MediaItem with all fields (uri, artwork, tag)
+        toMediaItem()
+            ?: try {
                 playerConnection.player.currentMediaItem
             } catch (e: Exception) { null }
-        }
     }
 
     val thumbnailPages = buildList {
@@ -409,9 +406,8 @@ fun Thumbnail(
     }
 
     LaunchedEffect(playerConnection.player.currentMediaItemIndex, currentMediaItem?.mediaId) {
-        val index = currentMediaIndex
-        if (index >= 0 && index != currentItem) {
-            thumbnailLazyGridState.scrollToItem(index)
+        if (currentMediaIndex >= 0 && currentMediaIndex != currentItem) {
+            thumbnailLazyGridState.scrollToItem(currentMediaIndex)
         }
     }
 

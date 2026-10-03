@@ -27,9 +27,8 @@ object TranslatorLanguages {
             for (i in 0 until arr.length()) {
                 val o = arr.opt(i)
                 if (o is String) {
-                    val name = o
-                    val code = name.uppercase().replace(' ', '_')
-                    out.add(TranslatorLang(name, code))
+                    val code = o.uppercase().replace(' ', '_')
+                    out.add(TranslatorLang(o, code))
                 } else {
                     val obj = arr.optJSONObject(i) ?: continue
                     val name = obj.optString("name", obj.optString("label", ""))

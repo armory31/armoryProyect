@@ -487,7 +487,7 @@ fun YearInMusicScreen(
 // awaitNextPreDraw
 // ─────────────────────────────────────────────────────────────────────────────
 
-private suspend fun awaitNextPreDraw(view: View) = suspendCancellableCoroutine<Unit> { cont ->
+private suspend fun awaitNextPreDraw(view: View) = suspendCancellableCoroutine{ cont ->
     val vto = view.viewTreeObserver
     val listener = object : ViewTreeObserver.OnPreDrawListener {
         override fun onPreDraw(): Boolean {
