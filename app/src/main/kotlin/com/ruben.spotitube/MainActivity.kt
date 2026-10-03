@@ -39,10 +39,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -607,12 +609,14 @@ class MainActivity : ComponentActivity() {
                             !active &&
                             route?.startsWith("search/") != true
 
-                    val navigationBarHeight = if (canShowNav && !useRail) 68.dp else 0.dp
+                    val systemNavPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    val navBarHeight = if (canShowNav && !useRail) 88.dp else 0.dp
+                    val dynamicCollapsedBound = 76.dp + navBarHeight + systemNavPadding
 
                     val playerBottomSheetState =
                         rememberBottomSheetState(
                             dismissedBound = 0.dp,
-                            collapsedBound = 200.dp,
+                            collapsedBound = dynamicCollapsedBound,
                             expandedBound = maxHeight,
                         )
 

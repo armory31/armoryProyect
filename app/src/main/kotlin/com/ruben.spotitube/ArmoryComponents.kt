@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Whatshot
@@ -46,6 +47,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -60,10 +62,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -325,19 +331,17 @@ fun MiniPlayer(
             .height(68.dp)
             .graphicsLayer(scaleX = scale, scaleY = scale)
             .clip(RoundedCornerShape(16.dp))
-            .background(ArmoryColors.ObsidianSoft)
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(Color.White.copy(alpha = 0.15f), Color.Transparent)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
+            .background(brush = ArmoryColors.JetBlack)
             .background(
                 Brush.horizontalGradient(
-                    listOf(dynamicColor.copy(alpha = 0.3f), Color.Transparent),
+                    listOf(dynamicColor.copy(alpha = 0.35f), Color.Transparent),
                     endX = 500f
                 )
+            )
+            .border(
+                width = 2.dp,
+                brush = ArmoryColors.Gold,
+                shape = RoundedCornerShape(16.dp)
             )
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -382,27 +386,39 @@ fun MiniPlayer(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+                IconButton(onClick = onPrevious) {
+                    Icon(
+                        painter = painterResource(R.drawable.skip_previous),
+                        contentDescription = null,
+                        tint = ArmoryColors.Silver1,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+
                 if (playerStatus == PlayerStatus.LOADING) {
                     CircularProgressIndicator(
-                        color = ArmoryColors.GoldPrimary,
+                        color = ArmoryColors.Gold1,
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
                     IconButton(onClick = onToggle) {
                         Icon(
-                            if (playerStatus == PlayerStatus.PLAYING) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                            null,
-                            tint = ArmoryColors.GoldPrimary,
+                            painter = painterResource(
+                                if (playerStatus == PlayerStatus.PLAYING) R.drawable.pause else R.drawable.play
+                            ),
+                            contentDescription = null,
+                            tint = ArmoryColors.Gold1,
                             modifier = Modifier.size(32.dp)
                         )
                     }
                 }
+
                 IconButton(onClick = onNext) {
                     Icon(
-                        Icons.Filled.SkipNext,
-                        null,
-                        tint = ArmoryColors.Silver3.copy(alpha = 0.7f),
+                        painter = painterResource(R.drawable.skip_next),
+                        contentDescription = null,
+                        tint = ArmoryColors.Silver1,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -544,19 +560,16 @@ fun OpenTuneNavigationBar(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        color = ArmoryColors.ObsidianSoft,
+        color = Color.Transparent,
         shape = RoundedCornerShape(26.dp),
         tonalElevation = 8.dp,
         modifier = modifier
             .height(62.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(brush = ArmoryColors.JetBlack)
             .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.12f),
-                        Color.Transparent
-                    )
-                ),
+                width = 2.dp,
+                brush = ArmoryColors.Gold,
                 shape = RoundedCornerShape(26.dp)
             )
     ) {
@@ -578,23 +591,36 @@ fun OpenTuneNavigationBar(
                     onClick = { onTabChange(idx) },
                     icon = {
                         Icon(
-                            icon,
-                            null,
-                            tint = if (isSelected) ArmoryColors.Gold2 else ArmoryColors.Silver3.copy(alpha = 0.8f),
-                            modifier = Modifier.size(24.dp)
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                                .drawWithCache {
+                                    onDrawWithContent {
+                                        drawContent()
+                                        drawRect(
+                                            brush = if (isSelected) ArmoryColors.Gold else ArmoryColors.Silver,
+                                            blendMode = BlendMode.SrcIn
+                                        )
+                                    }
+                                }
                         )
                     },
                     label = {
                         Text(
-                            label,
-                            color = if (isSelected) ArmoryColors.Gold2 else ArmoryColors.Silver3.copy(alpha = 0.8f),
-                            fontSize = 11.sp,
-                            fontFamily = PremiumBodyFont,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            text = label,
+                            style = TextStyle(
+                                brush = if (isSelected) ArmoryColors.Gold else ArmoryColors.Silver,
+                                fontSize = 11.sp,
+                                fontFamily = PremiumBodyFont,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            )
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = ArmoryColors.GoldPrimary.copy(alpha = 0.12f)
+                        indicatorColor = Color.Transparent
                     )
                 )
             }

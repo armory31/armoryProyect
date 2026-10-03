@@ -46,6 +46,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -91,6 +94,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.OpenTuneColors
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.PlayerBackgroundStyle
@@ -436,7 +440,7 @@ fun PlayerTopActions(
                         }
                     },
                     shape = RoundedCornerShape(14.dp),
-                    color = OpenTuneColors.GoldPrimary.copy(alpha = 0.12f),
+                    color = ArmoryColors.Silver3.copy(alpha = 0.18f),
                     modifier = Modifier
                         .height(44.dp)
                         .width(44.dp)
@@ -445,7 +449,7 @@ fun PlayerTopActions(
                         Icon(
                             painter = painterResource(R.drawable.more_horiz),
                             contentDescription = null,
-                            tint = OpenTuneColors.GoldPrimary,
+                            tint = ArmoryColors.Silver3,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -1133,151 +1137,134 @@ fun PlayerPlaybackControls(
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            onClick = {
-                                playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
-                            },
-                            shape = RoundedCornerShape(smallRadius),
-                            color = textBackgroundColor.copy(
-                                alpha = if (shuffleModeEnabled) 0.2f else 0.08f
-                            ),
-                            modifier = Modifier.size(small)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.shuffle),
-                                    contentDescription = null,
-                                    tint = textBackgroundColor.copy(
-                                        alpha = if (shuffleModeEnabled) 1f else 0.6f
-                                    ),
-                                    modifier = Modifier.size(smallIcon)
+                        Box(
+                            modifier = Modifier
+                                .size(small)
+                                .clip(RoundedCornerShape(smallRadius))
+                                .background(
+                                    brush = ArmoryColors.Copper,
+                                    alpha = if (shuffleModeEnabled) 1f else 0.75f
                                 )
-                            }
+                                .clickable {
+                                    playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.shuffle),
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(smallIcon)
+                            )
                         }
 
                         Spacer(modifier = Modifier.width(gap))
 
-                        Surface(
-                            onClick = { playerConnection.seekToPrevious() },
-                            enabled = canSkipPrevious,
-                            shape = RoundedCornerShape(largeRadius),
-                            color = OpenTuneColors.GoldPrimary.copy(alpha = 0.15f),
-                            modifier = Modifier.size(large)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.skip_previous),
-                                    contentDescription = null,
-                                    tint = OpenTuneColors.GoldPrimary.copy(
-                                        alpha = if (canSkipPrevious) 1f else 0.4f
-                                    ),
-                                    modifier = Modifier.size(largeIcon)
+                        Box(
+                            modifier = Modifier
+                                .size(large)
+                                .clip(RoundedCornerShape(largeRadius))
+                                .background(
+                                    brush = ArmoryColors.Silver,
+                                    alpha = if (canSkipPrevious) 1f else 0.6f
                                 )
-                            }
+                                .clickable(enabled = canSkipPrevious) { playerConnection.seekToPrevious() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.skip_previous),
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(largeIcon)
+                            )
                         }
                     }
 
-                    Surface(
-                        onClick = {
-                            if (playbackState == STATE_ENDED) {
-                                playerConnection.player.seekTo(0, 0)
-                                playerConnection.player.playWhenReady = true
-                            } else {
-                                playerConnection.player.togglePlayPause()
-                            }
-                        },
-                        shape = RoundedCornerShape(28.dp),
-                        color = textButtonColor,
+                    Box(
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .size(88.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(brush = ArmoryColors.Gold)
+                            .clickable {
+                                if (playbackState == STATE_ENDED) {
+                                    playerConnection.player.seekTo(0, 0)
+                                    playerConnection.player.playWhenReady = true
+                                } else {
+                                    playerConnection.player.togglePlayPause()
+                                }
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isLoading) {
-                                CircularWavyProgressIndicator(
-                                    modifier = Modifier.size(40.dp),
-                                    color = icBackgroundColor,
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(
-                                        when {
-                                            playbackState == STATE_ENDED -> R.drawable.replay
-                                            isPlaying -> R.drawable.pause
-                                            else -> R.drawable.play
-                                        }
-                                    ),
-                                    contentDescription = null,
-                                    tint = icBackgroundColor,
-                                    modifier = Modifier.size(44.dp)
-                                )
-                            }
+                        if (isLoading) {
+                            CircularWavyProgressIndicator(
+                                modifier = Modifier.size(40.dp),
+                                color = Color.Black,
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(
+                                    when {
+                                        playbackState == STATE_ENDED -> R.drawable.replay
+                                        isPlaying -> R.drawable.pause
+                                        else -> R.drawable.play
+                                    }
+                                ),
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(44.dp)
+                            )
                         }
                     }
+
                     Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            onClick = { playerConnection.seekToNext() },
-                            enabled = canSkipNext,
-                            shape = RoundedCornerShape(largeRadius),
-                            color = OpenTuneColors.GoldPrimary.copy(alpha = 0.15f),
-                            modifier = Modifier.size(large)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.skip_next),
-                                    contentDescription = null,
-                                    tint = OpenTuneColors.GoldPrimary.copy(
-                                        alpha = if (canSkipNext) 1f else 0.4f
-                                    ),
-                                    modifier = Modifier.size(largeIcon)
+                        Box(
+                            modifier = Modifier
+                                .size(large)
+                                .clip(RoundedCornerShape(largeRadius))
+                                .background(
+                                    brush = ArmoryColors.Silver,
+                                    alpha = if (canSkipNext) 1f else 0.6f
                                 )
-                            }
+                                .clickable(enabled = canSkipNext) { playerConnection.seekToNext() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.skip_next),
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(largeIcon)
+                            )
                         }
 
                         Spacer(modifier = Modifier.width(gap))
 
-                        Surface(
-                            onClick = { playerConnection.player.toggleRepeatMode() },
-                            shape = RoundedCornerShape(smallRadius),
-                            color = textBackgroundColor.copy(
-                                alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 0.2f else 0.08f
-                            ),
-                            modifier = Modifier.size(small)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(
-                                        when (repeatMode) {
-                                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
-                                            else -> R.drawable.repeat
-                                        }
-                                    ),
-                                    contentDescription = null,
-                                    tint = textBackgroundColor.copy(
-                                        alpha = if (repeatMode == Player.REPEAT_MODE_OFF) 0.6f else 1f
-                                    ),
-                                    modifier = Modifier.size(smallIcon)
+                        Box(
+                            modifier = Modifier
+                                .size(small)
+                                .clip(RoundedCornerShape(smallRadius))
+                                .background(
+                                    brush = ArmoryColors.Copper,
+                                    alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 1f else 0.75f
                                 )
-                            }
+                                .clickable { playerConnection.player.toggleRepeatMode() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    when (repeatMode) {
+                                        Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                        else -> R.drawable.repeat
+                                    }
+                                ),
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(smallIcon)
+                            )
                         }
                     }
                 }
