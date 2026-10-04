@@ -14,8 +14,8 @@ import com.ruben.spotitube.innertube.models.Run
 object PageHelper {
     fun extractRuns(columns: List<FlexColumn>, typeLike: String): List<Run> {
         val filteredRuns = mutableListOf<Run>()
-        for (column in columns) {
-            val runs = column.musicResponsiveListItemFlexColumnRenderer.text?.runs
+        for ((musicResponsiveListItemFlexColumnRenderer) in columns) {
+            val runs = musicResponsiveListItemFlexColumnRenderer.text?.runs
                 ?: continue
 
             for (run in runs) {

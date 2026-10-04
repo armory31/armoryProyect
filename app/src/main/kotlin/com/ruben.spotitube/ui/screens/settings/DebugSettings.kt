@@ -8,6 +8,7 @@
 
 package com.ruben.spotitube.ui.screens.settings
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.text.format.DateFormat
 import android.util.Log
@@ -18,7 +19,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +45,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -54,9 +53,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -64,6 +60,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -102,8 +100,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DebugSettings(
     navController: NavController
@@ -228,7 +226,7 @@ private fun DebugTimestampItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 private fun LogViewerPanel() {
     val allLogs by GlobalLog.logs.collectAsState()
@@ -510,11 +508,6 @@ private fun EmptyLogPlaceholder() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(R.drawable.anime_blank),
-                contentDescription = null,
-                modifier = Modifier.size(120.dp)
-            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.no_logs),
@@ -647,10 +640,10 @@ private fun NerdStatsSection(playerConnection: com.ruben.spotitube.playback.Play
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val player = playerConnection.player
 
-    var bufferPercentage by remember { mutableStateOf(0) }
-    var bufferedPosition by remember { mutableStateOf(0L) }
-    var currentPosition by remember { mutableStateOf(0L) }
-    var playbackSpeed by remember { mutableStateOf(1.0f) }
+    var bufferPercentage by remember { mutableIntStateOf(0) }
+    var bufferedPosition by remember { mutableLongStateOf(0L) }
+    var currentPosition by remember { mutableLongStateOf(0L) }
+    var playbackSpeed by remember { androidx.compose.runtime.mutableFloatStateOf(1.0f) }
 
     LaunchedEffect(Unit) {
         while (isActive) {
@@ -658,7 +651,7 @@ private fun NerdStatsSection(playerConnection: com.ruben.spotitube.playback.Play
             bufferedPosition = player.bufferedPosition
             currentPosition = player.currentPosition
             playbackSpeed = player.playbackParameters.speed
-            delay(500)
+            delay(500.milliseconds)
         }
     }
 

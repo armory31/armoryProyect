@@ -58,6 +58,7 @@ import java.util.Date
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MusicDatabase"
 private const val CURRENT_VERSION = 28
@@ -90,7 +91,7 @@ class MusicDatabase(
         }
 
     suspend fun awaitIdle(timeoutMs: Long = 5_000L) {
-        withTimeout(timeoutMs) {
+        withTimeout(timeoutMs.milliseconds) {
             awaitExecutor(delegate.queryExecutor)
             awaitExecutor(delegate.transactionExecutor)
         }

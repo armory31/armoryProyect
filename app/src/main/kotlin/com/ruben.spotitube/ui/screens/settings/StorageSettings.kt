@@ -23,7 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +33,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,7 +46,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
@@ -71,8 +70,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StorageSettings(
     navController: NavController,
@@ -109,16 +108,16 @@ fun StorageSettings(
     var clearCanvasCacheDialog by remember { mutableStateOf(false) }
 
     var imageCacheSize by remember {
-        mutableStateOf(imageDiskCache.size)
+        mutableLongStateOf(imageDiskCache.size)
     }
     var playerCacheSize by remember {
-        mutableStateOf(0L)
+        mutableLongStateOf(0L)
     }
     var downloadCacheSize by remember {
-        mutableStateOf(0L)
+        mutableLongStateOf(0L)
     }
     var canvasCacheSize by remember {
-        mutableStateOf(CanvasArtworkPlaybackCache.size())
+        androidx.compose.runtime.mutableIntStateOf(CanvasArtworkPlaybackCache.size())
     }
     val imageCacheProgress by animateFloatAsState(
         targetValue = if (imageDiskCache.maxSize > 0) {
@@ -171,13 +170,13 @@ fun StorageSettings(
 
     LaunchedEffect(imageDiskCache) {
         while (isActive) {
-            delay(500)
+            delay(500.milliseconds)
             imageCacheSize = imageDiskCache.size
         }
     }
     LaunchedEffect(playerCache, playerCacheDir) {
         while (isActive) {
-            delay(500)
+            delay(500.milliseconds)
             playerCacheSize =
                 withContext(Dispatchers.IO) {
                     val cacheSpace = tryOrNull { playerCache.cacheSpace } ?: 0L
@@ -187,7 +186,7 @@ fun StorageSettings(
     }
     LaunchedEffect(downloadCache, downloadCacheDir) {
         while (isActive) {
-            delay(500)
+            delay(500.milliseconds)
             downloadCacheSize =
                 withContext(Dispatchers.IO) {
                     val cacheSpace = tryOrNull { downloadCache.cacheSpace } ?: 0L
@@ -197,7 +196,7 @@ fun StorageSettings(
     }
     LaunchedEffect(Unit) {
         while (isActive) {
-            delay(500)
+            delay(500.milliseconds)
             canvasCacheSize = CanvasArtworkPlaybackCache.size()
         }
     }
@@ -467,13 +466,13 @@ fun CacheCard(
                 Spacer(Modifier.padding(top = 8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     LinearProgressIndicator(
-                        progress = progress,
+                        progress = { progress },
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp),
+                                                .weight(1f)
+                                                .padding(end = 8.dp),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        strokeCap = StrokeCap.Round
+                        strokeCap = StrokeCap.Round,
                     )
                     // percent label
                     Text(

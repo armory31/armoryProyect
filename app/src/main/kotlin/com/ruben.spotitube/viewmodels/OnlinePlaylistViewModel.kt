@@ -40,7 +40,7 @@ import javax.inject.Inject
 class OnlinePlaylistViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val database: MusicDatabase,
-    private val libraryStateHolder: LibraryStateHolder,
+    libraryStateHolder: LibraryStateHolder,
     private val syncManager: SyncManager
 ) : ViewModel() {
     private val playlistId = savedStateHandle.get<String>("playlistId")!!
@@ -87,7 +87,7 @@ class OnlinePlaylistViewModel @Inject constructor(
     fun loadMoreSongs() {
         if (_isLoadingMore.value) return // Prevent multiple concurrent requests
         
-        continuation?.let {
+        continuation?.let { it ->
             viewModelScope.launch(Dispatchers.IO) {
                 _isLoadingMore.value = true
                 YouTube.playlistContinuation(it)

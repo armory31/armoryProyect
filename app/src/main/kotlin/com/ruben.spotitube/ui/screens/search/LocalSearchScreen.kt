@@ -8,7 +8,7 @@
 
 package com.ruben.spotitube.ui.screens.search
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -69,7 +69,7 @@ import com.ruben.spotitube.viewmodels.LocalFilter
 import com.ruben.spotitube.viewmodels.LocalSearchViewModel
 import kotlinx.coroutines.flow.drop
 
-@OptIn(ExperimentalFoundationApi::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun LocalSearchScreen(
     query: String,

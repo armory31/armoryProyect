@@ -12,7 +12,6 @@ import com.ruben.spotitube.ArmoryColors
 import androidx.compose.material3.ButtonDefaults
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +37,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -54,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -126,7 +125,6 @@ import com.ruben.spotitube.viewmodels.TopPlaylistViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TopPlaylistScreen(
     navController: NavController,
@@ -181,7 +179,7 @@ fun TopPlaylistScreen(
     val name = stringResource(R.string.my_top) + " $maxSize"
 
     val downloadUtil = LocalDownloadUtil.current
-    var downloadState by remember { mutableStateOf(Download.STATE_STOPPED) }
+    var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
 
     LaunchedEffect(songs) {
         mutableSongs.apply {
@@ -325,7 +323,7 @@ fun TopPlaylistScreen(
     val headerItems by remember {
         derivedStateOf {
             val currentSongs = songs
-            if (currentSongs != null && currentSongs.isNotEmpty() && !isSearching) 2 else 0
+            if (!currentSongs.isNullOrEmpty() && !isSearching) 2 else 0
         }
     }
 
@@ -522,7 +520,7 @@ fun TopPlaylistScreen(
                                             ),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = ArmoryColors.Rust2,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                            fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }
@@ -536,7 +534,7 @@ fun TopPlaylistScreen(
                                             text = makeTimeString(likeLength * 1000L),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = ArmoryColors.Rust2,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                            fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }

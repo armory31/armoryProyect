@@ -7,7 +7,6 @@
 package com.ruben.spotitube.ui.screens.library
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -97,7 +96,6 @@ private data class LibraryShortcutEntry(
     val accentColor: Color,
 )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LibraryMixScreen(
     navController: NavController,
@@ -540,7 +538,6 @@ private fun LibraryControlCard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LibraryShortcutGrid(
     entries: List<LibraryShortcutEntry>,

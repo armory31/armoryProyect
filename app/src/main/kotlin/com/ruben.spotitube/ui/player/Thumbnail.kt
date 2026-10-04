@@ -50,6 +50,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -112,14 +113,15 @@ import timber.log.Timber
 import java.io.File
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 object CanvasArtworkPlaybackCache {
-    private const val defaultMaxSize = 256
+    private const val DEFAULT_MAX_SIZE = 256
     private const val PERSIST_FILE = "canvas_artwork_cache.json"
     private const val PERSIST_DEBOUNCE_MS = 2_000L
 
-    private val map = LinkedHashMap<String, CanvasArtwork>(defaultMaxSize, 0.75f, true)
-    @Volatile private var maxSize = defaultMaxSize
+    private val map = LinkedHashMap<String, CanvasArtwork>(DEFAULT_MAX_SIZE, 0.75f, true)
+    @Volatile private var maxSize = DEFAULT_MAX_SIZE
     @Volatile private var cacheFile: File? = null
 
     private val persistScope = CoroutineScope(Dispatchers.IO)
@@ -224,7 +226,7 @@ object CanvasArtworkPlaybackCache {
     private fun schedulePersist() {
         persistJob?.cancel()
         persistJob = persistScope.launch {
-            delay(PERSIST_DEBOUNCE_MS)
+            delay(PERSIST_DEBOUNCE_MS.milliseconds)
             writeToDisk()
         }
     }
@@ -324,7 +326,7 @@ fun Thumbnail(
     val previousMediaMetadata = if (previousWindowIndex != C.INDEX_UNSET) {
         try {
             playerConnection.player.getMediaItemAt(previousWindowIndex)
-        } catch (e: Exception) { null }
+        } catch (_: Exception) { null }
     } else null
 
     val nextWindowIndex = if (swipeThumbnail && !timeline.isEmpty) {
@@ -339,7 +341,7 @@ fun Thumbnail(
     val nextMediaMetadata = if (nextWindowIndex != C.INDEX_UNSET) {
         try {
             playerConnection.player.getMediaItemAt(nextWindowIndex)
-        } catch (e: Exception) { null }
+        } catch (_: Exception) { null }
     } else null
 
     val currentMediaItem = remember(mediaMetadata) {
@@ -350,7 +352,7 @@ fun Thumbnail(
         toMediaItem()
             ?: try {
                 playerConnection.player.currentMediaItem
-            } catch (e: Exception) { null }
+            } catch (_: Exception) { null }
     }
 
     val thumbnailPages = buildList {
@@ -399,7 +401,7 @@ fun Thumbnail(
         if (index >= 0 && index < thumbnailPages.size) {
             try {
                 thumbnailLazyGridState.animateScrollToItem(index)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 thumbnailLazyGridState.scrollToItem(index)
             }
         }
@@ -499,7 +501,7 @@ fun Thumbnail(
                         ) { page ->
                             val item = page.mediaItem
                             val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
-                            var skipMultiplier by remember { mutableStateOf(1) }
+                            var skipMultiplier by remember { mutableIntStateOf(1) }
                             var lastTapTime by remember { mutableLongStateOf(0L) }
                             val itemMetadata = remember(item) { item.metadata }
                             val storefront =
@@ -562,9 +564,6 @@ fun Thumbnail(
                                     }
                                 canvasArtwork = fetched as CanvasArtwork?
                                 canvasFetchedAtMs = now
-                                if (fetched != null) {
-                                    CanvasArtworkPlaybackCache.put(item.mediaId, fetched)
-                                }
                                 canvasFetchInFlight = false
                             }
 
@@ -681,7 +680,7 @@ fun Thumbnail(
         // Seek effect
         LaunchedEffect(showSeekEffect) {
             if (showSeekEffect) {
-                delay(1000)
+                delay(1000.milliseconds)
                 showSeekEffect = false
             }
         }
@@ -756,7 +755,7 @@ fun SnapLayoutInfoProvider(
             }
 
             // Find item that is closest to center, but after it
-            if (offset >= 0 && offset < upperBoundOffset) {
+            if (offset in 0.0..<upperBoundOffset.toDouble()) {
                 upperBoundOffset = offset
             }
         }

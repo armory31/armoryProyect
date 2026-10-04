@@ -15,7 +15,6 @@ import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -46,7 +45,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -61,6 +59,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -216,7 +215,7 @@ private fun QualitySelectionDialog(
     onDismiss: () -> Unit,
     onQualitySelected: (Int) -> Unit,
 ) {
-    var selectedQuality by remember { mutableStateOf(1024) }
+    var selectedQuality by remember { mutableIntStateOf(1024) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -348,7 +347,6 @@ private fun QualitySelectionDialog(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumScreen(
     navController: NavController,
@@ -440,7 +438,7 @@ fun AlbumScreen(
     }
 
     val downloadUtil = LocalDownloadUtil.current
-    var downloadState by remember { mutableStateOf(Download.STATE_STOPPED) }
+    var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
 
     LaunchedEffect(albumWithSongs) {
         val songs = albumWithSongs?.songs?.map { it.id }
@@ -836,7 +834,7 @@ fun AlbumScreen(
                                 Icon(
                                     painter = painterResource(R.drawable.play),
                                     contentDescription = stringResource(R.string.play),
-                                    tint = androidx.compose.ui.graphics.Color.Black,
+                                    tint = Color.Black,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -851,8 +849,8 @@ fun AlbumScreen(
                                 },
                                 shape = RoundedCornerShape(24.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor =androidx.compose.ui.graphics.Color.Transparent,
-                                    contentColor = androidx.compose.ui.graphics.Color.Black
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.Black
                                 ),
                                 contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                 modifier = Modifier
@@ -863,7 +861,7 @@ fun AlbumScreen(
                                 Icon(
                                     painter = painterResource(R.drawable.shuffle),
                                     contentDescription = stringResource(R.string.shuffle),
-                                    tint = androidx.compose.ui.graphics.Color.Black,
+                                    tint = Color.Black,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -911,7 +909,7 @@ fun AlbumScreen(
                                     }
                                 },
                                 shape = CircleShape,
-                                color = androidx.compose.ui.graphics.Color.Transparent,
+                                color = Color.Transparent,
                                 modifier = Modifier
                                     .size(48.dp)
                                     .background(ArmoryColors.Copper, shape = CircleShape)
@@ -925,7 +923,7 @@ fun AlbumScreen(
                                             Icon(
                                                 painter = painterResource(R.drawable.offline),
                                                 contentDescription = null,
-                                                tint = androidx.compose.ui.graphics.Color.Black,
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
@@ -933,14 +931,14 @@ fun AlbumScreen(
                                             CircularProgressIndicator(
                                                 strokeWidth = 2.dp,
                                                 modifier = Modifier.size(24.dp),
-                                                color = androidx.compose.ui.graphics.Color.Black
+                                                color = Color.Black
                                             )
                                         }
                                         else -> {
                                             Icon(
                                                 painter = painterResource(R.drawable.download),
                                                 contentDescription = null,
-                                                tint = androidx.compose.ui.graphics.Color.Black,
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
@@ -963,7 +961,7 @@ fun AlbumScreen(
                                     }
                                 },
                                 shape = CircleShape,
-                                color = androidx.compose.ui.graphics.Color.Transparent,
+                                color = Color.Transparent,
                                 modifier = Modifier
                                     .size(48.dp)
                                     .background(ArmoryColors.Copper, shape = CircleShape)
@@ -975,7 +973,7 @@ fun AlbumScreen(
                                     Icon(
                                         painter = painterResource(R.drawable.more_vert),
                                         contentDescription = null,
-                                        tint = androidx.compose.ui.graphics.Color.Black,
+                                        tint = Color.Black,
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
@@ -1382,8 +1380,8 @@ private fun MetadataChip(
     icon: Int,
     text: String,
     modifier: Modifier = Modifier,
-    textColor: androidx.compose.ui.graphics.Color? = null,
-    iconTint: androidx.compose.ui.graphics.Color? = null
+    textColor: Color? = null,
+    iconTint: Color? = null
 ) {
     Surface(
         modifier = modifier,

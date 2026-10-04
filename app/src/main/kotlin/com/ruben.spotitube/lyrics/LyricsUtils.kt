@@ -119,10 +119,8 @@ object LyricsUtils {
 
     fun isTtml(lyrics: String): Boolean {
         val trimmed = lyrics.trim()
-        if (!trimmed.startsWith("<")) return false
-
-        return trimmed.contains("<tt", ignoreCase = true) ||
-                trimmed.contains("http://www.w3.org/ns/ttml", ignoreCase = true)
+        return trimmed.startsWith("<") && (trimmed.contains("<tt", ignoreCase = true) ||
+                trimmed.contains("http://www.w3.org/ns/ttml", ignoreCase = true))
     }
 
     fun parseTtml(lyrics: String, durationSeconds: Int? = null): List<LyricsEntry> {

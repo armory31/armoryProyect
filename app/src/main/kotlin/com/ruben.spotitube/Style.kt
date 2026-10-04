@@ -13,7 +13,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
@@ -802,7 +801,6 @@ val quickFilters = listOf("Top España", "Éxitos Hoy", "Urbano", "Pop Español"
 
 
 // ── 8. SISTEMA DE TEMA Y ESQUEMA DE COLOR MATERIAL 3 ───────────────────────
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ArmoryTheme(
     pureBlack: Boolean = true,

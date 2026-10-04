@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -101,8 +100,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LyricsScreen(
     mediaMetadata: MediaMetadata,
@@ -133,7 +132,7 @@ fun LyricsScreen(
     LaunchedEffect(mediaMetadata.id, currentLyrics) {
         if (currentLyrics == null) {
             // Small delay to ensure database state is stable
-            delay(500)
+            delay(500.milliseconds)
             
             coroutineScope.launch(Dispatchers.IO) {
                 try {
@@ -255,7 +254,7 @@ fun LyricsScreen(
     LaunchedEffect(playbackState) {
         if (playbackState == STATE_READY) {
             while (isActive) {
-                delay(100)
+                delay(100.milliseconds)
                 position = player.currentPosition
                 duration = player.duration
             }

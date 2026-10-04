@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 /*
  * ARMORY Project (2026)
  * Arturo254 (github.com/Arturo254)
@@ -13,7 +12,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
@@ -48,7 +46,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -115,6 +112,7 @@ import com.ruben.spotitube.ui.utils.ShowMediaInfo
 import com.ruben.spotitube.ui.utils.highRes
 import com.ruben.spotitube.utils.makeTimeString
 import me.saket.squiggles.SquigglySlider
+import androidx.core.net.toUri
 
 @Composable
 fun PlayerTitleSection(
@@ -680,7 +678,6 @@ fun PlayerTopActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerSlider(
     sliderStyle: SliderStyle,
@@ -2005,7 +2002,7 @@ fun PlayerBackground(
                             val cm = ColorMatrix(matrix)
 
                             AsyncImage(
-                                model = Uri.parse(uri),
+                                model = uri.toUri(),
                                 contentDescription = "Custom background",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize().let {

@@ -6,8 +6,9 @@
 
 
 
-package com.ruben.spotitube.innertube
+package com.ruben.spotitube.innertube.pages
 
+import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.YouTubeClient
 import com.ruben.spotitube.innertube.models.response.PlayerResponse
 import io.ktor.http.URLBuilder

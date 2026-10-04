@@ -10,7 +10,7 @@ package com.ruben.spotitube.utils
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * A [Modifier] that draws a border around elements that are recomposing. The border increases in
@@ -45,12 +46,12 @@ private val recomposeModifier =
         totalCompositions[0]++
 
         // The value of totalCompositions at the last timeout.
-        val totalCompositionsAtLastTimeout = remember { mutableStateOf(0L) }
+        val totalCompositionsAtLastTimeout = remember { mutableLongStateOf(0L) }
 
         // Start the timeout, and reset everytime there's a recomposition. (Using totalCompositions
         // as the key is really just to cause the timer to restart every composition).
         LaunchedEffect(totalCompositions[0]) {
-            delay(3000)
+            delay(3000.milliseconds)
             totalCompositionsAtLastTimeout.value = totalCompositions[0]
         }
 

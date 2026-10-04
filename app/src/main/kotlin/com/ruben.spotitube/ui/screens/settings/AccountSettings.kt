@@ -11,13 +11,7 @@ package com.ruben.spotitube.ui.screens.settings
 import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -59,7 +53,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -82,7 +75,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.App.Companion.forgetAccount
@@ -97,9 +89,7 @@ import com.ruben.spotitube.constants.DataSyncIdKey
 import com.ruben.spotitube.constants.InnerTubeCookieKey
 import com.ruben.spotitube.constants.PoTokenKey
 import com.ruben.spotitube.constants.SelectedYtmPlaylistsKey
-import com.ruben.spotitube.constants.UseLoginForBrowse
 import com.ruben.spotitube.constants.VisitorDataKey
-import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.utils.completed
 import com.ruben.spotitube.innertube.utils.parseCookieString
@@ -110,7 +100,6 @@ import com.ruben.spotitube.utils.Updater
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.isInternetAvailable
 import com.ruben.spotitube.utils.rememberPreference
-import com.ruben.spotitube.viewmodels.HomeViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 

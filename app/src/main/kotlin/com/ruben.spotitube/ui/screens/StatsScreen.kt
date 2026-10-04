@@ -8,7 +8,7 @@
 
 package com.ruben.spotitube.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +33,6 @@ import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -100,7 +99,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.cos
 import kotlin.math.sin
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun StatsScreen(
     navController: NavController,
@@ -643,7 +642,7 @@ fun ArtistPieChart(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(PieSliceShape(startAngle, sweepAngle))
+                            .clip(pieSliceShape(startAngle, sweepAngle))
                     )
                     startAngle += sweepAngle
                 }
@@ -670,7 +669,7 @@ fun ArtistPieChart(
     }
 }
 
-fun PieSliceShape(startAngle: Float, sweepAngle: Float): GenericShape {
+fun pieSliceShape(startAngle: Float, sweepAngle: Float): GenericShape {
     return GenericShape { size, _ ->
         val center = Offset(size.width / 2, size.height / 2)
         val radius = size.width / 2

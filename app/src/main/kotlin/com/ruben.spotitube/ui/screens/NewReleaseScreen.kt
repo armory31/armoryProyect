@@ -13,7 +13,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
@@ -80,11 +78,6 @@ import com.ruben.spotitube.viewmodels.NewReleaseContent
 import com.ruben.spotitube.viewmodels.NewReleaseUiState
 import com.ruben.spotitube.viewmodels.NewReleaseViewModel
 
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3ExpressiveApi::class
-)
 @Composable
 fun NewReleaseScreen(
     navController: NavController,
@@ -227,7 +220,6 @@ private data class NewReleaseSection(
     val releases: List<com.ruben.spotitube.innertube.models.AlbumItem>,
 )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NewReleaseCategoriesContent(
     content: NewReleaseContent,
@@ -312,7 +304,6 @@ private fun NewReleaseSectionHeader(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NewReleaseHorizontalSection(
     releases: List<com.ruben.spotitube.innertube.models.AlbumItem>,

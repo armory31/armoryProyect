@@ -48,7 +48,7 @@ class TogetherOnlineHost(
     private val hostDisplayName: String,
     initialSettings: TogetherRoomSettings,
     clientId: String = UUID.randomUUID().toString(),
-    private val bearerToken: String? = null,
+    bearerToken: String? = null,
 ) {
     private val client =
         HttpClient(OkHttp) {

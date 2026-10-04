@@ -12,7 +12,6 @@ import com.ruben.spotitube.ArmoryColors
 import androidx.compose.material3.ButtonDefaults
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +37,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -132,7 +130,6 @@ import com.ruben.spotitube.viewmodels.AutoPlaylistViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AutoPlaylistScreen(
     navController: NavController,
@@ -353,7 +350,7 @@ fun AutoPlaylistScreen(
     val headerItems by remember {
         derivedStateOf {
             val currentSongs = songs
-            if (currentSongs != null && currentSongs.isNotEmpty() && !isSearching) 2 else 0
+            if (!currentSongs.isNullOrEmpty() && !isSearching) 2 else 0
         }
     }
 
@@ -550,7 +547,7 @@ fun AutoPlaylistScreen(
                                             ),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = ArmoryColors.Rust2,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                            fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }
@@ -564,7 +561,7 @@ fun AutoPlaylistScreen(
                                             text = makeTimeString(likeLength * 1000L),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = ArmoryColors.Rust2,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                            fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }

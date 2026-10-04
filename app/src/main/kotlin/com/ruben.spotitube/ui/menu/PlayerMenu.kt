@@ -43,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -132,7 +131,7 @@ import kotlin.math.floor
 import kotlin.math.round
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun ColumnScope.PlayerMenu(
     mediaMetadata: MediaMetadata?,
@@ -141,7 +140,7 @@ fun ColumnScope.PlayerMenu(
     isQueueTrigger: Boolean? = false,
     onShowDetailsDialog: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
 ) {
     mediaMetadata ?: return
     val context = LocalContext.current
@@ -693,7 +692,6 @@ private fun PlayerVolumeCard(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun VolumeSliderL(value: Float, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier) {
     val safeValue = value.coerceIn(0f, 1f)
     var sliderValue by remember { mutableFloatStateOf(safeValue) }
@@ -726,7 +724,6 @@ private fun VolumeSliderL(value: Float, onValueChange: (Float) -> Unit, modifier
 }
 
 @SuppressLint("LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EqualizerDialog(onDismiss: () -> Unit, openSystemEqualizer: () -> Unit) {
     val context = LocalContext.current

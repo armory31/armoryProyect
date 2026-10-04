@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.PlaybackException
 import com.ruben.spotitube.MainActivity
 import com.ruben.spotitube.R
+import androidx.core.net.toUri
 
 @Composable
 fun PlaybackError(
@@ -163,7 +164,7 @@ fun PlaybackError(
             errorInfo.loginRecoveryUrl?.let { targetUrl ->
                 Button(
                     onClick = {
-                        val deepLink = Uri.parse("archivetune://login?url=${Uri.encode(targetUrl)}")
+                        val deepLink = "archivetune://login?url=${Uri.encode(targetUrl)}".toUri()
                         val loginIntent =
                             Intent(Intent.ACTION_VIEW, deepLink, context, MainActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -171,7 +172,7 @@ fun PlaybackError(
                                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             }
                         val fallbackIntent =
-                            Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl)).apply {
+                            Intent(Intent.ACTION_VIEW, targetUrl.toUri()).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
 

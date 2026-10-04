@@ -47,7 +47,7 @@ fun SnapLayoutInfoProvider(
                 lowerBoundOffset = offset
             }
 
-            if (offset >= 0 && offset < upperBoundOffset) {
+            if (offset in 0.0..<upperBoundOffset.toDouble()) {
                 upperBoundOffset = offset
             }
         }

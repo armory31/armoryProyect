@@ -51,7 +51,7 @@ fun Queue.toPersistQueue(
                 items = items,
                 mediaItemIndex = mediaItemIndex,
                 position = position,
-                queueType = QueueType.YOUTUBE_ALBUM_RADIO,
+                queueType = QueueType.YOUTUBEALBUMRADIO,
                 queueData = QueueData.YouTubeAlbumRadioData(
                     playlistId = "youtube_album_radio"
                 )
@@ -64,7 +64,7 @@ fun Queue.toPersistQueue(
                 items = items,
                 mediaItemIndex = mediaItemIndex,
                 position = position,
-                queueType = QueueType.LOCAL_ALBUM_RADIO,
+                queueType = QueueType.LOCALALBUMRADIO,
                 queueData = QueueData.LocalAlbumRadioData(
                     albumId = "local_album_radio",
                     startIndex = 0
@@ -98,7 +98,7 @@ fun PersistQueue.toQueue(): Queue {
                 position = position
             )
         }
-        is QueueType.YOUTUBE_ALBUM_RADIO -> {
+        is QueueType.YOUTUBEALBUMRADIO -> {
             // For now, fallback to ListQueue since we can't reconstruct YouTubeAlbumRadio properly
             ListQueue(
                 title = title,
@@ -107,7 +107,7 @@ fun PersistQueue.toQueue(): Queue {
                 position = position
             )
         }
-        is QueueType.LOCAL_ALBUM_RADIO -> {
+        is QueueType.LOCALALBUMRADIO -> {
             // For now, fallback to ListQueue since we can't reconstruct LocalAlbumRadio properly
             ListQueue(
                 title = title,

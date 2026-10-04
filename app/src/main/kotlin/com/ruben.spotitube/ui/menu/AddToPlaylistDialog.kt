@@ -31,7 +31,6 @@ import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,11 +69,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 internal fun playlistsForAddToPlaylist(playlists: List<Playlist>): List<Playlist> =
     playlists.filter { it.playlist.isEditable || it.playlist.browseId != null }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddToPlaylistDialog(
     isVisible: Boolean,
@@ -114,7 +113,7 @@ fun AddToPlaylistDialog(
                         wasAdded = true
                         break
                     }
-                    if (attempt < 2) delay(250)
+                    if (attempt < 2) delay(250.milliseconds)
                 }
                 if (wasAdded) {
                     acceptedSongIds += songId

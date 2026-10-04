@@ -7,7 +7,6 @@
 package com.ruben.spotitube.utils
 
 import android.app.Activity
-import android.content.ContentValues
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Bitmap
@@ -24,10 +23,8 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -57,6 +54,7 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.coroutines.resume
 import kotlin.math.max
+import androidx.core.graphics.scale
 
 object ComposeToImage {
 
@@ -84,7 +82,7 @@ object ComposeToImage {
         val location = IntArray(2)
         view.getLocationInWindow(location)
         val rect   = Rect(location[0], location[1], location[0] + view.width, location[1] + view.height)
-        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(view.width, view.height)
         val result = suspendCancellableCoroutine { cont ->
             PixelCopy.request(window, rect, bitmap, { cont.resume(it) }, Handler(Looper.getMainLooper()))
         }
@@ -104,7 +102,7 @@ object ComposeToImage {
         val fallbackBitmap = runCatching { view.drawToBitmap() }.getOrElse {
             val w = view.width.coerceAtLeast(1)
             val h = view.height.coerceAtLeast(1)
-            Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).also { bmp ->
+            createBitmap(w, h).also { bmp ->
                 backgroundColor?.let { Canvas(bmp).drawColor(it) }
             }
         }
@@ -118,11 +116,11 @@ object ComposeToImage {
             val safeOriginal = ensureSoftwareBitmap(original)
             val tw = targetWidth  ?: original.width
             val th = targetHeight ?: (original.height * tw / original.width)
-            ensureSoftwareBitmap(Bitmap.createScaledBitmap(safeOriginal, tw, th, true))
+            ensureSoftwareBitmap(safeOriginal.scale(tw, th))
         } else ensureSoftwareBitmap(original)
 
         if (backgroundColor != null) {
-            val out = Bitmap.createBitmap(base.width, base.height, Bitmap.Config.ARGB_8888)
+            val out = createBitmap(base.width, base.height)
             Canvas(out).apply { drawColor(backgroundColor); drawBitmap(base, 0f, 0f, null) }
             return out
         }
@@ -140,7 +138,7 @@ object ComposeToImage {
 
     fun fitBitmap(source: Bitmap, targetWidth: Int, targetHeight: Int, backgroundColor: Int): Bitmap {
         val safeSource = ensureSoftwareBitmap(source)
-        val out    = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+        val out    = createBitmap(targetWidth, targetHeight)
         val canvas = Canvas(out)
         canvas.drawColor(backgroundColor)
         val scale   = minOf(targetWidth.toFloat() / safeSource.width.coerceAtLeast(1),
@@ -148,9 +146,10 @@ object ComposeToImage {
         val scaledW = (safeSource.width  * scale).toInt().coerceAtLeast(1)
         val scaledH = (safeSource.height * scale).toInt().coerceAtLeast(1)
         val scaled  = if (scaledW != safeSource.width || scaledH != safeSource.height) {
-            ensureSoftwareBitmap(Bitmap.createScaledBitmap(safeSource, scaledW, scaledH, true))
+            ensureSoftwareBitmap(safeSource.scale(scaledW, scaledH))
         } else safeSource
-        canvas.drawBitmap(scaled, ((targetWidth - scaled.width) / 2f), ((targetHeight - scaled.height) / 2f), null)
+        canvas.drawBitmap(scaled, ((targetWidth - scaled.width) / 2f),
+            ((targetHeight - scaled.height) / 2f), null)
         return out
     }
 
@@ -189,12 +188,7 @@ object ComposeToImage {
         if (coverArt != null) {
             // Usa la imagen original sin escalar primero
             val scaled = ensureSoftwareBitmap(
-                Bitmap.createScaledBitmap(
-                    coverArt,
-                    cardSize,
-                    cardSize,
-                    false  // Cambia false para mejor calidad
-                )
+                coverArt.scale(cardSize, cardSize, false)
             )
             // Reduce la intensidad del blur o usa un blur más suave
             val blurred = if (coverArt.width > cardSize * 2) {
@@ -230,8 +224,8 @@ object ComposeToImage {
         val smallW = targetSize
         val smallH = (safe.height * targetSize / safe.width).coerceAtLeast(100)
 
-        val small = Bitmap.createScaledBitmap(safe, smallW, smallH, true)
-        val result = Bitmap.createScaledBitmap(small, safe.width, safe.height, true)
+        val small = safe.scale(smallW, smallH)
+        val result = small.scale(safe.width, safe.height)
 
         small.recycle() // Limpia memoria
         return result
@@ -256,7 +250,7 @@ object ComposeToImage {
             val top    = panelRect.top.toInt().coerceIn(0, cardSize - 1)
             val width  = panelRect.width().toInt().coerceIn(1, cardSize - left)
             val height = panelRect.height().toInt().coerceIn(1, cardSize - top)
-            val scaled = ensureSoftwareBitmap(Bitmap.createScaledBitmap(coverArt, cardSize, cardSize, true))
+            val scaled = ensureSoftwareBitmap(coverArt.scale(cardSize, cardSize))
             val crop   = Bitmap.createBitmap(scaled, left, top, width, height)
             val frosted = scaleBlur(crop, 12)
             canvas.withClip(path) { drawBitmap(frosted, panelRect.left, panelRect.top, null) }
@@ -392,7 +386,7 @@ object ComposeToImage {
         val logoSize  = (baseSize * 0.045f).toInt().coerceAtLeast(24)
         val rawLogo   = ContextCompat.getDrawable(context, R.drawable.armory_logo)?.toBitmap(logoSize, logoSize)
         val logo = rawLogo?.let { source ->
-            val colored = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+            val colored = createBitmap(source.width, source.height)
             Canvas(colored).drawBitmap(source, 0f, 0f, Paint().apply {
                 colorFilter = PorterDuffColorFilter(logoTint, PorterDuff.Mode.SRC_IN); isAntiAlias = true
             })
@@ -837,7 +831,7 @@ object ComposeToImage {
 
         // Fondo con blur máximo (30)
         if (coverArt != null) {
-            val scaled  = ensureSoftwareBitmap(Bitmap.createScaledBitmap(coverArt, cardSize, cardSize, true))
+            val scaled  = ensureSoftwareBitmap(coverArt.scale(cardSize, cardSize))
             val blurred = scaleBlur(scaled, 30)
             val path    = Path().apply { addRoundRect(RectF(0f, 0f, size, size), corner, corner, Path.Direction.CW) }
             canvas.withClip(path) { drawBitmap(blurred, 0f, 0f, null) }
@@ -1043,8 +1037,8 @@ object ComposeToImage {
         val factor = (1f / (strength / 2f).coerceAtLeast(1F)).coerceIn(0.3f, 1f)
         val smallW = (safe.width * factor).toInt().coerceAtLeast(100)
         val smallH = (safe.height * factor).toInt().coerceAtLeast(100)
-        val small = Bitmap.createScaledBitmap(safe, smallW, smallH, true)
-        return Bitmap.createScaledBitmap(small, safe.width, safe.height, true)
+        val small = safe.scale(smallW, smallH)
+        return small.scale(safe.width, safe.height)
     }
 
     /** Convierte TextAlign de Compose al equivalente de Canvas */
@@ -1053,6 +1047,7 @@ object ComposeToImage {
         androidx.compose.ui.text.style.TextAlign.Left  -> Layout.Alignment.ALIGN_NORMAL
         androidx.compose.ui.text.style.TextAlign.End,
         androidx.compose.ui.text.style.TextAlign.Right -> Layout.Alignment.ALIGN_OPPOSITE
+
         else                                            -> Layout.Alignment.ALIGN_CENTER
     }
 

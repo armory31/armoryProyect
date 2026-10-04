@@ -805,7 +805,7 @@ object YouTube {
         when {
             contents?.gridRenderer != null -> {
                 LibraryPage(
-                    items = contents.gridRenderer.items.orEmpty()
+                    items = contents.gridRenderer.items
                         .mapNotNull(GridRenderer.Item::musicTwoRowItemRenderer)
                         .mapNotNull { LibraryPage.fromMusicTwoRowItemRenderer(it) },
                     continuation = contents.gridRenderer.continuations?.getContinuation()
@@ -941,7 +941,7 @@ object YouTube {
                                 convertMusicTwoRowItem(item.musicTwoRowItemRenderer)
                             else -> null
                         }
-                    }.filterNotNull()
+                    }
                 
                     if (items.isNotEmpty()) {
                         sections.add(
@@ -962,7 +962,7 @@ object YouTube {
                         item.musicTwoRowItemRenderer?.let { renderer ->
                             convertMusicTwoRowItem(renderer)
                         }
-                    }.filterNotNull()
+                    }
                 
                     if (items.isNotEmpty()) {
                         sections.add(
@@ -1165,7 +1165,7 @@ object YouTube {
 
     suspend fun registerPlayback(playlistId: String? = null, playbackTracking: String) = runCatching {
         val cpn = (1..16).map {
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"[Random.Default.nextInt(
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"[Random.nextInt(
                 0,
                 64
             )]

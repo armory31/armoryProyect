@@ -69,6 +69,7 @@ import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.utils.rememberPreference
 import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.liquidGlass
+import androidx.compose.ui.res.stringResource
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constantes compartidas entre layouts
@@ -131,7 +132,7 @@ internal fun LyricsBrandingRow(
         }
         Spacer(Modifier.width(8.dp))
         Text(
-            text  = context.getString(R.string.app_name),
+            text  = stringResource(R.string.app_name),
             color = secondaryColor,
             fontSize    = 13.sp,
             fontWeight  = FontWeight.SemiBold,

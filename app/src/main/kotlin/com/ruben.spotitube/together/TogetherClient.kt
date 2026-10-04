@@ -79,9 +79,9 @@ sealed class TogetherClientState {
 }
 
 class TogetherClient(
-    private val externalScope: CoroutineScope,
+    externalScope: CoroutineScope,
     clientId: String = UUID.randomUUID().toString(),
-    private val bearerToken: String? = null,
+    bearerToken: String? = null,
 ) {
     private val client =
         HttpClient(OkHttp) {

@@ -1,9 +1,7 @@
 package com.ruben.spotitube.ui.screens.settings
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
@@ -21,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +39,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.ruben.spotitube.R
 import com.ruben.spotitube.innertube.utils.PoTokenGenerator
 import com.ruben.spotitube.ui.component.IconButton
+import androidx.core.net.toUri
 
 class PoTokenExtractionActivity : ComponentActivity() {
 
@@ -81,7 +79,6 @@ class PoTokenExtractionActivity : ComponentActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun PoTokenExtractionContent(targetUrl: String) {
         val context = LocalContext.current
@@ -90,11 +87,11 @@ class PoTokenExtractionActivity : ComponentActivity() {
         var isExtracting by remember { mutableStateOf(false) }
 
         fun normalizeHost(url: String): String {
-            return Uri.parse(url).host.orEmpty().removePrefix("www.")
+            return url.toUri().host.orEmpty().removePrefix("www.")
         }
 
         fun normalizePath(url: String): String {
-            val path = Uri.parse(url).path.orEmpty().trimEnd('/')
+            val path = url.toUri().path.orEmpty().trimEnd('/')
             return path.ifBlank { "/" }
         }
 

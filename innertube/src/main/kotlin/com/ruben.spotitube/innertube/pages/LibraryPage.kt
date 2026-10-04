@@ -142,12 +142,12 @@ data class LibraryPage(
             val artists = mutableListOf<Artist>()
 
             if (runs != null) {
-                for (run in runs) {
-                    if (run.navigationEndpoint != null) {
+                for ((text, navigationEndpoint) in runs) {
+                    if (navigationEndpoint != null) {
                         artists.add(
                             Artist(
-                                id = run.navigationEndpoint.browseEndpoint?.browseId!!,
-                                name = run.text
+                                id = navigationEndpoint.browseEndpoint?.browseId!!,
+                                name = text
                             )
                         )
                     }

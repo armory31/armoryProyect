@@ -59,14 +59,14 @@ fun GridMenu(
     )
 }
 
-fun LazyGridScope.GridMenuItem(
+fun LazyGridScope.gridMenuItem(
     modifier: Modifier = Modifier,
     @DrawableRes icon: Int,
     tint: @Composable () -> Color = { LocalContentColor.current },
     @StringRes title: Int,
     enabled: Boolean = true,
     onClick: () -> Unit,
-) = GridMenuItem(
+) = gridMenuItem(
     modifier = modifier,
     icon = {
         Icon(
@@ -80,7 +80,7 @@ fun LazyGridScope.GridMenuItem(
     onClick = onClick
 )
 
-fun LazyGridScope.GridMenuItem(
+fun LazyGridScope.gridMenuItem(
     modifier: Modifier = Modifier,
     icon: @Composable BoxScope.() -> Unit,
     @StringRes title: Int,
@@ -122,14 +122,14 @@ fun LazyGridScope.GridMenuItem(
 }
 
 
-fun LazyGridScope.DownloadGridMenu(
+fun LazyGridScope.downloadGridMenu(
     @Download.State state: Int?,
     onRemoveDownload: () -> Unit,
     onDownload: () -> Unit,
 ) {
     when (state) {
         Download.STATE_COMPLETED -> {
-            GridMenuItem(
+            gridMenuItem(
                 icon = R.drawable.offline,
                 title = R.string.remove_download,
                 onClick = onRemoveDownload
@@ -137,7 +137,7 @@ fun LazyGridScope.DownloadGridMenu(
         }
 
         Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> {
-            GridMenuItem(
+            gridMenuItem(
                 icon = {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
@@ -150,7 +150,7 @@ fun LazyGridScope.DownloadGridMenu(
         }
 
         else -> {
-            GridMenuItem(
+            gridMenuItem(
                 icon = R.drawable.download,
                 title = R.string.action_download,
                 onClick = onDownload
@@ -159,7 +159,7 @@ fun LazyGridScope.DownloadGridMenu(
     }
 }
 
-fun LazyGridScope.SleepTimerGridMenu(
+fun LazyGridScope.sleepTimerGridMenu(
     modifier: Modifier = Modifier,
     sleepTimerTimeLeft: Long,
     enabled: Boolean = true,

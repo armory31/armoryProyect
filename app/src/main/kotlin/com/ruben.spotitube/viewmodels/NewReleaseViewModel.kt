@@ -206,7 +206,7 @@ constructor(
         )
     }
 
-    private suspend fun applyContentFilters(content: NewReleaseContent): NewReleaseContent {
+    private fun applyContentFilters(content: NewReleaseContent): NewReleaseContent {
         val hideVideo = context.dataStore.get(HideVideoKey, false)
 
         return NewReleaseContent(

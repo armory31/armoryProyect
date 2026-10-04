@@ -103,7 +103,7 @@ class FilebinService(
                 )
             }
             
-            response.body?.string()?.let { responseBody ->
+            response.body.string().let { responseBody ->
                 // Parsear la respuesta JSON para obtener la URL
                 val json = JSONObject(responseBody)
                 val url = json.optString("url")
@@ -114,7 +114,7 @@ class FilebinService(
                     // Si no viene URL en la respuesta, construirla manualmente
                     Result.success("$FILEBIN_API_URL/$binName/$fileName")
                 }
-            } ?: Result.failure(Exception("Empty response from Filebin"))
+            }
             
         } catch (e: Exception) {
             reportException(e)
@@ -128,19 +128,19 @@ class FilebinService(
     suspend fun isAvailable(): Boolean = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder()
-                .url("$FILEBIN_API_URL")
+                .url(FILEBIN_API_URL)
                 .head()
                 .build()
             val response = client.newCall(request).execute()
             response.isSuccessful
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
 }
 
 // Extensión del ViewModel para manejar la subida a la nube
-suspend fun BackupRestoreViewModel.uploadBackupToCloud(
+suspend fun uploadBackupToCloud(
     context: Context,
     backupFile: File,
     onProgress: (Int) -> Unit = {}

@@ -20,7 +20,6 @@ import com.ruben.spotitube.constants.ArtistSongSortType
 import com.ruben.spotitube.constants.HideExplicitKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.ArtistEntity
-import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.pages.ArtistPage
 import com.ruben.spotitube.sync.LibraryStateHolder
@@ -46,7 +45,7 @@ class ArtistViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: MusicDatabase,
     savedStateHandle: SavedStateHandle,
-    private val libraryStateHolder: LibraryStateHolder,
+    libraryStateHolder: LibraryStateHolder,
     private val syncManager: SyncManager
 ) : ViewModel() {
     val artistId = savedStateHandle.get<String>("artistId")!!

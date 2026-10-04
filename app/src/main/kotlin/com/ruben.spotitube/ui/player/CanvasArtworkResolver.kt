@@ -41,11 +41,7 @@ internal suspend fun fetchCanvasArtworkForPlayback(
                 artist = artist,
                 storefront = storefront,
             )?.takeIf { artwork ->
-                if (requireVertical) {
-                    false
-                } else {
-                    !artwork.preferredAnimationUrl.isNullOrBlank()
-                }
+                !requireVertical && !artwork.preferredAnimationUrl.isNullOrBlank()
             }
     }
 }

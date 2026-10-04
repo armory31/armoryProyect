@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
@@ -64,7 +63,7 @@ import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.HomeViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -342,7 +341,7 @@ fun HomeScreen(
                     }
 
                     // 6. Recomendaciones Similares (Similar to...)
-                    SimilarRecommendationsContainer(
+                    similarRecommendationsContainer(
                         viewModel = viewModel,
                         mediaMetadata = mediaMetadata,
                         isPlaying = isPlaying,

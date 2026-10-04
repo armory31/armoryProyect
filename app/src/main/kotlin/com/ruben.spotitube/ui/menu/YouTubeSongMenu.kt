@@ -93,7 +93,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@SuppressLint("MutableCollectionMutableState")
+@SuppressLint("MutableCollectionMutableState", "LocalContextGetResourceValueCall")
 @Composable
 fun YouTubeSongMenu(
     song: SongItem,
@@ -551,7 +551,7 @@ fun YouTubeSongMenu(
                         }
                         val intent = Intent(Intent.ACTION_VIEW).apply {
                             setPackage(externalDownloaderPackage)
-                            data = android.net.Uri.parse(url)
+                            data = url.toUri()
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         try {

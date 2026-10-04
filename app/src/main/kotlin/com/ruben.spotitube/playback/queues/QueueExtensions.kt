@@ -6,6 +6,4 @@
 
 package com.ruben.spotitube.playback.queues
 
-import androidx.media3.common.MediaItem
-
 // Conflict resolved: filterExplicit is handled in Queue.kt

@@ -15,7 +15,6 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -125,8 +123,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 
 // ──────────────────────────────────────────────────────────────────────
@@ -160,7 +158,7 @@ private val HEAD_LYRICS_ENTRY = LyricsEntry(time = 0L, text = "")
 @SuppressLint("UnusedBoxWithConstraintsScope", "LocalContextGetResourceValueCall",
     "StringFormatInvalid"
 )
-@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LyricsV2(
     sliderPositionProvider: () -> Long?,
@@ -337,7 +335,7 @@ fun LyricsV2(
             currentPositionMs = pos + leadMs + visualTuningOffsetMs
 
             currentLineIndex = findCurrentLineIndex(entriesWithWords, currentPositionMs, 0L)
-            delay(16L) // ~60fps polling
+            delay(16L.milliseconds) // ~60fps polling
         }
     }
 
@@ -362,7 +360,7 @@ fun LyricsV2(
     // Resume auto-scroll after timeout
     LaunchedEffect(isManualScrolling, lastManualScrollTime) {
         if (isManualScrolling) {
-            delay(MANUAL_SCROLL_TIMEOUT_MS)
+            delay(MANUAL_SCROLL_TIMEOUT_MS.milliseconds)
             isManualScrolling = false
         }
     }
@@ -1092,7 +1090,6 @@ fun LyricsV2(
 // Line-level composable: renders words with fluid fill animation
 // ──────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun LyricsLineV2(
     words: List<WordTimestamp>,

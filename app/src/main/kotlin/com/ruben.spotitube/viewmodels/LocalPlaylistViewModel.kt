@@ -67,7 +67,7 @@ constructor(
     @ApplicationContext private val context: Context,
     private val database: MusicDatabase,
     private val syncUtils: SyncUtils,
-    private val libraryStateHolder: LibraryStateHolder,
+    libraryStateHolder: LibraryStateHolder,
     private val syncManager: SyncManager,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {

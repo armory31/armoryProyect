@@ -6,6 +6,7 @@
 
 package com.ruben.spotitube.viewmodels
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -59,6 +60,7 @@ import java.util.zip.ZipEntry
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.milliseconds
 
 data class BackupRestoreProgressUi(
     val title: String,
@@ -172,6 +174,7 @@ class BackupRestoreViewModel @Inject constructor(
             )
     }
 
+    @SuppressLint("StringFormatInvalid")
     fun backup(context: Context, uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             val title = context.getString(R.string.backup_in_progress)
@@ -272,6 +275,7 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
+    @SuppressLint("StringFormatInvalid")
     fun restore(context: Context, uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             val title = context.getString(R.string.restore_in_progress)
@@ -680,6 +684,7 @@ class BackupRestoreViewModel @Inject constructor(
         return context.dataStore.data.first()[CLOUD_BACKUP_ENABLED_KEY] ?: false
     }
 
+    @SuppressLint("StringFormatInvalid")
     fun uploadExistingBackupToCloud(context: Context, backupUri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             _cloudUploadState.update { it.copy(isUploading = true, lastError = null, uploadProgress = 0) }
@@ -753,7 +758,7 @@ class BackupRestoreViewModel @Inject constructor(
     private suspend fun uploadBackupToCloudAfterCreation(context: Context, backupUri: Uri) {
         try {
             // Pequeña pausa para asegurar que el archivo esté completamente escrito
-            kotlinx.coroutines.delay(500)
+            kotlinx.coroutines.delay(500.milliseconds)
 
             // Crear archivo temporal
             val tempFile = File(context.cacheDir, "temp_backup_upload_${System.currentTimeMillis()}.backup")
@@ -854,7 +859,7 @@ class BackupRestoreViewModel @Inject constructor(
                 )
             }
 
-            response.body?.string()?.let { responseBody ->
+            response.body.string().let { responseBody ->
                 // Intentar parsear la respuesta JSON
                 try {
                     val json = JSONObject(responseBody)
@@ -864,7 +869,7 @@ class BackupRestoreViewModel @Inject constructor(
                     } else {
                         Result.success("https://filebin.net/$binName/$fileName")
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Si no es JSON, construir URL manualmente
                     Result.success("https://filebin.net/$binName/$fileName")
                 }

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class CachePlaylistViewModel @Inject constructor(
@@ -73,7 +74,7 @@ class CachePlaylistViewModel @Inject constructor(
                     .filter { it.song.dateDownload != null }
                     .sortedByDescending { it.song.dateDownload }
 
-                delay(1000)
+                delay(1000.milliseconds)
             }
         }
     }

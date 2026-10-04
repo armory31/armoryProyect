@@ -12,10 +12,8 @@
 package com.ruben.spotitube.innertube.utils
 
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 
-@OptIn(ExperimentalEncodingApi::class)
 object PoTokenGenerator {
 
     private const val TOKEN_VERSION: Byte = 0x22

@@ -9,6 +9,7 @@
 package com.ruben.spotitube.utils
 
 // import com.ruben.spotitube.innertube.utils.parseCookieString
+import android.annotation.SuppressLint
 import android.content.Context
 import com.ruben.spotitube.constants.SelectedYtmPlaylistsKey
 import com.ruben.spotitube.constants.YtmSyncKey
@@ -456,15 +457,15 @@ class SyncUtils @Inject constructor(
                 Timber.w("syncSavedPlaylists: Selected playlists not found in remote library; skipping song sync (selected=${selectedIds.size}, remote=${remotePlaylists.size})")
             }
 
-            for (playlist in playlistsToSync) {
+            for ((id, title) in playlistsToSync) {
                 if (!isSyncStillEnabled(gen)) return@onSuccess
                 try {
-                    val playlistId = localPlaylistIdByBrowseId[playlist.id]
-                        ?: database.playlistByBrowseId(playlist.id).firstOrNull()?.playlist?.id
+                    val playlistId = localPlaylistIdByBrowseId[id]
+                        ?: database.playlistByBrowseId(id).firstOrNull()?.playlist?.id
                         ?: continue
-                    syncPlaylist(playlist.id, playlistId)
+                    syncPlaylist(id, playlistId)
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to sync playlist ${playlist.title}")
+                    Timber.e(e, "Failed to sync playlist $title")
                 }
             }
         }.onFailure { e ->
@@ -511,6 +512,7 @@ class SyncUtils @Inject constructor(
         syncPlaylist(browseId, playlistId)
     }
 
+    @SuppressLint("TimberArgCount")
     private suspend fun syncPlaylist(browseId: String, playlistId: String) = coroutineScope {
         /*if (!isYtmSyncEnabled()) {
             Timber.w("syncPlaylist: Skipping - sync disabled")

@@ -37,6 +37,7 @@ import com.ruben.spotitube.constants.ThumbnailCornerRadius
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PlayingIndicator(
@@ -54,12 +55,12 @@ fun PlayingIndicator(
         }
 
     LaunchedEffect(Unit) {
-        delay(300)
+        delay(300.milliseconds)
         animatables.forEach { animatable ->
             launch {
                 while (true) {
                     animatable.animateTo(Random.nextFloat() * 0.9f + 0.1f)
-                    delay(50)
+                    delay(50.milliseconds)
                 }
             }
         }

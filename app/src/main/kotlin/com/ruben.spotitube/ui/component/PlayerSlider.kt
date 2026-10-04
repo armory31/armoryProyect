@@ -5,13 +5,11 @@
  */
 
 
-@file:OptIn(ExperimentalMaterial3Api::class)
 package com.ruben.spotitube.ui.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
@@ -110,7 +108,7 @@ private fun DrawScope.drawTrack(
 
     // Ticks
     tickFractions.forEach { tick ->
-        val isInactive = tick > activeRangeEnd || tick < activeRangeStart
+        val isInactive = tick !in activeRangeStart..activeRangeEnd
         drawCircle(
             color = if (isInactive) inactiveTickColor else activeTickColor,
             center = Offset(

@@ -77,7 +77,7 @@ private data class ReleasesNetworkResult(
 
 object Updater {
     private val client = HttpClient()
-    private const val ReleaseCacheCheckIntervalMs: Long = 6 * 60 * 60 * 1000L
+    private const val RELEASE_CACHE_CHECK_INTERVAL_MS: Long = 6 * 60 * 60 * 1000L
     var lastCheckTime = -1L
         private set
 
@@ -504,7 +504,7 @@ object Updater {
                     ?.let { runCatching { parseReleasesJson(it) }.getOrNull() }
 
             val shouldCheckNetwork =
-                forceRefresh || cachedJson.isNullOrBlank() || (now - lastCheckedAt) >= ReleaseCacheCheckIntervalMs
+                forceRefresh || cachedJson.isNullOrBlank() || (now - lastCheckedAt) >= RELEASE_CACHE_CHECK_INTERVAL_MS
 
             if (!shouldCheckNetwork) {
                 lastCheckTime = now

@@ -7,6 +7,7 @@
 
 package com.ruben.spotitube.ui.screens.playlist
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("LocalContextGetResourceValueCall", "UnrememberedMutableState")
 @Composable
 fun PlaylistSuggestionsSection(
     modifier: Modifier = Modifier,
@@ -148,7 +150,7 @@ fun PlaylistSuggestionsSection(
                 YouTubeListItem(
                     item = item,
                     isActive = item.id == mediaMetadata?.id,
-                    isPlaying = isPlaying == true,
+                    isPlaying = isPlaying,
                     trailingContent = {
                         IconButton(
                             onClick = { 

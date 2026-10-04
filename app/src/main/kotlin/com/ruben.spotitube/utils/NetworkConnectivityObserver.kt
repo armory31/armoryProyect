@@ -71,12 +71,9 @@ class NetworkConnectivityObserver(context: Context) {
             val hasInternet = networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
             
             // For API 23+, also check if connection is validated
-            val isValidated = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
-            } else {
-                true // For older versions, assume validated if we have internet capability
-            }
-            
+            val isValidated =
+                android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M || networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true // For older versions, assume validated if we have internet capability
+
             hasInternet && isValidated
         } catch (e: Exception) {
             false

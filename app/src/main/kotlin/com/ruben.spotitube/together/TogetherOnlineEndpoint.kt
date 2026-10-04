@@ -20,10 +20,10 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 
 object TogetherOnlineEndpoint {
-    private const val EndpointSourceUrl =
+    private const val ENDPOINT_SOURCE_URL =
         "https://raw.githubusercontent.com/Arturo254/OpenTune/refs/heads/master/OpenTuneServer.txt"
 
-    private const val CacheTtlMs: Long = 6 * 60 * 60 * 1000L
+    private const val CACHE_TTL_MS: Long = 6 * 60 * 60 * 1000L
 
     private val httpClient =
         HttpClient(OkHttp) {
@@ -44,7 +44,7 @@ object TogetherOnlineEndpoint {
         val cached = dataStore.getAsync(TogetherOnlineEndpointCacheKey)?.trim().orEmpty()
         val lastCheckedAt = dataStore.getAsync(TogetherOnlineEndpointLastCheckedAtKey, 0L)
 
-        if (cached.isNotBlank() && now - lastCheckedAt < CacheTtlMs) return cached
+        if (cached.isNotBlank() && now - lastCheckedAt < CACHE_TTL_MS) return cached
 
         val fetched = fetchEndpointFromSourceOrNull()
         if (fetched != null) {
@@ -70,7 +70,7 @@ object TogetherOnlineEndpoint {
 
     private suspend fun fetchEndpointFromSourceOrNull(): String? {
         val text =
-            runCatching { httpClient.get(EndpointSourceUrl).bodyAsText() }
+            runCatching { httpClient.get(ENDPOINT_SOURCE_URL).bodyAsText() }
                 .getOrNull()
                 ?.trim()
                 .orEmpty()
@@ -112,8 +112,7 @@ object TogetherOnlineEndpoint {
 
     private fun isIpv4Address(host: String): Boolean {
         val parts = host.split('.')
-        if (parts.size != 4) return false
-        return parts.all { part ->
+        return parts.size == 4 && parts.all { part ->
             val n = part.toIntOrNull() ?: return@all false
             n in 0..255 && part == n.toString()
         }

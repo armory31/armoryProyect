@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
 data class TogetherOnlineCreateSessionRequest(
@@ -55,7 +56,7 @@ class TogetherOnlineApiException(
 ) : Exception(message, cause)
 
 class TogetherOnlineApi(
-    private val baseUrl: String,
+    baseUrl: String,
     private val bearerToken: String? = null,
 ) {
     private val v1BaseUrl: String =
@@ -94,7 +95,7 @@ class TogetherOnlineApi(
             } catch (t: Throwable) {
                 lastException = t
                 if (attempt < maxAttempts && isRetryable(t)) {
-                    delay(initialDelayMs * attempt)
+                    delay((initialDelayMs * attempt).milliseconds)
                 } else {
                     throw t
                 }

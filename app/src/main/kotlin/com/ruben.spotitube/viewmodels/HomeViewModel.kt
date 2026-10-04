@@ -58,6 +58,7 @@ import kotlinx.coroutines.supervisorScope
 import timber.log.Timber
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -399,7 +400,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val hideExplicit = context.dataStore.get(HideExplicitKey, false)
             val hideVideo = context.dataStore.get(HideVideoKey, false)
-            val nextSections = YouTube.home(params = chip?.endpoint?.params).getOrNull() ?: return@launch
+            val nextSections = YouTube.home(params = chip.endpoint?.params).getOrNull() ?: return@launch
 
             homePage.value = nextSections.copy(
                 chips = homePage.value?.chips,
@@ -439,7 +440,7 @@ class HomeViewModel @Inject constructor(
 
                     launch {
                         YouTube.library("FEmusic_liked_playlists").completed().onSuccess {
-                            val lists = it.items.filterIsInstance<PlaylistItem>().filterNot { it.id == "SE" }
+                            val lists = it.items.filterIsInstance<PlaylistItem>().filterNot { it -> it.id == "SE" }
                             accountPlaylists.value = lists
                         }.onFailure {
                             Timber.w(it, "Failed to fetch playlists")
@@ -486,7 +487,7 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            kotlinx.coroutines.delay(3000)
+            kotlinx.coroutines.delay(3000.milliseconds)
             
             syncUtils.cleanupDuplicatePlaylists()
         }
@@ -506,7 +507,7 @@ class HomeViewModel @Inject constructor(
                         val loginTransition = isLoggedIn && !wasLoggedIn
                         wasLoggedIn = isLoggedIn
                         
-                        if (isLoggedIn && cookie != null && cookie.isNotEmpty()) {
+                        if (isLoggedIn && cookie.isNotEmpty()) {
                             try {
                                 YouTube.cookie = cookie
                             } catch (e: Exception) {
@@ -527,7 +528,7 @@ class HomeViewModel @Inject constructor(
                                 }
                             }
                             
-                            kotlinx.coroutines.delay(100)
+                            kotlinx.coroutines.delay(100.milliseconds)
                             
                             try {
                                 YouTube.accountInfo().onSuccess { info ->

@@ -297,7 +297,7 @@ constructor(
                                     albums.filter { album ->
                                         val totalSongsInAlbum = album.album.songCount
                                         val downloadedSongsCount = downloadedCountByAlbum[album.album.id] ?: 0
-                                        totalSongsInAlbum > 0 && downloadedSongsCount >= totalSongsInAlbum
+                                        totalSongsInAlbum in 1..downloadedSongsCount
                                     }
                                 }
                         }
@@ -434,7 +434,7 @@ constructor(
     @ApplicationContext context: Context,
     database: MusicDatabase,
     private val syncUtils: SyncUtils,
-    private val libraryStateHolder: LibraryStateHolder
+    libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
     val syncAllLibrary = {
          viewModelScope.launch(Dispatchers.IO) {

@@ -45,7 +45,7 @@ data class ArtistPage(
             }
         }
 
-        private fun fromMusicShelfRenderer(renderer: MusicShelfRenderer): ArtistSection? {
+        private fun fromMusicShelfRenderer(renderer: MusicShelfRenderer): ArtistSection {
             return ArtistSection(
                 title = renderer.title?.runs?.firstOrNull()?.text ?: "",
                 items = renderer.contents?.getItems()?.mapNotNull {
@@ -55,7 +55,7 @@ data class ArtistPage(
             )
         }
 
-        private fun fromMusicCarouselShelfRenderer(renderer: MusicCarouselShelfRenderer): ArtistSection? {
+        private fun fromMusicCarouselShelfRenderer(renderer: MusicCarouselShelfRenderer): ArtistSection {
             return ArtistSection(
                 title = renderer.header?.musicCarouselShelfBasicHeaderRenderer?.title?.runs?.firstOrNull()?.text ?: "",
                 items = renderer.contents.mapNotNull {

@@ -12,8 +12,6 @@ import com.ruben.spotitube.ArmoryColors
 import androidx.compose.material3.ButtonDefaults
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +38,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -139,7 +136,6 @@ import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun OnlinePlaylistScreen(
     navController: NavController,
@@ -911,11 +907,6 @@ fun OnlinePlaylistScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             if (isPrivatePlaylist) {
-                                Image(
-                                    painter = painterResource(R.drawable.anime_blank),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(120.dp)
-                                )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     text = stringResource(R.string.playlist_private_title),

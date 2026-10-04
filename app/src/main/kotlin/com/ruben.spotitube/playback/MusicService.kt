@@ -205,6 +205,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -350,7 +351,7 @@ class MusicService :
         if (lastPrompt?.first == mediaId && now - lastPrompt.second < 10000L) return
         lastLoginRecoveryPrompt = mediaId to now
 
-        val deepLink = Uri.parse("ARMORY://login?url=${Uri.encode(targetUrl)}")
+        val deepLink = "ARMORY://login?url=${Uri.encode(targetUrl)}".toUri()
         val intent = Intent(Intent.ACTION_VIEW, deepLink, this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -480,7 +481,6 @@ class MusicService :
     }
 
     private fun ensureStartedAsForeground() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val notification =
             try {
@@ -544,11 +544,7 @@ class MusicService :
     private fun stopForegroundAndSelf() {
         cancelIdleStop()
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                stopForeground(STOP_FOREGROUND_REMOVE)
-            } else {
-                stopForeground(true)
-            }
+            stopForeground(STOP_FOREGROUND_REMOVE)
         }
         hasCalledStartForeground = false
         stopSelf()
@@ -580,7 +576,7 @@ class MusicService :
         cancelIdleStop()
         idleStopJob =
             scope.launch {
-                delay(delayMs)
+                delay(delayMs.milliseconds)
                 if (hasBoundClients) return@launch
                 val currentState = player.playbackState
                 val shouldKeep =
@@ -597,17 +593,15 @@ class MusicService :
         ensureScopesActive()
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    CHANNEL_ID,
-                    getString(R.string.music_player),
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                }
-                val nm = getSystemService(NotificationManager::class.java)
-                nm?.createNotificationChannel(channel)
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                getString(R.string.music_player),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
+            val nm = getSystemService(NotificationManager::class.java)
+            nm?.createNotificationChannel(channel)
         } catch (e: Exception) {
             reportException(e)
         }
@@ -713,7 +707,7 @@ class MusicService :
             player.volume = finalVolume
         }
 
-        playerVolume.debounce(1000).collect(ioScope) { volume ->
+        playerVolume.debounce(1000.milliseconds).collect(ioScope) { volume ->
             dataStore.edit { settings ->
                 settings[PlayerVolumeKey] = volume
             }
@@ -897,11 +891,11 @@ class MusicService :
             .map { prefs ->
                 (prefs[SmartTrimmerKey] ?: false) to (prefs[MaxSongCacheSizeKey] ?: 1024)
             }
-            .debounce(300)
+            .debounce(300.milliseconds)
             .distinctUntilChanged()
             .collectLatest(ioScope) { (enabled, maxSongCacheSizeMb) ->
                 if (!enabled) return@collectLatest
-                if (maxSongCacheSizeMb <= 0 || maxSongCacheSizeMb == -1) return@collectLatest
+                if (maxSongCacheSizeMb <= 0) return@collectLatest
                 val bytesPerMb = 1024L * 1024L
                 val safeSizeMb = maxSongCacheSizeMb.toLong().coerceAtMost(Long.MAX_VALUE / bytesPerMb)
                 val limitBytes = safeSizeMb * bytesPerMb
@@ -925,7 +919,7 @@ class MusicService :
                 
                 readPersistentObject<PersistPlayerState>(PERSISTENT_PLAYER_STATE_FILE)
                     ?.let { playerState ->
-                    delay(1000)
+                    delay(1000.milliseconds)
                     withContext(Dispatchers.Main) {
                         player.repeatMode = playerState.repeatMode
                         player.shuffleModeEnabled = playerState.shuffleModeEnabled
@@ -1013,7 +1007,7 @@ class MusicService :
 
             if (items.size > initialChunk.size) {
                 scope.launch(SilentHandler) {
-                    delay(2000)
+                    delay(2000.milliseconds)
                     if (!isActive || player.mediaItemCount == 0) return@launch
                     if (windowStart > 0) {
                         player.addMediaItems(0, items.subList(0, windowStart))
@@ -1198,7 +1192,7 @@ class MusicService :
             if (!isAudioDevice) return
 
             scope.launch {
-                delay(1500)
+                delay(1500.milliseconds)
                 handleBluetoothAutoStart()
             }
         }
@@ -1520,7 +1514,7 @@ class MusicService :
                 if (items.size > initialChunk.size) {
                     scope.launch(SilentHandler) {
                         try {
-                            delay(2000) // Allow UI to settle
+                            delay(2000.milliseconds) // Allow UI to settle
                             if (!isActive) return@launch
                             
                             // Add preceding items
@@ -1630,7 +1624,7 @@ class MusicService :
                     .onSuccess {
                         YouTube
                             .next(WatchEndpoint(playlistId = it.endpoint.playlistId))
-                            .onSuccess {
+                            .onSuccess { it ->
                                 val mediaItems = it.items.map { song -> song.toMediaItem() }
                                 withContext(Dispatchers.Main) {
                                     val currentSeed =
@@ -2071,7 +2065,7 @@ class MusicService :
                                     )
                             }
                         }
-                        delay(750)
+                        delay(750.milliseconds)
                     }
                 }
         }
@@ -2232,7 +2226,7 @@ class MusicService :
                                     )
                             }
                         }
-                        delay(750)
+                        delay(750.milliseconds)
                     }
                 }
         }
@@ -3044,7 +3038,7 @@ class MusicService :
                 while (togetherClient === client) {
                     val now = android.os.SystemClock.elapsedRealtime()
                     client.sendHeartbeat(sessionId = sessionId, pingId = pingId++, clientElapsedRealtimeMs = now)
-                    delay(2000)
+                    delay(2000.milliseconds)
                 }
             }
     }
@@ -3752,7 +3746,7 @@ class MusicService :
             }
         }
 
-        if (shouldAttemptStreamRefresh && currentMediaId != null && shouldSkipRedundantStreamRefresh(currentMediaId)) {
+        if (shouldAttemptStreamRefresh && shouldSkipRedundantStreamRefresh(currentMediaId)) {
             Timber.tag("MusicService").w(
                 "Skipping redundant stream refresh for $currentMediaId after validated recovery; resuming playback without URL refresh"
             )
@@ -3762,7 +3756,7 @@ class MusicService :
             return
         }
 
-        if (shouldAttemptStreamRefresh && currentMediaId != null && markAndCheckRecoveryAllowance(currentMediaId)) {
+        if (shouldAttemptStreamRefresh && markAndCheckRecoveryAllowance(currentMediaId)) {
             val failingStreamClientKey =
                 playbackUrlCache[currentMediaId]
                     ?.first
@@ -3850,10 +3844,10 @@ class MusicService :
                     }.sortedBy { it.lastTouchTimestamp }
                 }.getOrNull().orEmpty()
 
-            for (candidate in candidates) {
+            for ((key, _, sizeBytes) in candidates) {
                 if (totalBytes <= limitBytes) break
-                val removedSize = candidate.sizeBytes.coerceAtLeast(0L)
-                runCatching { playerCache.removeResource(candidate.key) }
+                val removedSize = sizeBytes.coerceAtLeast(0L)
+                runCatching { playerCache.removeResource(key) }
                 totalBytes -= removedSize
             }
         }
@@ -3966,11 +3960,10 @@ class MusicService :
                 }
             }
 
-            val nonNullPlayback = playbackData
             run {
-                val format = nonNullPlayback.format
-                val loudnessDb = nonNullPlayback.audioConfig?.loudnessDb
-                val perceptualLoudnessDb = nonNullPlayback.audioConfig?.perceptualLoudnessDb
+                val format = playbackData.format
+                val loudnessDb = playbackData.audioConfig?.loudnessDb
+                val perceptualLoudnessDb = playbackData.audioConfig?.perceptualLoudnessDb
                 
                 Timber.tag("AudioNormalization").d("Storing format for $mediaId with loudnessDb: $loudnessDb, perceptualLoudnessDb: $perceptualLoudnessDb")
                 if (loudnessDb == null && perceptualLoudnessDb == null) {
@@ -3989,16 +3982,16 @@ class MusicService :
                             contentLength = format.contentLength!!,
                             loudnessDb = loudnessDb,
                             perceptualLoudnessDb = perceptualLoudnessDb,
-                            playbackUrl = nonNullPlayback.playbackTracking?.videostatsPlaybackUrl?.baseUrl
+                            playbackUrl = playbackData.playbackTracking?.videostatsPlaybackUrl?.baseUrl
                         )
                     )
                 }
-                scope.launch(Dispatchers.IO) { recoverSong(mediaId, nonNullPlayback) }
+                scope.launch(Dispatchers.IO) { recoverSong(mediaId, playbackData) }
 
-                val streamUrl = nonNullPlayback.streamUrl
+                val streamUrl = playbackData.streamUrl
 
                 playbackUrlCache[mediaId] =
-                    streamUrl to System.currentTimeMillis() + (nonNullPlayback.streamExpiresInSeconds * 1000L)
+                    streamUrl to System.currentTimeMillis() + (playbackData.streamExpiresInSeconds * 1000L)
                 val length = if (dataSpec.length >= 0) minOf(dataSpec.length, CHUNK_LENGTH) else CHUNK_LENGTH
                 return@Factory dataSpec.withUri(streamUrl.toUri()).subrange(dataSpec.uriPositionOffset, length)
             }
@@ -4074,7 +4067,7 @@ class MusicService :
         runCatching {
             val builder = player.trackSelectionParameters.buildUpon()
             val audioOffloadPrefsClass = Class.forName("androidx.media3.common.AudioOffloadPreferences")
-            val audioOffloadPrefsBuilderClass = Class.forName("androidx.media3.common.AudioOffloadPreferences\$Builder")
+            val audioOffloadPrefsBuilderClass = Class.forName($$"androidx.media3.common.AudioOffloadPreferences$Builder")
 
             val modeFieldName = if (enabled) "AUDIO_OFFLOAD_MODE_ENABLED" else "AUDIO_OFFLOAD_MODE_DISABLED"
             val mode = audioOffloadPrefsClass.getField(modeFieldName).getInt(null)
@@ -4099,7 +4092,7 @@ class MusicService :
         val wl = wakeLock ?: return
         val shouldHold = wakelockEnabled && player.isPlaying
         if (shouldHold && !wl.isHeld) {
-            wl.acquire()
+            wl.acquire(10*60*1000L)
         } else if (!shouldHold && wl.isHeld) {
             wl.release()
         }
@@ -4459,7 +4452,7 @@ class MusicService :
         if (player.mediaItemCount > 0 && player.currentMediaItem != null) {
             currentMediaMetadata.value = player.currentMetadata
             scope.launch {
-                delay(50)
+                delay(50.milliseconds)
                 refreshPlaybackNotification()
             }
         }
@@ -4486,11 +4479,7 @@ class MusicService :
             }
             runCatching { stopAndClearPlayback() }
             runCatching {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                } else {
-                    stopForeground(true)
-                }
+                stopForeground(STOP_FOREGROUND_REMOVE)
             }
             stopSelf()
         } catch (_: Exception) {}

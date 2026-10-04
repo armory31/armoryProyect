@@ -30,10 +30,10 @@ sealed class QueueType : Serializable {
     object YOUTUBE : QueueType() {
         private const val serialVersionUID = 1L
     }
-    object YOUTUBE_ALBUM_RADIO : QueueType() {
+    object YOUTUBEALBUMRADIO : QueueType() {
         private const val serialVersionUID = 1L
     }
-    object LOCAL_ALBUM_RADIO : QueueType() {
+    object LOCALALBUMRADIO : QueueType() {
         private const val serialVersionUID = 1L
     }
 }

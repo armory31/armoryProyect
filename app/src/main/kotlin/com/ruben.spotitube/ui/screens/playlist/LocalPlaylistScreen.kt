@@ -13,7 +13,6 @@ import androidx.compose.material3.ButtonDefaults
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -64,6 +62,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -163,8 +162,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDateTime
 
-@SuppressLint("RememberReturnType")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@SuppressLint("RememberReturnType", "LocalContextGetResourceValueCall")
 @Composable
 fun LocalPlaylistScreen(
     navController: NavController,
@@ -257,7 +255,7 @@ fun LocalPlaylistScreen(
     }
 
     val downloadUtil = LocalDownloadUtil.current
-    var downloadState by remember { mutableStateOf(Download.STATE_STOPPED) }
+    var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
 
     val editable: Boolean = playlist?.playlist?.isEditable == true
 
@@ -853,8 +851,8 @@ fun LocalPlaylistScreen(
                                         },
                                         shape = RoundedCornerShape(24.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
-                                            contentColor = androidx.compose.ui.graphics.Color.Black
+                                            containerColor = Color.Transparent,
+                                            contentColor = Color.Black
                                         ),
                                         contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                         modifier = Modifier
@@ -865,7 +863,7 @@ fun LocalPlaylistScreen(
                                         Icon(
                                             painter = painterResource(R.drawable.play),
                                             contentDescription = stringResource(R.string.play),
-                                            tint = androidx.compose.ui.graphics.Color.Black,
+                                            tint = Color.Black,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
@@ -882,8 +880,8 @@ fun LocalPlaylistScreen(
                                         },
                                         shape = RoundedCornerShape(24.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
-                                            contentColor = androidx.compose.ui.graphics.Color.Black
+                                            containerColor = Color.Transparent,
+                                            contentColor = Color.Black
                                         ),
                                         contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                         modifier = Modifier
@@ -894,7 +892,7 @@ fun LocalPlaylistScreen(
                                         Icon(
                                             painter = painterResource(R.drawable.shuffle),
                                             contentDescription = stringResource(R.string.shuffle),
-                                            tint = androidx.compose.ui.graphics.Color.Black,
+                                            tint = Color.Black,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
@@ -934,7 +932,7 @@ fun LocalPlaylistScreen(
                                             }
                                         },
                                         shape = CircleShape,
-                                        color = androidx.compose.ui.graphics.Color.Transparent,
+                                        color = Color.Transparent,
                                         modifier = Modifier
                                             .size(48.dp)
                                             .background(ArmoryColors.Copper, shape = CircleShape)
@@ -948,7 +946,7 @@ fun LocalPlaylistScreen(
                                                     Icon(
                                                         painter = painterResource(R.drawable.offline),
                                                         contentDescription = null,
-                                                        tint = androidx.compose.ui.graphics.Color.Black,
+                                                        tint = Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
@@ -956,14 +954,14 @@ fun LocalPlaylistScreen(
                                                     CircularProgressIndicator(
                                                         strokeWidth = 2.dp,
                                                         modifier = Modifier.size(24.dp),
-                                                        color = androidx.compose.ui.graphics.Color.Black
+                                                        color = Color.Black
                                                     )
                                                 }
                                                 else -> {
                                                     Icon(
                                                         painter = painterResource(R.drawable.download),
                                                         contentDescription = null,
-                                                        tint = androidx.compose.ui.graphics.Color.Black,
+                                                        tint = Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }

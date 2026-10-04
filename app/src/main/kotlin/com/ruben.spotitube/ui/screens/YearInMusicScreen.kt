@@ -6,6 +6,7 @@
 
 package com.ruben.spotitube.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.view.View
 import android.view.ViewTreeObserver
@@ -18,7 +19,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,7 +48,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -124,6 +123,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design tokens
@@ -235,7 +235,7 @@ private enum class InsightPage {
 // Main screen
 // ─────────────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun YearInMusicScreen(
     navController: NavController,
@@ -505,7 +505,6 @@ private suspend fun awaitNextPreDraw(view: View) = suspendCancellableCoroutine{ 
 // Page content router
 // ─────────────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InsightPageContent(
     page: InsightPage,
@@ -901,7 +900,7 @@ private fun TopSongsListPage(songs: List<SongWithStats>, modifier: Modifier = Mo
 
                 var visible by remember { mutableStateOf(false) }
                 LaunchedEffect(Unit) {
-                    delay(revealDelay.toLong())
+                    delay(revealDelay.toLong().milliseconds)
                     visible = true
                 }
                 val animAlpha by animateFloatAsState(
@@ -987,7 +986,6 @@ private fun TopSongsListPage(songs: List<SongWithStats>, modifier: Modifier = Mo
 // 4. Song spotlight (#1 song full-screen)
 // ─────────────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SongSpotlightPage(
     song: SongWithStats?,
@@ -1092,7 +1090,6 @@ private fun SongSpotlightPage(
 // 5. Artist spotlight
 // ─────────────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ArtistSpotlightPage(
     artist: Artist?,
@@ -1943,7 +1940,7 @@ private fun rememberAnimatedLong(target: Long, durationMs: Int = 1400): Long {
             val eased    = FastOutSlowInEasing.transform(progress)
             current      = (target * eased).toLong()
             if (elapsed >= durationMs) break
-            delay(16L)
+            delay(16L.milliseconds)
         }
     }
     return current

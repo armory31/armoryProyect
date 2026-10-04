@@ -8,6 +8,7 @@
 
 package com.ruben.spotitube.utils
 
+import android.annotation.SuppressLint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
@@ -22,6 +23,7 @@ object GlobalLog {
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs = _logs.asStateFlow()
 
+    @SuppressLint("ConstantLocale")
     private val timeFormat = SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())
 
     fun append(level: Int, tag: String?, message: String) {

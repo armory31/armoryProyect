@@ -51,7 +51,7 @@ class AlbumViewModel
 constructor(
     private val database: MusicDatabase,
     savedStateHandle: SavedStateHandle,
-    private val libraryStateHolder: LibraryStateHolder,
+    libraryStateHolder: LibraryStateHolder,
     private val syncManager: SyncManager
 ) : ViewModel() {
     val albumId = savedStateHandle.get<String>("albumId")!!

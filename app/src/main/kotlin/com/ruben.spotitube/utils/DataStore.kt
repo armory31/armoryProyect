@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.properties.ReadOnlyProperty
+import kotlin.time.Duration.Companion.milliseconds
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 object PreferenceStore {
@@ -72,7 +73,7 @@ operator fun <T> DataStore<Preferences>.get(key: Preferences.Key<T>): T? =
             null
         } else {
             runBlocking(Dispatchers.IO) {
-                withTimeoutOrNull(1500) {
+                withTimeoutOrNull(1500.milliseconds) {
                     data.first()[key]
                 }
             }
@@ -87,7 +88,7 @@ fun <T> DataStore<Preferences>.get(
             defaultValue
         } else {
             runBlocking(Dispatchers.IO) {
-                withTimeoutOrNull(1500) {
+                withTimeoutOrNull(1500.milliseconds) {
                     data.first()[key]
                 } ?: defaultValue
             }

@@ -18,8 +18,6 @@ import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -48,11 +46,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -150,7 +145,6 @@ import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ArtistScreen(
     navController: NavController,
@@ -737,8 +731,8 @@ fun ArtistScreen(
                                         viewModel.toggleLike()
                                     },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isSubscribed) androidx.compose.ui.graphics.Color.Transparent else androidx.compose.ui.graphics.Color.Transparent,
-                                        contentColor = if (isSubscribed) androidx.compose.ui.graphics.Color.Black else ArmoryColors.Gold1
+                                        containerColor = if (isSubscribed) Color.Transparent else Color.Transparent,
+                                        contentColor = if (isSubscribed) Color.Black else ArmoryColors.Gold1
                                     ),
                                     contentPadding = PaddingValues(0.dp),
                                     shape = RoundedCornerShape(24.dp),
@@ -757,7 +751,7 @@ fun ArtistScreen(
                                             if (isSubscribed) R.drawable.done else R.drawable.add
                                         ),
                                         contentDescription = null,
-                                        tint = if (isSubscribed) androidx.compose.ui.graphics.Color.Black else ArmoryColors.Gold1,
+                                        tint = if (isSubscribed) Color.Black else ArmoryColors.Gold1,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -765,7 +759,7 @@ fun ArtistScreen(
                                         text = stringResource(
                                             if (isSubscribed) R.string.subscribed else R.string.subscribe
                                         ),
-                                        color = if (isSubscribed) androidx.compose.ui.graphics.Color.Black else ArmoryColors.Gold1,
+                                        color = if (isSubscribed) Color.Black else ArmoryColors.Gold1,
                                         maxLines = 1
                                     )
                                 }
@@ -790,8 +784,8 @@ fun ArtistScreen(
                                     enabled = if (showLocal) librarySongs.isNotEmpty() else artistPage?.artist?.shuffleEndpoint != null,
                                     shape = RoundedCornerShape(24.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
-                                        contentColor = androidx.compose.ui.graphics.Color.Black
+                                        containerColor = Color.Transparent,
+                                        contentColor = Color.Black
                                     ),
                                     contentPadding = PaddingValues(0.dp),
                                     modifier = Modifier
@@ -802,13 +796,13 @@ fun ArtistScreen(
                                     Icon(
                                         painter = painterResource(R.drawable.shuffle),
                                         contentDescription = null,
-                                        tint = androidx.compose.ui.graphics.Color.Black,
+                                        tint = Color.Black,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = stringResource(R.string.shuffle),
-                                        color = androidx.compose.ui.graphics.Color.Black,
+                                        color = Color.Black,
                                         maxLines = 1
                                     )
                                 }
@@ -823,8 +817,8 @@ fun ArtistScreen(
                                         },
                                         shape = RoundedCornerShape(24.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
-                                            contentColor = androidx.compose.ui.graphics.Color.Black
+                                            containerColor = Color.Transparent,
+                                            contentColor = Color.Black
                                         ),
                                         contentPadding = PaddingValues(0.dp),
                                         modifier = Modifier
@@ -836,13 +830,13 @@ fun ArtistScreen(
                                         Icon(
                                             painter = painterResource(R.drawable.radio),
                                             contentDescription = null,
-                                            tint = androidx.compose.ui.graphics.Color.Black,
+                                            tint = Color.Black,
                                             modifier = Modifier.size(20.dp)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = stringResource(R.string.radio),
-                                            color = androidx.compose.ui.graphics.Color.Black
+                                            color = Color.Black
                                         )
                                     }
                                 }

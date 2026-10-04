@@ -10,6 +10,7 @@ package com.ruben.spotitube.innertube
 
 import com.ruben.spotitube.innertube.models.Context
 import com.ruben.spotitube.innertube.models.MediaInfo
+import com.ruben.spotitube.innertube.models.PlaylistDeleteBody
 import com.ruben.spotitube.innertube.models.ReturnYouTubeDislikeResponse
 import com.ruben.spotitube.innertube.models.YouTubeClient
 import com.ruben.spotitube.innertube.models.YouTubeLocale
@@ -25,23 +26,20 @@ import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.net.Proxy
 import java.io.IOException
 import kotlinx.coroutines.delay
 import java.util.*
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Provide access to InnerTube endpoints.
  * For making HTTP requests, not parsing response.
  */
-@OptIn(ExperimentalEncodingApi::class)
 class InnerTube {
     private var httpClient = createClient()
 
@@ -68,7 +66,6 @@ class InnerTube {
 
     var useLoginForBrowse: Boolean = false
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun createClient() = HttpClient(OkHttp) {
         expectSuccess = true
 
@@ -146,7 +143,7 @@ class InnerTube {
             } catch (e: IOException) {
                 attempt++
                 if (attempt >= maxAttempts) throw e
-                delay(currentDelay)
+                delay(duration = currentDelay.milliseconds)
                 currentDelay = (currentDelay * factor).toLong()
             }
         }
@@ -330,7 +327,7 @@ class InnerTube {
             setBody(
                 GetTranscriptBody(
                     context = client.toContext(locale, null, null),
-                    params = Base64.Default.encode(
+                    params = Base64.encode(
                         "\n${11.toChar()}$videoId".encodeToByteArray()
                     )
                 )

@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class CrossfadeAudio(
     private val player: ExoPlayer,
@@ -95,25 +96,25 @@ internal class CrossfadeAudio(
             val fadeMs = crossfadeDurationMs.value
             if (fadeMs <= 0) {
                 stopOverlapCrossfade(resetMainFade = true)
-                delay(250)
+                delay(250.milliseconds)
                 continue
             }
 
             if (!player.playWhenReady) {
                 stopOverlapCrossfade(resetMainFade = true)
-                delay(150)
+                delay(150.milliseconds)
                 continue
             }
 
             if (handoffActive) {
                 updateVolumes()
-                delay(50)
+                delay(50.milliseconds)
                 continue
             }
 
             if (!crossfadeActive && (player.playbackState != Player.STATE_READY || !player.isPlaying)) {
                 stopOverlapCrossfade(resetMainFade = true)
-                delay(150)
+                delay(150.milliseconds)
                 continue
             }
 
@@ -123,13 +124,13 @@ internal class CrossfadeAudio(
 
             if (player.repeatMode == Player.REPEAT_MODE_ONE) {
                 stopOverlapCrossfade(resetMainFade = true)
-                delay(150)
+                delay(150.milliseconds)
                 continue
             }
 
             if (!crossfadeActive && (nextIndex == C.INDEX_UNSET || durationMs <= 0 || durationMs == C.TIME_UNSET)) {
                 stopOverlapCrossfade(resetMainFade = true)
-                delay(150)
+                delay(150.milliseconds)
                 continue
             }
 
@@ -140,7 +141,7 @@ internal class CrossfadeAudio(
 
                 if (!onTarget && (nextIndex == C.INDEX_UNSET || durationMs <= 0 || durationMs == C.TIME_UNSET)) {
                     stopOverlapCrossfade(resetMainFade = true)
-                    delay(150)
+                    delay(150.milliseconds)
                     continue
                 }
 
@@ -149,12 +150,12 @@ internal class CrossfadeAudio(
                 val nextChanged = !onTarget && crossfadeTargetIndex != C.INDEX_UNSET && nextIndex != crossfadeTargetIndex
                 if (tooFarFromEnd || nextChanged) {
                     stopOverlapCrossfade(resetMainFade = true)
-                    delay(100)
+                    delay(100.milliseconds)
                     continue
                 }
 
                 updateVolumes()
-                delay(50)
+                delay(50.milliseconds)
                 continue
             }
 
@@ -169,12 +170,12 @@ internal class CrossfadeAudio(
 
             if (overlapPrimedIndex == nextIndex && remainingMs in 1L..fadeMs.toLong()) {
                 beginOverlapCrossfade(fadeMs = fadeMs, remainingMs = remainingMs)
-                delay(50)
+                delay(50.milliseconds)
                 continue
             }
 
             if (playbackFadeFactor.value != 1f) playbackFadeFactor.value = 1f
-            delay(100)
+            delay(100.milliseconds)
         }
     }
 

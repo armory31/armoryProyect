@@ -26,6 +26,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.guava.future
 import kotlin.math.roundToInt
+import androidx.core.graphics.scale
+import kotlin.time.Duration.Companion.milliseconds
 
 class CoilBitmapLoader(
     private val context: Context,
@@ -81,7 +83,7 @@ class CoilBitmapLoader(
                                             )
                                         val targetWidth = (bitmap.width * scale).roundToInt().coerceAtLeast(1)
                                         val targetHeight = (bitmap.height * scale).roundToInt().coerceAtLeast(1)
-                                        Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true)
+                                        bitmap.scale(targetWidth, targetHeight)
                                     }
 
                                 if (scaled == null) {
@@ -95,7 +97,7 @@ class CoilBitmapLoader(
                         }
 
                         is ErrorResult -> {
-                            result.throwable?.let { reportException(it) }
+                            result.throwable.let { reportException(it) }
                         }
                     }
                 } catch (e: Exception) {
@@ -103,7 +105,7 @@ class CoilBitmapLoader(
                 }
 
                 if (attempt < attempts) {
-                    delay(250L * attempt)
+                    delay((250L * attempt).milliseconds)
                     continue
                 }
             }

@@ -21,7 +21,6 @@
 - [Visión General](#visión-general)
 - [Stack Tecnológico](#stack-tecnológico)
 - [Características Principales](#características-principales)
-- [Documentación](#documentación)
 - [Instalación](#instalación)
 - [Compilación desde Código Fuente](#compilación-desde-código-fuente)
 - [Contribuciones](#contribuciones)

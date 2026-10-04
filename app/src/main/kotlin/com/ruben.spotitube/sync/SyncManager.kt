@@ -198,9 +198,7 @@ class SyncManager @Inject constructor(
         }
         withContext(Dispatchers.IO) {
             val channelId = artist.channelId ?: YouTube.getChannelId(artist.id)
-            if (channelId != null) {
-                YouTube.subscribeChannel(channelId, !isCurrentlyLiked)
-            }
+            YouTube.subscribeChannel(channelId, !isCurrentlyLiked)
         }
     }
 
@@ -319,7 +317,7 @@ class SyncManager @Inject constructor(
                     albumName = dto.albumName,
                     isLiked = true
                 ))
-                artistId?.let { database.insert(SongArtistMap(songId = dto.videoId, artistId = it, position = 0)) }
+                artistId.let { database.insert(SongArtistMap(songId = dto.videoId, artistId = it, position = 0)) }
             } else if (!existingSong.song.isLiked) {
                 database.upsert(existingSong.song.copy(isLiked = true))
             }
@@ -366,7 +364,7 @@ class SyncManager @Inject constructor(
         }
     }
 
-    private suspend fun ensureArtistExists(name: String): String {
+    private fun ensureArtistExists(name: String): String {
         val existing = database.artistByName(name)
         if (existing != null) return existing.id
         val newId = ArtistEntity.generateArtistId()
@@ -378,7 +376,7 @@ class SyncManager @Inject constructor(
         if (database.getSongById(sDto.id) == null) {
             val artistId = ensureArtistExists(sDto.artistName)
             database.insert(SongEntity(id = sDto.id, title = sDto.title, thumbnailUrl = sDto.thumbnailUrl))
-            artistId?.let { database.insert(SongArtistMap(songId = sDto.id, artistId = it, position = 0)) }
+            artistId.let { database.insert(SongArtistMap(songId = sDto.id, artistId = it, position = 0)) }
         }
     }
 
@@ -417,11 +415,7 @@ class SyncManager @Inject constructor(
         }
     }
 
-    suspend fun removeSongFromPlaylist(playlistId: String, songId: String) {
-        // Implementation for local removal needed
-    }
-
-    suspend fun deletePlaylist(playlistId: String) {
+    fun deletePlaylist(playlistId: String) {
         database.deletePlaylistById(playlistId)
     }
 }

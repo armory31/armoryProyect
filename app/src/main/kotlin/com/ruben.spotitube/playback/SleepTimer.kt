@@ -9,6 +9,7 @@
 package com.ruben.spotitube.playback
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.media3.common.MediaItem
@@ -24,7 +25,7 @@ class SleepTimer(
     val player: Player,
 ) : Player.Listener {
     private var sleepTimerJob: Job? = null
-    var triggerTime by mutableStateOf(-1L)
+    var triggerTime by mutableLongStateOf(-1L)
         private set
     var pauseWhenSongEnd by mutableStateOf(false)
         private set

@@ -13,8 +13,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.preferences.core.edit
@@ -38,6 +36,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+import androidx.core.net.toUri
 
 object UpdateNotificationManager {
     private const val CHANNEL_ID = "update_notification_channel"
@@ -48,16 +47,14 @@ object UpdateNotificationManager {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun createNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = context.getString(R.string.update_notification_channel_name)
-            val descriptionText = context.getString(R.string.update_notification_channel_desc)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
-            notificationManager?.createNotificationChannel(channel)
+        val name = context.getString(R.string.update_notification_channel_name)
+        val descriptionText = context.getString(R.string.update_notification_channel_desc)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
         }
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        notificationManager?.createNotificationChannel(channel)
     }
 
     fun schedulePeriodicUpdateCheck(context: Context) {
@@ -100,7 +97,7 @@ object UpdateNotificationManager {
 
                 val updateChannel = dataStore.data.map { 
                     it[UpdateChannelKey]?.let { value -> 
-                        try { UpdateChannel.valueOf(value) } catch (e: Exception) { UpdateChannel.STABLE }
+                        try { UpdateChannel.valueOf(value) } catch (_: Exception) { UpdateChannel.STABLE }
                     } ?: UpdateChannel.STABLE
                 }.first()
 
@@ -118,7 +115,7 @@ object UpdateNotificationManager {
                         notifyIfNewVersion(context, latestVersion)
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Silently fail
             }
         }
@@ -133,7 +130,7 @@ object UpdateNotificationManager {
                 showUpdateNotification(context, latestVersion)
                 dataStore.edit { it[LastNotifiedVersionKey] = latestVersion }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Silently fail
         }
     }
@@ -152,7 +149,7 @@ object UpdateNotificationManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val downloadIntent = Intent(Intent.ACTION_VIEW, Uri.parse(Updater.getLatestDownloadUrl()))
+        val downloadIntent = Intent(Intent.ACTION_VIEW, Updater.getLatestDownloadUrl().toUri())
         val downloadPendingIntent = PendingIntent.getActivity(
             context,
             1,
@@ -176,7 +173,7 @@ object UpdateNotificationManager {
 
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             // Missing POST_NOTIFICATIONS permission
         }
     }

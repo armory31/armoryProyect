@@ -8,8 +8,8 @@
 
 package com.ruben.spotitube.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
@@ -122,7 +122,7 @@ import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickPicksSection(
     quickPicks: List<Song>,
@@ -247,7 +247,6 @@ fun QuickPicksSection(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SpeedDialSection(
     speedDialSongs: List<Song>,
@@ -269,6 +268,7 @@ fun SpeedDialSection(
     val rowCount = min(3, distinctSpeedDial.size + 1)
     val gridHeight = (tileSize * rowCount) + (spacing * (rowCount - 1))
 
+    @SuppressLint("LocalContextGetResourceValueCall")
     fun playSpeedDialQueue(startIndex: Int) {
         if (distinctSpeedDial.isEmpty()) return
         playerConnection.playQueue(
@@ -461,7 +461,6 @@ fun SpeedDialSection(
 /**
  * Keep Listening section - horizontal grid of local items
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun KeepListeningSection(
     keepListening: List<LocalItem>,
@@ -523,7 +522,6 @@ fun KeepListeningSection(
 /**
  * Forgotten Favorites section - horizontal grid of songs
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ForgottenFavoritesSection(
     forgottenFavorites: List<Song>,
@@ -614,7 +612,6 @@ fun ForgottenFavoritesSection(
 /**
  * Account Playlists section - horizontal row of YouTube playlists
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AccountPlaylistsSection(
     accountPlaylists: List<PlaylistItem>,
@@ -660,7 +657,6 @@ fun AccountPlaylistsSection(
 /**
  * Similar Recommendations section
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SimilarRecommendationsSection(
     recommendation: SimilarRecommendation,
@@ -702,7 +698,6 @@ fun SimilarRecommendationsSection(
 /**
  * HomePage Section - a single section from YouTube home page
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomePageSectionContent(
     section: HomePage.Section,
@@ -774,7 +769,6 @@ fun HomeLoadingShimmer(modifier: Modifier = Modifier) {
 /**
  * Wrapper for YouTube grid items with click handling
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun YouTubeGridItemWrapper(
     item: YTItem,
@@ -842,7 +836,6 @@ private fun YouTubeGridItemWrapper(
 /**
  * Local item grid item for songs, albums, artists
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LocalGridItem(
     item: LocalItem,
@@ -1049,8 +1042,7 @@ fun HomePageSectionTitle(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.AccountPlaylistsContainer(
+fun LazyListScope.accountPlaylistsContainer(
     viewModel: HomeViewModel,
     accountName: String?,
     accountImageUrl: String?,
@@ -1094,8 +1086,7 @@ fun LazyListScope.AccountPlaylistsContainer(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.SimilarRecommendationsContainer(
+fun LazyListScope.similarRecommendationsContainer(
     viewModel: HomeViewModel,
     mediaMetadata: MediaMetadata?,
     isPlaying: Boolean,

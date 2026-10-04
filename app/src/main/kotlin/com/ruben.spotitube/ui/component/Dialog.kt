@@ -9,7 +9,6 @@
 package com.ruben.spotitube.ui.component
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -40,7 +39,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +77,8 @@ import androidx.navigation.NavController
 import com.ruben.spotitube.R
 import com.ruben.spotitube.ui.screens.settings.AccountSettings
 import kotlinx.coroutines.delay
+import androidx.core.net.toUri
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun DefaultDialog(
@@ -217,7 +217,6 @@ fun AccountSettingsDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionPromptDialog(
     title: String? = null,
@@ -366,7 +365,7 @@ fun TextFieldDialog(
 
     LaunchedEffect(Unit) {
         if (autoFocus) {
-            delay(300)
+            delay(300.milliseconds)
             focusRequester.requestFocus()
         }
     }
@@ -476,7 +475,7 @@ fun EditPlaylistDialog(
 
     fun releasePersistablePermissionIfPossible(uriString: String?) {
         if (uriString.isNullOrBlank()) return
-        val uri = runCatching { Uri.parse(uriString) }.getOrNull() ?: return
+        val uri = runCatching { uriString.toUri() }.getOrNull() ?: return
         if (uri.scheme != "content") return
         runCatching {
             context.contentResolver.releasePersistableUriPermission(

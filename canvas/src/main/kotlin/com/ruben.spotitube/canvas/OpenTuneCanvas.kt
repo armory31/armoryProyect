@@ -166,9 +166,7 @@ object OpenTuneCanvas {
 
     private fun cacheKey(prefix: String, vararg parts: String): String {
         val normalized =
-            parts
-                .map { it.trim().lowercase(Locale.ROOT) }
-                .joinToString("|")
+            parts.joinToString("|") { it.trim().lowercase(Locale.ROOT) }
         return "$prefix|$normalized"
     }
 }

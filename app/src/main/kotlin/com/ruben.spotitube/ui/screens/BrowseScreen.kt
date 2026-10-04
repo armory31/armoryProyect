@@ -8,13 +8,11 @@
 
 package com.ruben.spotitube.ui.screens
  
- import androidx.compose.foundation.ExperimentalFoundationApi
  import androidx.compose.foundation.combinedClickable
  import androidx.compose.foundation.layout.asPaddingValues
  import androidx.compose.foundation.lazy.grid.GridCells
  import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
  import androidx.compose.foundation.lazy.grid.items
- import androidx.compose.material3.ExperimentalMaterial3Api
  import androidx.compose.material3.Icon
  import androidx.compose.material3.Text
  import androidx.compose.material3.TopAppBar
@@ -46,8 +44,7 @@ package com.ruben.spotitube.ui.screens
  import com.ruben.spotitube.ui.utils.backToMain
  import com.ruben.spotitube.viewmodels.BrowseViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
- @Composable
+@Composable
  fun BrowseScreen(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,

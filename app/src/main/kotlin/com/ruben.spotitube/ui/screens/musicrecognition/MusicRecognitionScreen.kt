@@ -10,7 +10,6 @@ package com.ruben.spotitube.ui.screens.musicrecognition
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -102,7 +101,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.window.core.layout.WindowSizeClass
@@ -117,7 +115,6 @@ import kotlinx.coroutines.Job
 fun MusicRecognitionScreen(
     navController: NavHostController,
 ) {
-    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
     var state by remember { mutableStateOf<MusicRecognitionState>(MusicRecognitionState.Ready) }
@@ -129,12 +126,8 @@ fun MusicRecognitionScreen(
         .collectAsStateWithLifecycle()
 
     val requestPermissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                launchRecognition()
-            } else {
-                state = MusicRecognitionState.PermissionRequired
-            }
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            state = MusicRecognitionState.PermissionRequired
         }
 
     fun cancelRecognition() {
@@ -144,14 +137,8 @@ fun MusicRecognitionScreen(
     }
 
     fun startOrRequestPermission() {
-        val permission =
-            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
-                    PackageManager.PERMISSION_GRANTED
-        if (permission) {
-            launchRecognition()
-        } else {
-            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
+        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+
     }
 
     DisposableEffect(Unit) {
@@ -433,9 +420,6 @@ private sealed interface MusicRecognitionState {
     data class NoMatch(val message: String) : MusicRecognitionState
     data class Error(val message: String) : MusicRecognitionState
 }
-
-private fun launchRecognition(
-) {}
 
 private fun buildMetadata(result: RecognitionResult): String {
     val pieces =

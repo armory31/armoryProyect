@@ -20,7 +20,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -51,7 +50,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +60,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -831,7 +830,7 @@ fun AlbumListItem(
             }
 
             var downloadState by remember {
-                mutableStateOf(Download.STATE_STOPPED)
+                mutableIntStateOf(Download.STATE_STOPPED)
             }
 
             LaunchedEffect(songs) {
@@ -895,7 +894,7 @@ fun AlbumGridItem(
                 database.albumSongs(album.id).collect { songs = it }
             }
 
-            var downloadState by remember { mutableStateOf(Download.STATE_STOPPED) }
+            var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
 
             LaunchedEffect(songs) {
                 if (songs.isEmpty()) return@LaunchedEffect
@@ -1924,7 +1923,7 @@ fun SwipeToSongBox(
     val ctx = LocalContext.current
     val player = LocalPlayerConnection.current
     val scope = rememberCoroutineScope()
-    val offset = remember { mutableStateOf(0f) }
+    val offset = remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     val threshold = 300f
 
     val dragState = rememberDraggableState { delta ->

@@ -69,7 +69,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@SuppressLint("MutableCollectionMutableState")
+@SuppressLint("MutableCollectionMutableState", "LocalContextGetResourceValueCall")
 @Composable
 fun SelectionSongMenu(
     songSelection: List<Song>,

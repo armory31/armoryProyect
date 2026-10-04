@@ -25,11 +25,12 @@ import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class LibraryStateHolder @Inject constructor(
     private val syncManager: SyncManager,
-    private val authManager: ArmoryAuthManager,
+    authManager: ArmoryAuthManager,
     private val databaseDao: DatabaseDao
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -41,7 +42,7 @@ class LibraryStateHolder @Inject constructor(
                 flow{
                     while (true) {
                         emit(syncManager.getUserLibrary())
-                        kotlinx.coroutines.delay(300000) // Poll every 5 mins or use listeners
+                        kotlinx.coroutines.delay(300000.milliseconds) // Poll every 5 mins or use listeners
                     }
                 }
             } else {

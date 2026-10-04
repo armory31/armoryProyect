@@ -42,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -94,7 +95,7 @@ import com.ruben.spotitube.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@SuppressLint("MutableCollectionMutableState")
+@SuppressLint("MutableCollectionMutableState", "LocalContextGetResourceValueCall")
 @Composable
 fun AlbumMenu(
     originalAlbum: Album,
@@ -121,7 +122,7 @@ fun AlbumMenu(
     }
 
     var downloadState by remember {
-        mutableStateOf(STATE_STOPPED)
+        mutableIntStateOf(STATE_STOPPED)
     }
 
     LaunchedEffect(songs) {

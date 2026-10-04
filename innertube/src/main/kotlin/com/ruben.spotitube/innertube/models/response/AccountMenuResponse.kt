@@ -11,7 +11,6 @@ package com.ruben.spotitube.innertube.models.response
 import com.ruben.spotitube.innertube.models.AccountInfo
 import com.ruben.spotitube.innertube.models.Runs
 import com.ruben.spotitube.innertube.models.Thumbnails
-import com.ruben.spotitube.innertube.models.Thumbnail
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -6,9 +6,8 @@
 
 
 
-package com.ruben.spotitube.innertube.models.body
+package com.ruben.spotitube.innertube.models
 
-import com.ruben.spotitube.innertube.models.Context
 import kotlinx.serialization.Serializable
 
 @Serializable
