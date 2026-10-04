@@ -90,6 +90,7 @@ import com.ruben.spotitube.BuildConfig
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
 import com.ruben.spotitube.R
+import com.ruben.spotitube.constants.AccountAvatarUriKey
 import com.ruben.spotitube.constants.AccountChannelHandleKey
 import com.ruben.spotitube.constants.AccountNameKey
 import com.ruben.spotitube.constants.DataSyncIdKey
@@ -123,6 +124,7 @@ fun AccountSettings(
     val uriHandler = LocalUriHandler.current
 
     val (accountNamePref, onAccountNameChange) = rememberPreference(AccountNameKey, "")
+    val (accountAvatarUriPref) = rememberPreference(AccountAvatarUriKey, "")
     val (accountChannelHandle, onAccountChannelHandleChange) = rememberPreference(AccountChannelHandleKey, "")
     val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
     val (poToken, onPoTokenChange) = rememberPreference(PoTokenKey, "")
@@ -138,7 +140,7 @@ fun AccountSettings(
         ?: currentUser?.displayName?.takeIf { it.isNotBlank() }
         ?: currentUser?.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
         ?: "Usuario"
-    val accountImageUrl = currentUser?.photoUrl?.toString()
+    val accountImageUrl = accountAvatarUriPref.ifEmpty { session.getAvatarUri().ifEmpty { currentUser?.photoUrl?.toString() } }
 
     var showToken by remember { mutableStateOf(false) }
     var showTokenEditor by remember { mutableStateOf(false) }

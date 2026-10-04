@@ -6,8 +6,8 @@
 
 package com.ruben.spotitube.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +53,6 @@ import com.ruben.spotitube.ui.component.shimmer.TextPlaceholder
 import com.ruben.spotitube.viewmodels.MoodAndGenresViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MoodAndGenresScreen(
     navController: NavController,
@@ -63,7 +62,6 @@ fun MoodAndGenresScreen(
     val gridState = rememberLazyGridState()
     val density = LocalDensity.current
     val windowInsets = LocalPlayerAwareWindowInsets.current
-    val topPadding = with(density) { windowInsets.getTop(this).toDp() }
     val bottomPadding = with(density) { windowInsets.getBottom(this).toDp() }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val scrollToTop =
@@ -145,22 +143,45 @@ fun MoodAndGenresButton(
     modifier: Modifier = Modifier,
 ) {
     val base = Color(stripeColor)
+    val metallicShine = Color.White.copy(alpha = 0.35f)
+    val brightVariant = Color(
+        red = (base.red * 1.4f).coerceIn(0f, 1f),
+        green = (base.green * 1.4f).coerceIn(0f, 1f),
+        blue = (base.blue * 1.4f).coerceIn(0f, 1f),
+    )
     val darkVariant = Color(
-        red = (base.red * 0.65f).coerceIn(0f, 1f),
-        green = (base.green * 0.65f).coerceIn(0f, 1f),
-        blue = (base.blue * 0.65f).coerceIn(0f, 1f),
+        red = (base.red * 0.38f).coerceIn(0f, 1f),
+        green = (base.green * 0.38f).coerceIn(0f, 1f),
+        blue = (base.blue * 0.38f).coerceIn(0f, 1f),
     )
-    val gradient = Brush.linearGradient(
-        colors = listOf(base, darkVariant),
+
+    val metallicGradient = Brush.linearGradient(
+        colors = listOf(
+            darkVariant,
+            base,
+            brightVariant,
+            metallicShine,
+            brightVariant,
+            base,
+            darkVariant
+        ),
         start = Offset(0f, 0f),
-        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
+        end = Offset(500f, 300f),
     )
+
     Box(
         contentAlignment = Alignment.BottomStart,
         modifier = modifier
             .height(MoodAndGenresButtonHeight)
             .clip(RoundedCornerShape(16.dp))
-            .background(gradient)
+            .background(metallicGradient)
+            .border(
+                1.5.dp,
+                Brush.linearGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.5f), Color.Transparent, Color.White.copy(alpha = 0.25f))
+                ),
+                RoundedCornerShape(16.dp)
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
     ) {
@@ -169,7 +190,7 @@ fun MoodAndGenresButton(
             style = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.Bold,
                 shadow = Shadow(
-                    color = Color.Black.copy(alpha = 0.35f),
+                    color = Color.Black.copy(alpha = 0.6f),
                     offset = Offset(0f, 1f),
                     blurRadius = 4f,
                 ),

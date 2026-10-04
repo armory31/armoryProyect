@@ -19,7 +19,7 @@ fun fetchGitCommitHash(): String {
         val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
         process.waitFor()
         output.ifEmpty { "unknown" }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         "unknown"
     }
 }
@@ -59,16 +59,19 @@ android {
     productFlavors {
         create("arm64") {
             dimension = "abi"
+            //noinspection ChromeOsAbiSupport
             ndk { abiFilters += "arm64-v8a" }
             buildConfigField("String", "ARCHITECTURE", "\"arm64\"")
         }
         create("armeabi") {
             dimension = "abi"
+            //noinspection ChromeOsAbiSupport
             ndk { abiFilters += "armeabi-v7a" }
             buildConfigField("String", "ARCHITECTURE", "\"armeabi\"")
         }
         create("x86") {
             dimension = "abi"
+            //noinspection ChromeOsAbiSupport
             ndk { abiFilters += "x86" }
             buildConfigField("String", "ARCHITECTURE", "\"x86\"")
         }
@@ -256,7 +259,6 @@ dependencies {
     implementation(project(":betterlyrics"))
     implementation(project(":simpmusic"))
     implementation(project(":canvas"))
-    implementation(project(":shazamkit"))
     implementation("com.github.Kyant0:m3color:2025.4")
     implementation(libs.compose.cloudy)
 

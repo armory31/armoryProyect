@@ -10,8 +10,11 @@ package com.ruben.spotitube.ui.player
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.ruben.spotitube.ArmoryColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +32,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -44,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
@@ -124,7 +127,7 @@ fun LyricsScreen(
     // slider style preference
     val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.Standard)
     val currentLyrics by playerConnection.currentLyrics.collectAsState(initial = null)
-    val (useLyricsV2) = rememberPreference(UseLyricsV2Key, defaultValue = false)
+    val (useLyricsV2) = rememberPreference(UseLyricsV2Key, defaultValue = true)
 
     // Auto-fetch lyrics when no lyrics found (same logic as refetch)
     LaunchedEffect(mediaMetadata.id, currentLyrics) {
@@ -148,7 +151,7 @@ fun LyricsScreen(
                     database.query {
                         upsert(LyricsEntity(mediaMetadata.id, lyrics))
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Handle error silently - user can manually refetch if needed
                 }
             }
@@ -310,7 +313,7 @@ fun LyricsScreen(
                             Icon(
                                 painter = painterResource(R.drawable.expand_more),
                                 contentDescription = stringResource(R.string.close),
-                                tint = textBackgroundColor,
+                                tint = ArmoryColors.Silver2,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -323,12 +326,12 @@ fun LyricsScreen(
                             Text(
                                 text = stringResource(R.string.now_playing),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = textBackgroundColor
+                                color = ArmoryColors.Gold2
                             )
                             Text(
                                 text = mediaMetadata.title,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = textBackgroundColor.copy(alpha = 0.8f),
+                                color = ArmoryColors.Gold1,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -358,7 +361,7 @@ fun LyricsScreen(
                             Icon(
                                 painter = painterResource(R.drawable.more_horiz),
                                 contentDescription = stringResource(R.string.more_options),
-                                tint = textBackgroundColor,
+                                tint = ArmoryColors.Silver2,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -421,7 +424,7 @@ fun LyricsScreen(
                                     }
                                     sliderPosition = null
                                 },
-                                activeColor = textBackgroundColor,
+                                activeColor = ArmoryColors.Gold1,
                                 isPlaying = isPlaying,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -436,76 +439,77 @@ fun LyricsScreen(
                                 Text(
                                     text = makeTimeString(sliderPosition ?: position),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = textBackgroundColor.copy(alpha = 0.7f)
+                                    color = ArmoryColors.Gold1.copy(alpha = 0.8f)
                                 )
                                 Text(
                                     text = if (duration != C.TIME_UNSET) makeTimeString(duration) else "",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = textBackgroundColor.copy(alpha = 0.7f)
+                                     color = ArmoryColors.Gold1.copy(alpha = 0.8f)
                                 )
                             }
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // Control buttons
+                            // Control buttons (Metallic Squircles: Copper - Silver - Gold - Silver - Copper)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                    .padding(horizontal = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Repeat button
-                                IconButton(
-                                    onClick = { playerConnection.player.toggleRepeatMode() },
-                                    modifier = Modifier.size(40.dp)
+                                // Shuffle (Copper)
+                                Box(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            brush = ArmoryColors.Copper,
+                                            alpha = if (shuffleModeEnabled) 1f else 0.75f
+                                        )
+                                        .clickable {
+                                            playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
+                                        },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(
-                                            when (repeatMode) {
-                                                Player.REPEAT_MODE_OFF, 
-                                                Player.REPEAT_MODE_ALL -> R.drawable.repeat
-                                                Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
-                                                else -> R.drawable.repeat
-                                            }
-                                        ),
-                                        contentDescription = when (repeatMode) {
-                                            Player.REPEAT_MODE_OFF -> "Repeat Off"
-                                            Player.REPEAT_MODE_ALL -> "Repeat All"
-                                            Player.REPEAT_MODE_ONE -> "Repeat One"
-                                            else -> "Repeat"
-                                        },
-                                        tint = if (repeatMode == Player.REPEAT_MODE_OFF) {
-                                            textBackgroundColor.copy(alpha = 0.4f)
-                                        } else {
-                                            textBackgroundColor
-                                        },
+                                        painter = painterResource(R.drawable.shuffle),
+                                        contentDescription = "Shuffle",
+                                        tint = Color.Black,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
 
-                                // Previous button
-                                IconButton(
-                                    onClick = { player.seekToPrevious() },
-                                    modifier = Modifier.size(40.dp)
+                                // Previous (Silver)
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(brush = ArmoryColors.Silver)
+                                        .clickable { player.seekToPrevious() },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.skip_previous),
-                                        contentDescription = null,
-                                        tint = textBackgroundColor,
+                                        contentDescription = "Previous",
+                                        tint = Color.Black,
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
 
-                                // Play/Pause button
-                                IconButton(
-                                    onClick = { player.togglePlayPause() },
-                                    modifier = Modifier.size(56.dp)
+                                // Play/Pause (Gold)
+                                Box(
+                                    modifier = Modifier
+                                        .size(72.dp)
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(brush = ArmoryColors.Gold)
+                                        .clickable { player.togglePlayPause() },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     if (isLoading) {
                                         CircularProgressIndicator(
-                                            modifier = Modifier.size(36.dp),
-                                            color = textBackgroundColor,
+                                            modifier = Modifier.size(32.dp),
+                                            color = Color.Black,
                                             strokeWidth = 3.dp
                                         )
                                     } else {
@@ -514,38 +518,50 @@ fun LyricsScreen(
                                                 if (isPlaying) R.drawable.pause else R.drawable.play
                                             ),
                                             contentDescription = if (isPlaying) "Pause" else stringResource(R.string.play),
-                                            tint = textBackgroundColor,
+                                            tint = Color.Black,
                                             modifier = Modifier.size(36.dp)
                                         )
                                     }
                                 }
 
-                                // Next button
-                                IconButton(
-                                    onClick = { player.seekToNext() },
-                                    modifier = Modifier.size(40.dp)
+                                // Next (Silver)
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(brush = ArmoryColors.Silver)
+                                        .clickable { player.seekToNext() },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.skip_next),
-                                        contentDescription = null,
-                                        tint = textBackgroundColor,
+                                        contentDescription = "Next",
+                                        tint = Color.Black,
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
 
-                                // Shuffle button
-                                IconButton(
-                                    onClick = { playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled },
-                                    modifier = Modifier.size(40.dp)
+                                // Repeat (Copper)
+                                Box(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            brush = ArmoryColors.Copper,
+                                            alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 1f else 0.75f
+                                        )
+                                        .clickable { playerConnection.player.toggleRepeatMode() },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(R.drawable.shuffle),
-                                        contentDescription = if (shuffleModeEnabled) stringResource(R.string.shuffle) else stringResource(R.string.shuffle),
-                                        tint = if (shuffleModeEnabled) {
-                                            textBackgroundColor
-                                        } else {
-                                            textBackgroundColor.copy(alpha = 0.4f)
-                                        },
+                                        painter = painterResource(
+                                            when (repeatMode) {
+                                                Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                                else -> R.drawable.repeat
+                                            }
+                                        ),
+                                        contentDescription = "Repeat",
+                                        tint = Color.Black,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -565,13 +581,13 @@ fun LyricsScreen(
                                     painter = painterResource(R.drawable.volume_off),
                                     contentDescription = stringResource(R.string.minimum_volume),
                                     modifier = Modifier.size(20.dp),
-                                    tint = textBackgroundColor
+                                    tint = ArmoryColors.Gold1
                                 )
 
                                 BigSeekBar(
                                     progressProvider = playerVolume::value,
                                     onProgressChange = { playerConnection.service.playerVolume.value = it },
-                                    color = textBackgroundColor,
+                                    color = ArmoryColors.Gold1,
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(24.dp)
@@ -582,7 +598,7 @@ fun LyricsScreen(
                                     painter = painterResource(R.drawable.volume_up),
                                     contentDescription = stringResource(R.string.maximum_volume),
                                     modifier = Modifier.size(20.dp),
-                                    tint = textBackgroundColor
+                                    tint = ArmoryColors.Gold1
                                 )
                             }
                         }
@@ -620,7 +636,7 @@ fun LyricsScreen(
                             Icon(
                                 painter = painterResource(R.drawable.expand_more),
                                 contentDescription = stringResource(R.string.close),
-                                tint = textBackgroundColor,
+                                tint = ArmoryColors.Silver2,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -633,12 +649,12 @@ fun LyricsScreen(
                             Text(
                                 text = stringResource(R.string.now_playing),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = textBackgroundColor
+                                color = ArmoryColors.Gold2
                             )
                             Text(
                                 text = mediaMetadata.title,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = textBackgroundColor.copy(alpha = 0.8f),
+                                color = ArmoryColors.Gold1,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -668,7 +684,7 @@ fun LyricsScreen(
                             Icon(
                                 painter = painterResource(R.drawable.more_horiz),
                                 contentDescription = stringResource(R.string.more_options),
-                                tint = textBackgroundColor,
+                                tint = ArmoryColors.Silver2,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -697,7 +713,7 @@ fun LyricsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 48.dp, vertical = 16.dp)
+                            .padding(horizontal = 12.dp, vertical = 16.dp)
                     ) {
                         StyledPlaybackSlider(
                             sliderStyle = sliderStyle,
@@ -713,7 +729,7 @@ fun LyricsScreen(
                                 }
                                 sliderPosition = null
                             },
-                            activeColor = textBackgroundColor,
+                            activeColor = ArmoryColors.Gold1,
                             isPlaying = isPlaying,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -728,78 +744,77 @@ fun LyricsScreen(
                             Text(
                                 text = makeTimeString(sliderPosition ?: position),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = textBackgroundColor.copy(alpha = 0.7f)
+                                color = ArmoryColors.Gold1.copy(alpha = 0.8f)
                             )
                             Text(
                                 text = if (duration != C.TIME_UNSET) makeTimeString(duration) else "",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = textBackgroundColor.copy(alpha = 0.7f)
+                                color = ArmoryColors.Gold1.copy(alpha = 0.8f)
                             )
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Optimized control buttons for better fit
+                        // Control buttons (Metallic Squircles: Copper - Silver - Gold - Silver - Copper)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 8.dp), // Reduced padding
-                            horizontalArrangement = Arrangement.SpaceEvenly, // Even distribution
+                                .padding(horizontal = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Repeat button with clear state indication
-                            IconButton(
-                                onClick = { playerConnection.player.toggleRepeatMode() },
-                                modifier = Modifier.size(40.dp)
+                            // Shuffle (Copper)
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        brush = ArmoryColors.Copper,
+                                        alpha = if (shuffleModeEnabled) 1f else 0.75f
+                                    )
+                                    .clickable {
+                                        playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
+                                    },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(
-                                        when (repeatMode) {
-                                            Player.REPEAT_MODE_OFF, 
-                                            Player.REPEAT_MODE_ALL -> R.drawable.repeat
-                                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
-                                            else -> R.drawable.repeat
-                                        }
-                                    ),
-                                    contentDescription = when (repeatMode) {
-                                        Player.REPEAT_MODE_OFF -> "Repeat Off"
-                                        Player.REPEAT_MODE_ALL -> "Repeat All"
-                                        Player.REPEAT_MODE_ONE -> "Repeat One"
-                                        else -> "Repeat"
-                                    },
-                                    tint = if (repeatMode == Player.REPEAT_MODE_OFF) {
-                                        // Inactive state - low opacity
-                                        textBackgroundColor.copy(alpha = 0.4f)
-                                    } else {
-                                        // Active state - full brightness
-                                        textBackgroundColor
-                                    },
+                                    painter = painterResource(R.drawable.shuffle),
+                                    contentDescription = "Shuffle",
+                                    tint = Color.Black,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
 
-                            // Previous button
-                            IconButton(
-                                onClick = { player.seekToPrevious() },
-                                modifier = Modifier.size(40.dp) // Slightly smaller
+                            // Previous (Silver)
+                            Box(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(brush = ArmoryColors.Silver)
+                                    .clickable { player.seekToPrevious() },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.skip_previous),
-                                    contentDescription = null,
-                                    tint = textBackgroundColor,
+                                    contentDescription = "Previous",
+                                    tint = Color.Black,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
 
-                            // Play/Pause button (largest)
-                            IconButton(
-                                onClick = { player.togglePlayPause() },
-                                modifier = Modifier.size(56.dp) // Slightly smaller but still prominent
+                            // Play/Pause (Gold)
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .background(brush = ArmoryColors.Gold)
+                                    .clickable { player.togglePlayPause() },
+                                contentAlignment = Alignment.Center
                             ) {
                                 if (isLoading) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.size(36.dp),
-                                        color = textBackgroundColor,
+                                        modifier = Modifier.size(32.dp),
+                                        color = Color.Black,
                                         strokeWidth = 3.dp
                                     )
                                 } else {
@@ -808,46 +823,56 @@ fun LyricsScreen(
                                             if (isPlaying) R.drawable.pause else R.drawable.play
                                         ),
                                         contentDescription = if (isPlaying) "Pause" else stringResource(R.string.play),
-                                        tint = textBackgroundColor,
+                                        tint = Color.Black,
                                         modifier = Modifier.size(36.dp)
                                     )
                                 }
                             }
 
-                            // Next button
-                            IconButton(
-                                onClick = { player.seekToNext() },
-                                modifier = Modifier.size(40.dp) // Slightly smaller
+                            // Next (Silver)
+                            Box(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(brush = ArmoryColors.Silver)
+                                    .clickable { player.seekToNext() },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.skip_next),
-                                    contentDescription = null,
-                                    tint = textBackgroundColor,
+                                    contentDescription = "Next",
+                                    tint = Color.Black,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
 
-                            // Shuffle button with clear state indication
-                            IconButton(
-                                onClick = { playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled },
-                                modifier = Modifier.size(40.dp)
+                            // Repeat (Copper)
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        brush = ArmoryColors.Copper,
+                                        alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 1f else 0.75f
+                                    )
+                                    .clickable { playerConnection.player.toggleRepeatMode() },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.shuffle),
-                                    contentDescription = if (shuffleModeEnabled) stringResource(R.string.shuffle) else stringResource(R.string.shuffle),
-                                    tint = if (shuffleModeEnabled) {
-                                        // Active state - full brightness
-                                        textBackgroundColor
-                                    } else {
-                                        // Inactive state - low opacity
-                                        textBackgroundColor.copy(alpha = 0.4f)
-                                    },
+                                    painter = painterResource(
+                                        when (repeatMode) {
+                                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                            else -> R.drawable.repeat
+                                        }
+                                    ),
+                                    contentDescription = "Repeat",
+                                    tint = Color.Black,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp)) // Proper spacing
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         // Volume Control
                         Row(
@@ -861,16 +886,16 @@ fun LyricsScreen(
                                 painter = painterResource(R.drawable.volume_off),
                                 contentDescription = stringResource(R.string.minimum_volume),
                                 modifier = Modifier.size(20.dp),
-                                tint = textBackgroundColor
+                                tint = ArmoryColors.Gold1
                             )
 
                             BigSeekBar(
                                 progressProvider = playerVolume::value,
                                 onProgressChange = { playerConnection.service.playerVolume.value = it },
-                                color = textBackgroundColor,
+                                color = ArmoryColors.Gold1,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(20.dp)
+                                    .height(24.dp)
                                     .padding(horizontal = 16.dp)
                             )
 
@@ -878,7 +903,7 @@ fun LyricsScreen(
                                 painter = painterResource(R.drawable.volume_up),
                                 contentDescription = stringResource(R.string.maximum_volume),
                                 modifier = Modifier.size(20.dp),
-                                tint = textBackgroundColor
+                                tint = ArmoryColors.Gold1
                             )
                         }
 

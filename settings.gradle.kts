@@ -33,7 +33,6 @@ include(":simpmusic")
 include(":betterlyrics")
 
 include(":canvas")
-include(":shazamkit")
 
 // Use a local copy of NewPipe Extractor by uncommenting the lines below.
 // We assume, that OpenTune and NewPipe Extractor have the same parent directory.

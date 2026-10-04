@@ -8,6 +8,8 @@
 
 package com.ruben.spotitube.ui.screens.artist
 
+import com.ruben.spotitube.ArmoryColors
+
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -729,31 +731,33 @@ fun ArtistScreen(
                                     .padding(horizontal = 24.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
                             ) {
-                                FilledTonalButton(
+                                // Subscribe Button
+                                Button(
                                     onClick = {
                                         viewModel.toggleLike()
                                     },
-                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = if (isSubscribed)
-                                            OpenTuneColors.Gold5.copy(alpha = 0.5f)
-                                        else
-                                            OpenTuneColors.Gold3.copy(alpha = 0.15f),
-                                        contentColor = if (isSubscribed)
-                                            OpenTuneColors.Gold2
-                                        else
-                                            OpenTuneColors.Gold1
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isSubscribed) androidx.compose.ui.graphics.Color.Transparent else androidx.compose.ui.graphics.Color.Transparent,
+                                        contentColor = if (isSubscribed) androidx.compose.ui.graphics.Color.Black else ArmoryColors.Gold1
                                     ),
+                                    contentPadding = PaddingValues(0.dp),
                                     shape = RoundedCornerShape(24.dp),
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(48.dp)
-                                        .border(1.dp, if (isSubscribed) OpenTuneColors.Gold5 else OpenTuneColors.Gold4, RoundedCornerShape(24.dp))
+                                        .then(
+                                            if (isSubscribed)
+                                                Modifier.background(ArmoryColors.Gold, shape = RoundedCornerShape(24.dp))
+                                            else
+                                                Modifier.border(1.dp, ArmoryColors.Gold1, RoundedCornerShape(24.dp))
+                                        )
                                 ) {
                                     Icon(
                                         painter = painterResource(
                                             if (isSubscribed) R.drawable.done else R.drawable.add
                                         ),
                                         contentDescription = null,
+                                        tint = if (isSubscribed) androidx.compose.ui.graphics.Color.Black else ArmoryColors.Gold1,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -761,11 +765,12 @@ fun ArtistScreen(
                                         text = stringResource(
                                             if (isSubscribed) R.string.subscribed else R.string.subscribe
                                         ),
+                                        color = if (isSubscribed) androidx.compose.ui.graphics.Color.Black else ArmoryColors.Gold1,
                                         maxLines = 1
                                     )
                                 }
 
-                                // Shuffle Button
+                                // Shuffle Button (Plata Metálico)
                                 Button(
                                     onClick = {
                                         if (!showLocal) {
@@ -785,50 +790,60 @@ fun ArtistScreen(
                                     enabled = if (showLocal) librarySongs.isNotEmpty() else artistPage?.artist?.shuffleEndpoint != null,
                                     shape = RoundedCornerShape(24.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = OpenTuneColors.Gold3,
-                                        contentColor = OpenTuneColors.AbsoluteBlack
+                                        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                        contentColor = androidx.compose.ui.graphics.Color.Black
                                     ),
+                                    contentPadding = PaddingValues(0.dp),
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(48.dp)
+                                        .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.shuffle),
                                         contentDescription = null,
+                                        tint = androidx.compose.ui.graphics.Color.Black,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = stringResource(R.string.shuffle),
+                                        color = androidx.compose.ui.graphics.Color.Black,
                                         maxLines = 1
                                     )
                                 }
                             }
 
-                            // Radio Button (for YouTube artists)
+                            // Radio Button (Bronce Metálico - YouTube Artists)
                             if (!showLocal) {
                                 artistPage?.artist?.radioEndpoint?.let { radioEndpoint ->
-                                    OutlinedButton(
+                                    Button(
                                         onClick = {
                                             playerConnection.playQueue(YouTubeQueue(radioEndpoint))
                                         },
                                         shape = RoundedCornerShape(24.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(
-                                            contentColor = OpenTuneColors.Gold2
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                            contentColor = androidx.compose.ui.graphics.Color.Black
                                         ),
-                                        border = BorderStroke(1.dp, OpenTuneColors.Gold5),
+                                        contentPadding = PaddingValues(0.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 24.dp, vertical = 8.dp)
-                                            .height(44.dp)
+                                            .height(48.dp)
+                                            .background(ArmoryColors.Copper, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.radio),
                                             contentDescription = null,
-                                            modifier = Modifier.size(18.dp)
+                                            tint = androidx.compose.ui.graphics.Color.Black,
+                                            modifier = Modifier.size(20.dp)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text(text = stringResource(R.string.radio))
+                                        Text(
+                                            text = stringResource(R.string.radio),
+                                            color = androidx.compose.ui.graphics.Color.Black
+                                        )
                                     }
                                 }
                             }

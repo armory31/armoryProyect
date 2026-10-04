@@ -10,11 +10,8 @@ package com.ruben.spotitube.ui.screens.musicrecognition
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +36,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -62,7 +58,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -84,7 +79,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,26 +110,15 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import com.ruben.spotitube.R
-import com.ruben.spotitube.shazamkit.Shazam
-import com.ruben.spotitube.shazamkit.ShazamSignatureGenerator
-import com.ruben.spotitube.shazamkit.models.RecognitionResult
 import com.ruben.spotitube.ui.utils.appBarScrollBehavior
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
 @SuppressLint("LocalContextGetResourceValueCall", "UnrememberedGetBackStackEntry")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicRecognitionScreen(
     navController: NavHostController,
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
 
     var state by remember { mutableStateOf<MusicRecognitionState>(MusicRecognitionState.Ready) }
     var recognitionJob by remember { mutableStateOf<Job?>(null) }
@@ -145,29 +128,10 @@ fun MusicRecognitionScreen(
         .getStateFlow(MusicRecognitionAutoStartRequestKey, 0L)
         .collectAsStateWithLifecycle()
 
-    val strings =
-        remember {
-            MusicRecognitionStrings(
-                signatureFailed = context.getString(R.string.music_recognition_signature_failed),
-                noMatchFallback = context.getString(R.string.music_recognition_no_match),
-                recognitionFailedFallback = context.getString(R.string.music_recognition_recognition_failed),
-            )
-        }
-
     val requestPermissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
-                launchRecognition(
-                    scope = scope,
-                    strings = strings,
-                    onState = { state = it },
-                    onHaptic = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                    onSearch = { query -> navController.navigate("search/${Uri.encode(query)}") },
-                    onReplaceJob = {
-                        recognitionJob?.cancel()
-                        recognitionJob = it
-                    },
-                )
+                launchRecognition()
             } else {
                 state = MusicRecognitionState.PermissionRequired
             }
@@ -184,17 +148,7 @@ fun MusicRecognitionScreen(
             ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
                     PackageManager.PERMISSION_GRANTED
         if (permission) {
-            launchRecognition(
-                scope = scope,
-                strings = strings,
-                onState = { state = it },
-                onHaptic = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                onSearch = { query -> navController.navigate("search/${Uri.encode(query)}") },
-                onReplaceJob = {
-                    recognitionJob?.cancel()
-                    recognitionJob = it
-                },
-            )
+            launchRecognition()
         } else {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
@@ -238,9 +192,12 @@ fun MusicRecognitionScreen(
                     }
                 },
                 colors =
-                    TopAppBarDefaults.largeTopAppBarColors(
+                    TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                         scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        navigationIconContentColor = Color.Unspecified,
+                        titleContentColor = Color.Unspecified,
+                        actionIconContentColor = Color.Unspecified
                     ),
                 scrollBehavior = scrollBehavior,
             )
@@ -454,6 +411,19 @@ private fun RecognitionListenPane(
     }
 }
 
+data class RecognitionResult(
+    val title: String,
+    val artist: String,
+    val album: String? = null,
+    val coverArtUrl: String? = null,
+    val coverArtHqUrl: String? = null,
+    val genre: String? = null,
+    val releaseDate: String? = null,
+    val isrc: String? = null,
+    val lyrics: List<String> = emptyList(),
+    val label: String? = null,
+)
+
 private sealed interface MusicRecognitionState {
     data object Ready : MusicRecognitionState
     data object Listening : MusicRecognitionState
@@ -464,82 +434,8 @@ private sealed interface MusicRecognitionState {
     data class Error(val message: String) : MusicRecognitionState
 }
 
-@Immutable
-private data class MusicRecognitionStrings(
-    val signatureFailed: String,
-    val noMatchFallback: String,
-    val recognitionFailedFallback: String,
-)
-
 private fun launchRecognition(
-    scope: CoroutineScope,
-    strings: MusicRecognitionStrings,
-    onState: (MusicRecognitionState) -> Unit,
-    onHaptic: () -> Unit,
-    onSearch: (String) -> Unit,
-    onReplaceJob: (Job) -> Unit,
-) {
-    onReplaceJob(
-        scope.launch {
-            runRecognitionFlow(
-                strings = strings,
-                onState = onState,
-                onHaptic = onHaptic,
-                onSearch = onSearch,
-            )
-        },
-    )
-}
-
-private suspend fun runRecognitionFlow(
-    strings: MusicRecognitionStrings,
-    onState: (MusicRecognitionState) -> Unit,
-    onHaptic: () -> Unit,
-    onSearch: (String) -> Unit,
-) {
-    onHaptic()
-    onState(MusicRecognitionState.Listening)
-
-    val samples =
-        withContext(Dispatchers.IO) {
-            recordMicPcm16Mono(
-                sampleRateHz = 16000,
-                recordMs = 4200L,
-            ).first
-        }
-
-    onState(MusicRecognitionState.Processing)
-
-    val signature =
-        withContext(Dispatchers.Default) {
-            ShazamSignatureGenerator().apply {
-                feedPcm16Mono(samples)
-            }.nextSignatureOrNull()
-        }
-
-    if (signature == null) {
-        onState(MusicRecognitionState.Error(strings.signatureFailed))
-        return
-    }
-
-    val result =
-        withContext(Dispatchers.IO) {
-            Shazam.recognize(signature.uri, signature.sampleDurationMs)
-        }
-
-    result.fold(
-        onSuccess = { onState(MusicRecognitionState.Success(it)) },
-        onFailure = { e ->
-            val msg = e.message?.trim().orEmpty()
-            when {
-                msg.contains("no match", ignoreCase = true) || msg.contains("404") -> {
-                    onState(MusicRecognitionState.NoMatch(msg.ifEmpty { strings.noMatchFallback }))
-                }
-                else -> onState(MusicRecognitionState.Error(msg.ifEmpty { strings.recognitionFailedFallback }))
-            }
-        },
-    )
-}
+) {}
 
 private fun buildMetadata(result: RecognitionResult): String {
     val pieces =
@@ -549,75 +445,6 @@ private fun buildMetadata(result: RecognitionResult): String {
             result.releaseDate?.takeIf { it.isNotBlank() },
         )
     return pieces.joinToString(" • ")
-}
-
-private suspend fun recordMicPcm16Mono(
-    sampleRateHz: Int,
-    recordMs: Long,
-): Pair<ShortArray, Int> = withContext(Dispatchers.IO) {
-    val channel = AudioFormat.CHANNEL_IN_MONO
-    val encoding = AudioFormat.ENCODING_PCM_16BIT
-
-    try {
-        val minBuffer =
-            AudioRecord.getMinBufferSize(sampleRateHz, channel, encoding).coerceAtLeast(4096)
-
-        val record = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            sampleRateHz,
-            channel,
-            encoding,
-            minBuffer,
-        )
-
-        // Verificar si AudioRecord está inicializado correctamente
-        if (record.state != AudioRecord.STATE_INITIALIZED) {
-            return@withContext ShortArray(0) to sampleRateHz
-        }
-
-        val totalSamples = ((recordMs / 1000.0) * sampleRateHz).toInt().coerceAtLeast(sampleRateHz)
-        val output = ShortArray(totalSamples)
-        val buffer = ShortArray(minBuffer / 2)
-
-        try {
-            record.startRecording()
-
-            // Verificar que está grabando
-            if (record.recordingState != AudioRecord.RECORDSTATE_RECORDING) {
-                return@withContext ShortArray(0) to sampleRateHz
-            }
-
-            var written = 0
-            while (written < output.size && isActive) {
-                val read = record.read(buffer, 0, minOf(buffer.size, output.size - written))
-                if (read > 0) {
-                    System.arraycopy(buffer, 0, output, written, read)
-                    written += read
-                } else if (read == AudioRecord.ERROR_INVALID_OPERATION ||
-                    read == AudioRecord.ERROR_BAD_VALUE
-                ) {
-                    break
-                }
-            }
-
-            if (written <= 0) {
-                ShortArray(0) to sampleRateHz
-            } else {
-                output.copyOf(written) to sampleRateHz
-            }
-        } finally {
-            runCatching {
-                if (record.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
-                    record.stop()
-                }
-            }
-            runCatching { record.release() }
-        }
-    } catch (e: SecurityException) {
-        // Permiso denegado en tiempo de ejecución
-        e.printStackTrace()
-        ShortArray(0) to sampleRateHz
-    }
 }
 
 @Composable
@@ -645,7 +472,6 @@ private fun ResultFirstSheet(
     onSearch: () -> Unit,
     onListenAgain: () -> Unit,
 ) {
-    val context = LocalContext.current
     val cover = result.coverArtHqUrl ?: result.coverArtUrl
     val metadata =
         remember(result.album, result.genre, result.releaseDate) { buildMetadata(result) }
@@ -722,27 +548,6 @@ private fun ResultFirstSheet(
                         isrc = result.isrc,
                     )
 
-                    if (!result.shazamUrl.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(14.dp))
-                        OutlinedButton(
-                            onClick = {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse(result.shazamUrl)),
-                                )
-                            },
-                            modifier = Modifier.heightIn(min = 48.dp),
-                            shapes = ButtonDefaults.shapes(),
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.link),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(stringResource(R.string.music_recognition_open_shazam))
-                        }
-                    }
-
                     ResultDetailSections(result = result)
                 }
             }
@@ -764,7 +569,7 @@ private fun ResultDetailSections(
     val lyrics =
         remember(result.lyrics) {
             result.lyrics
-                ?.takeIf { it.isNotEmpty() }
+                .takeIf { it.isNotEmpty() }
                 ?.take(6)
                 ?.joinToString("\n")
         }
@@ -1168,7 +973,6 @@ private fun CoverArt(
 }
 
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
 private fun FlowChips(
     album: String?,
     genre: String?,
@@ -1232,23 +1036,4 @@ private data class ChipData(
 )
 
 const val MusicRecognitionRoute = "music_recognition"
-const val ACTION_MUSIC_RECOGNITION = "moe.koiverse.archivetune.action.MUSIC_RECOGNITION"
 const val MusicRecognitionAutoStartRequestKey = "music_recognition_auto_start_request"
-
-fun NavHostController.openMusicRecognition(
-    autoStartRequestId: Long = System.currentTimeMillis(),
-) {
-    val currentRoute = currentDestination?.route
-    if (currentRoute != MusicRecognitionRoute && !popBackStack(
-            MusicRecognitionRoute,
-            inclusive = false
-        )
-    ) {
-        navigate(MusicRecognitionRoute) {
-            launchSingleTop = true
-        }
-    }
-
-    getBackStackEntry(MusicRecognitionRoute).savedStateHandle[MusicRecognitionAutoStartRequestKey] =
-        autoStartRequestId
-}

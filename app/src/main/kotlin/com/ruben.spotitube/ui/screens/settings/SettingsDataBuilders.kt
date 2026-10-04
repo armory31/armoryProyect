@@ -41,12 +41,6 @@ fun buildIntegrationActions(
 ): List<SettingsIntegrationAction> =
     listOf(
         SettingsIntegrationAction(
-            icon = painterResource(R.drawable.account),
-            label = "Armory Sync",
-            onClick = { resetSearch(); navController.navigate("settings/armory_sync") },
-            accentColor = MaterialTheme.colorScheme.primary,
-        ),
-        SettingsIntegrationAction(
             icon = painterResource(R.drawable.fire),
             label = stringResource(R.string.music_together),
             onClick = { resetSearch(); navController.navigate("settings/music_together") },
@@ -74,14 +68,6 @@ fun buildSettingsGroups(
                         accentColor = MaterialTheme.colorScheme.secondary,
                         keywords = listOf("storage", "cache", "offline", "downloads", "cleanup"),
                         onClick = { resetSearch(); navController.navigate("settings/storage") },
-                    ),
-                    SettingsItem(
-                        icon = painterResource(R.drawable.restore),
-                        title = stringResource(R.string.backup_restore),
-                        subtitle = stringResource(R.string.action_backup),
-                        accentColor = MaterialTheme.colorScheme.tertiary,
-                        keywords = listOf("backup", "restore", "import", "export", "migration"),
-                        onClick = { resetSearch(); navController.navigate("settings/backup_restore") },
                     ),
                 ),
             ),
@@ -192,14 +178,6 @@ fun buildInternalItems(
     resetSearch: () -> Unit,
 ): List<SettingsItem> =
     listOf(
-        SettingsItem(
-            icon = painterResource(R.drawable.account),
-            title = "Armory Cloud Sync",
-            subtitle = "Sync favorites and playlists",
-            accentColor = MaterialTheme.colorScheme.primary,
-            keywords = listOf("armory", "sync", "cloud", "backup", "account", "login", "firebase"),
-            onClick = { resetSearch(); navController.navigate("settings/armory_sync") },
-        ),
         SettingsItem(
             icon = painterResource(R.drawable.fire),
             title = stringResource(R.string.music_together),

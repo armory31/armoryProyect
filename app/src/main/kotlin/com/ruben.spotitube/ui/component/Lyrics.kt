@@ -12,9 +12,11 @@ import com.ruben.spotitube.LyricsGlassStyle
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.content.Intent
 import android.os.Build
 import android.view.WindowManager
 import android.widget.Toast
+import com.ruben.spotitube.utils.ComposeToImage
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -143,9 +145,12 @@ import com.ruben.spotitube.ui.component.shimmer.TextPlaceholder
 import com.ruben.spotitube.ui.utils.smoothFadingEdge
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import kotlin.math.abs
 import kotlin.math.sin
 import kotlin.time.Duration.Companion.seconds
@@ -1954,6 +1959,91 @@ fun Lyrics(
                 }
             }
 
+        }
+
+        if (showShareDialog) {
+            shareDialogData?.let { (lyricText, title, artist) ->
+                mediaMetadata?.let { metadata ->
+                    LyricsShareCarouselSheet(
+                        lyricText = lyricText,
+                        mediaMetadata = metadata,
+                        initialConfig = LyricsCardConfig(),
+                        onDismiss = {
+                            showShareDialog = false
+                            shareDialogData = null
+                        },
+                        onShare = { config ->
+                            showShareDialog = false
+                            shareDialogData = null
+                            scope.launch {
+                                runCatching {
+                                    val bitmap = ComposeToImage.createLyricsImageWithConfig(
+                                        context = context,
+                                        coverArtUrl = metadata.thumbnailUrl,
+                                        songTitle = title,
+                                        artistName = artist,
+                                        lyrics = lyricText,
+                                        config = config,
+                                        outputSize = 1080,
+                                    )
+                                    val uri = ComposeToImage.saveBitmapAsFile(
+                                        context = context,
+                                        bitmap = bitmap,
+                                        fileName = "lyrics_${System.currentTimeMillis()}",
+                                    )
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "image/png"
+                                        putExtra(Intent.EXTRA_STREAM, uri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    val chooserIntent = Intent.createChooser(shareIntent, "Compartir letra").apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(chooserIntent)
+                                }.onFailure { e ->
+                                    Timber.e(e, "Error sharing lyrics")
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(context, "Error al compartir: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        },
+                        onSave = { config ->
+                            showShareDialog = false
+                            shareDialogData = null
+                            scope.launch {
+                                runCatching {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        val bitmap = ComposeToImage.createLyricsImageWithConfig(
+                                            context = context,
+                                            coverArtUrl = metadata.thumbnailUrl,
+                                            songTitle = title,
+                                            artistName = artist,
+                                            lyrics = lyricText,
+                                            config = config,
+                                            outputSize = 1080,
+                                        )
+                                        ComposeToImage.saveBitmapAsFile(
+                                            context = context,
+                                            bitmap = bitmap,
+                                            fileName = "lyrics_saved_${System.currentTimeMillis()}",
+                                        )
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(context, "Imagen guardada en Galería", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }.onFailure { e ->
+                                    Timber.e(e, "Error saving lyrics image")
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(context, "Error al guardar imagen: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
         }
     }
 }

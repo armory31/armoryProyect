@@ -29,10 +29,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -58,7 +56,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -144,7 +141,6 @@ import com.ruben.spotitube.ui.component.shimmer.ShimmerTheme
 import com.ruben.spotitube.ui.player.BottomSheetPlayer
 import com.ruben.spotitube.ui.screens.Screens
 import com.ruben.spotitube.ui.screens.navigationBuilder
-import com.ruben.spotitube.ArmoryTheme
 import com.ruben.spotitube.ui.utils.appBarScrollBehavior
 import com.ruben.spotitube.ui.utils.resetHeightOffset
 import com.ruben.spotitube.utils.PreferenceStore
@@ -173,6 +169,7 @@ import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
@@ -293,11 +290,7 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
 
         val shouldStopOnTaskClear =
-            if (!isFinishing) {
-                false
-            } else {
-                dataStore.get(StopMusicOnTaskClearKey, false)
-            }
+            isFinishing && dataStore.get(StopMusicOnTaskClearKey, false)
 
         if (shouldStopOnTaskClear) {
             safeUnbindMusicService()
@@ -320,8 +313,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         startMusicServiceSafely()
@@ -832,7 +823,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     LaunchedEffect(Unit) {
-                        delay(3000)
+                        delay(3000.milliseconds)
 
                         withContext(Dispatchers.IO) {
                             val current = dataStore[LaunchCountKey] ?: 0
@@ -853,7 +844,7 @@ class MainActivity : ComponentActivity() {
                             val waitStep = 500L
                             val maxWait = 30_000L
                             while (bottomSheetPageState.isVisible && waited < maxWait) {
-                                delay(waitStep)
+                                delay(waitStep.milliseconds)
                                 waited += waitStep
                             }
                             // star dialog logic omitted as per cleanup
@@ -877,7 +868,7 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(playerConnection, playerStatus) {
                         while (playerStatus == PlayerStatus.PLAYING) {
                             position = playerConnection?.player?.currentPosition ?: 0L
-                            delay(1000)
+                            delay(1000.milliseconds)
                         }
                     }
 
@@ -1090,7 +1081,7 @@ class MainActivity : ComponentActivity() {
                         if (shouldShowSearchBar && openSearchImmediately) {
                             onActiveChange(true)
                             try {
-                                delay(100)
+                                delay(100.milliseconds)
                                 searchBarFocusRequester.requestFocus()
                             } catch (_: Exception) {
                             }

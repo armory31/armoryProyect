@@ -147,6 +147,7 @@ inline fun ListItem(
     modifier: Modifier = Modifier,
     title: String,
     noinline subtitle: (@Composable RowScope.() -> Unit)? = null,
+    crossinline badges: @Composable RowScope.() -> Unit = {},
     thumbnailContent: @Composable () -> Unit,
     trailingContent: @Composable RowScope.() -> Unit = {},
     isActive: Boolean = false
@@ -166,7 +167,10 @@ inline fun ListItem(
                 fontWeight = FontWeight.Bold,
                 maxLines = 1, overflow = TextOverflow.Ellipsis
             )
-            if (subtitle != null) Row(verticalAlignment = Alignment.CenterVertically) { subtitle() }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                badges()
+                subtitle?.invoke(this)
+            }
         }
         trailingContent()
     }
@@ -273,9 +277,6 @@ private fun playlistPlaceholderIcon(
         else -> if (autoPlaylist) R.drawable.trending_up else R.drawable.queue_music
     }
 
-
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LibraryPlaylistFeatureCard(
     playlist: Playlist,
@@ -1273,7 +1274,6 @@ fun MediaMetadataListItem(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun YouTubeListItem(
     item: YTItem,
@@ -1625,7 +1625,9 @@ fun ItemThumbnail(
             ) {
                 Text(
                     text = albumIndex.toString(),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ArmoryColors.Rust2,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

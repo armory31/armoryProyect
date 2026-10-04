@@ -43,6 +43,7 @@ import androidx.core.graphics.withTranslation
 import androidx.core.view.drawToBitmap
 import coil3.ImageLoader
 import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
 import com.ruben.spotitube.R
@@ -158,11 +159,16 @@ object ComposeToImage {
     // ─────────────────────────────────────────────────────────────────────────
 
     private suspend fun loadCoverArt(context: Context, url: String?): Bitmap? {
-        if (url == null) return null
+        if (url.isNullOrBlank()) return null
         return runCatching {
             val loader  = ImageLoader(context)
             val request = ImageRequest.Builder(context).data(url).size(512).allowHardware(false).build()
-            loader.execute(request).image?.toBitmap()
+            val result = loader.execute(request)
+            if (result is SuccessResult) {
+                result.image.toBitmap()
+            } else {
+                null
+            }
         }.getOrNull()
     }
 
@@ -1063,22 +1069,9 @@ object ComposeToImage {
 
     fun saveBitmapAsFile(context: Context, bitmap: Bitmap, fileName: String): Uri {
         val safeBitmap = ensureSoftwareBitmap(bitmap)
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/OpenTune")
-            }
-            val uri = context.contentResolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
-            ) ?: throw IllegalStateException("Failed to create new MediaStore record")
-            context.contentResolver.openOutputStream(uri)?.use { safeBitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            uri
-        } else {
-            val cachePath = File(context.cacheDir, "images").also { it.mkdirs() }
-            val imageFile = File(cachePath, "$fileName.png")
-            FileOutputStream(imageFile).use { safeBitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", imageFile)
-        }
+        val cachePath = File(context.cacheDir, "images").also { it.mkdirs() }
+        val imageFile = File(cachePath, "$fileName.png")
+        FileOutputStream(imageFile).use { safeBitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        return FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", imageFile)
     }
 }

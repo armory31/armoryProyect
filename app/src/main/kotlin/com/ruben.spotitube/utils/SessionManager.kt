@@ -21,6 +21,16 @@ class SessionManager(context: Context) {
 
     fun getNombre(): String = prefs.getString("nombre", "") ?: ""
 
+    fun saveNombre(nombre: String) {
+        prefs.edit().putString("nombre", nombre).apply()
+    }
+
+    fun getAvatarUri(): String = prefs.getString("avatarUri", "") ?: ""
+
+    fun saveAvatarUri(uri: String) {
+        prefs.edit().putString("avatarUri", uri).apply()
+    }
+
     fun getEmail(): String = prefs.getString("email", "") ?: ""
 
     fun getToken(): String = prefs.getString("token", "") ?: ""

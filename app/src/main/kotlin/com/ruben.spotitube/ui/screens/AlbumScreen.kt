@@ -8,6 +8,9 @@
 
 package com.ruben.spotitube.ui.screens
 
+import com.ruben.spotitube.ArmoryColors
+import androidx.compose.material3.ButtonDefaults
+
 import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
@@ -155,9 +158,7 @@ suspend fun downloadAlbumCover(
     albumTitle: String,
     quality: Int = 1024,
 ): Boolean {
-    if (imageUrl.isNullOrEmpty()) return false
-
-    return try {
+    return !imageUrl.isNullOrEmpty() && try {
         val request = ImageRequest.Builder(context)
             .data(imageUrl)
             .size(Size(quality, quality))
@@ -756,7 +757,9 @@ fun AlbumScreen(
                                     R.plurals.n_song,
                                     wrappedSongs.size,
                                     wrappedSongs.size
-                                )
+                                ),
+                                textColor = ArmoryColors.Rust2,
+                                iconTint = ArmoryColors.Rust2
                             )
 
                             // Duration
@@ -764,7 +767,9 @@ fun AlbumScreen(
                             if (totalDuration > 0) {
                                 MetadataChip(
                                     icon = R.drawable.timer,
-                                    text = makeTimeString(totalDuration * 1000L)
+                                    text = makeTimeString(totalDuration * 1000L),
+                                    textColor = ArmoryColors.Rust2,
+                                    iconTint = ArmoryColors.Rust2
                                 )
                             }
                         }
@@ -809,7 +814,7 @@ fun AlbumScreen(
                                 }
                             }
 
-                            // Play Button
+                            // Play Button (Plata Metálico)
                             Button(
                                 onClick = {
                                     playerConnection.service.getAutomix(playlistId)
@@ -818,18 +823,25 @@ fun AlbumScreen(
                                     )
                                 },
                                 shape = RoundedCornerShape(24.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.Black
+                                ),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
+                                    .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.play),
                                     contentDescription = stringResource(R.string.play),
+                                    tint = androidx.compose.ui.graphics.Color.Black,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
 
-                            // Shuffle Button
+                            // Shuffle Button (Plata Metálico)
                             Button(
                                 onClick = {
                                     playerConnection.service.getAutomix(playlistId)
@@ -838,18 +850,25 @@ fun AlbumScreen(
                                     )
                                 },
                                 shape = RoundedCornerShape(24.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor =androidx.compose.ui.graphics.Color.Transparent,
+                                    contentColor = androidx.compose.ui.graphics.Color.Black
+                                ),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
+                                    .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.shuffle),
                                     contentDescription = stringResource(R.string.shuffle),
+                                    tint = androidx.compose.ui.graphics.Color.Black,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
 
-                            // Download Button
+                            // Download Button (Bronce Metálico)
                             Surface(
                                 onClick = {
                                     when (downloadState) {
@@ -892,8 +911,10 @@ fun AlbumScreen(
                                     }
                                 },
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.size(48.dp)
+                                color = androidx.compose.ui.graphics.Color.Transparent,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(ArmoryColors.Copper, shape = CircleShape)
                             ) {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
@@ -904,7 +925,7 @@ fun AlbumScreen(
                                             Icon(
                                                 painter = painterResource(R.drawable.offline),
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
+                                                tint = androidx.compose.ui.graphics.Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
@@ -912,14 +933,14 @@ fun AlbumScreen(
                                             CircularProgressIndicator(
                                                 strokeWidth = 2.dp,
                                                 modifier = Modifier.size(24.dp),
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = androidx.compose.ui.graphics.Color.Black
                                             )
                                         }
                                         else -> {
                                             Icon(
                                                 painter = painterResource(R.drawable.download),
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                tint = androidx.compose.ui.graphics.Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
@@ -927,7 +948,7 @@ fun AlbumScreen(
                                 }
                             }
 
-                            // More Options Button
+                            // More Options Button (Bronce Metálico - El de al lado)
                             Surface(
                                 onClick = {
                                     menuState.show {
@@ -942,8 +963,10 @@ fun AlbumScreen(
                                     }
                                 },
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.size(48.dp)
+                                color = androidx.compose.ui.graphics.Color.Transparent,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(ArmoryColors.Copper, shape = CircleShape)
                             ) {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
@@ -952,7 +975,7 @@ fun AlbumScreen(
                                     Icon(
                                         painter = painterResource(R.drawable.more_vert),
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = androidx.compose.ui.graphics.Color.Black,
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
@@ -1344,10 +1367,6 @@ fun AlbumScreen(
                                 1024 -> "Alta (1024x1024)"
                                 else -> "Custom"
                             }
-
-                            if (success) {
-                                // Aquí puedes agregar un SnackBar si lo deseas
-                            }
                         } finally {
                             downloadingCover = false
                         }
@@ -1362,7 +1381,9 @@ fun AlbumScreen(
 private fun MetadataChip(
     icon: Int,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textColor: androidx.compose.ui.graphics.Color? = null,
+    iconTint: androidx.compose.ui.graphics.Color? = null
 ) {
     Surface(
         modifier = modifier,
@@ -1378,12 +1399,12 @@ private fun MetadataChip(
                 painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = textColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
         }

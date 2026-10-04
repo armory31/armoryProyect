@@ -16,10 +16,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
-val CustomThemeColorKey = stringPreferencesKey("customThemeColor")
-val RandomThemeOnStartupKey = booleanPreferencesKey("randomThemeOnStartup")
-val PureBlackKey = booleanPreferencesKey("pureBlack")
 val UseSystemFontKey = booleanPreferencesKey("useSystemFont")
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
@@ -411,6 +407,7 @@ val InnerTubeCookieKey = stringPreferencesKey("innerTubeCookie")
 val PoTokenKey = stringPreferencesKey("poToken")
 val AccountNameKey = stringPreferencesKey("accountName")
 val AccountEmailKey = stringPreferencesKey("accountEmail")
+val AccountAvatarUriKey = stringPreferencesKey("accountAvatarUri")
 val AccountChannelHandleKey = stringPreferencesKey("accountChannelHandle")
 val UseLoginForBrowse = booleanPreferencesKey("useLoginForBrowse")
 val YouTubeClientScoresKey = stringPreferencesKey("youtubeClientScores")
@@ -535,7 +532,7 @@ val AodTextScaleKey = floatPreferencesKey("aod_text_scale")
 /** Mostrar reloj del sistema en el AOD */
 val AodShowClockKey = booleanPreferencesKey("aod_show_clock")
 
-/** Formato de 24h para el reloj (true = 24h, false = 12h AM/PM) */
+/** Formato de 24 h para el reloj (true = 24 h, false = 12 h AM/PM) */
 val AodClockFormatKey = booleanPreferencesKey("aod_clock_24h")
 
 val LyricsLineBlurKey = booleanPreferencesKey("lyricsLineBlur")

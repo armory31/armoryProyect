@@ -239,7 +239,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
         }
 
         try {
-            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
                 try {
                     val sw = StringWriter()
                     val pw = PrintWriter(sw)

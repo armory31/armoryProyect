@@ -32,8 +32,6 @@ import com.ruben.spotitube.ui.screens.playlist.OnlinePlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.TopPlaylistScreen
 import com.ruben.spotitube.ui.screens.search.OnlineSearchResult
 import com.ruben.spotitube.ui.screens.settings.AboutScreen
-import com.ruben.spotitube.ui.screens.settings.AccountSettings
-import com.ruben.spotitube.ui.screens.settings.BackupAndRestore
 import com.ruben.spotitube.ui.screens.settings.ChangelogScreen
 import com.ruben.spotitube.ui.screens.settings.DebugSettings
 import com.ruben.spotitube.ui.screens.settings.IntegrationScreen
@@ -270,14 +268,8 @@ fun NavGraphBuilder.navigationBuilder(
     composable("settings/storage") {
         StorageSettings(navController, scrollBehavior)
     }
-    composable("settings/backup_restore") {
-        BackupAndRestore(navController, scrollBehavior)
-    }
     composable("settings/integration") {
         IntegrationScreen(navController, scrollBehavior)
-    }
-    composable("settings/armory_sync") {
-        AccountSettings(navController, { navController.navigateUp() }, latestVersionName)
     }
     composable("settings/music_together") {
         MusicTogetherScreen(navController, scrollBehavior)

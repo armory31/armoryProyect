@@ -33,7 +33,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -63,7 +62,6 @@ import com.ruben.spotitube.sync.SyncManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import com.ruben.spotitube.ArmoryTheme
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.isInternetAvailable
 import com.google.firebase.auth.FirebaseAuth
@@ -73,6 +71,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
@@ -176,7 +175,7 @@ class LoginActivity : ComponentActivity() {
                                 }
                                 
                                 showRestoringDialog = false
-                                delay(500)
+                                delay(500.milliseconds)
                                 showBetaDialog = true
                             }
                         }
@@ -186,7 +185,6 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun LoginScreen(
         auth: FirebaseAuth,
@@ -365,7 +363,7 @@ class LoginActivity : ComponentActivity() {
                                         if (task.isSuccessful) {
                                             val user = auth.currentUser
                                             user?.reload()?.addOnCompleteListener {
-                                                if (user != null && user.isEmailVerified) {
+                                                if (user.isEmailVerified) {
                                                     onLoginSuccess(email, user)
                                                 } else {
                                                     isLoading = false

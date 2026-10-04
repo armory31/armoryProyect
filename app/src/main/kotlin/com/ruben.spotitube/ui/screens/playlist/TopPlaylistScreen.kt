@@ -8,6 +8,9 @@
 
 package com.ruben.spotitube.ui.screens.playlist
 
+import com.ruben.spotitube.ArmoryColors
+import androidx.compose.material3.ButtonDefaults
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -518,6 +521,8 @@ fun TopPlaylistScreen(
                                                 songs!!.size
                                             ),
                                             style = MaterialTheme.typography.labelMedium,
+                                            color = ArmoryColors.Rust2,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }
@@ -530,6 +535,8 @@ fun TopPlaylistScreen(
                                         Text(
                                             text = makeTimeString(likeLength * 1000L),
                                             style = MaterialTheme.typography.labelMedium,
+                                            color = ArmoryColors.Rust2,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }
@@ -543,7 +550,7 @@ fun TopPlaylistScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Download Button
+                                    // Download Button (Bronce Metálico)
                                     Surface(
                                         onClick = {
                                             when (downloadState) {
@@ -582,8 +589,10 @@ fun TopPlaylistScreen(
                                             }
                                         },
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        modifier = Modifier.size(48.dp)
+                                        color = Color.Transparent,
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(ArmoryColors.Copper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -594,21 +603,22 @@ fun TopPlaylistScreen(
                                                     Icon(
                                                         painter = painterResource(R.drawable.offline),
                                                         contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        tint = Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
                                                 Download.STATE_DOWNLOADING -> {
                                                     CircularProgressIndicator(
                                                         strokeWidth = 2.dp,
-                                                        modifier = Modifier.size(24.dp)
+                                                        modifier = Modifier.size(24.dp),
+                                                        color = Color.Black
                                                     )
                                                 }
                                                 else -> {
                                                     Icon(
                                                         painter = painterResource(R.drawable.download),
                                                         contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        tint = Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
@@ -616,7 +626,7 @@ fun TopPlaylistScreen(
                                         }
                                     }
 
-                                    // Play Button
+                                    // Play Button (Plata Metálico)
                                     Button(
                                         onClick = {
                                             playerConnection.playQueue(
@@ -627,18 +637,25 @@ fun TopPlaylistScreen(
                                             )
                                         },
                                         shape = RoundedCornerShape(24.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color.Transparent,
+                                            contentColor = Color.Black
+                                        ),
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
+                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.play),
                                             contentDescription = stringResource(R.string.play),
+                                            tint = Color.Black,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
 
-                                    // Shuffle Button
+                                    // Shuffle Button (Plata Metálico)
                                     Button(
                                         onClick = {
                                             playerConnection.playQueue(
@@ -649,18 +666,25 @@ fun TopPlaylistScreen(
                                             )
                                         },
                                         shape = RoundedCornerShape(24.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color.Transparent,
+                                            contentColor = Color.Black
+                                        ),
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
+                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.shuffle),
                                             contentDescription = stringResource(R.string.shuffle),
+                                            tint = Color.Black,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
 
-                                    // Add to Queue Button
+                                    // Add to Queue Button (Bronce Metálico - El de al lado)
                                     Surface(
                                         onClick = {
                                             playerConnection.addToQueue(
@@ -668,8 +692,10 @@ fun TopPlaylistScreen(
                                             )
                                         },
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        modifier = Modifier.size(48.dp)
+                                        color = Color.Transparent,
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(ArmoryColors.Copper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -678,7 +704,7 @@ fun TopPlaylistScreen(
                                             Icon(
                                                 painter = painterResource(R.drawable.queue_music),
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }

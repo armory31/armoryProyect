@@ -22,14 +22,11 @@ import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.lang.Integer.min
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
 
-@OptIn(ExperimentalSerializationApi::class)
 private val client = HttpClient {
     expectSuccess = true
 
@@ -63,7 +60,6 @@ private const val HEAD_CUT_LIMIT = 30
  * KuGou Lyrics Library
  * Modified from [ViMusic](https://github.com/vfsfitvnm/ViMusic)
  */
-@OptIn(ExperimentalEncodingApi::class)
 object KuGou {
     var useTraditionalChinese: Boolean = false
 

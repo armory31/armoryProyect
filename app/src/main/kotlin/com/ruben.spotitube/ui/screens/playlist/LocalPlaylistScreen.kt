@@ -8,6 +8,9 @@
 
 package com.ruben.spotitube.ui.screens.playlist
 
+import com.ruben.spotitube.ArmoryColors
+import androidx.compose.material3.ButtonDefaults
+
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -766,14 +769,18 @@ fun LocalPlaylistScreen(
                                     }
                                     MetadataChip(
                                         icon = R.drawable.music_note,
-                                        text = pluralStringResource(R.plurals.n_song, songCount, songCount)
+                                        text = pluralStringResource(R.plurals.n_song, songCount, songCount),
+                                        textColor = ArmoryColors.Rust2,
+                                        iconTint = ArmoryColors.Rust2
                                     )
 
                                     // Duration
                                     if (playlistLength > 0) {
                                         MetadataChip(
                                             icon = R.drawable.timer,
-                                            text = makeTimeString(playlistLength * 1000L)
+                                            text = makeTimeString(playlistLength * 1000L),
+                                            textColor = ArmoryColors.Rust2,
+                                            iconTint = ArmoryColors.Rust2
                                         )
                                     }
                                 }
@@ -834,7 +841,7 @@ fun LocalPlaylistScreen(
                                         }
                                     }
 
-                                    // Play Button
+                                    // Play Button (Plata Metálico)
                                     Button(
                                         onClick = {
                                             playerConnection.playQueue(
@@ -845,18 +852,25 @@ fun LocalPlaylistScreen(
                                             )
                                         },
                                         shape = RoundedCornerShape(24.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                            contentColor = androidx.compose.ui.graphics.Color.Black
+                                        ),
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
+                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.play),
                                             contentDescription = stringResource(R.string.play),
+                                            tint = androidx.compose.ui.graphics.Color.Black,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
 
-                                    // Shuffle Button
+                                    // Shuffle Button (Plata Metálico)
                                     Button(
                                         onClick = {
                                             playerConnection.playQueue(
@@ -867,18 +881,25 @@ fun LocalPlaylistScreen(
                                             )
                                         },
                                         shape = RoundedCornerShape(24.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                                            contentColor = androidx.compose.ui.graphics.Color.Black
+                                        ),
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
+                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.shuffle),
                                             contentDescription = stringResource(R.string.shuffle),
+                                            tint = androidx.compose.ui.graphics.Color.Black,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
 
-                                    // Download Button
+                                    // Download Button (Bronce Metálico)
                                     Surface(
                                         onClick = {
                                             when (downloadState) {
@@ -913,8 +934,10 @@ fun LocalPlaylistScreen(
                                             }
                                         },
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        modifier = Modifier.size(48.dp)
+                                        color = androidx.compose.ui.graphics.Color.Transparent,
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(ArmoryColors.Copper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -925,7 +948,7 @@ fun LocalPlaylistScreen(
                                                     Icon(
                                                         painter = painterResource(R.drawable.offline),
                                                         contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        tint = androidx.compose.ui.graphics.Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
@@ -933,14 +956,14 @@ fun LocalPlaylistScreen(
                                                     CircularProgressIndicator(
                                                         strokeWidth = 2.dp,
                                                         modifier = Modifier.size(24.dp),
-                                                        color = MaterialTheme.colorScheme.primary
+                                                        color = androidx.compose.ui.graphics.Color.Black
                                                     )
                                                 }
                                                 else -> {
                                                     Icon(
                                                         painter = painterResource(R.drawable.download),
                                                         contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        tint = androidx.compose.ui.graphics.Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
@@ -948,7 +971,7 @@ fun LocalPlaylistScreen(
                                         }
                                     }
 
-                                    // More Options Button
+                                    // More Options Button (Bronce Metálico - El de al lado)
                                     Surface(
                                         onClick = {
                                             // Show more options (edit, sync, queue)
@@ -1526,7 +1549,9 @@ fun LocalPlaylistScreen(
 private fun MetadataChip(
     icon: Int,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textColor: Color? = null,
+    iconTint: Color? = null
 ) {
     Surface(
         modifier = modifier,
@@ -1542,12 +1567,12 @@ private fun MetadataChip(
                 painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = textColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
         }

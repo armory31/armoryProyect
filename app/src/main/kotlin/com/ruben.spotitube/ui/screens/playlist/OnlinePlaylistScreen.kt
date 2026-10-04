@@ -8,6 +8,9 @@
 
 package com.ruben.spotitube.ui.screens.playlist
 
+import com.ruben.spotitube.ArmoryColors
+import androidx.compose.material3.ButtonDefaults
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -636,7 +639,9 @@ fun OnlinePlaylistScreen(
                                     ) {
                                         MetadataChip(
                                             icon = R.drawable.music_note,
-                                            text = songCountText
+                                            text = songCountText,
+                                            textColor = ArmoryColors.Rust2,
+                                            iconTint = ArmoryColors.Rust2
                                         )
                                     }
                                 }
@@ -682,7 +687,7 @@ fun OnlinePlaylistScreen(
                                         }
                                     }
 
-                                    // Shuffle Button
+                                    // Shuffle Button (Plata Metálico)
                                     playlist.shuffleEndpoint?.let { shuffleEndpoint ->
                                         Button(
                                             onClick = {
@@ -691,18 +696,26 @@ fun OnlinePlaylistScreen(
                                                 )
                                             },
                                             shape = RoundedCornerShape(24.dp),
-                                            modifier = Modifier.weight(1f).height(48.dp)
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.Transparent,
+                                                contentColor = Color.Black
+                                            ),
+                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(48.dp)
+                                                .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                         ) {
                                             Icon(
                                                 painter = painterResource(R.drawable.shuffle),
-                                                contentDescription =
-                                                    stringResource(R.string.shuffle),
+                                                contentDescription = stringResource(R.string.shuffle),
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
                                     }
 
-                                    // Radio Button
+                                    // Radio Button (Plata Metálico)
                                     playlist.radioEndpoint?.let { radioEndpoint ->
                                         Button(
                                             onClick = {
@@ -711,17 +724,26 @@ fun OnlinePlaylistScreen(
                                                 )
                                             },
                                             shape = RoundedCornerShape(24.dp),
-                                            modifier = Modifier.weight(1f).height(48.dp)
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.Transparent,
+                                                contentColor = Color.Black
+                                            ),
+                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(48.dp)
+                                                .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                         ) {
                                             Icon(
                                                 painter = painterResource(R.drawable.radio),
                                                 contentDescription = stringResource(R.string.radio),
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
                                     }
 
-                                    // More Options Button
+                                    // More Options Button (Bronce Metálico)
                                     Surface(
                                         onClick = {
                                             menuState.show {
@@ -737,8 +759,10 @@ fun OnlinePlaylistScreen(
                                             }
                                         },
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        modifier = Modifier.size(48.dp)
+                                        color = Color.Transparent,
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(ArmoryColors.Copper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -747,7 +771,7 @@ fun OnlinePlaylistScreen(
                                             Icon(
                                                 painter = painterResource(R.drawable.more_vert),
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }
@@ -1108,7 +1132,37 @@ fun OnlinePlaylistScreen(
 }
 
 @Composable
-private fun MetadataChip(icon: Int, text: String, modifier: Modifier = Modifier) {
+private fun MetadataChip(
+    icon: Int,
+    text: String,
+    modifier: Modifier = Modifier,
+    textColor: Color? = null,
+    iconTint: Color? = null
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+                color = textColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
+    }
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),

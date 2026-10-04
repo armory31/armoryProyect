@@ -8,7 +8,12 @@ package com.ruben.spotitube.ui.screens
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,7 +35,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -65,17 +70,19 @@ import com.ruben.spotitube.App.Companion.forgetAccount
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
 import com.ruben.spotitube.R
+import com.ruben.spotitube.constants.AccountAvatarUriKey
 import com.ruben.spotitube.constants.AccountNameKey
 import com.ruben.spotitube.ui.component.ActionPromptDialog
 import com.ruben.spotitube.ui.component.IconButton
+import com.ruben.spotitube.ui.component.TextFieldDialog
 import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.isInternetAvailable
 import com.ruben.spotitube.utils.rememberPreference
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     navController: NavController,
@@ -85,7 +92,8 @@ fun AccountScreen(
     val session = remember { SessionManager(context) }
     val coroutineScope = rememberCoroutineScope()
     
-    val (accountNamePref) = rememberPreference(AccountNameKey, "")
+    val (accountNamePref, onAccountNameChange) = rememberPreference(AccountNameKey, "")
+    val (accountAvatarUriPref, onAccountAvatarUriChange) = rememberPreference(AccountAvatarUriKey, "")
     val currentUser = remember { FirebaseAuth.getInstance().currentUser }
 
     val accountEmail = session.getEmail().ifEmpty { currentUser?.email ?: "" }
@@ -94,12 +102,55 @@ fun AccountScreen(
         ?: currentUser?.displayName?.takeIf { it.isNotBlank() }
         ?: currentUser?.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
         ?: "Usuario"
-    val avatarUrl = currentUser?.photoUrl?.toString()
+    val avatarUrl = accountAvatarUriPref.ifEmpty { session.getAvatarUri().ifEmpty { currentUser?.photoUrl?.toString() } }
 
     var showLogoutConfirmation by rememberSaveable { mutableStateOf(false) }
     var showLogoutProgress by rememberSaveable { mutableStateOf(false) }
+    var showEditNameDialog by rememberSaveable { mutableStateOf(false) }
     var isBackupLoading by remember { mutableStateOf(false) }
     var isRestoreLoading by remember { mutableStateOf(false) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { newUri ->
+            val uriString = newUri.toString()
+            onAccountAvatarUriChange(uriString)
+            session.saveAvatarUri(uriString)
+
+            currentUser?.let { user ->
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setPhotoUri(newUri)
+                    .build()
+                user.updateProfile(profileUpdates)
+            }
+            Toast.makeText(context, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    if (showEditNameDialog) {
+        TextFieldDialog(
+            icon = { Icon(painterResource(R.drawable.edit), contentDescription = null) },
+            title = { Text("Editar nombre") },
+            initialTextFieldValue = TextFieldValue(accountName),
+            onDone = { newName ->
+                showEditNameDialog = false
+                val trimmedName = newName.trim()
+                if (trimmedName.isNotEmpty()) {
+                    onAccountNameChange(trimmedName)
+                    session.saveNombre(trimmedName)
+                    currentUser?.let { user ->
+                        val profileUpdates = UserProfileChangeRequest.Builder()
+                            .setDisplayName(trimmedName)
+                            .build()
+                        user.updateProfile(profileUpdates)
+                    }
+                    Toast.makeText(context, "Nombre actualizado", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onDismiss = { showEditNameDialog = false }
+        )
+    }
 
     if (showLogoutProgress) {
         AlertDialog(
@@ -184,24 +235,50 @@ fun AccountScreen(
             Box(
                 modifier = Modifier
                     .size(110.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    .clickable { imagePickerLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                if (!avatarUrl.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = avatarUrl,
-                        contentDescription = "Avatar",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().clip(CircleShape)
-                    )
-                } else {
+                // Contenedor del avatar recortado en círculo
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!avatarUrl.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = avatarUrl,
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.account),
+                            contentDescription = "Avatar",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(54.dp)
+                        )
+                    }
+                }
+
+                // Badge de edición
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
-                        painter = painterResource(R.drawable.account),
-                        contentDescription = "Avatar",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(54.dp)
+                        painter = painterResource(R.drawable.edit),
+                        contentDescription = "Cambiar foto",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
@@ -209,14 +286,30 @@ fun AccountScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ── Nombre y Correo ──
-            Text(
-                text = accountName,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { showEditNameDialog = true }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = accountName,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    painter = painterResource(R.drawable.edit),
+                    contentDescription = "Editar nombre",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
 
             if (accountEmail.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -229,23 +322,35 @@ fun AccountScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // ── Copia de Seguridad en Firebase ──
+            // ── Cabecera CUENTA ──
+            Text(
+                text = "Cuenta",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // ── Recuadro CUENTA ──
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(ArmoryGradients.ObsidianGradient),
                 shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                color = Color.Transparent,
+                border = BorderStroke(1.5.dp, ArmoryColors.Gold)
             ) {
                 Column {
-                    // 1. ☁️ Guardar copia de seguridad en Firebase
-                    AccountOptionRow(
-                        icon = painterResource(R.drawable.add_circle),
-                        title = "Guardar copia de seguridad en Firebase",
-                        subtitle = "Subida manual inmediata a la nube",
-                        isLoading = isBackupLoading,
-                        onClick = {
+                    val accountItems = listOf(
+                        AccountSettingItem(R.drawable.fire, stringResource(R.string.music_together), stringResource(R.string.integration)) { navController.navigate("settings/music_together") },
+                        AccountSettingItem(R.drawable.add_circle, "Guardar copia de seguridad en Firebase", "Subida manual inmediata a la nube", isLoading = isBackupLoading) {
                             coroutineScope.launch {
                                 isBackupLoading = true
                                 try {
@@ -255,27 +360,14 @@ fun AccountScreen(
                                     } else {
                                         Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
                                     }
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     Toast.makeText(context, "Error al guardar copia", Toast.LENGTH_SHORT).show()
                                 } finally {
                                     isBackupLoading = false
                                 }
                             }
-                        }
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-                    )
-
-                    // 2. 🔄 Restaurar copia desde Firebase
-                    AccountOptionRow(
-                        icon = painterResource(R.drawable.cached),
-                        title = "Restaurar copia desde Firebase",
-                        subtitle = "Descarga e importación manual desde la nube",
-                        isLoading = isRestoreLoading,
-                        onClick = {
+                        },
+                        AccountSettingItem(R.drawable.cached, "Restaurar copia de seguridad en Firebase", "Descarga e importación manual desde la nube", isLoading = isRestoreLoading) {
                             coroutineScope.launch {
                                 isRestoreLoading = true
                                 try {
@@ -290,22 +382,48 @@ fun AccountScreen(
                                     } else {
                                         Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
                                     }
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     Toast.makeText(context, "Error al restaurar copia", Toast.LENGTH_SHORT).show()
                                 } finally {
                                     isRestoreLoading = false
                                 }
                             }
+                        },
+                        AccountSettingItem(
+                            R.drawable.logout,
+                            stringResource(R.string.action_logout),
+                            "Cierra tu sesión previa copia de seguridad",
+                            titleColor = MaterialTheme.colorScheme.error,
+                            iconTint = MaterialTheme.colorScheme.error
+                        ) {
+                            showLogoutConfirmation = true
                         }
                     )
+
+                    accountItems.forEachIndexed { index, item ->
+                        AccountOptionRow(
+                            icon = painterResource(item.iconRes),
+                            title = item.title,
+                            subtitle = item.subtitle,
+                            titleColor = item.titleColor ?: MaterialTheme.colorScheme.onSurface,
+                            iconTint = item.iconTint ?: MaterialTheme.colorScheme.primary,
+                            isLoading = item.isLoading,
+                            onClick = item.onClick
+                        )
+                        if (index < accountItems.size - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 56.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                            )
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ── Cabecera de Ajustes ──
-            Text(
-                text = "Ajustes",
+            // ── Cabecera AJUSTES ──
+            Text(                text = "Ajustes",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -316,21 +434,21 @@ fun AccountScreen(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // ── Recuadro de Ajustes Integrados ──
+            // ── Recuadro AJUSTES ──
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(ArmoryGradients.ObsidianGradient),
                 shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                color = Color.Transparent,
+                border = BorderStroke(1.5.dp, ArmoryColors.Silver)
             ) {
                 Column {
                     val settingsItems = listOf(
                         AccountSettingItem(R.drawable.storage, stringResource(R.string.storage), stringResource(R.string.cache)) { navController.navigate("settings/storage") },
-                        AccountSettingItem(R.drawable.restore, stringResource(R.string.backup_restore), stringResource(R.string.action_backup)) { navController.navigate("settings/backup_restore") },
-                        AccountSettingItem(R.drawable.account, "Armory Sync", "Sincroniza tus datos en la nube") { navController.navigate("settings/armory_sync") },
-                        AccountSettingItem(R.drawable.fire, stringResource(R.string.music_together), stringResource(R.string.integration)) { navController.navigate("settings/music_together") },
-                        AccountSettingItem(R.drawable.experiment, stringResource(R.string.experiment_settings), stringResource(R.string.misc)) { navController.navigate("settings/misc") },
                         AccountSettingItem(R.drawable.link, "Configurar PO Token", "Token de origen de YouTube") { navController.navigate("settings/po_token") },
+                        AccountSettingItem(R.drawable.experiment, stringResource(R.string.experiment_settings), stringResource(R.string.misc)) { navController.navigate("settings/misc") },
                         AccountSettingItem(R.drawable.update, stringResource(R.string.updates), BuildConfig.VERSION_NAME) { navController.navigate("settings/update") },
                         AccountSettingItem(R.drawable.info, stringResource(R.string.about), "ARMORY") { navController.navigate("settings/about") },
                     )
@@ -340,6 +458,9 @@ fun AccountScreen(
                             icon = painterResource(item.iconRes),
                             title = item.title,
                             subtitle = item.subtitle,
+                            titleColor = item.titleColor ?: MaterialTheme.colorScheme.onSurface,
+                            iconTint = item.iconTint ?: MaterialTheme.colorScheme.primary,
+                            isLoading = item.isLoading,
                             onClick = item.onClick
                         )
                         if (index < settingsItems.size - 1) {
@@ -352,26 +473,7 @@ fun AccountScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Cerrar Sesión ──
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-            ) {
-                AccountOptionRow(
-                    icon = painterResource(R.drawable.logout),
-                    title = stringResource(R.string.action_logout),
-                    subtitle = "Cierra tu sesión previa copia de seguridad",
-                    titleColor = MaterialTheme.colorScheme.error,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    onClick = {
-                        showLogoutConfirmation = true
-                    }
-                )
-            }
+            Spacer(modifier = Modifier.height(32.dp))
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -448,5 +550,8 @@ private data class AccountSettingItem(
     val iconRes: Int,
     val title: String,
     val subtitle: String,
+    val titleColor: Color? = null,
+    val iconTint: Color? = null,
+    val isLoading: Boolean = false,
     val onClick: () -> Unit
 )
