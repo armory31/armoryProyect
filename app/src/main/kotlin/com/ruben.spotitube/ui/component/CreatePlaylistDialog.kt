@@ -151,8 +151,8 @@ suspend fun importCsvPlaylistAndFetchMetadata(
 
     songs.forEach { songItem ->
         var songId = songItem.song.id
-        val title = songItem.song.title
-        val artistName = songItem.artists.firstOrNull()?.name.orEmpty()
+        var title = songItem.song.title
+        var artistName = songItem.artists.firstOrNull()?.name.orEmpty()
 
         if (songId.isBlank()) {
             val query = "$title $artistName".trim()

@@ -49,7 +49,7 @@ fun LibraryScreen(navController: NavController) {
     val currentUser = remember { FirebaseAuth.getInstance().currentUser }
     val avatarUrl = currentUser?.photoUrl?.toString()
 
-    val filterContent = @Composable {
+    val headerContent = @Composable {
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text(
                 text = "Mi Colección",
@@ -58,33 +58,7 @@ fun LibraryScreen(navController: NavController) {
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(
-                    LibraryFilter.PLAYLISTS to "Playlists",
-                    LibraryFilter.ALBUMS to "Álbumes",
-                    LibraryFilter.ARTISTS to "Artistas"
-                ).forEach { (filter, label) ->
-                    val selected = filterType == filter
-                    ArmoryFilterChip(
-                        selected = selected,
-                        onClick = { filterType = filter },
-                        label = {
-                            Text(
-                                text = label,
-                                fontSize = 12.sp,
-                                color = if (selected) ArmoryColors.AbsoluteBlack else ArmoryColors.Champagne,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                    )
-                }
-            }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
             GoldDivider()
             Spacer(Modifier.height(16.dp))
         }
@@ -101,12 +75,12 @@ fun LibraryScreen(navController: NavController) {
                 onSettings = { navController.navigate("account") }
             )
             
-            when (filterType) {
-                LibraryFilter.PLAYLISTS -> LibraryPlaylistsScreen(navController, filterContent)
-                LibraryFilter.ALBUMS -> LibraryAlbumsScreen(navController, { filterType = LibraryFilter.PLAYLISTS })
-                LibraryFilter.ARTISTS -> LibraryArtistsScreen(navController, { filterType = LibraryFilter.PLAYLISTS })
-                else -> LibraryPlaylistsScreen(navController, filterContent)
-            }
+            LibraryPlaylistsScreen(
+                navController = navController,
+                headerContent = headerContent,
+                filterType = filterType,
+                onFilterTypeChange = { filterType = it }
+            )
         }
     }
 }

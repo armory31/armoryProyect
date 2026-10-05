@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -62,7 +63,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.ArmoryFont
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
@@ -78,12 +78,22 @@ import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.extensions.move
+import com.ruben.spotitube.ArmoryFont
+import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.constants.AlbumViewTypeKey
+import com.ruben.spotitube.constants.ArtistViewTypeKey
+import com.ruben.spotitube.constants.LibraryFilter
+import com.ruben.spotitube.constants.LibraryViewType
+import com.ruben.spotitube.ui.component.LibraryAlbumListItem
+import com.ruben.spotitube.ui.component.LibraryArtistListItem
 import com.ruben.spotitube.ui.component.LibraryPinnedCollectionTile
 import com.ruben.spotitube.ui.component.LibraryPlaylistListItem
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
+import com.ruben.spotitube.viewmodels.LibraryAlbumsViewModel
+import com.ruben.spotitube.viewmodels.LibraryArtistsViewModel
 import com.ruben.spotitube.viewmodels.LibraryPlaylistsViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -98,14 +108,28 @@ private data class PlaylistShortcutEntry(
 @Composable
 fun LibraryPlaylistsScreen(
     navController: NavController,
-    filterContent: @Composable () -> Unit,
+    headerContent: @Composable () -> Unit,
+    filterType: LibraryFilter = LibraryFilter.PLAYLISTS,
+    onFilterTypeChange: (LibraryFilter) -> Unit = {},
     viewModel: LibraryPlaylistsViewModel = hiltViewModel(),
+    albumsViewModel: LibraryAlbumsViewModel = hiltViewModel(),
+    artistsViewModel: LibraryArtistsViewModel = hiltViewModel(),
     initialTextFieldValue: String? = null,
     allowSyncing: Boolean = true,
 ) {
     val menuState = LocalMenuState.current
     val coroutineScope = rememberCoroutineScope()
     val database = LocalDatabase.current
+
+    val playerConnection = LocalPlayerConnection.current
+    val isPlaying by playerConnection?.isPlaying?.collectAsState(initial = false) ?: remember { mutableStateOf(false) }
+    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsState(initial = null) ?: remember { mutableStateOf(null) }
+
+    var albumViewType by rememberEnumPreference(AlbumViewTypeKey, LibraryViewType.LIST)
+    var artistViewType by rememberEnumPreference(ArtistViewTypeKey, LibraryViewType.LIST)
+
+    val albums by albumsViewModel.allAlbums.collectAsState()
+    val artists by artistsViewModel.allArtists.collectAsState()
 
     val (sortType, onSortTypeChange) = rememberEnumPreference(
         PlaylistSortTypeKey,
@@ -320,35 +344,8 @@ fun LibraryPlaylistsScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
             contentPadding = PaddingValues(bottom = 120.dp),
         ) {
-            item(key = "filter") {
-                filterContent()
-            }
-
-            item(key = "controls") {
-                PlaylistControlCard(
-                    summary = summary,
-                    canEnterReorderMode = canEnterReorderMode,
-                    reorderEnabled = reorderEnabled,
-                    onToggleReorder = { reorderEnabled = !reorderEnabled },
-                    onCreatePlaylist = { showCreatePlaylistDialog = true }
-                ) {
-                    SortHeader(
-                        sortType = sortType,
-                        sortDescending = sortDescending,
-                        onSortTypeChange = onSortTypeChange,
-                        onSortDescendingChange = onSortDescendingChange,
-                        sortTypeText = { type ->
-                            when (type) {
-                                PlaylistSortType.CREATE_DATE -> R.string.sort_by_create_date
-                                PlaylistSortType.NAME -> R.string.sort_by_name
-                                PlaylistSortType.SONG_COUNT -> R.string.sort_by_song_count
-                                PlaylistSortType.LAST_UPDATED -> R.string.sort_by_last_updated
-                                PlaylistSortType.CUSTOM -> R.string.sort_by_custom
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+            item(key = "header") {
+                headerContent()
             }
 
             item(key = "shortcuts") {
@@ -361,51 +358,147 @@ fun LibraryPlaylistsScreen(
                 )
             }
 
-            item(key = "playlist_section_header") {
-                PlaylistSectionHeaderCard(
-                    title = stringResource(R.string.playlists),
-                    supportingText = summary,
-                    modifier = Modifier.padding(horizontal = 16.dp),
+            item(key = "filter_chips") {
+                LibraryFilterChipsRow(
+                    selectedFilter = filterType,
+                    onFilterSelected = onFilterTypeChange,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
 
-            if (canReorderPlaylists) {
-                itemsIndexed(
-                    items = mutableVisiblePlaylists,
-                    key = { _, item -> item.id },
-                ) { _, playlist ->
-                    ReorderableItem(
-                        state = reorderableState,
-                        key = playlist.id,
-                    ) {
-                        LibraryPlaylistListItem(
+            item(key = "playlist_section_header") {
+                val headerTitle = when (filterType) {
+                    LibraryFilter.PLAYLISTS -> stringResource(R.string.playlists)
+                    LibraryFilter.ALBUMS -> stringResource(R.string.albums)
+                    LibraryFilter.ARTISTS -> stringResource(R.string.artists)
+                    else -> stringResource(R.string.playlists)
+                }
+
+                val headerSummary = when (filterType) {
+                    LibraryFilter.PLAYLISTS -> summary
+                    LibraryFilter.ALBUMS -> pluralStringResource(R.plurals.n_album, albums.size, albums.size)
+                    LibraryFilter.ARTISTS -> pluralStringResource(R.plurals.n_artist, artists.size, artists.size)
+                    else -> summary
+                }
+
+                val btn1Icon = when (filterType) {
+                    LibraryFilter.PLAYLISTS -> R.drawable.add
+                    LibraryFilter.ALBUMS -> if (albumViewType == LibraryViewType.LIST) R.drawable.grid_view else R.drawable.list
+                    LibraryFilter.ARTISTS -> if (artistViewType == LibraryViewType.LIST) R.drawable.grid_view else R.drawable.list
+                    else -> R.drawable.add
+                }
+
+                val btn1Click = {
+                    when (filterType) {
+                        LibraryFilter.PLAYLISTS -> showCreatePlaylistDialog = true
+                        LibraryFilter.ALBUMS -> albumViewType = albumViewType.toggle()
+                        LibraryFilter.ARTISTS -> artistViewType = artistViewType.toggle()
+                        else -> showCreatePlaylistDialog = true
+                    }
+                }
+
+                val btn2Icon = when (filterType) {
+                    LibraryFilter.PLAYLISTS -> if (reorderEnabled) R.drawable.lock_open else R.drawable.lock
+                    LibraryFilter.ALBUMS -> R.drawable.sync
+                    LibraryFilter.ARTISTS -> R.drawable.sync
+                    else -> if (reorderEnabled) R.drawable.lock_open else R.drawable.lock
+                }
+
+                val btn2Click = {
+                    when (filterType) {
+                        LibraryFilter.PLAYLISTS -> if (canEnterReorderMode) reorderEnabled = !reorderEnabled
+                        LibraryFilter.ALBUMS -> albumsViewModel.sync()
+                        LibraryFilter.ARTISTS -> artistsViewModel.sync()
+                        else -> if (canEnterReorderMode) reorderEnabled = !reorderEnabled
+                    }
+                }
+
+                PlaylistHeaderSplitRow(
+                    title = headerTitle,
+                    summary = headerSummary,
+                    button1IconRes = btn1Icon,
+                    onButton1Click = btn1Click,
+                    button2IconRes = btn2Icon,
+                    onButton2Click = btn2Click,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            when (filterType) {
+                LibraryFilter.PLAYLISTS -> {
+                    if (canReorderPlaylists) {
+                        itemsIndexed(
+                            items = mutableVisiblePlaylists,
+                            key = { _, item -> item.id },
+                        ) { _, playlist ->
+                            ReorderableItem(
+                                state = reorderableState,
+                                key = playlist.id,
+                            ) {
+                                LibraryPlaylistListItem(
+                                    navController = navController,
+                                    menuState = menuState,
+                                    coroutineScope = coroutineScope,
+                                    playlist = playlist,
+                                    showDragHandle = true,
+                                    dragHandleModifier = Modifier.draggableHandle(),
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .animateItem(),
+                                )
+                            }
+                        }
+                    } else {
+                        items(
+                            items = visiblePlaylists,
+                            key = { it.id },
+                        ) { playlist ->
+                            LibraryPlaylistListItem(
+                                navController = navController,
+                                menuState = menuState,
+                                coroutineScope = coroutineScope,
+                                playlist = playlist,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .animateItem(),
+                            )
+                        }
+                    }
+                }
+                LibraryFilter.ALBUMS -> {
+                    items(
+                        items = albums.distinctBy { it.id },
+                        key = { "album_${it.id}" }
+                    ) { album ->
+                        LibraryAlbumListItem(
                             navController = navController,
                             menuState = menuState,
-                            coroutineScope = coroutineScope,
-                            playlist = playlist,
-                            showDragHandle = true,
-                            dragHandleModifier = Modifier.draggableHandle(),
+                            album = album,
+                            isActive = album.id == mediaMetadata?.album?.id,
+                            isPlaying = isPlaying ?: false,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
-                                .animateItem(),
+                                .animateItem()
                         )
                     }
                 }
-            } else {
-                items(
-                    items = visiblePlaylists,
-                    key = { it.id },
-                ) { playlist ->
-                    LibraryPlaylistListItem(
-                        navController = navController,
-                        menuState = menuState,
-                        coroutineScope = coroutineScope,
-                        playlist = playlist,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .animateItem(),
-                    )
+                LibraryFilter.ARTISTS -> {
+                    items(
+                        items = artists,
+                        key = { "artist_${it.id}" }
+                    ) { artist ->
+                        LibraryArtistListItem(
+                            navController = navController,
+                            menuState = menuState,
+                            coroutineScope = coroutineScope,
+                            artist = artist,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .animateItem()
+                        )
+                    }
                 }
+                else -> {}
             }
         }
 
@@ -470,57 +563,42 @@ private fun FavoritosGradientCard(onClick: () -> Unit) {
 }
 
 @Composable
-private fun PlaylistControlCard(
-    summary: String,
-    canEnterReorderMode: Boolean,
-    reorderEnabled: Boolean,
-    onToggleReorder: () -> Unit,
-    onCreatePlaylist: () -> Unit,
-    controls: @Composable RowScope.() -> Unit,
+private fun LibraryFilterChipsRow(
+    selectedFilter: LibraryFilter,
+    onFilterSelected: (LibraryFilter) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = ArmoryColors.Silver5.copy(alpha = 0.5f)),
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier.padding(horizontal = 16.dp)
-            .border(1.dp, ArmoryColors.Silver4.copy(alpha = 0.3f), MaterialTheme.shapes.large),
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-        ) {
-            controls()
+        listOf(
+            LibraryFilter.PLAYLISTS to "Playlists",
+            LibraryFilter.ALBUMS to "Álbumes",
+            LibraryFilter.ARTISTS to "Artistas"
+        ).forEach { (filter, label) ->
+            val isSelected = selectedFilter == filter
+            val alpha = if (isSelected) 1.0f else 0.5f
 
-            IconButton(
-                onClick = onCreatePlaylist,
-                modifier = Modifier.size(36.dp),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.add),
-                    contentDescription = null,
-                    tint = ArmoryColors.Gold3
-                )
-            }
-
-            Text(
-                text = summary.uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                color = ArmoryColors.Silver3,
-                letterSpacing = 1.sp,
-                modifier = Modifier.weight(1f)
-            )
-            if (canEnterReorderMode) {
-                IconButton(
-                    onClick = onToggleReorder,
-                    modifier = Modifier.size(36.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(if (reorderEnabled) R.drawable.lock_open else R.drawable.lock),
-                        contentDescription = null,
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .graphicsLayer { this.alpha = alpha }
+                    .background(
+                        brush = ArmoryColors.Gold,
+                        shape = RoundedCornerShape(14.dp)
                     )
-                }
+                    .combinedClickable(onClick = { onFilterSelected(filter) })
+                    .padding(vertical = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 13.sp,
+                    fontFamily = ArmoryFont.Body,
+                    color = ArmoryColors.AbsoluteBlack,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -560,35 +638,95 @@ private fun PlaylistShortcutGrid(
 }
 
 @Composable
-private fun PlaylistSectionHeaderCard(
+private fun PlaylistHeaderSplitRow(
     title: String,
-    supportingText: String,
+    summary: String,
+    button1IconRes: Int? = R.drawable.add,
+    onButton1Click: () -> Unit = {},
+    button2IconRes: Int? = R.drawable.lock,
+    onButton2Click: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = ArmoryColors.Gold5.copy(alpha = 0.15f)),
-        shape = MaterialTheme.shapes.large,
-        modifier = modifier.border(0.5.dp, ArmoryColors.Gold4.copy(alpha = 0.3f), MaterialTheme.shapes.large),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        // 3/5 - Bloque Plata con Título y contador
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
+                .weight(3f)
+                .height(52.dp)
+                .background(
+                    brush = ArmoryColors.Silver,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            Text(
-                text = title.uppercase(),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Black,
-                color = ArmoryColors.Gold2,
-                letterSpacing = 1.sp,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = supportingText,
-                style = MaterialTheme.typography.labelMedium,
-                color = ArmoryColors.Gold4,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = title.uppercase(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    color = ArmoryColors.AbsoluteBlack,
+                    letterSpacing = 1.sp,
+                )
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = ArmoryColors.AbsoluteBlack.copy(alpha = 0.75f),
+                )
+            }
+        }
+
+        // 1/5 - Bloque Bronce con Botón 1
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(52.dp)
+                .background(
+                    brush = ArmoryColors.Copper,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .combinedClickable(onClick = onButton1Click),
+            contentAlignment = Alignment.Center
+        ) {
+            if (button1IconRes != null) {
+                Icon(
+                    painter = painterResource(button1IconRes),
+                    contentDescription = null,
+                    tint = ArmoryColors.AbsoluteBlack,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        // 1/5 - Bloque Bronce con Botón 2
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(52.dp)
+                .background(
+                    brush = ArmoryColors.Copper,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .combinedClickable(onClick = onButton2Click),
+            contentAlignment = Alignment.Center
+        ) {
+            if (button2IconRes != null) {
+                Icon(
+                    painter = painterResource(button2IconRes),
+                    contentDescription = null,
+                    tint = ArmoryColors.AbsoluteBlack,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
