@@ -64,7 +64,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import androidx.media3.exoplayer.offline.Download
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.PlaylistSortDescendingKey
 import com.ruben.spotitube.constants.PlaylistSortType
@@ -92,6 +94,7 @@ import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
+import com.ruben.spotitube.viewmodels.CachePlaylistViewModel
 import com.ruben.spotitube.viewmodels.LibraryAlbumsViewModel
 import com.ruben.spotitube.viewmodels.LibraryArtistsViewModel
 import com.ruben.spotitube.viewmodels.LibraryPlaylistsViewModel
@@ -349,10 +352,66 @@ fun LibraryPlaylistsScreen(
             }
 
             item(key = "shortcuts") {
-                FavoritosGradientCard(onClick = { navController.navigate("auto_playlist/liked") })
-                Spacer(Modifier.height(16.dp))
+                val likedSongs by database.likedSongsByRowIdAsc().collectAsState(initial = emptyList())
+                val likedCount = likedSongs.size
+                val likedMinutes = likedSongs.sumOf { maxOf(0, it.song.duration) } / 60
+
+                val downloadUtil = LocalDownloadUtil.current
+                val downloads by downloadUtil.downloads.collectAsState()
+                val downloadedSongsList = remember(downloads, likedSongs) {
+                    likedSongs.filter { downloads[it.id]?.state == Download.STATE_COMPLETED }
+                }
+                val downloadedCount = downloadedSongsList.size
+                val downloadedMinutes = downloadedSongsList.sumOf { maxOf(0, it.song.duration) } / 60
+
+                val topSongs by database.mostPlayedSongs(0L, topSize.toInt()).collectAsState(initial = emptyList())
+                val topCount = topSongs.size
+                val topMinutes = topSongs.sumOf { maxOf(0, it.song.duration) } / 60
+
+                val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
+                val cachedSongs by cacheViewModel.cachedSongs.collectAsState()
+                val cachedCount = cachedSongs.size
+                val cachedMinutes = cachedSongs.sumOf { maxOf(0, it.song.duration) } / 60
+
+                if (showLiked) {
+                    FavoritosGradientCard(
+                        songCount = likedCount,
+                        totalMinutes = likedMinutes.toLong(),
+                        onClick = { navController.navigate("auto_playlist/liked") }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+                if (showDownloaded) {
+                    DownloadsGradientCard(
+                        songCount = downloadedCount,
+                        totalMinutes = downloadedMinutes.toLong(),
+                        onClick = { navController.navigate("auto_playlist/downloaded") }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+                if (showTop) {
+                    TopGradientCard(
+                        songCount = topCount,
+                        totalMinutes = topMinutes.toLong(),
+                        onClick = { navController.navigate("top_playlist/$topSize") }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+                if (showCached) {
+                    CachedGradientCard(
+                        songCount = cachedCount,
+                        totalMinutes = cachedMinutes.toLong(),
+                        onClick = { navController.navigate("cache_playlist/cached") }
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
                 PlaylistShortcutGrid(
-                    entries = shortcuts.filter { it.route != "auto_playlist/liked" },
+                    entries = shortcuts.filter { 
+                        it.route != "auto_playlist/liked" && 
+                        it.route != "auto_playlist/downloaded" && 
+                        !it.route.startsWith("top_playlist") &&
+                        it.route != "cache_playlist/cached"
+                    },
                     onClick = navController::navigate,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
@@ -397,20 +456,9 @@ fun LibraryPlaylistsScreen(
                     }
                 }
 
-                val btn2Icon = when (filterType) {
-                    LibraryFilter.PLAYLISTS -> if (reorderEnabled) R.drawable.lock_open else R.drawable.lock
-                    LibraryFilter.ALBUMS -> R.drawable.sync
-                    LibraryFilter.ARTISTS -> R.drawable.sync
-                    else -> if (reorderEnabled) R.drawable.lock_open else R.drawable.lock
-                }
-
+                val btn2Icon = if (reorderEnabled) R.drawable.lock_open else R.drawable.lock
                 val btn2Click = {
-                    when (filterType) {
-                        LibraryFilter.PLAYLISTS -> if (canEnterReorderMode) reorderEnabled = !reorderEnabled
-                        LibraryFilter.ALBUMS -> albumsViewModel.sync()
-                        LibraryFilter.ARTISTS -> artistsViewModel.sync()
-                        else -> if (canEnterReorderMode) reorderEnabled = !reorderEnabled
-                    }
+                    reorderEnabled = !reorderEnabled
                 }
 
                 PlaylistHeaderSplitRow(
@@ -515,12 +563,120 @@ fun LibraryPlaylistsScreen(
 }
 
 @Composable
-private fun FavoritosGradientCard(onClick: () -> Unit) {
+private fun FavoritosGradientCard(
+    songCount: Int,
+    totalMinutes: Long,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(100.dp)
+            .height(80.dp)
+            .combinedClickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(Color(0xFFFF5252), Color.Transparent)))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(Color(0xFFD32F2F), Color(0xFFB71C1C))))
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Favoritos",
+                    color = Color.White,
+                    fontFamily = ArmoryFont.Title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "$songCount canciones • $totalMinutes min",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontFamily = ArmoryFont.Body,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                )
+                Icon(
+                    painter = painterResource(R.drawable.favorite),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadsGradientCard(
+    songCount: Int,
+    totalMinutes: Long,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(80.dp)
+            .combinedClickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(Color(0xFF448AFF), Color.Transparent)))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(Color(0xFF1976D2), Color(0xFF0D47A1))))
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Local",
+                    color = Color.White,
+                    fontFamily = ArmoryFont.Title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "$songCount canciones • $totalMinutes min",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontFamily = ArmoryFont.Body,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                )
+                Icon(
+                    painter = painterResource(R.drawable.offline),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopGradientCard(
+    songCount: Int,
+    totalMinutes: Long,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(80.dp)
             .combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, Brush.verticalGradient(listOf(ArmoryColors.Gold1, Color.Transparent)))
@@ -529,33 +685,85 @@ private fun FavoritosGradientCard(onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(ArmoryColors.GoldGradient)
-                .padding(20.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
-                    Text(
-                        text = "Mis Favoritos",
-                        color = ArmoryColors.AbsoluteBlack,
-                        fontFamily = ArmoryFont.Title,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = "Tu colección privada",
-                        color = ArmoryColors.AbsoluteBlack.copy(alpha = 0.7f),
-                        fontFamily = ArmoryFont.Body,
-                        fontSize = 12.sp
-                    )
-                }
+                Text(
+                    text = "Top 50",
+                    color = ArmoryColors.AbsoluteBlack,
+                    fontFamily = ArmoryFont.Title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "$songCount canciones • $totalMinutes min",
+                    color = ArmoryColors.AbsoluteBlack.copy(alpha = 0.8f),
+                    fontFamily = ArmoryFont.Body,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                )
                 Icon(
-                    painter = painterResource(R.drawable.favorite),
+                    painter = painterResource(R.drawable.trending_up),
                     contentDescription = null,
                     tint = ArmoryColors.AbsoluteBlack,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CachedGradientCard(
+    songCount: Int,
+    totalMinutes: Long,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(80.dp)
+            .combinedClickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(Color(0xFF606060), Color.Transparent)))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(Color(0xFF2A2A2A), Color(0xFF141414))))
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Caché",
+                    color = Color.White,
+                    fontFamily = ArmoryFont.Title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "$songCount canciones • $totalMinutes min",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontFamily = ArmoryFont.Body,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                )
+                Icon(
+                    painter = painterResource(R.drawable.cached),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
                 )
             }
         }

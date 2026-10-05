@@ -143,30 +143,23 @@ fun MoodAndGenresButton(
     modifier: Modifier = Modifier,
 ) {
     val base = Color(stripeColor)
-    val metallicShine = Color.White.copy(alpha = 0.35f)
-    val brightVariant = Color(
-        red = (base.red * 1.4f).coerceIn(0f, 1f),
-        green = (base.green * 1.4f).coerceIn(0f, 1f),
-        blue = (base.blue * 1.4f).coerceIn(0f, 1f),
+    val subtleLight = Color(
+        red = (base.red * 1.2f).coerceIn(0f, 1f),
+        green = (base.green * 1.2f).coerceIn(0f, 1f),
+        blue = (base.blue * 1.2f).coerceIn(0f, 1f),
     )
-    val darkVariant = Color(
-        red = (base.red * 0.38f).coerceIn(0f, 1f),
-        green = (base.green * 0.38f).coerceIn(0f, 1f),
-        blue = (base.blue * 0.38f).coerceIn(0f, 1f),
+    val subtleDark = Color(
+        red = (base.red * 0.75f).coerceIn(0f, 1f),
+        green = (base.green * 0.75f).coerceIn(0f, 1f),
+        blue = (base.blue * 0.75f).coerceIn(0f, 1f),
     )
 
-    val metallicGradient = Brush.linearGradient(
+    val metallicGradient = Brush.verticalGradient(
         colors = listOf(
-            darkVariant,
+            subtleLight,
             base,
-            brightVariant,
-            metallicShine,
-            brightVariant,
-            base,
-            darkVariant
-        ),
-        start = Offset(0f, 0f),
-        end = Offset(500f, 300f),
+            subtleDark
+        )
     )
 
     Box(

@@ -743,12 +743,12 @@ fun ArtistListItem(
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
         if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
+            if (metadata.isLiked) Icon.Library()
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
             val isBookmarked by libraryStateHolder.isArtistBookmarked(artist.id).collectAsState(initial = false)
             if (isBookmarked) {
-                Icon.Favorite()
+                Icon.Library()
             }
         }
     },
@@ -777,12 +777,12 @@ fun ArtistGridItem(
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
         if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
+            if (metadata.isLiked) Icon.Library()
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
             val isBookmarked by libraryStateHolder.isArtistBookmarked(artist.id).collectAsState(initial = false)
             if (isBookmarked) {
-                Icon.Favorite()
+                Icon.Library()
             }
         }
     },
