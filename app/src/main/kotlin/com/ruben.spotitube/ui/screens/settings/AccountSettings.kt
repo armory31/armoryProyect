@@ -259,14 +259,10 @@ fun AccountSettings(
                                 Toast.makeText(context, "Descargando copia...", Toast.LENGTH_SHORT).show()
                                 try {
                                     val lib = syncManager.getUserLibrary()
-                                    if (lib != null) {
-                                        syncManager.applyLibraryToLocal(lib)
-                                        Toast.makeText(context, "Biblioteca restaurada con éxito", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(context, "No hay copias guardadas", Toast.LENGTH_SHORT).show()
-                                    }
+                                    syncManager.applyLibraryToLocal(lib)
+                                    Toast.makeText(context, "Biblioteca restaurada con éxito", Toast.LENGTH_SHORT).show()
                                 } catch (e: Exception) {
-                                    Toast.makeText(context, "Error al restaurar copia", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, e.message ?: "Error al restaurar copia", Toast.LENGTH_LONG).show()
                                 }
                             } else {
                                 Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()

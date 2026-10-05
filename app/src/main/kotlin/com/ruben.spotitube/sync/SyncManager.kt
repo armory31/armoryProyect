@@ -10,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.ruben.spotitube.constants.AlbumSortType
 import com.ruben.spotitube.constants.ArtistSortType
 import com.ruben.spotitube.db.MusicDatabase
+import com.ruben.spotitube.db.entities.AlbumArtistMap
 import com.ruben.spotitube.db.entities.AlbumEntity
 import com.ruben.spotitube.db.entities.ArtistEntity
 import com.ruben.spotitube.db.entities.HistoryAlbumEntity
@@ -42,6 +43,7 @@ import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.ceil
 
 @Singleton
 class SyncManager @Inject constructor(
@@ -97,6 +99,19 @@ class SyncManager @Inject constructor(
             Timber.w("SyncManager: Cannot push payload, UID is null or unauthenticated")
             return@withContext
         }
+
+        val rawSavedSongsCount = database.allSavedSongs().first().size
+        val likedSongsCount = database.likedSongsByRowIdAsc().first().size
+        val rawSavedArtistsCount = database.allSavedArtists().first().size
+        val rawSavedAlbumsCount = database.allSavedAlbums().first().size
+        val rawSavedPlaylistsCount = database.allSavedPlaylists().first().size
+
+        if (rawSavedSongsCount == 0 && likedSongsCount == 0 && rawSavedArtistsCount == 0 &&
+            rawSavedAlbumsCount == 0 && rawSavedPlaylistsCount == 0) {
+            Timber.w("SyncManager: Room database is completely empty, skipping cloud push to prevent data loss")
+            return@withContext
+        }
+
         val db = getFirestore()
 
         val rawSavedSongs = database.allSavedSongs().first()
@@ -113,11 +128,13 @@ class SyncManager @Inject constructor(
                 }
                 val songWithArtists = database.getSongById(s.id)
                 val artist = songWithArtists?.artists?.firstOrNull() ?: database.songArtistMap(s.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
+                val rawName = s.artistName ?: artist?.name ?: ""
+                val cleanArtistName = if (rawName.toLongOrNull() != null || rawName.toIntOrNull() != null) (artist?.name ?: "") else rawName
                 FavoriteSongDto(
                     videoId = s.id,
                     title = s.title,
                     artistId = s.artistId ?: artist?.id ?: "",
-                    artistName = s.artistName ?: artist?.name ?: "",
+                    artistName = cleanArtistName,
                     thumbnailUrl = s.thumbnailUrl,
                     albumId = s.albumId,
                     albumName = s.albumName,
@@ -262,24 +279,11 @@ class SyncManager @Inject constructor(
             HistoryPlaylistDto(playlistId = h.playlistId, playedsongsJson = h.playedsongsJson, playedAt = h.playedAt)
         }
 
-        val payload = SavedAndHistoryPayloadDto(
-            savedSongs = savedSongs,
-            savedArtists = savedArtists,
-            savedAlbums = savedAlbums,
-            savedPlaylists = savedPlaylists,
-            historySongs = historySongs,
-            historyArtists = historyArtists,
-            historyAlbums = historyAlbums,
-            historyPlaylists = historyPlaylists,
-            metadata = SyncMetadataDto(lastSync = System.currentTimeMillis()),
-        )
-
-        val jsonString = payloadToJson(payload)
-        val bytes = jsonString.toByteArray(Charsets.UTF_8)
-        val totalParts = kotlin.math.ceil(bytes.size.toDouble() / CHUNK_MAX_BYTES).toInt().coerceAtLeast(1)
-
         val firestoreMap = mapOf(
-            "savedsong" to savedSongs.map { mapOf("videoId" to it.videoId, "title" to it.title, "artistId" to it.artistId, "artistName" to it.artistName, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "albumId" to (it.albumId ?: ""), "albumName" to (it.albumName ?: ""), "duration" to it.duration, "savedAt" to it.savedAt) },
+            "savedsong" to savedSongs.map {
+                val cleanName = if (it.artistName.toLongOrNull() != null || it.artistName.toIntOrNull() != null) "" else it.artistName
+                mapOf("videoId" to it.videoId, "title" to it.title, "artistId" to it.artistId, "artistName" to cleanName, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "albumId" to (it.albumId ?: ""), "albumName" to (it.albumName ?: ""), "duration" to it.duration, "savedAt" to it.savedAt)
+            },
             "savedalbum" to savedAlbums.map { mapOf("id" to it.id, "title" to it.title, "artistId" to it.artistId, "artistName" to it.artistName, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "songCount" to it.songCount, "duration" to it.duration, "savedAt" to it.savedAt) },
             "savedartist" to savedArtists.map { mapOf("id" to it.id, "name" to it.name, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "channelId" to (it.channelId ?: ""), "savedAt" to it.savedAt) },
             "savedplaylist" to savedPlaylists.map { p ->
@@ -298,31 +302,16 @@ class SyncManager @Inject constructor(
             "historialalbum" to historyAlbums.map { mapOf("albumId" to it.albumId, "artistId" to (it.artistId ?: ""), "playedsongsJson" to it.playedsongsJson, "playedAt" to it.playedAt) },
             "historialplaylist" to historyPlaylists.map { mapOf("playlistId" to it.playlistId, "playedsongsJson" to it.playedsongsJson, "playedAt" to it.playedAt) },
             "lastSync" to System.currentTimeMillis(),
-            "totalParts" to totalParts,
+            "totalParts" to 1,
         )
 
         try {
             withContext(Dispatchers.IO + NonCancellable) {
-                db.collection("users").document(uid).set(firestoreMap).await()
-
-                var offset = 0
-                for (i in 1..totalParts) {
-                    val length = minOf(CHUNK_MAX_BYTES, bytes.size - offset)
-                    val chunkBytes = bytes.copyOfRange(offset, offset + length)
-                    val chunkStr = String(chunkBytes, Charsets.UTF_8)
-
-                    val partMap = mapOf(
-                        "chunkData" to chunkStr,
-                        "partIndex" to i,
-                        "totalParts" to totalParts,
-                    )
-                    db.collection("users").document("${uid}_part$i").set(partMap).await()
-                    offset += length
-                }
+                db.collection("users").document("${uid}_part1").set(firestoreMap).await()
             }
-            Timber.i("SyncManager: Cloud push completed in $totalParts part(s)")
+            Timber.i("SyncManager: Cloud push completed directly to ${uid}_part1")
         } catch (e: Exception) {
-            Timber.w(e, "SyncManager: Cloud push failed (permission or network error)")
+            Timber.w(e, "SyncManager: Cloud push failed")
         }
     }
 
@@ -749,48 +738,248 @@ class SyncManager @Inject constructor(
         applyPayloadFromCloud()
     }
 
-    suspend fun getUserLibrary(): UserLibraryDto? = withContext(Dispatchers.IO) {
-        try {
-            authManager.refreshSessionSilently()
-            val firebaseAuth = authManager.getFirebaseAuth()
-            val uid = authManager.currentUserUid.first() ?: firebaseAuth.currentUser?.uid ?: return@withContext null
-            val db = getFirestore()
+    suspend fun getUserLibrary(): UserLibraryDto = withContext(Dispatchers.IO) {
+        authManager.refreshSessionSilently()
+        val firebaseAuth = authManager.getFirebaseAuth()
+        val uid = authManager.currentUserUid.first() ?: firebaseAuth.currentUser?.uid
+            ?: throw IllegalStateException("Sesión expirada. Por favor, vuelve a iniciar sesión.")
+        val db = getFirestore()
 
-            val headerDoc = db.collection("users").document(uid).get().await()
-            val totalParts = headerDoc.getLong("totalParts")?.toInt() ?: 1
+        val part1Doc = runCatching { db.collection("users").document("${uid}_part1").get().await() }.getOrNull()
+        if (part1Doc == null || !part1Doc.exists()) throw IllegalStateException("No hay copias guardadas en la nube.")
 
-            val stringBuilder = StringBuilder()
-            for (i in 1..totalParts) {
+        val chunkData = part1Doc.getString("chunkData")
+        val jsonString = if (!chunkData.isNullOrBlank()) {
+            val stringBuilder = StringBuilder(chunkData)
+            val totalParts = part1Doc.getLong("totalParts")?.toInt() ?: 1
+            for (i in 2..totalParts) {
                 val partDoc = db.collection("users").document("${uid}_part$i").get().await()
-                val chunkData = partDoc.getString("chunkData") ?: ""
-                stringBuilder.append(chunkData)
+                stringBuilder.append(partDoc.getString("chunkData") ?: "")
             }
+            stringBuilder.toString()
+        } else {
+            JSONObject(part1Doc.data ?: emptyMap<String, Any>()).toString()
+        }
 
-            val unifiedJson = stringBuilder.toString()
-            if (unifiedJson.isBlank()) return@withContext null
+        if (jsonString.isBlank()) throw IllegalStateException("No hay datos en la nube.")
 
-            val payload = jsonToPayload(unifiedJson)
-            UserLibraryDto(
-                favorites = payload.savedSongs,
-                albums = payload.savedAlbums,
-                artists = payload.savedArtists,
-                playlists = payload.savedPlaylists,
-                metadata = payload.metadata,
+        val payload = jsonToPayload(jsonString)
+        UserLibraryDto(
+            favorites = payload.savedSongs,
+            albums = payload.savedAlbums,
+            artists = payload.savedArtists,
+            playlists = payload.savedPlaylists,
+            metadata = payload.metadata,
+        )
+    }
+
+    suspend fun applyLibraryToLocal(library: UserLibraryDto) = withContext(Dispatchers.IO) {
+        library.favorites.forEach { sDto ->
+            val savedAtSec = if (sDto.savedAt > 1_000_000_000_000L) sDto.savedAt / 1000 else sDto.savedAt
+            database.insertSavedSong(
+                SavedSongEntity(
+                    id = sDto.videoId,
+                    title = sDto.title,
+                    artistId = sDto.artistId.ifEmpty { null },
+                    artistName = sDto.artistName.ifEmpty { null },
+                    duration = sDto.duration.toInt(),
+                    thumbnailUrl = sDto.thumbnailUrl,
+                    albumId = sDto.albumId,
+                    albumName = sDto.albumName,
+                    savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
+                )
             )
-        } catch (e: Exception) {
-            Timber.w(e, "SyncManager: getUserLibrary failed (permission or network error)")
-            null
+            database.insert(
+                SongEntity(
+                    id = sDto.videoId,
+                    title = sDto.title,
+                    duration = sDto.duration.toInt(),
+                    thumbnailUrl = sDto.thumbnailUrl,
+                    albumId = sDto.albumId?.ifEmpty { null },
+                    albumName = sDto.albumName?.ifEmpty { null },
+                    isLiked = true,
+                )
+            )
+            val artistId = sDto.artistId.ifEmpty { null }
+            val artistName = sDto.artistName.ifEmpty { null }
+            if (artistId != null && artistName != null) {
+                val existing = database.getArtistById(artistId)
+                database.insert(
+                    ArtistEntity(
+                        id = artistId,
+                        name = artistName,
+                        isBookmarked = existing?.isBookmarked ?: false,
+                    )
+                )
+                database.insert(
+                    SongArtistMap(
+                        songId = sDto.videoId,
+                        artistId = artistId,
+                        position = 0,
+                    )
+                )
+            }
+        }
+        library.artists.forEach { aDto ->
+            val savedAtSec = if (aDto.savedAt > 1_000_000_000_000L) aDto.savedAt / 1000 else aDto.savedAt
+            database.insertSavedArtist(
+                SavedArtistEntity(
+                    id = aDto.id,
+                    name = aDto.name,
+                    thumbnailUrl = aDto.thumbnailUrl,
+                    channelId = aDto.channelId,
+                    savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
+                )
+            )
+            database.insert(
+                ArtistEntity(
+                    id = aDto.id,
+                    name = aDto.name,
+                    thumbnailUrl = aDto.thumbnailUrl,
+                    channelId = aDto.channelId,
+                    isBookmarked = true,
+                )
+            )
+        }
+        library.albums.forEach { alDto ->
+            val savedAtSec = if (alDto.savedAt > 1_000_000_000_000L) alDto.savedAt / 1000 else alDto.savedAt
+            database.insertSavedAlbum(
+                SavedAlbumEntity(
+                    id = alDto.id,
+                    title = alDto.title,
+                    artistId = alDto.artistId.ifEmpty { null },
+                    artistName = alDto.artistName.ifEmpty { null },
+                    songCount = alDto.songCount,
+                    duration = alDto.duration,
+                    thumbnailUrl = alDto.thumbnailUrl,
+                    savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
+                )
+            )
+            database.insert(
+                AlbumEntity(
+                    id = alDto.id,
+                    title = alDto.title,
+                    songCount = alDto.songCount,
+                    duration = alDto.duration,
+                    thumbnailUrl = alDto.thumbnailUrl,
+                    isLiked = true,
+                )
+            )
+            val artistId = alDto.artistId.ifEmpty { null }
+            if (artistId != null) {
+                database.insert(
+                    AlbumArtistMap(
+                        albumId = alDto.id,
+                        artistId = artistId,
+                        order = 0,
+                    )
+                )
+            }
+        }
+        library.playlists.forEach { pDto ->
+            database.insertSavedPlaylist(
+                SavedPlaylistEntity(
+                    id = pDto.id,
+                    name = pDto.name,
+                    browseId = pDto.browseId,
+                    isEditable = pDto.isEditable,
+                    thumbnailUrl = pDto.thumbnailUrl,
+                )
+            )
+            database.insert(
+                PlaylistEntity(
+                    id = pDto.id,
+                    name = pDto.name,
+                    browseId = pDto.browseId,
+                    isEditable = pDto.isEditable,
+                    thumbnailUrl = pDto.thumbnailUrl,
+                )
+            )
+            pDto.songs.forEach { sDto ->
+                if (database.getSongById(sDto.id) == null) {
+                    database.insert(
+                        SongEntity(
+                            id = sDto.id,
+                            title = sDto.title,
+                            thumbnailUrl = sDto.thumbnailUrl,
+                        )
+                    )
+                }
+                if (database.checkInPlaylist(pDto.id, sDto.id) == 0) {
+                    database.insert(PlaylistSongMap(playlistId = pDto.id, songId = sDto.id, position = sDto.position))
+                }
+            }
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    suspend fun applyLibraryToLocal(library: UserLibraryDto? = null) = withContext(Dispatchers.IO) {
-        applyPayloadFromCloud()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
     suspend fun saveUserLibrary(library: UserLibraryDto? = null) = withContext(Dispatchers.IO) {
-        pushPayloadToCloud()
+        if (library == null) {
+            pushPayloadToCloud()
+            return@withContext
+        }
+
+        authManager.refreshSessionSilently()
+        val firebaseAuth = authManager.getFirebaseAuth()
+        val uid = authManager.currentUserUid.first() ?: firebaseAuth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            Timber.w("SyncManager: Cannot save library, UID is null or unauthenticated")
+            return@withContext
+        }
+
+        if (library.favorites.isEmpty() && library.artists.isEmpty() &&
+            library.albums.isEmpty() && library.playlists.isEmpty()) {
+            Timber.w("SyncManager: Provided library is completely empty, skipping cloud save to prevent data loss")
+            return@withContext
+        }
+
+        val db = getFirestore()
+        val historySongs = database.allHistorySongs().first().map { h ->
+            HistorySongDto(songId = h.songId, duration = h.duration, playedAt = h.playedAt, playTimeMs = h.playTimeMs)
+        }
+        val historyArtists = database.allHistoryArtists().first().map { h ->
+            HistoryArtistDto(artistId = h.artistId, name = h.name, thumbnailUrl = h.thumbnailUrl, playedAt = h.playedAt)
+        }
+        val historyAlbums = database.allHistoryAlbums().first().map { h ->
+            HistoryAlbumDto(albumId = h.albumId, artistId = h.artistId, playedsongsJson = h.playedsongsJson, playedAt = h.playedAt)
+        }
+        val historyPlaylists = database.allHistoryPlaylists().first().map { h ->
+            HistoryPlaylistDto(playlistId = h.playlistId, playedsongsJson = h.playedsongsJson, playedAt = h.playedAt)
+        }
+
+        val firestoreMap = mapOf(
+            "savedsong" to library.favorites.map {
+                val cleanName = if (it.artistName.toLongOrNull() != null || it.artistName.toIntOrNull() != null) "" else it.artistName
+                mapOf("videoId" to it.videoId, "title" to it.title, "artistId" to it.artistId, "artistName" to cleanName, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "albumId" to (it.albumId ?: ""), "albumName" to (it.albumName ?: ""), "duration" to it.duration, "savedAt" to it.savedAt)
+            },
+            "savedalbum" to library.albums.map { mapOf("id" to it.id, "title" to it.title, "artistId" to it.artistId, "artistName" to it.artistName, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "songCount" to it.songCount, "duration" to it.duration, "savedAt" to it.savedAt) },
+            "savedartist" to library.artists.map { mapOf("id" to it.id, "name" to it.name, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "channelId" to (it.channelId ?: ""), "savedAt" to it.savedAt) },
+            "savedplaylist" to library.playlists.map { p ->
+                mapOf(
+                    "id" to p.id,
+                    "name" to p.name,
+                    "browseId" to (p.browseId ?: ""),
+                    "isEditable" to p.isEditable,
+                    "thumbnailUrl" to (p.thumbnailUrl ?: ""),
+                    "createdAt" to (p.createdAt ?: ""),
+                    "songs" to p.songs.map { mapOf("id" to it.id, "title" to it.title, "artistName" to it.artistName, "thumbnailUrl" to (it.thumbnailUrl ?: ""), "position" to it.position) },
+                )
+            },
+            "historialsong" to historySongs.map { mapOf("songId" to it.songId, "duration" to it.duration, "playedAt" to it.playedAt, "playTimeMs" to it.playTimeMs) },
+            "historialartist" to historyArtists.map { mapOf("artistId" to it.artistId, "name" to (it.name ?: ""), "thumbnailUrl" to (it.thumbnailUrl ?: ""), "playedAt" to it.playedAt) },
+            "historialalbum" to historyAlbums.map { mapOf("albumId" to it.albumId, "artistId" to (it.artistId ?: ""), "playedsongsJson" to it.playedsongsJson, "playedAt" to it.playedAt) },
+            "historialplaylist" to historyPlaylists.map { mapOf("playlistId" to it.playlistId, "playedsongsJson" to it.playedsongsJson, "playedAt" to it.playedAt) },
+            "lastSync" to System.currentTimeMillis(),
+            "totalParts" to 1,
+        )
+
+        try {
+            withContext(Dispatchers.IO + NonCancellable) {
+                db.collection("users").document("${uid}_part1").set(firestoreMap).await()
+            }
+            Timber.i("SyncManager: Direct library save completed to ${uid}_part1")
+        } catch (e: Exception) {
+            Timber.w(e, "SyncManager: Direct library save failed")
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

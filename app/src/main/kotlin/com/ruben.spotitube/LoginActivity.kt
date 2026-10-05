@@ -162,16 +162,14 @@ class LoginActivity : ComponentActivity() {
                                 try {
                                     if (isInternetAvailable(this@LoginActivity)) {
                                         val library = syncManager.getUserLibrary()
-                                        if (library != null) {
-                                            syncManager.applyLibraryToLocal(library)
-                                        }
+                                        syncManager.applyLibraryToLocal(library)
                                     } else {
                                         withContext(Dispatchers.Main) {
                                             Toast.makeText(this@LoginActivity, "Sin internet. La sincronización se hará en segundo plano.", Toast.LENGTH_LONG).show()
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    Timber.e(e, "LoginActivity: Error recuperando biblioteca")
+                                    Timber.e(e, "LoginActivity: Error recuperando biblioteca: ${e.message}")
                                 }
                                 
                                 showRestoringDialog = false
