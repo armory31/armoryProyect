@@ -1927,7 +1927,7 @@ fun SwipeToSongBox(
     val threshold = 300f
 
     val dragState = rememberDraggableState { delta ->
-        offset.value = (offset.value + delta).coerceIn(-threshold, threshold)
+        offset.floatValue = (offset.floatValue + delta).coerceIn(-threshold, threshold)
     }
 
     Box(
@@ -1938,13 +1938,13 @@ fun SwipeToSongBox(
                 state = dragState,
                 onDragStopped = {
                     when {
-                        offset.value >= threshold -> {
+                        offset.floatValue >= threshold -> {
                             player?.playNext(listOf(mediaItem))
                             Toast.makeText(ctx, R.string.play_next, Toast.LENGTH_SHORT).show()
                             reset(offset, scope)
                         }
 
-                        offset.value <= -threshold -> {
+                        offset.floatValue <= -threshold -> {
                             player?.addToQueue(listOf(mediaItem))
                             Toast.makeText(ctx, R.string.add_to_queue, Toast.LENGTH_SHORT).show()
                             reset(offset, scope)
@@ -1955,8 +1955,8 @@ fun SwipeToSongBox(
                 }
             )
     ) {
-        if (offset.value != 0f) {
-            val (iconRes, bg, tint, align) = if (offset.value > 0)
+        if (offset.floatValue != 0f) {
+            val (iconRes, bg, tint, align) = if (offset.floatValue > 0)
                 Quadruple(
                     R.drawable.playlist_play,
                     MaterialTheme.colorScheme.secondary,
@@ -1992,7 +1992,7 @@ fun SwipeToSongBox(
 
         Box(
             modifier = Modifier
-                .offset { IntOffset(offset.value.roundToInt(), 0) }
+                .offset { IntOffset(offset.floatValue.roundToInt(), 0) }
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface),
             content = content

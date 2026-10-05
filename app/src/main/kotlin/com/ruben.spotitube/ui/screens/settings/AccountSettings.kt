@@ -368,7 +368,7 @@ private fun AccountSettingsHeader(onClose: () -> Unit) {
             ) {
                 // App Icon
                 Icon(
-                    painter = painterResource(R.drawable.opentune),
+                    painter = painterResource(R.drawable.opentune_monochrome),
                     contentDescription = null,
                     modifier = Modifier
                         .size(44.dp)

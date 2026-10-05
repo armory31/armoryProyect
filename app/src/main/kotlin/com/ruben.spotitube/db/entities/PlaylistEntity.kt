@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.db.entities
 
 import androidx.compose.runtime.Immutable
@@ -28,12 +26,12 @@ data class PlaylistEntity(
     val thumbnailUrl: String? = null,
     val shuffleEndpointParams: String? = null,
     val radioEndpointParams: String? = null,
-    @ColumnInfo(name = "isLocal", defaultValue = "0")
-    val isLocal: Boolean = false,
+    @ColumnInfo(name = "isLocal", defaultValue = "1")
+    val isLocal: Boolean = true,
     @ColumnInfo(name = "isAutoSync", defaultValue = "0")
     val isAutoSync: Boolean = false,
-    @ColumnInfo(name = "isEditable", defaultValue = "0")
-    val isEditable: Boolean = false,
+    @ColumnInfo(name = "isEditable", defaultValue = "1")
+    val isEditable: Boolean = true,
     @ColumnInfo(name = "customOrder", defaultValue = "0")
     val customOrder: Int = 0,
     val bookmarkedAt: LocalDateTime? = null

@@ -42,6 +42,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
+import com.ruben.spotitube.db.entities.HistorySongEntity
 import androidx.datastore.preferences.core.edit
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -3120,29 +3121,28 @@ class MusicService :
     }
 
     fun toggleLike() {
-        scope.launch {
-            currentSong.value?.let {
-                val song = it.song
-                syncManager.toggleLike(song)
+        scope.launch(Dispatchers.IO) {
+            val metadata = currentMediaMetadata.value ?: return@launch
+            var song = database.getSongById(metadata.id)?.song
+            if (song == null) {
+                database.insert(metadata)
+                song = database.getSongById(metadata.id)?.song ?: metadata.toSongEntity()
+            }
+            syncManager.toggleLike(song)
 
-                // The state observer in onCreate will trigger updateNotification()
-                
-                // Check if auto-download on like is enabled
-                val isLiked = libraryStateHolder.isSongLiked(song.id).first()
-                if (dataStore.get(AutoDownloadOnLikeKey, false) && isLiked) {
-                    // Trigger download for the liked song
-                    val downloadRequest = androidx.media3.exoplayer.offline.DownloadRequest
-                        .Builder(song.id, song.id.toUri())
-                        .setCustomCacheKey(song.id)
-                        .setData(song.title.toByteArray())
-                        .build()
-                    androidx.media3.exoplayer.offline.DownloadService.sendAddDownload(
-                        this@MusicService,
-                        ExoDownloadService::class.java,
-                        downloadRequest,
-                        false
-                    )
-                }
+            val isLiked = libraryStateHolder.isSongLiked(song.id).first()
+            if (dataStore.get(AutoDownloadOnLikeKey, false) && isLiked) {
+                val downloadRequest = androidx.media3.exoplayer.offline.DownloadRequest
+                    .Builder(song.id, song.id.toUri())
+                    .setCustomCacheKey(song.id)
+                    .setData(song.title.toByteArray())
+                    .build()
+                androidx.media3.exoplayer.offline.DownloadService.sendAddDownload(
+                    this@MusicService,
+                    ExoDownloadService::class.java,
+                    downloadRequest,
+                    false
+                )
             }
         }
     }
@@ -4058,10 +4058,9 @@ class MusicService :
     private fun createMediaSourceFactory() =
         DefaultMediaSourceFactory(
             createDataSourceFactory(),
-            ExtractorsFactory {
-                arrayOf(Mp4Extractor(), FragmentedMp4Extractor(), MatroskaExtractor())
-            },
-        )
+        ) {
+            arrayOf(Mp4Extractor(), FragmentedMp4Extractor(), MatroskaExtractor())
+        }
 
     private fun updateAudioOffload(enabled: Boolean) {
         runCatching {
@@ -4128,10 +4127,7 @@ class MusicService :
     ) {
         val mediaItem = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window()).mediaItem
 
-        if (playbackStats.totalPlayTimeMs >= (
-                dataStore[HistoryDuration]?.times(1000f)
-                    ?: 30000f
-            ) &&
+        if (playbackStats.totalPlayTimeMs >= 25_000L &&
             !dataStore.get(PauseListenHistoryKey, false)
         ) {
             database.query {
@@ -4143,6 +4139,14 @@ class MusicService :
                             timestamp = LocalDateTime.now(),
                             playTime = playbackStats.totalPlayTimeMs,
                         ),
+                    )
+                    insertHistorySong(
+                        HistorySongEntity(
+                            playedAt = System.currentTimeMillis(),
+                            songId = mediaItem.mediaId,
+                            duration = (mediaItem.mediaMetadata.durationMs ?: -1L).toInt() / 1000,
+                            playTimeMs = playbackStats.totalPlayTimeMs
+                        )
                     )
                 } catch (_: SQLException) {
                 }

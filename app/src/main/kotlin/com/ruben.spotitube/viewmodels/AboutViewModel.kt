@@ -87,7 +87,7 @@ class AboutViewModel : ViewModel() {
                     )
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return getFallbackContributors()
         }
         return contributorsList

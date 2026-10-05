@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.PlaylistEntity
+import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.TextFieldDialog
 import kotlinx.coroutines.Dispatchers
@@ -127,11 +128,34 @@ fun ImportPlaylistDialog(
                             }
                         }
 
+                        ids.forEach { sId ->
+                            val existingSong = database.getSongById(sId)?.song
+                            if (existingSong == null || existingSong.duration <= 0) {
+                                val refetched = com.ruben.spotitube.innertube.YouTube.queue(listOf(sId)).getOrNull()?.firstOrNull()?.let {
+                                    it.toMediaMetadata()
+                                }
+                                if (refetched != null) {
+                                    database.query { insert(refetched) }
+                                }
+                            }
+                        }
+
                         val newPlaylist = PlaylistEntity(
                             name = finalName,
                             browseId = browseId,
+                            isEditable = true,
+                            isLocal = true,
                         )
                         database.query { insert(newPlaylist) }
+                        database.insertSavedPlaylist(
+                            com.ruben.spotitube.db.entities.SavedPlaylistEntity(
+                                id = newPlaylist.id,
+                                name = newPlaylist.name,
+                                browseId = newPlaylist.browseId,
+                                isEditable = true,
+                                thumbnailUrl = newPlaylist.thumbnailUrl,
+                            ),
+                        )
 
                         val playlist = database.playlist(newPlaylist.id).firstOrNull()
                         if (playlist != null) {

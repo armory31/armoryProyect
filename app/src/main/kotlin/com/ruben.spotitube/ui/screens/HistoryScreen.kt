@@ -84,6 +84,7 @@ import com.ruben.spotitube.viewmodels.DateAgo
 import com.ruben.spotitube.viewmodels.HistoryViewModel
 import java.time.format.DateTimeFormatter
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun HistoryScreen(
     navController: NavController,

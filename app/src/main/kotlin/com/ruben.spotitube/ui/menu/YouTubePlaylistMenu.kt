@@ -175,7 +175,7 @@ fun YouTubePlaylistMenu(
                                         name = playlist.title,
                                         browseId = playlist.id,
                                         thumbnailUrl = playlist.thumbnail,
-                                        isEditable = false,
+                                        isEditable = true,
                                         remoteSongCount = playlist.songCountText?.let {
                                             Regex("""\d+""").find(it)?.value?.toIntOrNull()
                                         },
@@ -579,7 +579,7 @@ fun YouTubePlaylistMenu(
                                                             name = playlist.title,
                                                             browseId = playlist.id,
                                                             thumbnailUrl = playlist.thumbnail,
-                                                            isEditable = false,
+                                                            isEditable = true,
                                                             isAutoSync = newValue,
                                                             remoteSongCount = playlist.songCountText?.let {
                                                                 Regex("""\d+""").find(it)?.value?.toIntOrNull()

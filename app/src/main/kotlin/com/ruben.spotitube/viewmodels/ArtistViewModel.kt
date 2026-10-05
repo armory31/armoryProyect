@@ -29,6 +29,7 @@ import com.ruben.spotitube.utils.get
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -84,9 +85,17 @@ class ArtistViewModel @Inject constructor(
     }
 
     fun fetchArtistsFromYTM() {
-        viewModelScope.launch {
-            val hideExplicit = context.dataStore.get(HideExplicitKey, false)
-            YouTube.artist(artistId)
+        viewModelScope.launch(Dispatchers.IO) {
+            var targetId = artistId
+            if (!targetId.startsWith("UC") && !targetId.startsWith("FE")) {
+                val dbArtist = database.getArtistById(artistId) ?: database.artistByName(artistId)
+                val chId = dbArtist?.channelId
+                if (!chId.isNullOrBlank() && (chId.startsWith("UC") || chId.startsWith("FE"))) {
+                    targetId = chId
+                }
+            }
+
+            YouTube.artist(targetId)
                 .onSuccess { page ->
                     artistPage = page
                 }.onFailure {

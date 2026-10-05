@@ -36,12 +36,14 @@ class LibraryStateHolder @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // Flow of the raw cloud DTO
+    @Suppress("unused")
     val libraryDto: StateFlow<UserLibraryDto?> = authManager.isLoggedIn
         .flatMapLatest { loggedIn ->
             if (loggedIn) {
-                flow{
+                flow {
                     while (true) {
-                        emit(syncManager.getUserLibrary())
+                        val dto = runCatching { syncManager.getUserLibrary() }.getOrNull()
+                        emit(dto)
                         kotlinx.coroutines.delay(300000.milliseconds) // Poll every 5 mins or use listeners
                     }
                 }

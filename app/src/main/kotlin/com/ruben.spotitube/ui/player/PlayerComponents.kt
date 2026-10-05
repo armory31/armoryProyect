@@ -8,6 +8,8 @@
 
 package com.ruben.spotitube.ui.player
 
+import com.ruben.spotitube.LocalDatabase
+
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -60,7 +62,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -159,12 +165,17 @@ fun PlayerTitleSection(
 
     Spacer(Modifier.height(6.dp))
 
+    val coroutineScope = rememberCoroutineScope()
+    val database = LocalDatabase.current
     val annotatedString = buildAnnotatedString {
         mediaMetadata.artists.forEachIndexed { index, artist ->
-            val tag = "artist_${artist.id.orEmpty()}"
-            pushStringAnnotation(tag = tag, annotation = artist.id.orEmpty())
+            val id = artist.id.orEmpty()
+            val name = artist.name
+            val payload = "$id||$name"
+            val tag = "artist_$index"
+            pushStringAnnotation(tag = tag, annotation = payload)
             withStyle(SpanStyle(color = textBackgroundColor, fontSize = 16.sp)) {
-                append(artist.name)
+                append(name)
             }
             pop()
             if (index != mediaMetadata.artists.lastIndex) append(", ")
@@ -209,10 +220,19 @@ fun PlayerTitleSection(
                             annotatedString.getStringAnnotations(offset, offset)
                                 .firstOrNull()
                                 ?.let { ann ->
-                                    val artistId = ann.item
-                                    if (artistId.isNotBlank()) {
-                                        navController.navigate("artist/$artistId")
-                                        state.collapseSoft()
+                                    val parts = ann.item.split("||", limit = 2)
+                                    val rawId = parts.getOrNull(0).orEmpty()
+                                    val artistName = parts.getOrElse(1) { "" }
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        val resolvedId = rawId.takeIf { it.startsWith("UC") || it.startsWith("FE") }
+                                            ?: database.artistByName(artistName)?.let { it.channelId ?: it.id }
+                                            ?: rawId
+                                        if (resolvedId.isNotBlank()) {
+                                            withContext(Dispatchers.Main) {
+                                                navController.navigate("artist/$resolvedId")
+                                                state.collapseSoft()
+                                            }
+                                        }
                                     }
                                 }
                         }

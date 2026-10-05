@@ -46,6 +46,14 @@ import com.ruben.spotitube.db.entities.SearchHistory
 import com.ruben.spotitube.db.entities.SetVideoIdEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.db.entities.SongAlbumMap
+import com.ruben.spotitube.db.entities.HistoryAlbumEntity
+import com.ruben.spotitube.db.entities.HistoryArtistEntity
+import com.ruben.spotitube.db.entities.HistoryPlaylistEntity
+import com.ruben.spotitube.db.entities.HistorySongEntity
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.SongArtistMap
 import com.ruben.spotitube.db.entities.SongEntity
 import com.ruben.spotitube.db.entities.SongWithStats
@@ -123,7 +131,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         WHERE p.browseId IS NULL OR p.isAutoSync = 1 
         ORDER BY p.createdAt ASC
@@ -809,7 +817,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         ORDER BY p.rowId
     """)
@@ -818,7 +826,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         ORDER BY p.lastUpdateTime
     """)
@@ -827,7 +835,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         ORDER BY p.name
     """)
@@ -836,7 +844,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         ORDER BY p.customOrder ASC
     """)
@@ -879,11 +887,11 @@ interface DatabaseDao {
     }
 
     @Transaction
-    @Query("SELECT * FROM song WHERE id IN (SELECT videoId FROM set_video_id)")
+    @Query("SELECT * FROM song WHERE isLiked = 1 OR id IN (SELECT id FROM savedsong) OR id IN (SELECT videoId FROM set_video_id)")
     fun likedSongsByRowIdAsc(): Flow<List<Song>>
 
     @Transaction
-    @Query("SELECT *, 0 AS songCountListened, 0 AS timeListened FROM album WHERE isLiked = 1")
+    @Query("SELECT *, 0 AS songCountListened, 0 AS timeListened FROM album WHERE isLiked = 1 OR id IN (SELECT id FROM savedalbum)")
     fun albumsLikedInternal(): Flow<List<Album>>
 
     fun albumsLiked(sortType: AlbumSortType, descending: Boolean): Flow<List<Album>> =
@@ -902,7 +910,7 @@ interface DatabaseDao {
         }
 
     @Transaction
-    @Query("SELECT *, (SELECT COUNT(1) FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE artistId = artist.id) AS songCount, 0 AS timeListened FROM artist WHERE isBookmarked = 1")
+    @Query("SELECT *, (SELECT COUNT(1) FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE artistId = artist.id) AS songCount, 0 AS timeListened FROM artist WHERE isBookmarked = 1 OR id IN (SELECT id FROM savedartist)")
     fun artistsBookmarkedInternal(): Flow<List<Artist>>
 
     fun artistsBookmarked(sortType: ArtistSortType, descending: Boolean): Flow<List<Artist>> =
@@ -917,16 +925,16 @@ interface DatabaseDao {
             }.reversed(descending)
         }
 
-    @Query("SELECT id FROM artist WHERE isBookmarked = 1")
+    @Query("SELECT id FROM savedartist UNION SELECT id FROM artist WHERE isBookmarked = 1")
     fun getBookmarkedArtistIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM album WHERE isLiked = 1")
+    @Query("SELECT id FROM savedalbum UNION SELECT id FROM album WHERE isLiked = 1")
     fun getLikedAlbumIds(): Flow<List<String>>
 
-    @Query("SELECT videoId FROM set_video_id")
+    @Query("SELECT id FROM savedsong UNION SELECT videoId FROM set_video_id UNION SELECT id FROM song WHERE isLiked = 1")
     fun getLikedSongIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM playlist")
+    @Query("SELECT id FROM savedplaylist UNION SELECT id FROM playlist")
     fun getLikedPlaylistIds(): Flow<List<String>>
 
     @Transaction
@@ -940,13 +948,13 @@ interface DatabaseDao {
     fun getLibrarySummary(): Flow<LibrarySummary>
 
     @Transaction
-    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId")
+    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId OR playlistId = (SELECT browseId FROM playlist WHERE id = :playlistId) OR playlistId = (SELECT id FROM playlist WHERE browseId = :playlistId)")
     fun playlistSongs(playlistId: String): Flow<List<PlaylistSong>>
 
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         WHERE p.id = :id
     """)
@@ -955,7 +963,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         WHERE p.id = :playlistId 
         LIMIT 1
@@ -965,7 +973,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         WHERE p.id = :playlistId 
         LIMIT 1
@@ -975,7 +983,7 @@ interface DatabaseDao {
     @Transaction
     @Query("""
         SELECT p.*, 
-            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id), 0) AS songCount
+            COALESCE((SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p.id OR (p.browseId IS NOT NULL AND playlistId = p.browseId)), 0) AS songCount
         FROM playlist p 
         WHERE p.browseId = :browseId
     """)
@@ -1378,8 +1386,8 @@ interface DatabaseDao {
     @Delete
     fun delete(playlist: PlaylistEntity)
 
-    @Query("DELETE FROM playlist WHERE browseId = :browseId")
-    fun deletePlaylistById(browseId: String)
+    @Query("DELETE FROM playlist WHERE id = :playlistId OR browseId = :playlistId")
+    fun deletePlaylistById(playlistId: String)
 
     @Delete
     fun delete(lyrics: LyricsEntity)
@@ -1507,4 +1515,198 @@ interface DatabaseDao {
         }
         update(moving.copy(position = to))
     }
+
+    // --- Saved (Biblioteca) ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedSong(song: SavedSongEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedSongs(songs: List<SavedSongEntity>)
+
+    @Query("DELETE FROM savedsong WHERE id = :songId")
+    fun deleteSavedSong(songId: String)
+
+    @Query("SELECT * FROM savedsong WHERE id = :songId")
+    fun getSavedSong(songId: String): SavedSongEntity?
+
+    @Query("SELECT * FROM savedsong ORDER BY savedAt DESC")
+    fun allSavedSongs(): Flow<List<SavedSongEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedArtist(artist: SavedArtistEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedArtists(artists: List<SavedArtistEntity>)
+
+    @Query("DELETE FROM savedartist WHERE id = :artistId")
+    fun deleteSavedArtist(artistId: String)
+
+    @Query("SELECT * FROM savedartist WHERE id = :artistId")
+    fun getSavedArtist(artistId: String): SavedArtistEntity?
+
+    @Query("SELECT * FROM savedartist ORDER BY savedAt DESC")
+    fun allSavedArtists(): Flow<List<SavedArtistEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedAlbum(album: SavedAlbumEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedAlbums(albums: List<SavedAlbumEntity>)
+
+    @Query("DELETE FROM savedalbum WHERE id = :albumId")
+    fun deleteSavedAlbum(albumId: String)
+
+    @Query("SELECT * FROM savedalbum WHERE id = :albumId")
+    fun getSavedAlbum(albumId: String): SavedAlbumEntity?
+
+    @Query("SELECT * FROM savedalbum ORDER BY savedAt DESC")
+    fun allSavedAlbums(): Flow<List<SavedAlbumEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedPlaylist(playlist: SavedPlaylistEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSavedPlaylists(playlists: List<SavedPlaylistEntity>)
+
+    @Query("DELETE FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId")
+    fun deleteSavedPlaylist(playlistId: String)
+
+    @Query("SELECT * FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId")
+    fun getSavedPlaylist(playlistId: String): SavedPlaylistEntity?
+
+    @Query("SELECT * FROM savedplaylist ORDER BY createdAt DESC")
+    fun allSavedPlaylists(): Flow<List<SavedPlaylistEntity>>
+
+    // --- Historial ---
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertHistorySong(historySong: HistorySongEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertHistoryArtist(historyArtist: HistoryArtistEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertHistoryAlbum(historyAlbum: HistoryAlbumEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertHistoryPlaylist(historyPlaylist: HistoryPlaylistEntity)
+
+    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
+    fun allHistorySongs(): Flow<List<HistorySongEntity>>
+
+    @Query("SELECT * FROM historialartist ORDER BY playedAt DESC")
+    fun allHistoryArtists(): Flow<List<HistoryArtistEntity>>
+
+    @Query("SELECT * FROM historialalbum ORDER BY playedAt DESC")
+    fun allHistoryAlbums(): Flow<List<HistoryAlbumEntity>>
+
+    @Query("SELECT * FROM historialplaylist ORDER BY playedAt DESC")
+    fun allHistoryPlaylists(): Flow<List<HistoryPlaylistEntity>>
+
+    // --- Migración de Esquema Legacy al Nuevo Esquema ---
+    @Transaction
+    suspend fun migrateLegacyDataToNewSchema() {
+        val now = LocalDateTime.now()
+        
+        // 1. Migrar canciones Liked -> SavedSongEntity
+        val legacySongs = getLikedSongsSync()
+        val savedSongs = legacySongs.map { s ->
+            val songArtist = songArtistMap(s.id).firstOrNull()?.let { getArtistById(it.artistId) }
+            SavedSongEntity(
+                id = s.id,
+                title = s.title,
+                artistId = songArtist?.id,
+                artistName = songArtist?.name,
+                duration = s.duration,
+                thumbnailUrl = s.thumbnailUrl,
+                albumId = s.albumId,
+                albumName = s.albumName,
+                savedAt = s.bookmarkedAt ?: now
+            )
+        }
+        if (savedSongs.isNotEmpty()) {
+            insertSavedSongs(savedSongs)
+        }
+
+        // 2. Migrar artistas Bookmarked -> SavedArtistEntity
+        val legacyArtists = getBookmarkedArtistsSync()
+        val savedArtists = legacyArtists.map { a ->
+            SavedArtistEntity(
+                id = a.id,
+                name = a.name,
+                thumbnailUrl = a.thumbnailUrl,
+                channelId = a.channelId,
+                savedAt = a.bookmarkedAt ?: now
+            )
+        }
+        if (savedArtists.isNotEmpty()) {
+            insertSavedArtists(savedArtists)
+        }
+
+        // 3. Migrar álbumes Liked -> SavedAlbumEntity
+        val legacyAlbums = getLikedAlbumsSync()
+        val savedAlbums = legacyAlbums.map { al ->
+            val albumArtist = albumArtistMaps(al.id).firstOrNull()?.let { getArtistById(it.artistId) }
+            SavedAlbumEntity(
+                id = al.id,
+                title = al.title,
+                artistId = albumArtist?.id,
+                artistName = albumArtist?.name,
+                songCount = al.songCount,
+                duration = al.duration,
+                thumbnailUrl = al.thumbnailUrl,
+                year = al.year,
+                savedAt = al.bookmarkedAt ?: now
+            )
+        }
+        if (savedAlbums.isNotEmpty()) {
+            insertSavedAlbums(savedAlbums)
+        }
+
+        // 4. Migrar playlists -> SavedPlaylistEntity
+        val legacyPlaylists = getPlaylistsSync()
+        val savedPlaylists = legacyPlaylists.map { p ->
+            SavedPlaylistEntity(
+                id = p.id,
+                name = p.name,
+                browseId = p.browseId,
+                isEditable = p.isEditable,
+                thumbnailUrl = p.thumbnailUrl,
+                createdAt = p.createdAt ?: now
+            )
+        }
+        if (savedPlaylists.isNotEmpty()) {
+            insertSavedPlaylists(savedPlaylists)
+        }
+
+        // 5. Migrar canciones escuchadas HistorySongEntity
+        val legacyPlayedSongs = getPlayedSongsSync()
+        legacyPlayedSongs.forEach { song ->
+            if (song.totalPlayTime >= 25_000L) {
+                insertHistorySong(
+                    HistorySongEntity(
+                        playedAt = System.currentTimeMillis() - (song.totalPlayTime),
+                        songId = song.id,
+                        duration = song.duration,
+                        playTimeMs = song.totalPlayTime
+                    )
+                )
+            }
+        }
+    }
+
+    @Query("SELECT * FROM song WHERE isLiked = 1 OR id IN (SELECT videoId FROM set_video_id) OR id IN (SELECT id FROM savedsong)")
+    fun getLikedSongsSync(): List<SongEntity>
+
+    @Query("SELECT * FROM artist WHERE isBookmarked = 1 OR id IN (SELECT id FROM savedartist)")
+    fun getBookmarkedArtistsSync(): List<ArtistEntity>
+
+    @Query("SELECT * FROM album WHERE isLiked = 1 OR id IN (SELECT id FROM savedalbum)")
+    fun getLikedAlbumsSync(): List<AlbumEntity>
+
+    @Query("SELECT * FROM playlist")
+    fun getPlaylistsSync(): List<PlaylistEntity>
+
+    @Query("SELECT * FROM song WHERE totalPlayTime > 0 OR id IN (SELECT songId FROM event)")
+    fun getPlayedSongsSync(): List<SongEntity>
 }
+

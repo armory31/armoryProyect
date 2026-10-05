@@ -173,7 +173,6 @@ private val SummaryD  = Color(0xFF1DB954)
 // ─────────────────────────────────────────────────────────────────────────────
 
 private data class InsightPersonality(
-    val emoji: String,
     val title: String,
     val description: String,
     val gradTop: Color,
@@ -182,25 +181,21 @@ private data class InsightPersonality(
 )
 
 private val PersonalityDevoted = InsightPersonality(
-    emoji = "🎯",
     title = "Devoted Fan",
     description = "When you find a song you love, you play it on repeat. Your loyalty to your favourites is unmatched — and that's your superpower.",
     gradTop = PersonA, gradBot = PersonB, accent = PersonB,
 )
 private val PersonalityExplorer = InsightPersonality(
-    emoji = "🧭",
     title = "Music Explorer",
     description = "Always discovering, never settling. Your taste spans worlds, and your playlist never sounds the same twice.",
     gradTop = WelcomeA, gradBot = WelcomeB, accent = WelcomeB,
 )
 private val PersonalityAudiophile = InsightPersonality(
-    emoji = "🎧",
     title = "True Audiophile",
     description = "Hours melt away when you're in the zone. Music isn't background noise for you — it's everything.",
     gradTop = MinutesA, gradBot = MinutesB, accent = MinutesC,
 )
 private val PersonalityCasual = InsightPersonality(
-    emoji = "🌊",
     title = "Laid-Back Listener",
     description = "Music moves effortlessly with your life. It's always there when you need it, easy and perfectly in tune.",
     gradTop = SongsA, gradBot = SongsB, accent = SongsC,
@@ -444,7 +439,7 @@ fun YearInMusicScreen(
                                     )
                                 } else raw
                                 val fitted = ComposeToImage.fitBitmap(cropped, 1080, 1920, shareArgb)
-                                val uri    = ComposeToImage.saveBitmapAsFile(
+                                val uri = ComposeToImage.saveBitmapAsFile(
                                     context, fitted, "OpenTune_Insight_$selectedYear"
                                 )
                                 context.startActivity(
@@ -619,8 +614,8 @@ private fun WelcomePage(year: Int, modifier: Modifier = Modifier) {
     ) {
         // Animated glow orb
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val cx = size.width * (0.5f + 0.15f * cos(glowPhase * 2 * PI.toFloat()).toFloat())
-            val cy = size.height * (0.35f + 0.08f * sin(glowPhase * 2 * PI.toFloat()).toFloat())
+            val cx = size.width * (0.5f + 0.15f * cos(glowPhase * 2 * PI.toFloat()))
+            val cy = size.height * (0.35f + 0.08f * sin(glowPhase * 2 * PI.toFloat()))
             drawCircle(
                 brush = Brush.radialGradient(
                     listOf(WelcomeC.copy(alpha = 0.45f), WelcomeB.copy(alpha = 0.15f), Color.Transparent),
@@ -735,7 +730,7 @@ private fun MinutesPage(
     val displayValue  = if (totalHours > 0) totalHours else totalMinutes
     val displayLabel  = if (totalHours > 0) "hours" else "minutes"
 
-    val animatedValue = rememberAnimatedLong(displayValue, durationMs = 1800)
+    val animatedValue = rememberAnimatedLong(displayValue)
 
     Box(
         modifier = modifier.background(
@@ -1327,11 +1322,6 @@ private fun PersonalityPage(
     topSong: SongWithStats?,
     modifier: Modifier = Modifier,
 ) {
-    val emojiScale by rememberInfiniteTransition(label = "emojiPulse").animateFloat(
-        0.92f, 1.08f,
-        infiniteRepeatable(tween(1200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "emojiS",
-    )
 
     Box(
         modifier = modifier.background(
@@ -1367,13 +1357,6 @@ private fun PersonalityPage(
             )
 
             Spacer(Modifier.height(32.dp))
-
-            // Giant emoji
-            Text(
-                text     = personality.emoji,
-                fontSize = 88.sp,
-                modifier = Modifier.scale(emojiScale),
-            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -1930,7 +1913,7 @@ private fun SummaryHighlight(emoji: String, label: String, value: String, accent
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun rememberAnimatedLong(target: Long, durationMs: Int = 1400): Long {
+private fun rememberAnimatedLong(target: Long, durationMs: Int = 1800): Long {
     var current by remember { mutableLongStateOf(0L) }
     LaunchedEffect(target) {
         val startMs = System.currentTimeMillis()

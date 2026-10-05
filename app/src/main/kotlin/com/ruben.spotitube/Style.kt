@@ -788,8 +788,6 @@ val samplePlaylists = listOf(
         PlaylistIconType.DIAMOND),
 )
 
-val OpenTunePlaylistEmojis = listOf("🎵", "🎶", "🎧", "🎹", "🎸", "🎷", "🥁", "🎤", "🎼", "💿", "📀", "✨", "🔥", "👑", "💎")
-
 val OpenTunePlaylistGradients = listOf(
     listOf(ArmoryColors.SurfaceBlack, ArmoryColors.AbsoluteBlack),
     listOf(ArmoryColors.Gold5.copy(alpha = 0.4f), ArmoryColors.AbsoluteBlack),
@@ -863,10 +861,6 @@ fun ArmoryTheme(
         typography = typography,
         content = content
     )
-}
-
-val OpenTuneTheme = @Composable { content: @Composable () -> Unit ->
-    ArmoryTheme(content = content)
 }
 
 @Composable

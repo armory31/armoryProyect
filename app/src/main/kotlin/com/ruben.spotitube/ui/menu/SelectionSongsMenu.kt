@@ -508,7 +508,7 @@ fun SelectionSongMenu(
     }
 }
 
-@SuppressLint("MutableCollectionMutableState")
+@SuppressLint("MutableCollectionMutableState", "LocalContextGetResourceValueCall")
 @Composable
 fun SelectionMediaMetadataMenu(
     songSelection: List<MediaMetadata>,

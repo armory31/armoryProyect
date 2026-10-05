@@ -652,6 +652,6 @@ private fun formatCommitDate(isoDate: String): String = try {
         timeZone = TimeZone.getTimeZone("UTC")
     }
     SimpleDateFormat("MMM d", Locale.getDefault()).format(inputFormat.parse(isoDate)!!)
-} catch (e: Exception) {
+} catch (_: Exception) {
     isoDate.take(10)
 }

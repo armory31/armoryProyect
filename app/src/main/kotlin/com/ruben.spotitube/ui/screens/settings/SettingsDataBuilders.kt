@@ -9,7 +9,7 @@ package com.ruben.spotitube.ui.screens.settings
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
@@ -89,10 +89,14 @@ fun buildSettingsGroups(
                                 onClick = {
                                     resetSearch()
                                     try {
-                                        val intent = Intent(
-                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                                            "package:${context.packageName}".toUri()
-                                        )
+                                        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            Intent(
+                                                Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                                                "package:${context.packageName}".toUri()
+                                            )
+                                        } else {
+                                            TODO("VERSION.SDK_INT < S")
+                                        }
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                         context.startActivity(intent)
                                     } catch (e: Exception) {

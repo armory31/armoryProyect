@@ -11,6 +11,7 @@
 package com.ruben.spotitube.ui.player
 
 
+import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
@@ -120,6 +121,7 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
+import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.MiniPlayer
 import com.ruben.spotitube.PlayerStatus
@@ -169,6 +171,7 @@ import kotlin.time.Duration.Companion.milliseconds
 private const val SeekbarSettleToleranceMs = 1_500L
 private const val V7BackdropBlurHeightFraction = 0.54f // The height of the blur layout in PlayerDesignStyle V7
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun BottomSheetPlayer(
     state: BottomSheetState,
@@ -219,7 +222,9 @@ fun BottomSheetPlayer(
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked = currentSong?.song?.isLiked == true
+    val libraryStateHolder = LocalLibraryStateHolder.current
+    val isLikedInLibrary by libraryStateHolder.isSongLiked(mediaMetadata?.id ?: "").collectAsState(initial = false)
+    val currentSongLiked = isLikedInLibrary || currentSong?.song?.isLiked == true
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
     val queueWindows by playerConnection.queueWindows.collectAsState()
     val currentWindowIndex by playerConnection.currentWindowIndex.collectAsState()
@@ -467,7 +472,7 @@ fun BottomSheetPlayer(
                     if (!isUserSeeking) {
                         sliderPosition?.let { targetPosition ->
                             val clampedTargetPosition = when {
-                                currentPlayerDuration > 0L && currentPlayerDuration != C.TIME_UNSET -> {
+                                currentPlayerDuration > 0L -> {
                                     targetPosition.coerceIn(0L, currentPlayerDuration)
                                 }
                                 else -> targetPosition.coerceAtLeast(0L)
@@ -735,7 +740,7 @@ fun BottomSheetPlayer(
             }
             isUserSeeking = false
         }
-        val seekEnabled = duration > 0L && duration != C.TIME_UNSET
+        val seekEnabled = duration > 0L
         val updatedOnSliderValueChange by rememberUpdatedState(onSliderValueChange)
         val updatedOnSliderValueChangeFinished by rememberUpdatedState(onSliderValueChangeFinished)
 
@@ -814,7 +819,7 @@ fun BottomSheetPlayer(
                         val displayPositionMs = sliderPosition ?: position
                         val progressFraction =
                             remember(displayPositionMs, duration) {
-                                if (duration <= 0L || duration == C.TIME_UNSET) 0f
+                                if (duration <= 0L) 0f
                                 else (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
                             }
                         val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
@@ -963,11 +968,11 @@ fun BottomSheetPlayer(
                         val displayPositionMs = sliderPosition ?: position
                         val progressFraction =
                             remember(displayPositionMs, duration) {
-                                if (duration <= 0L || duration == C.TIME_UNSET) 0f
+                                if (duration <= 0L) 0f
                                 else (displayPositionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
                             }
                         val progressOverlayColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
-                        val seekEnabled = duration > 0L && duration != C.TIME_UNSET
+                        val seekEnabled = duration > 0L
 
                         Box(
                             modifier =
@@ -1541,15 +1546,13 @@ private fun Modifier.littlePlayerOverlayGestures(
             val down = awaitFirstDown(requireUnconsumed = true)
             val pointerId = down.id
 
-            var upPosition = down.position
+            var upPosition: Offset
             val minOverlayHeightPx = 24.dp.toPx()
             val overlayHeightPx =
                 (progressFraction * size.height).coerceAtLeast(minOverlayHeightPx)
             val seekAllowedFromDown =
                 seekEnabled &&
-                        durationMs > 0L &&
-                        durationMs != C.TIME_UNSET &&
-                        down.position.y <= overlayHeightPx
+                        durationMs > 0L && down.position.y <= overlayHeightPx
 
             var isSeeking = false
 

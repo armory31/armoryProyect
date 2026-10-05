@@ -61,6 +61,7 @@ class SyncUtils @Inject constructor(
     private val database: MusicDatabase,
     @ApplicationContext private val context: Context,
     private val syncManager: SyncManager,
+    @Suppress("unused")
     private val libraryStateHolder: LibraryStateHolder
 ) {
     private val syncScope = CoroutineScope(Dispatchers.IO)
@@ -158,7 +159,7 @@ class SyncUtils @Inject constructor(
         val gen = syncGeneration.get()
         YouTube.playlist("LM").completed().onSuccess { page ->
             if (!isSyncStillEnabled(gen)) return@onSuccess
-            val remoteSongs = page.songs.orEmpty()
+            val remoteSongs = page.songs
             if (remoteSongs.isEmpty()) {
                 Timber.w("syncLikedSongs: Remote playlist is empty")
                 return@onSuccess
@@ -298,11 +299,11 @@ class SyncUtils @Inject constructor(
                                 try {
                                     database.insert(albumPage)
                                 } catch (e: Exception) {
-                                    Timber.w("syncLikedAlbums: Failed to insert album ${album.id}", e)
+                                    Timber.w(e, "syncLikedAlbums: Failed to insert album ${album.id}")
                                 }
                             }
                         }.onFailure { e ->
-                            Timber.w("syncLikedAlbums: Failed to fetch album ${album.id}", e)
+                            Timber.w(e, "syncLikedAlbums: Failed to fetch album ${album.id}")
                         }
                     }
                 }
@@ -524,7 +525,7 @@ class SyncUtils @Inject constructor(
         
         YouTube.playlist(browseId).completed().onSuccess { page ->
             if (!isSyncStillEnabled(gen)) return@onSuccess
-            val songs = page.songs.orEmpty().map(SongItem::toMediaMetadata)
+            val songs = page.songs.map(SongItem::toMediaMetadata)
             Timber.d("syncPlaylist: Fetched ${songs.size} songs from remote")
 
             if (songs.isEmpty()) {
@@ -532,7 +533,7 @@ class SyncUtils @Inject constructor(
                 return@onSuccess
             }
 
-            val remoteIds = songs.mapNotNull { it.id }
+            val remoteIds = songs.map { it.id }
             if (remoteIds.isEmpty()) {
                 Timber.w("syncPlaylist: No valid song IDs found, skipping sync")
                 return@onSuccess
@@ -543,7 +544,7 @@ class SyncUtils @Inject constructor(
                     .sortedBy { it.map.position }
                     .map { it.song.id }
             } catch (e: Exception) {
-                Timber.w("syncPlaylist: Failed to fetch local songs", e)
+                Timber.w(e, "syncPlaylist: Failed to fetch local songs")
                 emptyList()
             }
 
@@ -560,7 +561,6 @@ class SyncUtils @Inject constructor(
                     database.clearPlaylist(playlistId)
                     songs.forEachIndexed { idx, song ->
                         if (!isSyncStillEnabled(gen)) return@withTransaction
-                        if (song.id == null) return@forEachIndexed
                         if (database.song(song.id).firstOrNull() == null) {
                             database.insert(song)
                         }

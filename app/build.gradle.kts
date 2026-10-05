@@ -11,6 +11,17 @@ plugins {
     id("com.github.ben-manes.versions") version "0.64.0"
 }
 
+android {
+    namespace = "com.ruben.spotitube"
+
+    defaultConfig {
+        applicationId = "com.ruben.spotitube"
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+}
+
 fun fetchGitCommitHash(): String {
     return try {
         val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD")

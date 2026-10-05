@@ -43,6 +43,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ruben.spotitube.ui.component.importCsvPlaylistAndFetchMetadata
+import com.ruben.spotitube.viewmodels.BackupRestoreViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +70,7 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.BuildConfig
 import com.ruben.spotitube.App.Companion.forgetAccount
+import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
 import com.ruben.spotitube.R
@@ -78,10 +82,12 @@ import com.ruben.spotitube.ui.component.TextFieldDialog
 import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.isInternetAvailable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.ruben.spotitube.utils.rememberPreference
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.launch
 
 @Composable
 fun AccountScreen(
@@ -89,6 +95,7 @@ fun AccountScreen(
 ) {
     val context = LocalContext.current
     val syncManager = LocalSyncManager.current
+    val database = LocalDatabase.current
     val session = remember { SessionManager(context) }
     val coroutineScope = rememberCoroutineScope()
     
@@ -109,6 +116,35 @@ fun AccountScreen(
     var showEditNameDialog by rememberSaveable { mutableStateOf(false) }
     var isBackupLoading by remember { mutableStateOf(false) }
     var isRestoreLoading by remember { mutableStateOf(false) }
+    var isMigrationLoading by remember { mutableStateOf(false) }
+    var isCsvImporting by remember { mutableStateOf(false) }
+    val backupRestoreViewModel: BackupRestoreViewModel = hiltViewModel()
+
+    val csvLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        isCsvImporting = true
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                val playlistId = importCsvPlaylistAndFetchMetadata(context, uri, database, backupRestoreViewModel)
+                withContext(Dispatchers.Main) {
+                    isCsvImporting = false
+                    if (playlistId != null) {
+                        Toast.makeText(context, "Playlist CSV importada con éxito", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "No se encontraron canciones en el archivo CSV", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    isCsvImporting = false
+                    Toast.makeText(context, "Error al importar CSV: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -350,6 +386,14 @@ fun AccountScreen(
                 Column {
                     val accountItems = listOf(
                         AccountSettingItem(R.drawable.fire, stringResource(R.string.music_together), stringResource(R.string.integration)) { navController.navigate("settings/music_together") },
+                        AccountSettingItem(
+                            R.drawable.add,
+                            "Importar playlist desde CSV",
+                            "Crea una playlist local e importa canciones desde un archivo .csv",
+                            isLoading = isCsvImporting
+                        ) {
+                            csvLauncher.launch("*/*")
+                        },
                         AccountSettingItem(R.drawable.add_circle, "Guardar copia de seguridad en Firebase", "Subida manual inmediata a la nube", isLoading = isBackupLoading) {
                             coroutineScope.launch {
                                 isBackupLoading = true
@@ -386,6 +430,26 @@ fun AccountScreen(
                                     Toast.makeText(context, "Error al restaurar copia", Toast.LENGTH_SHORT).show()
                                 } finally {
                                     isRestoreLoading = false
+                                }
+                            }
+                        },
+                        AccountSettingItem(
+                            R.drawable.sync,
+                            "Migrar datos al nuevo esquema",
+                            "Parsear biblioteca e historial actuales al nuevo formato de tablas",
+                            isLoading = isMigrationLoading
+                        ) {
+                            coroutineScope.launch {
+                                isMigrationLoading = true
+                                try {
+                                    withContext(Dispatchers.IO) {
+                                        database.migrateLegacyDataToNewSchema()
+                                    }
+                                    Toast.makeText(context, "Datos migrados con éxito al nuevo esquema", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error al migrar datos: ${e.message}", Toast.LENGTH_LONG).show()
+                                } finally {
+                                    isMigrationLoading = false
                                 }
                             }
                         },

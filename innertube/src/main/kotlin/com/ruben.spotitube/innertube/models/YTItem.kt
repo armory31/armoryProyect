@@ -9,12 +9,12 @@ package com.ruben.spotitube.innertube.models
 import com.ruben.spotitube.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_OMV
 import com.ruben.spotitube.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_UGC
 
-sealed class YTItem {
-    abstract val id: String
-    abstract val title: String
-    abstract val thumbnail: String?
-    abstract val explicit: Boolean
-    abstract val shareLink: String
+sealed interface YTItem {
+    val id: String
+    val title: String
+    val thumbnail: String?
+    val explicit: Boolean
+    val shareLink: String
 }
 
 data class Artist(
@@ -45,7 +45,7 @@ data class SongItem(
     override val explicit: Boolean = false,
     val endpoint: WatchEndpoint? = null,
     val setVideoId: String? = null,
-) : YTItem() {
+) : YTItem {
     override val shareLink: String
         get() = "https://music.youtube.com/watch?v=$id"
 }
@@ -60,7 +60,7 @@ data class AlbumItem(
     override val thumbnail: String,
     override val explicit: Boolean = false,
     val type: AlbumType? = null,  // Nuevo campo para clasificar el tipo de lanzamiento
-) : YTItem() {
+) : YTItem {
     override val shareLink: String
         get() = "https://music.youtube.com/playlist?list=$playlistId"
 
@@ -96,7 +96,7 @@ data class PlaylistItem(
     val shuffleEndpoint: WatchEndpoint?,
     val radioEndpoint: WatchEndpoint?,
     val isEditable: Boolean = false,
-) : YTItem() {
+) : YTItem {
     override val explicit: Boolean
         get() = false
     override val shareLink: String
@@ -111,7 +111,7 @@ data class ArtistItem(
     val playEndpoint: WatchEndpoint? = null,
     val shuffleEndpoint: WatchEndpoint?,
     val radioEndpoint: WatchEndpoint?,
-) : YTItem() {
+) : YTItem {
     override val explicit: Boolean
         get() = false
     override val shareLink: String

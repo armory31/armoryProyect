@@ -6,7 +6,6 @@
 
 package com.ruben.spotitube.lyrics
 
-import android.util.Log
 import com.ruben.spotitube.constants.PreloadQueueLyricsEnabledKey
 import com.ruben.spotitube.constants.QueueLyricsPreloadCountKey
 import com.ruben.spotitube.db.MusicDatabase
@@ -23,6 +22,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -59,19 +59,19 @@ class LyricsPreloadManager @Inject constructor(
                 val isEnabled = preferences[PreloadQueueLyricsEnabledKey] ?: true
                 
                 if (!isEnabled) {
-                    Log.d(TAG, "Queue lyrics pre-load is disabled")
+                    Timber.tag(TAG).d("Queue lyrics pre-load is disabled")
                     return@launch
                 }
                 
                 // Check network connectivity
                 val isNetworkAvailable = try {
                     networkConnectivity.isCurrentlyConnected()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     true
                 }
                 
                 if (!isNetworkAvailable) {
-                    Log.w(TAG, "Network unavailable, skipping lyrics pre-load")
+                    Timber.tag(TAG).w("Network unavailable, skipping lyrics pre-load")
                     return@launch
                 }
                 
@@ -81,11 +81,11 @@ class LyricsPreloadManager @Inject constructor(
                 val nextSongs = getNextSongs(queue, currentIndex, preloadCount)
                 
                 if (nextSongs.isEmpty()) {
-                    Log.d(TAG, "No songs to pre-load")
+                    Timber.tag(TAG).d("No songs to pre-load")
                     return@launch
                 }
-                
-                Log.d(TAG, "Starting pre-load for ${nextSongs.size} songs")
+
+                Timber.tag(TAG).d("Starting pre-load for ${nextSongs.size} songs")
                 preloadLyrics(nextSongs)
                 
             } catch (e: Exception) {
@@ -124,7 +124,7 @@ class LyricsPreloadManager @Inject constructor(
                     // Check if lyrics already exist in database
                     val existingLyrics = database.lyrics(song.id).first()
                     if (existingLyrics != null && existingLyrics.lyrics != LyricsEntity.LYRICS_NOT_FOUND) {
-                        Log.d(TAG, "Lyrics already cached for: ${song.title}")
+                        Timber.tag(TAG).d("Lyrics already cached for: ${song.title}")
                         return@forEach
                     }
                     
@@ -141,10 +141,10 @@ class LyricsPreloadManager @Inject constructor(
                                     )
                                 )
                             }
-                            Log.d(TAG, "Pre-loaded lyrics for: ${song.title}")
+                            Timber.tag(TAG).d("Pre-loaded lyrics for: ${song.title}")
                         }
                     } catch (e: Exception) {
-                        Log.w(TAG, "Failed to pre-load lyrics for ${song.title}: ${e.message}")
+                        Timber.tag(TAG).w("Failed to pre-load lyrics for ${song.title}: ${e.message}")
                     }
                 }
             } catch (e: Exception) {
@@ -163,7 +163,7 @@ class LyricsPreloadManager @Inject constructor(
         return try {
             lyricsHelper.getLyrics(song, preferredProviderOnly = true)
         } catch (e: Exception) {
-            Log.w(TAG, "Error fetching lyrics for ${song.title}: ${e.message}")
+            Timber.tag(TAG).w("Error fetching lyrics for ${song.title}: ${e.message}")
             null
         }
     }

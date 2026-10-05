@@ -11,7 +11,6 @@ package com.ruben.spotitube.db
 import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.room.AutoMigration
 import androidx.room.Database
@@ -33,6 +32,10 @@ import com.ruben.spotitube.db.entities.AlbumEntity
 import com.ruben.spotitube.db.entities.ArtistEntity
 import com.ruben.spotitube.db.entities.Event
 import com.ruben.spotitube.db.entities.FormatEntity
+import com.ruben.spotitube.db.entities.HistoryAlbumEntity
+import com.ruben.spotitube.db.entities.HistoryArtistEntity
+import com.ruben.spotitube.db.entities.HistoryPlaylistEntity
+import com.ruben.spotitube.db.entities.HistorySongEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
 import com.ruben.spotitube.db.entities.PlaylistEntity
@@ -40,6 +43,10 @@ import com.ruben.spotitube.db.entities.PlaylistSongMap
 import com.ruben.spotitube.db.entities.PlaylistSongMapPreview
 import com.ruben.spotitube.db.entities.PlaylistTagMap
 import com.ruben.spotitube.db.entities.RelatedSongMap
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.SearchHistory
 import com.ruben.spotitube.db.entities.SetVideoIdEntity
 import com.ruben.spotitube.db.entities.SongAlbumMap
@@ -51,6 +58,7 @@ import com.ruben.spotitube.db.entities.TagEntity
 import com.ruben.spotitube.extensions.toSQLiteQuery
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -61,11 +69,12 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MusicDatabase"
-private const val CURRENT_VERSION = 28
+private const val CURRENT_VERSION = 30
 
 class MusicDatabase(
     internal var delegate: InternalDatabase,
 ) : DatabaseDao by delegate.dao {
+    @Suppress("unused")
     val openHelper: SupportSQLiteOpenHelper
         get() = delegate.openHelper
 
@@ -76,6 +85,7 @@ class MusicDatabase(
             }
         }
 
+    @Suppress("unused")
     fun transaction(block: MusicDatabase.() -> Unit) =
         with(delegate) {
             transactionExecutor.execute {
@@ -99,6 +109,7 @@ class MusicDatabase(
 
     fun close() = delegate.close()
 
+    @Suppress("unused")
     fun clearAllTables() = delegate.clearAllTables()
 
     private suspend fun awaitExecutor(executor: Executor) {
@@ -113,12 +124,14 @@ class MusicDatabase(
         const val DB_NAME = "song.db"
 
         fun newInstance(context: Context): MusicDatabase {
-            return MusicDatabase(delegate = build(context))
+            val musicDb = MusicDatabase(delegate = build(context))
+            warmUp(context, musicDb)
+            return musicDb
         }
 
         private fun build(context: Context): InternalDatabase {
             val universalMigrations =
-                (2 until CURRENT_VERSION)
+                (2..27)
                     .map { from -> UniversalMigration(context, from, CURRENT_VERSION) }
                     .toTypedArray()
 
@@ -143,27 +156,31 @@ class MusicDatabase(
                 database.delegate.openHelper.writableDatabase
             } catch (t: Throwable) {
                 if (!shouldResetDb(t)) {
-                    Log.e(TAG, "Database failed to open with non-recoverable error", t)
+                    Timber.tag(TAG).e(t, "Database failed to open with non-recoverable error")
                     return
                 }
-                
-                Log.w(TAG, "Database open failed, attempting schema repair in background", t)
+
+                Timber.tag(TAG).w(t, "Database open failed, attempting schema repair in background")
                 runCatching { database.close() }
                 
                 val repaired = runCatching { 
                     SchemaTools.repairDatabaseFile(context = context, name = DB_NAME) 
-                }.onFailure { Log.e(TAG, "Schema repair failed", it) }.isSuccess
+                }.onFailure { Timber.tag(TAG).e(it, "Schema repair failed") }.isSuccess
                 
                 if (repaired) {
-                    Log.i(TAG, "Database schema repaired successfully. Next access will re-open.")
+                    Timber.tag(TAG)
+                        .i("Database schema repaired successfully. Next access will re-open.")
                 } else {
-                    Log.e(TAG, "Database schema repair failed, destructive migration will be attempted on next access")
+                    Timber.tag(TAG)
+                        .e("Database schema repair failed, destructive migration will be attempted on next access")
                     // If repair failed, we might want to force destructive migration now
                     runCatching { 
                         context.deleteDatabase(DB_NAME)
-                        Log.w(TAG, "Database deleted due to failed repair")
+                        Timber.tag(TAG).w("Database deleted due to failed repair")
                     }
                 }
+                database.delegate = build(context)
+                runCatching { database.delegate.openHelper.writableDatabase }
             }
         }
 
@@ -195,7 +212,15 @@ class MusicDatabase(
         SetVideoIdEntity::class,
         PlayCountEntity::class,
         TagEntity::class,
-        PlaylistTagMap::class
+        PlaylistTagMap::class,
+        SavedSongEntity::class,
+        SavedArtistEntity::class,
+        SavedAlbumEntity::class,
+        SavedPlaylistEntity::class,
+        HistorySongEntity::class,
+        HistoryArtistEntity::class,
+        HistoryAlbumEntity::class,
+        HistoryPlaylistEntity::class,
     ],
     views = [
         SortedSongArtistMap::class,
@@ -226,6 +251,8 @@ class MusicDatabase(
         AutoMigration(from = 20, to = 21, spec = Migration20To21::class),
         AutoMigration(from = 21, to = 22),
         AutoMigration(from = 27, to = 28),
+        AutoMigration(from = 28, to = 29),
+        AutoMigration(from = 29, to = 30),
     ],
 )
 @TypeConverters(Converters::class)
@@ -247,8 +274,10 @@ private class DatabaseCallback : RoomDatabase.Callback() {
                 
                 cleanupDuplicatePlaylistsOnOpen(db)
                 ensurePlaylistBrowseIdIndex(db)
+                db.execSQL("UPDATE playlist SET isEditable = 1")
+                db.execSQL("UPDATE savedplaylist SET isEditable = 1")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to set PRAGMA settings", e)
+                Timber.tag(TAG).e(e, "Failed to set PRAGMA settings")
             }
         }
     }
@@ -297,7 +326,7 @@ private class DatabaseCallback : RoomDatabase.Callback() {
                 )
             """)
         } catch (e: Exception) {
-            Log.w(TAG, "Duplicate playlist cleanup skipped", e)
+            Timber.tag(TAG).w(e, "Duplicate playlist cleanup skipped")
         }
     }
     
@@ -305,7 +334,7 @@ private class DatabaseCallback : RoomDatabase.Callback() {
         try {
             db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_playlist_browseId ON playlist (browseId) WHERE browseId IS NOT NULL")
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to create browseId index", e)
+            Timber.tag(TAG).w(e, "Failed to create browseId index")
         }
     }
 }
@@ -327,15 +356,15 @@ private class UniversalMigration(
     override fun migrate(db: SupportSQLiteDatabase) {
         val from = startVersion
         val to = endVersion
-        Log.i(TAG, "Running universal migration from $from to $to")
+        Timber.tag(TAG).i("Running universal migration from $from to $to")
 
         val expectedDb = Room.inMemoryDatabaseBuilder(context, InternalDatabase::class.java).build()
         try {
             val expected = expectedDb.openHelper.writableDatabase
             SchemaTools.reconcileDatabase(db = db, expectedDb = expected)
-            Log.i(TAG, "Migration completed successfully")
+            Timber.tag(TAG).i("Migration completed successfully")
         } catch (e: Exception) {
-            Log.e(TAG, "Migration failed", e)
+            Timber.tag(TAG).e(e, "Migration failed")
             throw e
         } finally {
             expectedDb.close()
