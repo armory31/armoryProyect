@@ -31,6 +31,7 @@ proguard/
 *.log
 *.artifact.md
 .artifacts/
+*.bk
 
 # Android Studio Navigation editor temp files
 .navigation/
