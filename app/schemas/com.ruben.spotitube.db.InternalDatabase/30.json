@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 30,
-    "identityHash": "313c1f47c1a0da7892339435be16a85f",
+    "identityHash": "dc2b523589c63af5450463cf04651ea7",
     "entities": [
       {
         "tableName": "song",
@@ -358,7 +358,7 @@
       },
       {
         "tableName": "song_artist_map",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`songId` TEXT NOT NULL, `artistId` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`songId`, `artistId`), FOREIGN KEY(`songId`) REFERENCES `song`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`artistId`) REFERENCES `artist`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`songId` TEXT NOT NULL, `artistId` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`songId`, `artistId`))",
         "fields": [
           {
             "fieldPath": "songId",
@@ -405,35 +405,11 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_song_artist_map_artistId` ON `${TABLE_NAME}` (`artistId`)"
           }
-        ],
-        "foreignKeys": [
-          {
-            "table": "song",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "songId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "artist",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "artistId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
         ]
       },
       {
         "tableName": "song_album_map",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`songId` TEXT NOT NULL, `albumId` TEXT NOT NULL, `index` INTEGER NOT NULL, PRIMARY KEY(`songId`, `albumId`), FOREIGN KEY(`songId`) REFERENCES `song`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`albumId`) REFERENCES `album`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`songId` TEXT NOT NULL, `albumId` TEXT NOT NULL, `index` INTEGER NOT NULL, PRIMARY KEY(`songId`, `albumId`))",
         "fields": [
           {
             "fieldPath": "songId",
@@ -480,35 +456,11 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_song_album_map_albumId` ON `${TABLE_NAME}` (`albumId`)"
           }
-        ],
-        "foreignKeys": [
-          {
-            "table": "song",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "songId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "album",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "albumId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
         ]
       },
       {
         "tableName": "album_artist_map",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`albumId` TEXT NOT NULL, `artistId` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`albumId`, `artistId`), FOREIGN KEY(`albumId`) REFERENCES `album`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`artistId`) REFERENCES `artist`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`albumId` TEXT NOT NULL, `artistId` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`albumId`, `artistId`))",
         "fields": [
           {
             "fieldPath": "albumId",
@@ -554,30 +506,6 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_album_artist_map_artistId` ON `${TABLE_NAME}` (`artistId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "album",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "albumId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "artist",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "artistId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
           }
         ]
       },
@@ -1400,7 +1328,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '313c1f47c1a0da7892339435be16a85f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dc2b523589c63af5450463cf04651ea7')"
     ]
   }
 }
