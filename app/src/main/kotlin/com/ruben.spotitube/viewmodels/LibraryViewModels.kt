@@ -102,7 +102,7 @@ constructor(
             .flatMapLatest { (filterSort, hideExplicit, hideVideo) ->
                 val (filter, sortType, descending) = filterSort
                 when (filter) {
-                    SongFilter.LIBRARY -> database.songs(sortType, descending, hideVideo)
+                    SongFilter.LIBRARY,
                     SongFilter.LIKED -> libraryStateHolder.getLibrarySongs().map { songs ->
                         when (sortType) {
                             SongSortType.CREATE_DATE -> songs
@@ -190,7 +190,7 @@ constructor(
             }.distinctUntilChanged()
             .flatMapLatest { (filter, sortType, descending) ->
                 when (filter) {
-                    ArtistFilter.LIBRARY -> database.artists(sortType, descending)
+                    ArtistFilter.LIBRARY,
                     ArtistFilter.LIKED -> libraryStateHolder.getLibraryArtists().map { artists ->
                         when (sortType) {
                             ArtistSortType.CREATE_DATE -> artists.sortedBy { it.artist.bookmarkedAt }
@@ -301,7 +301,7 @@ constructor(
                                     }
                                 }
                         }
-                    AlbumFilter.LIBRARY -> database.albums(sortType, descending)
+                    AlbumFilter.LIBRARY,
                     AlbumFilter.LIKED -> libraryStateHolder.getLibraryAlbums().map { albums ->
                         when (sortType) {
                             AlbumSortType.CREATE_DATE -> albums

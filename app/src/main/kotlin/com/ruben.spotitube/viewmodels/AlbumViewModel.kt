@@ -115,17 +115,24 @@ constructor(
     }
 
     fun toggleLike() {
-        val album = albumWithSongs.value?.album ?: return
-        
         viewModelScope.launch {
-            // Aseguramos que el álbum esté en la base de datos antes de cambiar el estado de Like
-            // Aunque retry() lo hace, este es un doble chequeo de seguridad
-            database.withTransaction {
-                if (getAlbumById(album.id) == null) {
-                    insert(album)
+            val album = albumWithSongs.value?.album
+                ?: database.getAlbumById(albumId)
+                ?: database.getSavedAlbum(albumId)?.toAlbum()?.album
+
+            if (album != null) {
+                database.withTransaction {
+                    if (getAlbumById(album.id) == null) {
+                        insert(album)
+                    }
                 }
+                syncManager.toggleAlbumLike(album)
+            } else {
+                syncManager.toggleAlbumLike(
+                    albumId = albumId,
+                    title = ""
+                )
             }
-            syncManager.toggleAlbumLike(album)
         }
     }
 

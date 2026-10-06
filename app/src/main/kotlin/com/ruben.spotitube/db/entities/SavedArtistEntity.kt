@@ -13,4 +13,19 @@ data class SavedArtistEntity(
     val thumbnailUrl: String? = null,
     val channelId: String? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
-)
+) {
+    fun toArtist(): Artist {
+        val artistEntity = ArtistEntity(
+            id = id,
+            name = name,
+            thumbnailUrl = thumbnailUrl,
+            channelId = channelId,
+            isBookmarked = true
+        )
+        return Artist(
+            artist = artistEntity,
+            songCount = 0
+        )
+    }
+}
+

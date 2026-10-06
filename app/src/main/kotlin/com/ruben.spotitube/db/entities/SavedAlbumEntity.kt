@@ -17,4 +17,27 @@ data class SavedAlbumEntity(
     val thumbnailUrl: String? = null,
     val year: Int? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
-)
+) {
+    fun toAlbum(): Album {
+        val albumEntity = AlbumEntity(
+            id = id,
+            title = title,
+            songCount = songCount,
+            duration = duration,
+            thumbnailUrl = thumbnailUrl,
+            year = year,
+            isLiked = true
+        )
+        val artistEntity = artistName?.let {
+            ArtistEntity(
+                id = artistId ?: "",
+                name = it
+            )
+        }
+        return Album(
+            album = albumEntity,
+            artists = if (artistEntity != null) listOf(artistEntity) else emptyList()
+        )
+    }
+}
+

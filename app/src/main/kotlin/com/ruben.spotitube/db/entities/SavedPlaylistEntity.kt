@@ -18,7 +18,24 @@ data class SavedPlaylistEntity(
     val thumbnailUrl: String? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
+    fun toPlaylist(): Playlist {
+        val playlistEntity = PlaylistEntity(
+            id = id,
+            name = name,
+            browseId = browseId,
+            createdAt = createdAt,
+            isEditable = isEditable,
+            thumbnailUrl = thumbnailUrl
+        )
+        return Playlist(
+            playlist = playlistEntity,
+            songCount = 0,
+            songThumbnails = if (thumbnailUrl != null) listOf(thumbnailUrl) else emptyList()
+        )
+    }
+
     companion object {
         fun generatePlaylistId() = "LP" + RandomStringUtils.insecure().next(8, true, false)
     }
 }
+

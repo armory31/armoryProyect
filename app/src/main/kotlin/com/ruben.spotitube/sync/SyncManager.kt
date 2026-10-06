@@ -1019,34 +1019,72 @@ class SyncManager @Inject constructor(
         }
     }
 
-    suspend fun toggleAlbumLike(album: AlbumEntity) = withContext(Dispatchers.IO) {
-        val existingSaved = database.getSavedAlbum(album.id)
-        val isCurrentlyLiked = existingSaved != null || album.isLiked
-        if (isCurrentlyLiked) {
-            database.deleteSavedAlbum(album.id)
-            database.update(album.copy(isLiked = false))
+    suspend fun toggleAlbumLike(
+        albumId: String,
+        title: String,
+        artistId: String? = null,
+        artistName: String? = null,
+        songCount: Int = 0,
+        duration: Int = 0,
+        thumbnailUrl: String? = null,
+        year: Int? = null,
+    ) = withContext(Dispatchers.IO) {
+        val existingSaved = database.getSavedAlbum(albumId)
+        if (existingSaved != null) {
+            database.deleteSavedAlbum(albumId)
+            val albumEntity = database.getAlbumById(albumId)
+            if (albumEntity != null) {
+                database.update(albumEntity.copy(isLiked = false))
+            }
         } else {
-            val albumArtist = database.albumArtistMaps(album.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
             database.insertSavedAlbum(
                 SavedAlbumEntity(
-                    id = album.id,
-                    title = album.title,
-                    artistId = albumArtist?.id,
-                    artistName = albumArtist?.name,
-                    songCount = album.songCount,
-                    duration = album.duration,
-                    thumbnailUrl = album.thumbnailUrl,
-                    year = album.year,
+                    id = albumId,
+                    title = title,
+                    artistId = artistId,
+                    artistName = artistName,
+                    songCount = songCount,
+                    duration = duration,
+                    thumbnailUrl = thumbnailUrl,
+                    year = year,
                 ),
             )
-            database.update(album.copy(isLiked = true))
+            val existingEntity = database.getAlbumById(albumId)
+            if (existingEntity != null) {
+                database.update(existingEntity.copy(isLiked = true))
+            } else if (title.isNotBlank()) {
+                database.insert(
+                    AlbumEntity(
+                        id = albumId,
+                        title = title,
+                        songCount = songCount,
+                        duration = duration,
+                        thumbnailUrl = thumbnailUrl,
+                        year = year,
+                        isLiked = true,
+                    ),
+                )
+            }
         }
+    }
+
+    suspend fun toggleAlbumLike(album: AlbumEntity) = withContext(Dispatchers.IO) {
+        val albumArtist = database.albumArtistMaps(album.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
+        toggleAlbumLike(
+            albumId = album.id,
+            title = album.title,
+            artistId = albumArtist?.id,
+            artistName = albumArtist?.name,
+            songCount = album.songCount,
+            duration = album.duration,
+            thumbnailUrl = album.thumbnailUrl,
+            year = album.year,
+        )
     }
 
     suspend fun toggleArtistLike(artist: ArtistEntity) = withContext(Dispatchers.IO) {
         val existingSaved = database.getSavedArtist(artist.id)
-        val isCurrentlyLiked = existingSaved != null || artist.isBookmarked
-        if (isCurrentlyLiked) {
+        if (existingSaved != null) {
             database.deleteSavedArtist(artist.id)
             database.update(artist.copy(isBookmarked = false))
         } else {
@@ -1065,26 +1103,21 @@ class SyncManager @Inject constructor(
     suspend fun togglePlaylistLike(playlist: PlaylistEntity) = withContext(Dispatchers.IO) {
         val pId = playlist.browseId ?: playlist.id
         val existingSaved = database.getSavedPlaylist(pId) ?: database.getSavedPlaylist(playlist.id)
-        val existingLegacy = database.getPlaylistById(pId) ?: database.getPlaylistById(playlist.id)
 
-        if (existingSaved != null || existingLegacy != null) {
+        if (existingSaved != null) {
             database.deleteSavedPlaylist(pId)
             database.deleteSavedPlaylist(playlist.id)
-            database.deletePlaylistById(pId)
-            database.deletePlaylistById(playlist.id)
         } else {
             val localId = if (playlist.id.startsWith("LP")) playlist.id else PlaylistEntity.generatePlaylistId()
-            val newEntity = playlist.copy(id = localId)
             database.insertSavedPlaylist(
                 SavedPlaylistEntity(
-                    id = newEntity.id,
-                    name = newEntity.name,
-                    browseId = newEntity.browseId,
-                    isEditable = newEntity.isEditable,
-                    thumbnailUrl = newEntity.thumbnailUrl,
+                    id = localId,
+                    name = playlist.name,
+                    browseId = playlist.browseId,
+                    isEditable = playlist.isEditable,
+                    thumbnailUrl = playlist.thumbnailUrl,
                 ),
             )
-            database.insert(newEntity)
         }
     }
 

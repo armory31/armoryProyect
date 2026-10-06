@@ -2,8 +2,6 @@
 
 package com.ruben.spotitube.sync
 
-import com.ruben.spotitube.constants.AlbumSortType
-import com.ruben.spotitube.constants.ArtistSortType
 import com.ruben.spotitube.db.DatabaseDao
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.Artist
@@ -75,11 +73,17 @@ class LibraryStateHolder @Inject constructor(
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} playlists") }
 
     // Merged data for UI
-    fun getLibrarySongs(): Flow<List<Song>> = databaseDao.likedSongsByRowIdAsc()
+    fun getLibrarySongs(): Flow<List<Song>> = databaseDao.allSavedSongs().map { list ->
+        list.map { it.toSong() }
+    }
 
-    fun getLibraryAlbums(): Flow<List<Album>> = databaseDao.albumsLiked(AlbumSortType.CREATE_DATE, false)
+    fun getLibraryAlbums(): Flow<List<Album>> = databaseDao.allSavedAlbums().map { list ->
+        list.map { it.toAlbum() }
+    }
 
-    fun getLibraryArtists(): Flow<List<Artist>> = databaseDao.artistsBookmarked(ArtistSortType.CREATE_DATE, false)
+    fun getLibraryArtists(): Flow<List<Artist>> = databaseDao.allSavedArtists().map { list ->
+        list.map { it.toArtist() }
+    }
 
     fun isSongLiked(songId: String): Flow<Boolean> = likedSongIds.map { it.contains(songId) }
     fun isAlbumLiked(albumId: String): Flow<Boolean> = likedAlbumIds.map { it.contains(albumId) }

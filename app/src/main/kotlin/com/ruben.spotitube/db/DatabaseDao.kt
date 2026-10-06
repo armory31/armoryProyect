@@ -925,16 +925,16 @@ interface DatabaseDao {
             }.reversed(descending)
         }
 
-    @Query("SELECT id FROM savedartist UNION SELECT id FROM artist WHERE isBookmarked = 1")
+    @Query("SELECT id FROM savedartist")
     fun getBookmarkedArtistIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM savedalbum UNION SELECT id FROM album WHERE isLiked = 1")
+    @Query("SELECT id FROM savedalbum")
     fun getLikedAlbumIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM savedsong UNION SELECT videoId FROM set_video_id UNION SELECT id FROM song WHERE isLiked = 1")
+    @Query("SELECT id FROM savedsong UNION SELECT videoId FROM set_video_id")
     fun getLikedSongIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM savedplaylist UNION SELECT id FROM playlist")
+    @Query("SELECT id FROM savedplaylist")
     fun getLikedPlaylistIds(): Flow<List<String>>
 
     @Transaction
