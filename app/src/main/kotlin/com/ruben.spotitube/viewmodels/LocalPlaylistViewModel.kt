@@ -77,7 +77,7 @@ constructor(
             .playlist(playlistId)
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val isLiked = libraryStateHolder.isPlaylistLiked(playlistId)
+    val isLiked = libraryStateHolder.isSavedPlaylist(playlistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val playlistSongs: StateFlow<List<PlaylistSong>> =

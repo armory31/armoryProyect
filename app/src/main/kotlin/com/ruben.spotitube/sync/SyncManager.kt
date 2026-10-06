@@ -114,156 +114,76 @@ class SyncManager @Inject constructor(
 
         val db = getFirestore()
 
-        val rawSavedSongs = database.allSavedSongs().first()
-        val savedSongs = if (rawSavedSongs.isNotEmpty()) {
-            rawSavedSongs.map { s ->
-                var duration = s.duration
-                if (duration <= 0) {
-                    val refetched = YouTube.queue(listOf(s.id)).getOrNull()?.firstOrNull()?.toMediaMetadata()
-                    if (refetched != null && refetched.duration > 0) {
-                        duration = refetched.duration
-                        database.insert(refetched)
-                        database.insertSavedSong(s.copy(duration = duration))
-                    }
+        val savedSongs = database.allSavedSongs().first().map { s ->
+            var duration = s.duration
+            if (duration <= 0) {
+                val refetched = YouTube.queue(listOf(s.id)).getOrNull()?.firstOrNull()?.toMediaMetadata()
+                if (refetched != null && refetched.duration > 0) {
+                    duration = refetched.duration
+                    database.insert(refetched)
+                    database.insertSavedSong(s.copy(duration = duration))
                 }
-                val songWithArtists = database.getSongById(s.id)
-                val artist = songWithArtists?.artists?.firstOrNull() ?: database.songArtistMap(s.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
-                val rawName = s.artistName ?: artist?.name ?: ""
-                val cleanArtistName = if (rawName.toLongOrNull() != null || rawName.toIntOrNull() != null) (artist?.name ?: "") else rawName
-                FavoriteSongDto(
-                    videoId = s.id,
-                    title = s.title,
-                    artistId = s.artistId ?: artist?.id ?: "",
-                    artistName = cleanArtistName,
-                    thumbnailUrl = s.thumbnailUrl,
-                    albumId = s.albumId,
-                    albumName = s.albumName,
-                    duration = maxOf(0L, duration.toLong()),
-                    savedAt = s.savedAt.toEpochSecond(ZoneOffset.UTC),
-                )
             }
-        } else {
-            database.likedSongsByRowIdAsc().first().map { s ->
-                var duration = s.song.duration
-                if (duration <= 0) {
-                    val refetched = YouTube.queue(listOf(s.song.id)).getOrNull()?.firstOrNull()?.toMediaMetadata()
-                    if (refetched != null && refetched.duration > 0) {
-                        duration = refetched.duration
-                        database.insert(refetched)
-                    }
-                }
-                val artist = s.artists.firstOrNull()
-                FavoriteSongDto(
-                    videoId = s.song.id,
-                    title = s.song.title,
-                    artistId = artist?.id ?: "",
-                    artistName = artist?.name ?: "",
-                    thumbnailUrl = s.song.thumbnailUrl,
-                    albumId = s.song.albumId,
-                    albumName = s.song.albumName,
-                    duration = maxOf(0L, duration.toLong()),
-                    savedAt = System.currentTimeMillis(),
-                )
-            }
+            val songWithArtists = database.getSongById(s.id)
+            val artist = songWithArtists?.artists?.firstOrNull() ?: database.songArtistMap(s.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
+            val rawName = s.artistName ?: artist?.name ?: ""
+            val cleanArtistName = if (rawName.toLongOrNull() != null || rawName.toIntOrNull() != null) (artist?.name ?: "") else rawName
+            FavoriteSongDto(
+                videoId = s.id,
+                title = s.title,
+                artistId = s.artistId ?: artist?.id ?: "",
+                artistName = cleanArtistName,
+                thumbnailUrl = s.thumbnailUrl,
+                albumId = s.albumId,
+                albumName = s.albumName,
+                duration = maxOf(0L, duration.toLong()),
+                savedAt = s.savedAt.toEpochSecond(ZoneOffset.UTC),
+            )
         }
 
-        val rawSavedArtists = database.allSavedArtists().first()
-        val savedArtists = if (rawSavedArtists.isNotEmpty()) {
-            rawSavedArtists.map { a ->
-                FavoriteArtistDto(
-                    id = a.id,
-                    name = a.name,
-                    thumbnailUrl = a.thumbnailUrl,
-                    channelId = a.channelId,
-                    savedAt = a.savedAt.toEpochSecond(ZoneOffset.UTC),
-                )
-            }
-        } else {
-            database.artistsBookmarked(ArtistSortType.CREATE_DATE, false).first().map { ar ->
-                FavoriteArtistDto(
-                    id = ar.artist.id,
-                    name = ar.artist.name,
-                    thumbnailUrl = ar.artist.thumbnailUrl,
-                    channelId = ar.artist.channelId,
-                    savedAt = System.currentTimeMillis(),
-                )
-            }
+        val savedArtists = database.allSavedArtists().first().map { a ->
+            FavoriteArtistDto(
+                id = a.id,
+                name = a.name,
+                thumbnailUrl = a.thumbnailUrl,
+                channelId = a.channelId,
+                savedAt = a.savedAt.toEpochSecond(ZoneOffset.UTC),
+            )
         }
 
-        val rawSavedAlbums = database.allSavedAlbums().first()
-        val savedAlbums = if (rawSavedAlbums.isNotEmpty()) {
-            rawSavedAlbums.map { al ->
-                val albumArtist = database.albumArtistMaps(al.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
-                FavoriteAlbumDto(
-                    id = al.id,
-                    title = al.title,
-                    artistId = al.artistId ?: albumArtist?.id ?: "",
-                    artistName = al.artistName ?: albumArtist?.name ?: "",
-                    thumbnailUrl = al.thumbnailUrl,
-                    songCount = al.songCount,
-                    duration = al.duration,
-                    savedAt = al.savedAt.toEpochSecond(ZoneOffset.UTC),
-                )
-            }
-        } else {
-            database.albumsLiked(AlbumSortType.CREATE_DATE, false).first().map { a ->
-                val artist = a.artists.firstOrNull()
-                FavoriteAlbumDto(
-                    id = a.album.id,
-                    title = a.album.title,
-                    artistId = artist?.id ?: "",
-                    artistName = artist?.name ?: "",
-                    thumbnailUrl = a.album.thumbnailUrl,
-                    songCount = a.album.songCount,
-                    duration = a.album.duration,
-                    savedAt = System.currentTimeMillis(),
-                )
-            }
+        val savedAlbums = database.allSavedAlbums().first().map { al ->
+            val albumArtist = database.albumArtistMaps(al.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
+            FavoriteAlbumDto(
+                id = al.id,
+                title = al.title,
+                artistId = al.artistId ?: albumArtist?.id ?: "",
+                artistName = al.artistName ?: albumArtist?.name ?: "",
+                thumbnailUrl = al.thumbnailUrl,
+                songCount = al.songCount,
+                duration = al.duration,
+                savedAt = al.savedAt.toEpochSecond(ZoneOffset.UTC),
+            )
         }
 
-        val rawSavedPlaylists = database.allSavedPlaylists().first()
-        val savedPlaylists = if (rawSavedPlaylists.isNotEmpty()) {
-            rawSavedPlaylists.map { p ->
-                val songs = database.playlistSongs(p.id).first().map { ps ->
-                    PlaylistSongDto(
-                        id = ps.song.song.id,
-                        title = ps.song.song.title,
-                        artistName = ps.song.artists.firstOrNull()?.name ?: "Unknown",
-                        thumbnailUrl = ps.song.song.thumbnailUrl,
-                        position = ps.map.position,
-                    )
-                }
-                PlaylistDto(
-                    id = p.id,
-                    name = p.name,
-                    browseId = p.browseId,
-                    isEditable = p.isEditable,
-                    thumbnailUrl = p.thumbnailUrl,
-                    createdAt = p.createdAt.toString(),
-                    songs = songs,
+        val savedPlaylists = database.allSavedPlaylists().first().map { p ->
+            val songs = database.playlistSongs(p.id).first().map { ps ->
+                PlaylistSongDto(
+                    id = ps.song.song.id,
+                    title = ps.song.song.title,
+                    artistName = ps.song.artists.firstOrNull()?.name ?: "Unknown",
+                    thumbnailUrl = ps.song.song.thumbnailUrl,
+                    position = ps.map.position,
                 )
             }
-        } else {
-            database.playlistsByRowIdAsc().first().map { p ->
-                val songs = database.playlistSongs(p.playlist.id).first().map { ps ->
-                    PlaylistSongDto(
-                        id = ps.song.song.id,
-                        title = ps.song.song.title,
-                        artistName = ps.song.artists.firstOrNull()?.name ?: "Unknown",
-                        thumbnailUrl = ps.song.song.thumbnailUrl,
-                        position = ps.map.position,
-                    )
-                }
-                PlaylistDto(
-                    id = p.playlist.id,
-                    name = p.playlist.name,
-                    browseId = p.playlist.browseId,
-                    isEditable = p.playlist.isEditable,
-                    thumbnailUrl = p.playlist.thumbnailUrl ?: p.thumbnails.firstOrNull(),
-                    createdAt = p.playlist.createdAt?.toString(),
-                    songs = songs,
-                )
-            }
+            PlaylistDto(
+                id = p.id,
+                name = p.name,
+                browseId = p.browseId,
+                isEditable = p.isEditable,
+                thumbnailUrl = p.thumbnailUrl,
+                createdAt = p.createdAt.toString(),
+                songs = songs,
+            )
         }
 
         val historySongs = database.allHistorySongs().first().map { h ->
@@ -996,8 +916,7 @@ class SyncManager @Inject constructor(
 
     suspend fun toggleLike(song: SongEntity) = withContext(Dispatchers.IO) {
         val existingSaved = database.getSavedSong(song.id)
-        val isCurrentlyLiked = existingSaved != null || song.isLiked
-        if (isCurrentlyLiked) {
+        if (existingSaved != null) {
             database.deleteSavedSong(song.id)
             database.update(song.copy(isLiked = false))
         } else {
@@ -1107,11 +1026,13 @@ class SyncManager @Inject constructor(
         if (existingSaved != null) {
             database.deleteSavedPlaylist(pId)
             database.deleteSavedPlaylist(playlist.id)
+            if (existingSaved.browseId != null) {
+                database.deleteSavedPlaylist(existingSaved.browseId)
+            }
         } else {
-            val localId = if (playlist.id.startsWith("LP")) playlist.id else PlaylistEntity.generatePlaylistId()
             database.insertSavedPlaylist(
                 SavedPlaylistEntity(
-                    id = localId,
+                    id = playlist.id,
                     name = playlist.name,
                     browseId = playlist.browseId,
                     isEditable = playlist.isEditable,
@@ -1175,7 +1096,11 @@ class SyncManager @Inject constructor(
     }
 
     suspend fun deletePlaylist(playlistId: String) = withContext(Dispatchers.IO) {
+        val cleanId = playlistId.removePrefix("VL")
         database.deleteSavedPlaylist(playlistId)
+        database.deleteSavedPlaylist(cleanId)
+        database.deleteSavedPlaylist("VL$cleanId")
         database.deletePlaylistById(playlistId)
+        database.deletePlaylistById(cleanId)
     }
 }

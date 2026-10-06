@@ -42,7 +42,7 @@ constructor(
         YouTube
             .explore()
             .onSuccess { page ->
-                val bookmarkedArtistIds = libraryStateHolder.bookmarkedArtistIds.first()
+                val bookmarkedArtistIds = libraryStateHolder.savedArtistIds.first()
                 val artists: MutableMap<Int, String> = mutableMapOf()
                 val favouriteArtists: MutableMap<Int, String> = mutableMapOf()
                 database.allArtistsByPlayTime().first().let { list ->

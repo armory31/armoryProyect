@@ -66,7 +66,7 @@ fun ArtistMenu(
 
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
-    val isBookmarked by libraryStateHolder.isArtistBookmarked(artist.id).collectAsState(initial = false)
+    val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsState(initial = false)
 
     ArtistListItem(
         artist = artist,

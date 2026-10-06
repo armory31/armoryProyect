@@ -116,10 +116,10 @@ class HomeViewModel @Inject constructor(
         ) { songs, artists, playlists ->
             Triple(songs, artists, playlists)
         },
-        libraryStateHolder.likedSongIds,
-        libraryStateHolder.likedAlbumIds,
-        libraryStateHolder.bookmarkedArtistIds,
-        libraryStateHolder.likedPlaylistIds
+        libraryStateHolder.savedSongIds,
+        libraryStateHolder.savedAlbumIds,
+        libraryStateHolder.savedArtistIds,
+        libraryStateHolder.savedPlaylistIds
     ) { (songs, artists, playlists), likedSongIds, likedAlbumIds, bookmarkedArtistIds, likedPlaylistIds ->
         val metadataMap = mutableMapOf<String, ItemMetadata>()
 
@@ -353,7 +353,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun songLoad() {
-        val song = database.events().first().firstOrNull()?.song
+        val song = database.historySongsWithMetadata().first().firstOrNull()?.song
         if (song != null) {
             if (database.hasRelatedSongs(song.id).first()) {
                 val relatedSongs = database.getRelatedSongs(song.id).first().shuffled().take(20)

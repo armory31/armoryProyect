@@ -94,8 +94,8 @@ fun SelectionSongMenu(
     }
 
     LaunchedEffect(songSelection, libraryStateHolder) {
-        val inLibraryIds = libraryStateHolder.likedSongIds.first()
-        val likedIds = libraryStateHolder.likedSongIds.first() // En el nuevo modelo liked == inLibrary para canciones
+        val inLibraryIds = libraryStateHolder.savedSongIds.first()
+        val likedIds = libraryStateHolder.savedSongIds.first() // En el nuevo modelo liked == inLibrary para canciones
         
         allInLibrary = songSelection.all { it.id in inLibraryIds }
         allLiked = songSelection.isNotEmpty() && songSelection.all { it.id in likedIds }
@@ -371,7 +371,7 @@ fun SelectionSongMenu(
                             songSelection.forEach { song ->
                                 // Asegurarse de que esté en la DB local antes de sincronizar
                                 database.insert(song.toMediaMetadata())
-                                if (song.id !in libraryStateHolder.likedSongIds.first()) {
+                                if (song.id !in libraryStateHolder.savedSongIds.first()) {
                                     syncManager.toggleLike(song.song)
                                 }
                             }
@@ -464,7 +464,7 @@ fun SelectionSongMenu(
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        val likedIds = libraryStateHolder.likedSongIds.first()
+                        val likedIds = libraryStateHolder.savedSongIds.first()
                         val allLikedLocally = songSelection.all { it.id in likedIds }
                         onDismiss()
                         songSelection.forEach { song ->
@@ -529,7 +529,7 @@ fun SelectionMediaMetadataMenu(
     }
 
     LaunchedEffect(songSelection, libraryStateHolder) {
-        val likedIds = libraryStateHolder.likedSongIds.first()
+        val likedIds = libraryStateHolder.savedSongIds.first()
         allLiked = songSelection.isNotEmpty() && songSelection.all { it.id in likedIds }
     }
 
@@ -746,7 +746,7 @@ fun SelectionMediaMetadataMenu(
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        val likedIds = libraryStateHolder.likedSongIds.first()
+                        val likedIds = libraryStateHolder.savedSongIds.first()
                         if (allLiked) {
                             songSelection.forEach { song ->
                                 syncManager.toggleLike(song.toSongEntity())

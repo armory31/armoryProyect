@@ -25,7 +25,6 @@ import com.ruben.spotitube.innertube.pages.ArtistPage
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.sync.SyncManager
 import com.ruben.spotitube.utils.dataStore
-import com.ruben.spotitube.utils.get
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -52,7 +51,7 @@ class ArtistViewModel @Inject constructor(
     val artistId = savedStateHandle.get<String>("artistId")!!
     var artistPage by mutableStateOf<ArtistPage?>(null)
     
-    val isBookmarked = libraryStateHolder.isArtistBookmarked(artistId)
+    val isBookmarked = libraryStateHolder.isSavedArtist(artistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val libraryArtist = database.artist(artistId)

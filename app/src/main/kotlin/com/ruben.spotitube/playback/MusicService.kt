@@ -73,7 +73,6 @@ import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.SilenceSkippingAudioProcessor
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
-import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mkv.MatroskaExtractor
 import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.extractor.mp4.Mp4Extractor
@@ -106,7 +105,6 @@ import com.ruben.spotitube.constants.EqualizerSelectedProfileIdKey
 import com.ruben.spotitube.constants.EqualizerVirtualizerEnabledKey
 import com.ruben.spotitube.constants.EqualizerVirtualizerStrengthKey
 import com.ruben.spotitube.constants.HideVideoKey
-import com.ruben.spotitube.constants.HistoryDuration
 import com.ruben.spotitube.constants.InnerTubeCookieKey
 import com.ruben.spotitube.constants.MaxSongCacheSizeKey
 import com.ruben.spotitube.constants.PauseListenHistoryKey
@@ -1274,7 +1272,7 @@ class MusicService :
     private fun updateNotification() {
         try {
             val isLiked = currentSong.value?.let { song ->
-                runBlocking { libraryStateHolder.isSongLiked(song.song.id).first() }
+                runBlocking { libraryStateHolder.isSavedSong(song.song.id).first() }
             } ?: false
 
             val customLayout = listOf(
@@ -3130,7 +3128,7 @@ class MusicService :
             }
             syncManager.toggleLike(song)
 
-            val isLiked = libraryStateHolder.isSongLiked(song.id).first()
+            val isLiked = libraryStateHolder.isSavedSong(song.id).first()
             if (dataStore.get(AutoDownloadOnLikeKey, false) && isLiked) {
                 val downloadRequest = androidx.media3.exoplayer.offline.DownloadRequest
                     .Builder(song.id, song.id.toUri())

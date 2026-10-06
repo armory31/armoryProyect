@@ -98,7 +98,7 @@ fun PlaylistMenu(
     val dbPlaylist by database.playlist(playlist.id).collectAsState(initial = playlist)
     val isLiked by remember(playlist.id, playlist.playlist.browseId) {
         val targetId = playlist.playlist.browseId ?: playlist.id
-        libraryStateHolder.likedPlaylistIds.map { it.contains(targetId) }
+        libraryStateHolder.savedPlaylistIds.map { it.contains(targetId) }
     }.collectAsState(initial = false)
     var songs by remember {
         mutableStateOf(emptyList<Song>())

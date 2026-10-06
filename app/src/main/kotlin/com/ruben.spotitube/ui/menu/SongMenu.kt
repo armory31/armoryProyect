@@ -346,8 +346,8 @@ fun SongMenu(
         }
     }
 
-    val isLiked by libraryStateHolder.isSongLiked(song.id).collectAsState(initial = false)
-    val isInLibrary by libraryStateHolder.isSongLiked(song.id).collectAsState(initial = false)
+    val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsState(initial = false)
+    val isInLibrary by libraryStateHolder.isSavedSong(song.id).collectAsState(initial = false)
 
     Surface(
         shape = RoundedCornerShape(28.dp),

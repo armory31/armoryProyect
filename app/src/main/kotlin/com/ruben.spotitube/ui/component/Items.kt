@@ -597,7 +597,7 @@ fun SongListItem(
             if (showDownloadIcon) Icon.Download(metadata.downloadState)
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSongLiked(song.id).collectAsState(initial = false)
+            val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsState(initial = false)
             if (showLikedIcon && isLiked) Icon.Favorite()
 
             if (song.song.explicit) {
@@ -678,7 +678,7 @@ fun SongGridItem(
             if (showDownloadIcon) Icon.Download(metadata.downloadState)
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSongLiked(song.id).collectAsState(initial = false)
+            val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsState(initial = false)
             if (showLikedIcon && isLiked) {
                 Icon.Favorite()
             }
@@ -746,7 +746,7 @@ fun ArtistListItem(
             if (metadata.isLiked) Icon.Library()
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isBookmarked by libraryStateHolder.isArtistBookmarked(artist.id).collectAsState(initial = false)
+            val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsState(initial = false)
             if (isBookmarked) {
                 Icon.Library()
             }
@@ -780,7 +780,7 @@ fun ArtistGridItem(
             if (metadata.isLiked) Icon.Library()
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isBookmarked by libraryStateHolder.isArtistBookmarked(artist.id).collectAsState(initial = false)
+            val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsState(initial = false)
             if (isBookmarked) {
                 Icon.Library()
             }
@@ -912,7 +912,7 @@ fun AlbumGridItem(
             }
             
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isAlbumLiked(album.id).collectAsState(initial = false)
+            val isLiked by libraryStateHolder.isSavedAlbum(album.id).collectAsState(initial = false)
             if (isLiked) {
                 Icon.Favorite()
             }
@@ -981,7 +981,7 @@ fun PlaylistListItem(
             if (metadata.isLiked) Icon.Favorite()
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isPlaylistLiked(playlist.id).collectAsState(initial = false)
+            val isLiked by libraryStateHolder.isSavedPlaylist(playlist.id).collectAsState(initial = false)
             if (isLiked) {
                 Icon.Favorite()
             }
@@ -1163,7 +1163,7 @@ fun PlaylistGridItem(
             if (metadata.isLiked) Icon.Favorite()
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isPlaylistLiked(playlist.id).collectAsState(initial = false)
+            val isLiked by libraryStateHolder.isSavedPlaylist(playlist.id).collectAsState(initial = false)
             if (isLiked) {
                 Icon.Favorite()
             }
@@ -1293,13 +1293,15 @@ fun YouTubeListItem(
             if (item is SongItem) Icon.Download(metadata.downloadState)
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isSongLiked by libraryStateHolder.isSongLiked(item.id).collectAsState(initial = false)
-            val isAlbumLiked by libraryStateHolder.isAlbumLiked(item.id).collectAsState(initial = false)
-            val isArtistBookmarked by libraryStateHolder.isArtistBookmarked(item.id).collectAsState(initial = false)
+            val isSongLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedSong(item.id) }.collectAsState(initial = false)
+            val isAlbumLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedAlbum(item.id) }.collectAsState(initial = false)
+            val isArtistBookmarked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedArtist(item.id) }.collectAsState(initial = false)
+            val isPlaylistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedPlaylist(item.id) }.collectAsState(initial = false)
 
             if ((item is SongItem && isSongLiked) ||
                 (item is AlbumItem && isAlbumLiked) ||
-                (item is ArtistItem && isArtistBookmarked)
+                (item is ArtistItem && isArtistBookmarked) ||
+                (item is PlaylistItem && isPlaylistSaved)
             ) {
                 Icon.Favorite()
             }
@@ -1374,13 +1376,15 @@ fun YouTubeGridItem(
             if (item is SongItem) Icon.Download(metadata.downloadState)
         } else {
             val libraryStateHolder = LocalLibraryStateHolder.current
-            val isSongLiked by libraryStateHolder.isSongLiked(item.id).collectAsState(initial = false)
-            val isAlbumLiked by libraryStateHolder.isAlbumLiked(item.id).collectAsState(initial = false)
-            val isArtistBookmarked by libraryStateHolder.isArtistBookmarked(item.id).collectAsState(initial = false)
+            val isSongLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedSong(item.id) }.collectAsState(initial = false)
+            val isAlbumLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedAlbum(item.id) }.collectAsState(initial = false)
+            val isArtistBookmarked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedArtist(item.id) }.collectAsState(initial = false)
+            val isPlaylistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedPlaylist(item.id) }.collectAsState(initial = false)
 
             if ((item is SongItem && isSongLiked) ||
                 (item is AlbumItem && isAlbumLiked) ||
-                (item is ArtistItem && isArtistBookmarked)
+                (item is ArtistItem && isArtistBookmarked) ||
+                (item is PlaylistItem && isPlaylistSaved)
             ) {
                 Icon.Favorite()
             }

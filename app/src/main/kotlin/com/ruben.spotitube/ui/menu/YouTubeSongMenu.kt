@@ -107,7 +107,7 @@ fun YouTubeSongMenu(
     val syncManager = LocalSyncManager.current
     
     val isLiked by remember(song.id, libraryStateHolder) {
-        libraryStateHolder.likedSongIds.map { song.id in it }
+        libraryStateHolder.savedSongIds.map { song.id in it }
     }.collectAsState(initial = false)
     
     val download by LocalDownloadUtil.current.getDownload(song.id).collectAsState(initial = null)

@@ -56,7 +56,7 @@ fun YouTubeArtistMenu(
     val syncManager = LocalSyncManager.current
     val scope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isBookmarked by libraryStateHolder.isArtistBookmarked(artist.id).collectAsState(initial = false)
+    val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsState(initial = false)
 
     YouTubeListItem(
         item = artist,

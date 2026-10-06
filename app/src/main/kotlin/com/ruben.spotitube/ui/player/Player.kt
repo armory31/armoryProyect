@@ -223,7 +223,7 @@ fun BottomSheetPlayer(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
     val libraryStateHolder = LocalLibraryStateHolder.current
-    val isLikedInLibrary by libraryStateHolder.isSongLiked(mediaMetadata?.id ?: "").collectAsState(initial = false)
+    val isLikedInLibrary by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsState(initial = false)
     val currentSongLiked = isLikedInLibrary || currentSong?.song?.isLiked == true
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
     val queueWindows by playerConnection.queueWindows.collectAsState()

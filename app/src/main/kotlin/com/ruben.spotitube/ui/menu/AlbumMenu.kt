@@ -304,7 +304,7 @@ fun AlbumMenu(
 
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
-    val isLiked by libraryStateHolder.isAlbumLiked(album.id).collectAsState(initial = false)
+    val isLiked by libraryStateHolder.isSavedAlbum(album.id).collectAsState(initial = false)
 
     AlbumListItem(
         album = album,

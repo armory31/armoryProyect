@@ -52,22 +52,22 @@ class LibraryStateHolder @Inject constructor(
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     // Reactive sets of IDs for quick lookup (Local-First: Reading directly from local DB Room)
-    val likedSongIds: Flow<Set<String>> = databaseDao.getLikedSongIds()
+    val savedSongIds: Flow<Set<String>> = databaseDao.getSavedSongIds()
         .map { it.toSet() }
         .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked songs") }
     
-    val likedAlbumIds: Flow<Set<String>> = databaseDao.getLikedAlbumIds()
+    val savedAlbumIds: Flow<Set<String>> = databaseDao.getSavedAlbumIds()
         .map { it.toSet() }
         .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked albums") }
     
-    val bookmarkedArtistIds: Flow<Set<String>> = databaseDao.getBookmarkedArtistIds()
+    val savedArtistIds: Flow<Set<String>> = databaseDao.getSavedArtistIds()
         .map { it.toSet() }
         .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} bookmarked artists") }
     
-    val likedPlaylistIds: Flow<Set<String>> = databaseDao.getLikedPlaylistIds()
+    val savedPlaylistIds: Flow<Set<String>> = databaseDao.getSavedPlaylistIds()
         .map { it.toSet() }
         .distinctUntilChanged()
         .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} playlists") }
@@ -85,8 +85,11 @@ class LibraryStateHolder @Inject constructor(
         list.map { it.toArtist() }
     }
 
-    fun isSongLiked(songId: String): Flow<Boolean> = likedSongIds.map { it.contains(songId) }
-    fun isAlbumLiked(albumId: String): Flow<Boolean> = likedAlbumIds.map { it.contains(albumId) }
-    fun isArtistBookmarked(artistId: String): Flow<Boolean> = bookmarkedArtistIds.map { it.contains(artistId) }
-    fun isPlaylistLiked(playlistId: String): Flow<Boolean> = likedPlaylistIds.map { it.contains(playlistId) }
+    fun isSavedSong(songId: String): Flow<Boolean> = savedSongIds.map { it.contains(songId) }
+    fun isSavedAlbum(albumId: String): Flow<Boolean> = savedAlbumIds.map { it.contains(albumId) }
+    fun isSavedArtist(artistId: String): Flow<Boolean> = savedArtistIds.map { it.contains(artistId) }
+    fun isSavedPlaylist(playlistId: String): Flow<Boolean> = savedPlaylistIds.map { set ->
+        val cleanId = playlistId.removePrefix("VL")
+        set.contains(playlistId) || set.contains(cleanId) || set.contains("VL$cleanId")
+    }
 }

@@ -57,7 +57,7 @@ constructor(
     val albumId = savedStateHandle.get<String>("albumId")!!
     val playlistId = MutableStateFlow("")
 
-    val isLiked = libraryStateHolder.isAlbumLiked(albumId)
+    val isLiked = libraryStateHolder.isSavedAlbum(albumId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val albumWithSongs =

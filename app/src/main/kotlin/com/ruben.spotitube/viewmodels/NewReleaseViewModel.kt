@@ -142,7 +142,7 @@ constructor(
         val allArtists = mutableMapOf<Int, String>()
         val favouriteArtists = mutableMapOf<Int, String>()
 
-        val bookmarkedArtistIds = libraryStateHolder.bookmarkedArtistIds.first()
+        val bookmarkedArtistIds = libraryStateHolder.savedArtistIds.first()
 
         database.allArtistsByPlayTime().first().let { list ->
             var favIndex = 0

@@ -44,7 +44,7 @@ constructor(
 
     val events =
         database
-            .events()
+            .historySongsWithMetadata()
             .map { events ->
                 events
                     .groupBy {

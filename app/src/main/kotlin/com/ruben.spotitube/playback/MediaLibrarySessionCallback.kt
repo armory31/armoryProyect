@@ -367,11 +367,16 @@ constructor(
                             ),
                         )
 
-                    MusicService.SONG -> database.songs(sortType = SongSortType.CREATE_DATE, descending = false).first()
-                        .map { it.toMediaItem(parentId) }
+                    MusicService.SONG -> {
+                        val savedSongs = database.allSavedSongs().first().map { it.toSong() }
+                        val songs = if (savedSongs.isNotEmpty()) savedSongs else database.songs(sortType = SongSortType.CREATE_DATE, descending = false).first()
+                        songs.map { it.toMediaItem(parentId) }
+                    }
 
-                    MusicService.ARTIST ->
-                        database.artists(sortType = ArtistSortType.CREATE_DATE, descending = false).first().map { artist ->
+                    MusicService.ARTIST -> {
+                        val savedArtists = database.allSavedArtists().first().map { it.toArtist() }
+                        val artists = if (savedArtists.isNotEmpty()) savedArtists else database.artists(sortType = ArtistSortType.CREATE_DATE, descending = false).first()
+                        artists.map { artist ->
                             browsableMediaItem(
                                 "${MusicService.ARTIST}/${artist.artist.id}",
                                 artist.artist.name,
@@ -384,9 +389,12 @@ constructor(
                                 MediaMetadata.MEDIA_TYPE_ARTIST,
                             )
                         }
+                    }
 
-                    MusicService.ALBUM ->
-                        database.albums(sortType = AlbumSortType.CREATE_DATE, descending = false).first().map { album ->
+                    MusicService.ALBUM -> {
+                        val savedAlbums = database.allSavedAlbums().first().map { it.toAlbum() }
+                        val albums = if (savedAlbums.isNotEmpty()) savedAlbums else database.albums(sortType = AlbumSortType.CREATE_DATE, descending = false).first()
+                        albums.map { album ->
                             browsableMediaItem(
                                 "${MusicService.ALBUM}/${album.album.id}",
                                 album.album.title,
@@ -397,6 +405,7 @@ constructor(
                                 MediaMetadata.MEDIA_TYPE_ALBUM,
                             )
                         }
+                    }
 
                     MusicService.PLAYLIST -> {
                         val likedSongCount = database.likedSongsByRowIdAsc().map { it.size }.first()
@@ -641,7 +650,8 @@ constructor(
             when (path.firstOrNull()) {
                 MusicService.SONG -> {
                     val songId = path.getOrNull(1) ?: return@future defaultResult
-                    val allSongs = database.songs(sortType = SongSortType.CREATE_DATE, descending = false).first()
+                    val savedSongs = database.allSavedSongs().first().map { it.toSong() }
+                    val allSongs = if (savedSongs.isNotEmpty()) savedSongs else database.songs(sortType = SongSortType.CREATE_DATE, descending = false).first()
                     MediaSession.MediaItemsWithStartPosition(
                         allSongs.map { it.toMediaItem() },
                         allSongs.indexOfFirst { it.id == songId }.takeIf { it != -1 } ?: 0,

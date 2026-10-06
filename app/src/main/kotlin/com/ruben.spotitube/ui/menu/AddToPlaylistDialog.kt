@@ -130,8 +130,8 @@ fun AddToPlaylistDialog(
     }
 
     LaunchedEffect(Unit) {
-        database.playlistsByRowIdAsc().collect {
-            allPlaylists = it
+        database.allSavedPlaylists().collect { savedList ->
+            allPlaylists = savedList.map { it.toPlaylist() }
         }
     }
 

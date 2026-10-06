@@ -68,11 +68,15 @@ import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.sync.LibrarySummary
 import com.ruben.spotitube.ui.utils.resize
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.text.Collator
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Locale
 
@@ -364,119 +368,108 @@ interface DatabaseDao {
         limit: Int = 6,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<SongWithStats>>
+    ): Flow<List<SongWithStats>> = allHistorySongs().map { historyList ->
+        val toTime = toTimeStamp ?: Long.MAX_VALUE
+        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
+        val grouped = filtered.groupBy { it.songId }
+        val sorted = grouped.map { (songId, items) ->
+            val totalTime = items.sumOf { it.playTimeMs }
+            val playCount = items.size
+            songId to Pair(playCount, totalTime)
+        }.sortedByDescending { it.second.second }
+            .drop(offset)
+            .take(limit)
 
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
-        """
-        SELECT song.*,
-               (SELECT COUNT(1)
-                FROM event
-                WHERE songId = song.id
-                  AND timestamp > :fromTimeStamp AND timestamp <= :toTimeStamp) AS songCountListened,
-               (SELECT SUM(event.playTime)
-                FROM event
-                WHERE songId = song.id
-                  AND timestamp > :fromTimeStamp AND timestamp <= :toTimeStamp) AS timeListened
-        FROM song
-        JOIN (SELECT songId
-                     FROM event
-                     WHERE timestamp > :fromTimeStamp
-                     AND timestamp <= :toTimeStamp
-                     GROUP BY songId
-                     ORDER BY SUM(playTime) DESC
-                     LIMIT :limit)
-        ON song.id = songId
-        LIMIT :limit
-        OFFSET :offset
-    """,
-    )
+        sorted.mapNotNull { (songId, stats) ->
+            val savedSong = getSavedSong(songId)
+            val songObj = savedSong?.toSong()
+                ?: getSongById(songId)
+                ?: Song(song = SongEntity(id = songId, title = songId), artists = emptyList())
+
+            SongWithStats(
+                id = songObj.id,
+                title = songObj.title,
+                thumbnailUrl = songObj.thumbnailUrl ?: "",
+                songCountListened = stats.first,
+                timeListened = stats.second
+            )
+        }
+    }.flowOn(Dispatchers.IO)
+
     fun mostPlayedSongs(
         fromTimeStamp: Long,
         limit: Int = 6,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Song>>
+    ): Flow<List<Song>> = allHistorySongs().map { historyList ->
+        val toTime = toTimeStamp ?: Long.MAX_VALUE
+        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
+        val grouped = filtered.groupBy { it.songId }
+        val sorted = grouped.map { (songId, items) ->
+            val totalTime = items.sumOf { it.playTimeMs }
+            val playCount = items.size
+            songId to Pair(playCount, totalTime)
+        }.sortedByDescending { it.second.second }
+            .drop(offset)
+            .take(limit)
 
-    @Transaction
-    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
-    @Query(
-        """
-        SELECT artist.*,
-               (SELECT COUNT(1)
-                FROM song_artist_map
-                         JOIN event ON song_artist_map.songId = event.songId
-                WHERE artistId = artist.id
-                  AND timestamp > :fromTimeStamp AND timestamp <= :toTimeStamp) AS songCount,
-               (SELECT SUM(event.playTime)
-                FROM song_artist_map
-                         JOIN event ON song_artist_map.songId = event.songId
-                WHERE artistId = artist.id
-                  AND timestamp > :fromTimeStamp AND timestamp <= :toTimeStamp) AS timeListened
-        FROM artist
-                 JOIN(SELECT artistId, SUM(songTotalPlayTime) AS totalPlayTime
-                      FROM song_artist_map
-                               JOIN (SELECT songId, SUM(playTime) AS songTotalPlayTime
-                                     FROM event
-                                     WHERE timestamp > :fromTimeStamp
-                                     AND timestamp <= :toTimeStamp
-                                     GROUP BY songId) AS e
-                                    ON song_artist_map.songId = e.songId
-                      GROUP BY artistId
-                      ORDER BY totalPlayTime DESC
-                      LIMIT :limit
-                      OFFSET :offset)
-                     ON artist.id = artistId
-    """,
-    )
+        sorted.mapNotNull { (songId, _) ->
+            val savedSong = getSavedSong(songId)
+            savedSong?.toSong()
+                ?: getSongById(songId)
+                ?: Song(song = SongEntity(id = songId, title = songId), artists = emptyList())
+        }
+    }.flowOn(Dispatchers.IO)
+
     fun mostPlayedArtists(
         fromTimeStamp: Long,
         limit: Int = 6,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Artist>>
+    ): Flow<List<Artist>> = allHistoryArtists().map { historyList ->
+        val toTime = toTimeStamp ?: Long.MAX_VALUE
+        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
+        val grouped = filtered.groupBy { it.artistId }
+        val sorted = grouped.map { (artistId, items) ->
+            artistId to items.size
+        }.sortedByDescending { it.second }
+            .drop(offset)
+            .take(limit)
 
-    @Transaction
-    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
-    @Query(
-        """
-    SELECT album.*,
-           COUNT(DISTINCT song_album_map.songId) as downloadCount,
-           (SELECT COUNT(1)
-            FROM song_album_map
-                     JOIN event e ON song_album_map.songId = e.songId
-            WHERE albumId = album.id
-              AND e.timestamp > :fromTimeStamp 
-              AND e.timestamp <= :toTimeStamp) AS songCountListened,
-           (SELECT SUM(e.playTime)
-            FROM song_album_map
-                     JOIN event e ON song_album_map.songId = e.songId
-            WHERE albumId = album.id
-              AND e.timestamp > :fromTimeStamp 
-              AND e.timestamp <= :toTimeStamp) AS timeListened
-    FROM album
-    JOIN song_album_map ON album.id = song_album_map.albumId
-    WHERE album.id IN (
-        SELECT sam.albumId
-        FROM event
-                 JOIN song_album_map sam ON event.songId = sam.songId
-        WHERE event.timestamp > :fromTimeStamp
-          AND event.timestamp <= :toTimeStamp
-        GROUP BY sam.albumId
-        HAVING sam.albumId IS NOT NULL
-    )
-    GROUP BY album.id
-    ORDER BY timeListened DESC
-    LIMIT :limit OFFSET :offset
-    """
-    )
+        sorted.mapNotNull { (artistId, count) ->
+            val savedArtist = getSavedArtist(artistId)
+            val artistObj = savedArtist?.toArtist()
+                ?: getArtistById(artistId)?.let { Artist(artist = it, songCount = count) }
+                ?: Artist(artist = ArtistEntity(id = artistId, name = artistId), songCount = count)
+
+            artistObj.copy(songCount = count)
+        }
+    }.flowOn(Dispatchers.IO)
+
     fun mostPlayedAlbums(
         fromTimeStamp: Long,
         limit: Int = 6,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Album>>
+    ): Flow<List<Album>> = allHistoryAlbums().map { historyList ->
+        val toTime = toTimeStamp ?: Long.MAX_VALUE
+        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
+        val grouped = filtered.groupBy { it.albumId }
+        val sorted = grouped.map { (albumId, items) ->
+            albumId to items.size
+        }.sortedByDescending { it.second }
+            .drop(offset)
+            .take(limit)
+
+        sorted.mapNotNull { (albumId, count) ->
+            val savedAlbum = getSavedAlbum(albumId)
+            val albumObj = savedAlbum?.toAlbum()
+                ?: getAlbumById(albumId)?.let { Album(album = it, artists = emptyList(), songCountListened = count) }
+                ?: Album(album = AlbumEntity(id = albumId, title = albumId, songCount = count, duration = 0), artists = emptyList(), songCountListened = count)
+
+            albumObj.copy(songCountListened = count)
+        }
+    }.flowOn(Dispatchers.IO)
 
     @Transaction
     @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
@@ -926,30 +919,43 @@ interface DatabaseDao {
         }
 
     @Query("SELECT id FROM savedartist")
-    fun getBookmarkedArtistIds(): Flow<List<String>>
+    fun getSavedArtistIds(): Flow<List<String>>
 
     @Query("SELECT id FROM savedalbum")
-    fun getLikedAlbumIds(): Flow<List<String>>
+    fun getSavedAlbumIds(): Flow<List<String>>
 
     @Query("SELECT id FROM savedsong UNION SELECT videoId FROM set_video_id")
-    fun getLikedSongIds(): Flow<List<String>>
+    fun getSavedSongIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM savedplaylist")
-    fun getLikedPlaylistIds(): Flow<List<String>>
+    @Query("SELECT id FROM savedplaylist UNION SELECT browseId FROM savedplaylist WHERE browseId IS NOT NULL")
+    fun getSavedPlaylistIds(): Flow<List<String>>
 
     @Transaction
     @Query("""
         SELECT 
-            (SELECT COUNT(*) FROM song WHERE id IN (SELECT videoId FROM set_video_id)) as songCount,
-            (SELECT COUNT(*) FROM album WHERE isLiked = 1) as albumCount,
-            (SELECT COUNT(*) FROM artist WHERE isBookmarked = 1) as artistCount,
-            (SELECT COALESCE(SUM(totalPlayTime), 0) FROM song) as totalPlayTimeMillis
+            (SELECT COUNT(*) FROM savedsong) as songCount,
+            (SELECT COUNT(*) FROM savedalbum) as albumCount,
+            (SELECT COUNT(*) FROM savedartist) as artistCount,
+            (SELECT COALESCE(SUM(playTimeMs), 0) FROM historialsong) as totalPlayTimeMillis
     """)
     fun getLibrarySummary(): Flow<LibrarySummary>
 
-    @Transaction
-    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId OR playlistId = (SELECT browseId FROM playlist WHERE id = :playlistId) OR playlistId = (SELECT id FROM playlist WHERE browseId = :playlistId)")
-    fun playlistSongs(playlistId: String): Flow<List<PlaylistSong>>
+    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId OR playlistId = (SELECT browseId FROM playlist WHERE id = :playlistId) OR playlistId = (SELECT id FROM playlist WHERE browseId = :playlistId) OR playlistId = (SELECT browseId FROM savedplaylist WHERE id = :playlistId) OR playlistId = (SELECT id FROM savedplaylist WHERE browseId = :playlistId) OR playlistId = REPLACE(:playlistId, 'VL', '') OR playlistId = 'VL' || REPLACE(:playlistId, 'VL', '') ORDER BY position ASC")
+    fun rawPlaylistSongMaps(playlistId: String): Flow<List<PlaylistSongMap>>
+
+    fun playlistSongs(playlistId: String): Flow<List<PlaylistSong>> = rawPlaylistSongMaps(playlistId).map { mapList ->
+        mapList.mapNotNull { pMap ->
+            val savedSong = getSavedSong(pMap.songId)
+            val songObj = savedSong?.toSong()
+                ?: getSongById(pMap.songId)
+                ?: Song(song = SongEntity(id = pMap.songId, title = pMap.songId), artists = emptyList())
+
+            PlaylistSong(
+                map = pMap,
+                song = songObj
+            )
+        }
+    }.flowOn(Dispatchers.IO)
 
     @Transaction
     @Query("""
@@ -1095,10 +1101,10 @@ interface DatabaseDao {
     fun artistByName(name: String): ArtistEntity?
 
     @Query("SELECT * FROM artist WHERE id = :id LIMIT 1")
-    fun getArtistById(id: String): ArtistEntity?
+    suspend fun getArtistById(id: String): ArtistEntity?
 
     @Query("SELECT * FROM album WHERE id = :id LIMIT 1")
-    fun getAlbumById(id: String): AlbumEntity?
+    suspend fun getAlbumById(id: String): AlbumEntity?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(song: SongEntity): Long
@@ -1527,7 +1533,7 @@ interface DatabaseDao {
     fun deleteSavedSong(songId: String)
 
     @Query("SELECT * FROM savedsong WHERE id = :songId")
-    fun getSavedSong(songId: String): SavedSongEntity?
+    suspend fun getSavedSong(songId: String): SavedSongEntity?
 
     @Query("SELECT * FROM savedsong ORDER BY savedAt DESC")
     fun allSavedSongs(): Flow<List<SavedSongEntity>>
@@ -1542,7 +1548,7 @@ interface DatabaseDao {
     fun deleteSavedArtist(artistId: String)
 
     @Query("SELECT * FROM savedartist WHERE id = :artistId")
-    fun getSavedArtist(artistId: String): SavedArtistEntity?
+    suspend fun getSavedArtist(artistId: String): SavedArtistEntity?
 
     @Query("SELECT * FROM savedartist ORDER BY savedAt DESC")
     fun allSavedArtists(): Flow<List<SavedArtistEntity>>
@@ -1557,7 +1563,7 @@ interface DatabaseDao {
     fun deleteSavedAlbum(albumId: String)
 
     @Query("SELECT * FROM savedalbum WHERE id = :albumId")
-    fun getSavedAlbum(albumId: String): SavedAlbumEntity?
+    suspend fun getSavedAlbum(albumId: String): SavedAlbumEntity?
 
     @Query("SELECT * FROM savedalbum ORDER BY savedAt DESC")
     fun allSavedAlbums(): Flow<List<SavedAlbumEntity>>
@@ -1568,11 +1574,11 @@ interface DatabaseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSavedPlaylists(playlists: List<SavedPlaylistEntity>)
 
-    @Query("DELETE FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId")
+    @Query("DELETE FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId OR id = REPLACE(:playlistId, 'VL', '') OR browseId = REPLACE(:playlistId, 'VL', '') OR id = 'VL' || REPLACE(:playlistId, 'VL', '') OR browseId = 'VL' || REPLACE(:playlistId, 'VL', '')")
     fun deleteSavedPlaylist(playlistId: String)
 
-    @Query("SELECT * FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId")
-    fun getSavedPlaylist(playlistId: String): SavedPlaylistEntity?
+    @Query("SELECT * FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId OR id = REPLACE(:playlistId, 'VL', '') OR browseId = REPLACE(:playlistId, 'VL', '') OR id = 'VL' || REPLACE(:playlistId, 'VL', '') OR browseId = 'VL' || REPLACE(:playlistId, 'VL', '') LIMIT 1")
+    suspend fun getSavedPlaylist(playlistId: String): SavedPlaylistEntity?
 
     @Query("SELECT * FROM savedplaylist ORDER BY createdAt DESC")
     fun allSavedPlaylists(): Flow<List<SavedPlaylistEntity>>
@@ -1592,6 +1598,28 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
     fun allHistorySongs(): Flow<List<HistorySongEntity>>
+
+    fun historySongsWithMetadata(): Flow<List<EventWithSong>> = allHistorySongs().map { historyList ->
+        historyList.mapNotNull { historySong ->
+            val savedSong = getSavedSong(historySong.songId)
+            val songObj = savedSong?.toSong() ?: getSongById(historySong.songId)
+            if (songObj != null) {
+                val timestamp = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(historySong.playedAt),
+                    ZoneId.systemDefault()
+                )
+                EventWithSong(
+                    event = Event(
+                        id = historySong.playedAt,
+                        songId = historySong.songId,
+                        timestamp = timestamp,
+                        playTime = historySong.playTimeMs
+                    ),
+                    song = songObj
+                )
+            } else null
+        }
+    }.flowOn(Dispatchers.IO)
 
     @Query("SELECT * FROM historialartist ORDER BY playedAt DESC")
     fun allHistoryArtists(): Flow<List<HistoryArtistEntity>>

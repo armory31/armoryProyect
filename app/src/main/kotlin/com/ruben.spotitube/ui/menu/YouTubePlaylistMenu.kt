@@ -117,7 +117,7 @@ fun YouTubePlaylistMenu(
     val playerConnection = LocalPlayerConnection.current ?: return
     val syncUtils = LocalSyncUtils.current
     val isLiked by remember(playlist.id) {
-        libraryStateHolder.likedPlaylistIds.map { it.contains(playlist.id) }
+        libraryStateHolder.savedPlaylistIds.map { it.contains(playlist.id) }
     }.collectAsState(initial = false)
     val dbPlaylist by database.playlistByBrowseId(playlist.id).collectAsState(initial = null)
 

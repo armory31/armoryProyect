@@ -103,7 +103,7 @@ fun YouTubeAlbumMenu(
     val syncManager = LocalSyncManager.current
     
     val isLiked by remember(albumItem.id, libraryStateHolder) {
-        libraryStateHolder.likedAlbumIds.map { albumItem.id in it }
+        libraryStateHolder.savedAlbumIds.map { albumItem.id in it }
     }.collectAsState(initial = false)
     
     val album by database.albumWithSongs(albumItem.id).collectAsState(initial = null)
