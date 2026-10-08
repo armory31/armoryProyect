@@ -75,6 +75,7 @@ import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.PlaylistSongMap
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.PlaylistItem
@@ -588,7 +589,17 @@ fun YouTubePlaylistMenu(
                                                             shuffleEndpointParams = playlist.shuffleEndpoint?.params,
                                                             radioEndpointParams = playlist.radioEndpoint?.params,
                                                         )
-                                                    insert(playlistEntity)
+                                                    database.insertSavedPlaylist(
+                                                        SavedPlaylistEntity(
+                                                            id = playlistEntity.id,
+                                                            name = playlistEntity.name,
+                                                            browseId = playlistEntity.browseId,
+                                                            isEditable = playlistEntity.isEditable,
+                                                            thumbnailUrl = playlistEntity.thumbnailUrl,
+                                                            createdAt = playlistEntity.createdAt ?: java.time.LocalDateTime.now()
+                                                        )
+                                                    )
+                                                    update(playlistEntity)
                                                     fetchedSongs.forEach(::insert)
                                                     fetchedSongs.mapIndexed { index, song ->
                                                         PlaylistSongMap(

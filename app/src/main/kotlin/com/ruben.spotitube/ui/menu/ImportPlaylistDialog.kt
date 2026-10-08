@@ -33,7 +33,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.R
-import com.ruben.spotitube.db.entities.PlaylistEntity
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.TextFieldDialog
@@ -140,26 +140,18 @@ fun ImportPlaylistDialog(
                             }
                         }
 
-                        val newPlaylist = PlaylistEntity(
+                        val playlistId = SavedPlaylistEntity.generatePlaylistId()
+                        val savedPlaylist = SavedPlaylistEntity(
+                            id = playlistId,
                             name = finalName,
                             browseId = browseId,
                             isEditable = true,
-                            isLocal = true,
                         )
-                        database.query { insert(newPlaylist) }
-                        database.insertSavedPlaylist(
-                            com.ruben.spotitube.db.entities.SavedPlaylistEntity(
-                                id = newPlaylist.id,
-                                name = newPlaylist.name,
-                                browseId = newPlaylist.browseId,
-                                isEditable = true,
-                                thumbnailUrl = newPlaylist.thumbnailUrl,
-                            ),
-                        )
+                        database.insertSavedPlaylist(savedPlaylist)
 
-                        val playlist = database.playlist(newPlaylist.id).firstOrNull()
+                        val playlist = database.playlist(playlistId).firstOrNull()
                         if (playlist != null) {
-                            database.addSongsToPlaylist(playlist.playlist.id, ids)
+                            database.addSongsToPlaylist(playlistId, ids)
                         }
 
                         showMessage(context.getString(R.string.playlist_synced))
@@ -270,15 +262,17 @@ fun ImportPlaylistDialog(
                                     return@launch
                                 }
 
-                                val newPlaylist = PlaylistEntity(
+                                val playlistId = SavedPlaylistEntity.generatePlaylistId()
+                                val savedPlaylist = SavedPlaylistEntity(
+                                    id = playlistId,
                                     name = currentPlaylistName,
                                     browseId = null
                                 )
-                                database.query { insert(newPlaylist) }
+                                database.insertSavedPlaylist(savedPlaylist)
 
-                                val playlist = database.playlist(newPlaylist.id).firstOrNull()
+                                val playlist = database.playlist(playlistId).firstOrNull()
                                 if (playlist != null) {
-                                    database.addSongsToPlaylist(playlist.playlist.id, ids)
+                                    database.addSongsToPlaylist(playlistId, ids)
                                     showMessage(context.getString(R.string.playlist_synced))
                                 } else {
                                     showMessage(context.getString(R.string.import_failed))

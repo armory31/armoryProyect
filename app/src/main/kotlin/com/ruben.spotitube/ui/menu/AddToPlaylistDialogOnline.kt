@@ -162,13 +162,12 @@ fun AddToPlaylistDialogOnline(
                                             val media = firstSong.toMediaMetadata()
                                             val ids = listOf(firstSong.id)
                                             try {
-                                                database.insert(media)
+                                                database.insertSavedSong(media.toSavedSongEntity())
                                                 if (targetPlaylist != null) {
                                                     database.addSongsToPlaylist(targetPlaylist.playlist.id, ids)
                                                 }
                                                 if (addToLiked) {
-                                                    val entity = media.toSongEntity()
-                                                    database.update(entity.copy(isLiked = true))
+                                                    database.insertSavedSong(media.toSavedSongEntity())
                                                 }
                                                 success = true
                                             } catch (e: Exception) {

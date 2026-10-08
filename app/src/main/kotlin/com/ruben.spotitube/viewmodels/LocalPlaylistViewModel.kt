@@ -387,7 +387,21 @@ constructor(
                     // If not found, we can't add to it.
                     // This might happen if it's a special playlist that hasn't been created yet.
                     if (playlistId == com.ruben.spotitube.db.entities.PlaylistEntity.LIKED_PLAYLIST_ID) {
-                        insert(com.ruben.spotitube.db.entities.PlaylistEntity(id = playlistId, name = context.getString(R.string.liked_songs), isEditable = false, bookmarkedAt = java.time.LocalDateTime.now()))
+                        insertSavedPlaylist(
+                            com.ruben.spotitube.db.entities.SavedPlaylistEntity(
+                                id = playlistId,
+                                name = context.getString(R.string.liked_songs),
+                                isEditable = false
+                            )
+                        )
+                        update(
+                            com.ruben.spotitube.db.entities.PlaylistEntity(
+                                id = playlistId,
+                                name = context.getString(R.string.liked_songs),
+                                isEditable = false,
+                                bookmarkedAt = java.time.LocalDateTime.now()
+                            )
+                        )
                     } else {
                         return@withTransaction false
                     }

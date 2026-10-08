@@ -28,7 +28,7 @@ import com.ruben.spotitube.constants.PlayerStreamClient
 import com.ruben.spotitube.constants.PlayerStreamClientKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.FormatEntity
-import com.ruben.spotitube.db.entities.SongEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.di.DownloadCache
 import com.ruben.spotitube.di.PlayerCache
 import com.ruben.spotitube.innertube.YouTube
@@ -159,21 +159,14 @@ constructor(
                 )
 
                 val now = LocalDateTime.now()
-                val existing = getSongByIdBlocking(mediaId)?.song
-
-                val updatedSong = if (existing != null) {
-                    if (existing.dateDownload == null) existing.copy(dateDownload = now) else existing
-                } else {
-                    SongEntity(
+                insertSavedSong(
+                    SavedSongEntity(
                         id = mediaId,
                         title = playbackData.videoDetails?.title ?: "Unknown",
                         duration = playbackData.videoDetails?.lengthSeconds?.toIntOrNull() ?: 0,
-                        thumbnailUrl = playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url,
-                        dateDownload = now
+                        thumbnailUrl = playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url
                     )
-                }
-
-                upsert(updatedSong)
+                )
             }
 
             val streamUrl = playbackData.streamUrl

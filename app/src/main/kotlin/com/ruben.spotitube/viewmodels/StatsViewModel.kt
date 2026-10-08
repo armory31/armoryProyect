@@ -12,6 +12,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruben.spotitube.constants.statToPeriod
 import com.ruben.spotitube.db.MusicDatabase
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
+import com.ruben.spotitube.ui.utils.resize
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.sync.LibrarySummary
 import com.ruben.spotitube.ui.screens.OptionStats
@@ -154,7 +157,15 @@ constructor(
                     }.forEach { artist ->
                         YouTube.artist(artist.id).onSuccess { artistPage ->
                             database.query {
-                                update(artist, artistPage)
+                                database.insertSavedArtist(
+                                    SavedArtistEntity(
+                                        id = artist.id,
+                                        name = artistPage.artist.title,
+                                        thumbnailUrl = artistPage.artist.thumbnail?.resize(544, 544),
+                                        channelId = artist.channelId,
+                                        savedAt = artist.bookmarkedAt ?: LocalDateTime.now()
+                                    )
+                                )
                             }
                         }
                     }
@@ -170,13 +181,25 @@ constructor(
                             .album(album.id)
                             .onSuccess { albumPage ->
                                 database.query {
-                                    update(album.album, albumPage, album.artists)
+                                    val albumArtist = album.artists.firstOrNull()
+                                    database.insertSavedAlbum(
+                                        SavedAlbumEntity(
+                                            id = albumPage.album.browseId,
+                                            title = albumPage.album.title,
+                                            artistId = albumArtist?.id,
+                                            artistName = albumArtist?.name,
+                                            songCount = albumPage.songs.size,
+                                            duration = albumPage.songs.sumOf { song -> song.duration ?: 0 },
+                                            thumbnailUrl = albumPage.album.thumbnail,
+                                            year = albumPage.album.year
+                                        )
+                                    )
                                 }
                             }.onFailure {
                                 reportException(it)
                                 if (it.message?.contains("NOT_FOUND") == true) {
                                     database.query {
-                                        delete(album.album)
+                                        database.deleteSavedAlbum(album.album.id)
                                     }
                                 }
                             }

@@ -2,6 +2,7 @@
 
 package com.ruben.spotitube.sync
 
+import android.util.Log
 import com.ruben.spotitube.db.DatabaseDao
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.Artist
@@ -77,8 +78,20 @@ class LibraryStateHolder @Inject constructor(
         list.map { it.toSong() }
     }
 
-    fun getLibraryAlbums(): Flow<List<Album>> = databaseDao.allSavedAlbums().map { list ->
-        list.map { it.toAlbum() }
+    fun getLibraryAlbums(): Flow<List<Album>> = databaseDao.allSavedAlbums().map { entities ->
+        Log.d("SAVED_ALBUM_DEBUG", "1. DB Dao devolvió ${entities.size} registros de SavedAlbumEntity")
+        entities.firstOrNull()?.let { first ->
+            Log.d("SAVED_ALBUM_DEBUG", "   Ejemplo DB Entity -> id: ${first.id}, title: ${first.title}, playlistId: ${first.playlistId}")
+        }
+        val mapped = entities.mapNotNull { entity ->
+            val album = entity.toAlbum()
+            if (album == null) {
+                Log.d("SAVED_ALBUM_DEBUG", "   [AVISO] Entity id=${entity.id} resultó NULA tras toAlbum()")
+            }
+            album
+        }
+        Log.d("SAVED_ALBUM_DEBUG", "2. Mapper: De ${entities.size} entidades se convirtieron ${mapped.size} objetos Album")
+        mapped
     }
 
     fun getLibraryArtists(): Flow<List<Artist>> = databaseDao.allSavedArtists().map { list ->

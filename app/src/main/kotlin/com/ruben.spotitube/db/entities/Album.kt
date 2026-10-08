@@ -16,9 +16,9 @@ import androidx.room.Relation
 @Immutable
 data class Album(
     @Embedded
-    val album: AlbumEntity,
+    val album: SavedAlbumEntity,
     @Relation(
-        entity = ArtistEntity::class,
+        entity = SavedArtistEntity::class,
         entityColumn = "id",
         parentColumn = "id",
         associateBy =
@@ -28,7 +28,7 @@ data class Album(
             entityColumn = "artistId",
         ),
     )
-    val artists: List<ArtistEntity> = emptyList(),
+    val artists: List<SavedArtistEntity> = emptyList(),
     val songCountListened: Int? = 0,
     val timeListened: Long? = 0
 ) : LocalItem() {
@@ -38,4 +38,8 @@ data class Album(
         get() = album.title
     override val thumbnailUrl: String?
         get() = album.thumbnailUrl
+
+    companion object {
+        fun from(savedAlbum: SavedAlbumEntity): Album = savedAlbum.toAlbum()
+    }
 }

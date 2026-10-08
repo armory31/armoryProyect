@@ -9,6 +9,8 @@
 package com.ruben.spotitube.ui.screens.artist
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
+import androidx.compose.foundation.BorderStroke
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -719,52 +721,53 @@ fun ArtistScreen(
                             }
 
                             // Action Buttons
-                            Row(
+                            // 1. Suscrito Button (Full width on top, MetallicGold)
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                                    .padding(horizontal = 24.dp, vertical = 6.dp)
                             ) {
-                                // Subscribe Button
                                 Button(
-                                    onClick = {
-                                        viewModel.toggleLike()
-                                    },
+                                    onClick = { viewModel.toggleLike() },
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isSubscribed) Color.Transparent else Color.Transparent,
-                                        contentColor = if (isSubscribed) Color.Black else ArmoryColors.Gold1
+                                        containerColor = Color.Transparent,
+                                        contentColor = ArmoryColors.AbsoluteBlack
                                     ),
-                                    contentPadding = PaddingValues(0.dp),
                                     shape = RoundedCornerShape(24.dp),
                                     modifier = Modifier
-                                        .weight(1f)
+                                        .fillMaxWidth()
                                         .height(48.dp)
                                         .then(
                                             if (isSubscribed)
-                                                Modifier.background(ArmoryColors.Gold, shape = RoundedCornerShape(24.dp))
+                                                Modifier.background(ArmoryGradients.MetallicGold, shape = RoundedCornerShape(24.dp))
                                             else
-                                                Modifier.border(1.dp, ArmoryColors.Gold1, RoundedCornerShape(24.dp))
+                                                Modifier.border(1.dp, ArmoryColors.Gold1, RoundedCornerShape(24.dp)).background(ArmoryColors.SurfaceElevated, shape = RoundedCornerShape(24.dp))
                                         )
                                 ) {
                                     Icon(
-                                        painter = painterResource(
-                                            if (isSubscribed) R.drawable.done else R.drawable.add
-                                        ),
+                                        painter = painterResource(if (isSubscribed) R.drawable.done else R.drawable.add),
                                         contentDescription = null,
-                                        tint = if (isSubscribed) Color.Black else ArmoryColors.Gold1,
+                                        tint = if (isSubscribed) ArmoryColors.AbsoluteBlack else ArmoryColors.Gold1,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = stringResource(
-                                            if (isSubscribed) R.string.subscribed else R.string.subscribe
-                                        ),
-                                        color = if (isSubscribed) Color.Black else ArmoryColors.Gold1,
+                                        text = stringResource(if (isSubscribed) R.string.subscribed else R.string.subscribe),
+                                        color = if (isSubscribed) ArmoryColors.AbsoluteBlack else ArmoryColors.Gold1,
+                                        fontWeight = FontWeight.Bold,
                                         maxLines = 1
                                     )
                                 }
+                            }
 
-                                // Shuffle Button (Plata Metálico)
+                            // 2. Aleatorio & Radio Buttons (2 columns underneath, SurfaceElevated with SurfaceBorder)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                // Shuffle Button
                                 Button(
                                     onClick = {
                                         if (!showLocal) {
@@ -784,61 +787,59 @@ fun ArtistScreen(
                                     enabled = if (showLocal) librarySongs.isNotEmpty() else artistPage?.artist?.shuffleEndpoint != null,
                                     shape = RoundedCornerShape(24.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.Transparent,
-                                        contentColor = Color.Black
+                                        containerColor = ArmoryColors.SurfaceElevated,
+                                        contentColor = ArmoryColors.TextPrimary
                                     ),
-                                    contentPadding = PaddingValues(0.dp),
+                                    border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(48.dp)
-                                        .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.shuffle),
                                         contentDescription = null,
-                                        tint = Color.Black,
+                                        tint = ArmoryColors.TextPrimary,
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = stringResource(R.string.shuffle),
-                                        color = Color.Black,
+                                        color = ArmoryColors.TextPrimary,
                                         maxLines = 1
                                     )
                                 }
-                            }
 
-                            // Radio Button (Bronce Metálico - YouTube Artists)
-                            if (!showLocal) {
-                                artistPage?.artist?.radioEndpoint?.let { radioEndpoint ->
-                                    Button(
-                                        onClick = {
-                                            playerConnection.playQueue(YouTubeQueue(radioEndpoint))
-                                        },
-                                        shape = RoundedCornerShape(24.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color.Transparent,
-                                            contentColor = Color.Black
-                                        ),
-                                        contentPadding = PaddingValues(0.dp),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 24.dp, vertical = 8.dp)
-                                            .height(48.dp)
-                                            .background(ArmoryColors.Copper, shape = RoundedCornerShape(24.dp))
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.radio),
-                                            contentDescription = null,
-                                            tint = Color.Black,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text = stringResource(R.string.radio),
-                                            color = Color.Black
-                                        )
-                                    }
+                                // Radio Button
+                                val radioEndpoint = if (!showLocal) artistPage?.artist?.radioEndpoint else null
+                                Button(
+                                    onClick = {
+                                        radioEndpoint?.let {
+                                            playerConnection.playQueue(YouTubeQueue(it))
+                                        }
+                                    },
+                                    enabled = radioEndpoint != null,
+                                    shape = RoundedCornerShape(24.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = ArmoryColors.SurfaceElevated,
+                                        contentColor = ArmoryColors.TextPrimary
+                                    ),
+                                    border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.radio),
+                                        contentDescription = null,
+                                        tint = ArmoryColors.TextPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.radio),
+                                        color = ArmoryColors.TextPrimary,
+                                        maxLines = 1
+                                    )
                                 }
                             }
 
@@ -857,7 +858,10 @@ fun ArtistScreen(
                                 NavigationTitle(
                                     title = stringResource(R.string.songs),
                                     onClick = {
-                                        navController.navigate("artist/${viewModel.artistId}/songs")
+                                        val route = "artist/${viewModel.artistId}/songs"
+                                        if (navController.currentDestination?.route != route) {
+                                            navController.navigate(route)
+                                        }
                                     }
                                 )
                             }
@@ -960,7 +964,10 @@ fun ArtistScreen(
                                 NavigationTitle(
                                     title = stringResource(R.string.albums),
                                     onClick = {
-                                        navController.navigate("artist/${viewModel.artistId}/albums")
+                                        val route = "artist/${viewModel.artistId}/albums"
+                                        if (navController.currentDestination?.route != route) {
+                                            navController.navigate(route)
+                                        }
                                     }
                                 )
                             }
@@ -1014,11 +1021,13 @@ fun ArtistScreen(
                                 item {
                                     NavigationTitle(
                                         title = section.title,
-                                        onClick = section.moreEndpoint?.let {
+                                        onClick = section.moreEndpoint?.let { endpoint ->
                                             {
-                                                navController.navigate(
-                                                    "artist/${viewModel.artistId}/items?browseId=${it.browseId}&params=${it.params}",
-                                                )
+                                                val encodedTitle = android.net.Uri.encode(section.title)
+                                                val route = "artist/${viewModel.artistId}/items?browseId=${endpoint.browseId}&params=${endpoint.params}&title=$encodedTitle"
+                                                if (navController.currentDestination?.route != route) {
+                                                    navController.navigate(route)
+                                                }
                                             }
                                         },
                                     )

@@ -34,13 +34,19 @@ constructor(
     @ApplicationContext val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val browseId = savedStateHandle.get<String>("browseId")!!
+    val browseId = savedStateHandle.get<String>("browseId")!!
     private val params = savedStateHandle.get<String>("params")
+    private val rawPassedTitle = savedStateHandle.get<String>("title")
+    val passedTitle = rawPassedTitle?.let {
+        runCatching { java.net.URLDecoder.decode(it, "UTF-8") }.getOrDefault(it)
+    }
 
-    val title = MutableStateFlow("")
+    val title = MutableStateFlow(passedTitle.orEmpty())
     val itemsPage = MutableStateFlow<ItemsPage?>(null)
 
     init {
+        android.util.Log.d("ARMORY_DEBUG", "ArtistItemsViewModel init: browseId=$browseId, params=$params, passedTitle=$passedTitle")
+        itemsPage.value = null
         viewModelScope.launch {
             YouTube
                 .artistItems(
@@ -49,7 +55,10 @@ constructor(
                         params = params,
                     ),
                 ).onSuccess { artistItemsPage ->
-                    title.value = artistItemsPage.title
+                    android.util.Log.d("ARMORY_DEBUG", "ArtistItemsViewModel éxito: title='${artistItemsPage.title}', itemsCount=${artistItemsPage.items.size}")
+                    if (artistItemsPage.title.isNotBlank()) {
+                        title.value = artistItemsPage.title
+                    }
                     itemsPage.value =
                         ItemsPage(
                             items = artistItemsPage.items
@@ -58,7 +67,9 @@ constructor(
                             continuation = artistItemsPage.continuation,
                         )
                 }.onFailure {
+                    android.util.Log.e("ARMORY_DEBUG", "ArtistItemsViewModel fallo al cargar items para browseId=$browseId, params=$params", it)
                     reportException(it)
+                    itemsPage.value = ItemsPage(items = emptyList(), continuation = null)
                 }
         }
     }

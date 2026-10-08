@@ -6,9 +6,11 @@
 
 package com.ruben.spotitube.ui.screens.settings
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 
+@Immutable
 data class SettingsQuickAction(
     val icon: Painter,
     val label: String,
@@ -16,11 +18,13 @@ data class SettingsQuickAction(
     val accentColor: Color,
 )
 
+@Immutable
 data class SettingsGroup(
     val title: String,
     val items: List<SettingsItem>,
 )
 
+@Immutable
 data class SettingsItem(
     val icon: Painter,
     val title: String,
@@ -32,6 +36,7 @@ data class SettingsItem(
     val onClick: () -> Unit,
 )
 
+@Immutable
 data class SettingsIntegrationAction(
     val icon: Painter,
     val label: String,

@@ -468,7 +468,7 @@ fun UpdateScreen(
             }
 
             if (isExpanded && !isLoadingCommits) {
-                items(commits) { commit ->
+                items(commits, key = { it.sha }) { commit ->
                     CommitItem(commit = commit, onClick = { uriHandler.openUri(commit.url) })
                 }
             }

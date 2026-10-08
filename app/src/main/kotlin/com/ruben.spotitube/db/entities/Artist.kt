@@ -14,7 +14,7 @@ import androidx.room.Embedded
 @Immutable
 data class Artist(
     @Embedded
-    val artist: ArtistEntity,
+    val artist: SavedArtistEntity,
     val songCount: Int,
     val timeListened: Int? = 0,
 ) : LocalItem() {
@@ -24,4 +24,8 @@ data class Artist(
         get() = artist.name
     override val thumbnailUrl: String?
         get() = artist.thumbnailUrl
+
+    companion object {
+        fun from(savedArtist: SavedArtistEntity): Artist = savedArtist.toArtist()
+    }
 }

@@ -6,11 +6,9 @@
 
 package com.ruben.spotitube.ui.screens.library
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -41,7 +39,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -73,7 +70,6 @@ import com.ruben.spotitube.extensions.move
 import com.ruben.spotitube.playback.queues.LocalAlbumRadio
 import com.ruben.spotitube.ui.component.LibraryAlbumSpotlightCard
 import com.ruben.spotitube.ui.component.LibraryArtistSpotlightCard
-import com.ruben.spotitube.ui.component.LibraryPinnedCollectionTile
 import com.ruben.spotitube.ui.component.LibraryPlaylistListItem
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SortHeader
@@ -88,13 +84,6 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.text.Collator
 import java.util.Locale
-
-private data class LibraryShortcutEntry(
-    val title: String,
-    @DrawableRes val iconRes: Int,
-    val route: String,
-    val accentColor: Color,
-)
 
 @Composable
 fun LibraryMixScreen(
@@ -202,41 +191,45 @@ fun LibraryMixScreen(
     val shortcuts = buildList {
         if (showLiked) {
             add(
-                LibraryShortcutEntry(
+                LibraryShortcutItem(
+                    id = "liked",
                     title = likedPlaylist.playlist.name,
                     iconRes = R.drawable.favorite,
                     route = "auto_playlist/liked",
-                    accentColor = MaterialTheme.colorScheme.error,
+                    accentColor = ArmoryColors.CopperAccent,
                 ),
             )
         }
         if (showDownloaded) {
             add(
-                LibraryShortcutEntry(
+                LibraryShortcutItem(
+                    id = "downloaded",
                     title = downloadPlaylist.playlist.name,
                     iconRes = R.drawable.offline,
                     route = "auto_playlist/downloaded",
-                    accentColor = MaterialTheme.colorScheme.primary,
+                    accentColor = ArmoryColors.SilverAccent,
                 ),
             )
         }
         if (showCached) {
             add(
-                LibraryShortcutEntry(
+                LibraryShortcutItem(
+                    id = "cached",
                     title = cachePlaylist.playlist.name,
                     iconRes = R.drawable.cached,
                     route = "cache_playlist/cached",
-                    accentColor = MaterialTheme.colorScheme.tertiary,
+                    accentColor = ArmoryColors.Gold2,
                 ),
             )
         }
         if (showTop) {
             add(
-                LibraryShortcutEntry(
+                LibraryShortcutItem(
+                    id = "top",
                     title = topPlaylist.playlist.name,
                     iconRes = R.drawable.trending_up,
                     route = "top_playlist/$topSize",
-                    accentColor = MaterialTheme.colorScheme.secondary,
+                    accentColor = ArmoryColors.GoldPrimary,
                 ),
             )
         }
@@ -321,13 +314,13 @@ fun LibraryMixScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp),
         contentPadding = PaddingValues(bottom = 120.dp),
     ) {
-        item(key = "filter") {
+        item(key = "filter", contentType = "filter") {
             filterContent()
             Spacer(Modifier.height(8.dp))
             GoldDivider(modifier = Modifier.padding(horizontal = 20.dp))
         }
 
-        item(key = "controls") {
+        item(key = "controls", contentType = "controls") {
             LibraryControlCard(
                 canEnterReorderMode = canEnterReorderMode,
                 reorderEnabled = reorderEnabled,
@@ -350,11 +343,10 @@ fun LibraryMixScreen(
         }
 
         if (shortcuts.isNotEmpty()) {
-            item(key = "shortcuts") {
-                LibraryShortcutGrid(
-                    entries = shortcuts,
-                    onClick = navController::navigate,
-                    modifier = Modifier.padding(horizontal = 16.dp),
+            item(key = "shortcuts", contentType = "shortcuts") {
+                LibraryShortcutsRow(
+                    shortcuts = shortcuts,
+                    onClick = { navController.navigate(it) },
                 )
             }
         }
@@ -363,6 +355,7 @@ fun LibraryMixScreen(
             itemsIndexed(
                 items = mutableVisiblePlaylists,
                 key = { _, item -> item.id },
+                contentType = { _, _ -> "playlist_item" }
             ) { _, item ->
                 ReorderableItem(
                     state = reorderableState,
@@ -385,6 +378,7 @@ fun LibraryMixScreen(
             items(
                 items = visiblePlaylists,
                 key = { it.id },
+                contentType = { "playlist_item" }
             ) { item ->
                 LibraryPlaylistListItem(
                     navController = navController,
@@ -402,6 +396,7 @@ fun LibraryMixScreen(
             items(
                 items = sortedAlbums,
                 key = { it.id },
+                contentType = { "spotlight_album" }
             ) { album ->
                 LibraryAlbumSpotlightCard(
                     album = album,
@@ -456,6 +451,7 @@ fun LibraryMixScreen(
             items(
                 items = sortedArtists,
                 key = { it.id },
+                contentType = { "spotlight_artist" }
             ) { artist ->
                 LibraryArtistSpotlightCard(
                     artist = artist,
@@ -532,39 +528,6 @@ private fun LibraryControlCard(
                         painter = painterResource(if (reorderEnabled) R.drawable.lock_open else R.drawable.lock),
                         contentDescription = null,
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LibraryShortcutGrid(
-    entries: List<LibraryShortcutEntry>,
-    onClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier,
-    ) {
-        entries.chunked(2).forEach { rowEntries ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                rowEntries.forEach { entry ->
-                    LibraryPinnedCollectionTile(
-                        title = entry.title,
-                        iconRes = entry.iconRes,
-                        accentColor = entry.accentColor,
-                        modifier = Modifier
-                            .weight(1f)
-                            .combinedClickable(onClick = { onClick(entry.route) }),
-                    )
-                }
-                if (rowEntries.size == 1) {
-                    Spacer(Modifier.weight(1f))
                 }
             }
         }

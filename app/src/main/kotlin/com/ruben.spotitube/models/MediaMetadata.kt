@@ -9,8 +9,8 @@
 package com.ruben.spotitube.models
 
 import androidx.compose.runtime.Immutable
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.db.entities.SongEntity
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.ui.utils.resize
 import java.io.Serializable
@@ -55,16 +55,17 @@ data class MediaMetadata(
         }
     }
 
-    fun toSongEntity() =
-        SongEntity(
+    fun toSavedSongEntity() =
+        SavedSongEntity(
             id = id,
             title = title,
+            artistId = artists.firstOrNull()?.id,
+            artistName = artists.joinToString(", ") { artist -> artist.name }.ifEmpty { artists.firstOrNull()?.name },
             duration = duration,
             thumbnailUrl = thumbnailUrl,
             albumId = album?.id,
             albumName = album?.title,
             explicit = explicit,
-            isLiked = liked,
         )
 }
 

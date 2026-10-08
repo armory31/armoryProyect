@@ -7,12 +7,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.firebase.firestore.FirebaseFirestore
-import com.ruben.spotitube.constants.AlbumSortType
-import com.ruben.spotitube.constants.ArtistSortType
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.AlbumArtistMap
-import com.ruben.spotitube.db.entities.AlbumEntity
-import com.ruben.spotitube.db.entities.ArtistEntity
 import com.ruben.spotitube.db.entities.HistoryAlbumEntity
 import com.ruben.spotitube.db.entities.HistoryArtistEntity
 import com.ruben.spotitube.db.entities.HistoryPlaylistEntity
@@ -23,8 +18,6 @@ import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
-import com.ruben.spotitube.db.entities.SongArtistMap
-import com.ruben.spotitube.db.entities.SongEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.sync.worker.SyncWorker
@@ -43,7 +36,6 @@ import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.ceil
 
 @Singleton
 class SyncManager @Inject constructor(
@@ -709,36 +701,6 @@ class SyncManager @Inject constructor(
                     savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
                 )
             )
-            database.insert(
-                SongEntity(
-                    id = sDto.videoId,
-                    title = sDto.title,
-                    duration = sDto.duration.toInt(),
-                    thumbnailUrl = sDto.thumbnailUrl,
-                    albumId = sDto.albumId?.ifEmpty { null },
-                    albumName = sDto.albumName?.ifEmpty { null },
-                    isLiked = true,
-                )
-            )
-            val artistId = sDto.artistId.ifEmpty { null }
-            val artistName = sDto.artistName.ifEmpty { null }
-            if (artistId != null && artistName != null) {
-                val existing = database.getArtistById(artistId)
-                database.insert(
-                    ArtistEntity(
-                        id = artistId,
-                        name = artistName,
-                        isBookmarked = existing?.isBookmarked ?: false,
-                    )
-                )
-                database.insert(
-                    SongArtistMap(
-                        songId = sDto.videoId,
-                        artistId = artistId,
-                        position = 0,
-                    )
-                )
-            }
         }
         library.artists.forEach { aDto ->
             val savedAtSec = if (aDto.savedAt > 1_000_000_000_000L) aDto.savedAt / 1000 else aDto.savedAt
@@ -749,15 +711,6 @@ class SyncManager @Inject constructor(
                     thumbnailUrl = aDto.thumbnailUrl,
                     channelId = aDto.channelId,
                     savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
-                )
-            )
-            database.insert(
-                ArtistEntity(
-                    id = aDto.id,
-                    name = aDto.name,
-                    thumbnailUrl = aDto.thumbnailUrl,
-                    channelId = aDto.channelId,
-                    isBookmarked = true,
                 )
             )
         }
@@ -775,26 +728,6 @@ class SyncManager @Inject constructor(
                     savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
                 )
             )
-            database.insert(
-                AlbumEntity(
-                    id = alDto.id,
-                    title = alDto.title,
-                    songCount = alDto.songCount,
-                    duration = alDto.duration,
-                    thumbnailUrl = alDto.thumbnailUrl,
-                    isLiked = true,
-                )
-            )
-            val artistId = alDto.artistId.ifEmpty { null }
-            if (artistId != null) {
-                database.insert(
-                    AlbumArtistMap(
-                        albumId = alDto.id,
-                        artistId = artistId,
-                        order = 0,
-                    )
-                )
-            }
         }
         library.playlists.forEach { pDto ->
             database.insertSavedPlaylist(
@@ -806,25 +739,14 @@ class SyncManager @Inject constructor(
                     thumbnailUrl = pDto.thumbnailUrl,
                 )
             )
-            database.insert(
-                PlaylistEntity(
-                    id = pDto.id,
-                    name = pDto.name,
-                    browseId = pDto.browseId,
-                    isEditable = pDto.isEditable,
-                    thumbnailUrl = pDto.thumbnailUrl,
-                )
-            )
             pDto.songs.forEach { sDto ->
-                if (database.getSongById(sDto.id) == null) {
-                    database.insert(
-                        SongEntity(
-                            id = sDto.id,
-                            title = sDto.title,
-                            thumbnailUrl = sDto.thumbnailUrl,
-                        )
+                database.insertSavedSong(
+                    SavedSongEntity(
+                        id = sDto.id,
+                        title = sDto.title,
+                        thumbnailUrl = sDto.thumbnailUrl,
                     )
-                }
+                )
                 if (database.checkInPlaylist(pDto.id, sDto.id) == 0) {
                     database.insert(PlaylistSongMap(playlistId = pDto.id, songId = sDto.id, position = sDto.position))
                 }
@@ -914,11 +836,10 @@ class SyncManager @Inject constructor(
         }
     }
 
-    suspend fun toggleLike(song: SongEntity) = withContext(Dispatchers.IO) {
+    suspend fun toggleLike(song: SavedSongEntity) = withContext(Dispatchers.IO) {
         val existingSaved = database.getSavedSong(song.id)
         if (existingSaved != null) {
             database.deleteSavedSong(song.id)
-            database.update(song.copy(isLiked = false))
         } else {
             val songWithArtists = database.getSongById(song.id)
             val artist = songWithArtists?.artists?.firstOrNull() ?: database.songArtistMap(song.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
@@ -926,15 +847,30 @@ class SyncManager @Inject constructor(
                 SavedSongEntity(
                     id = song.id,
                     title = song.title,
-                    artistId = artist?.id,
-                    artistName = artist?.name,
+                    artistId = artist?.id ?: song.artistId,
+                    artistName = artist?.name ?: song.artistName,
                     duration = song.duration,
                     thumbnailUrl = song.thumbnailUrl,
                     albumId = song.albumId,
                     albumName = song.albumName,
+                    explicit = song.explicit,
                 ),
             )
-            database.update(song.copy(isLiked = true))
+        }
+    }
+
+    suspend fun toggleAlbumLike(album: SavedAlbumEntity) = withContext(Dispatchers.IO) {
+        val existingSaved = database.getSavedAlbum(album.id)
+        if (existingSaved != null) {
+            database.deleteSavedAlbum(album.id)
+        } else {
+            val albumArtist = database.albumArtistMaps(album.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
+            database.insertSavedAlbum(
+                album.copy(
+                    artistId = albumArtist?.id ?: album.artistId,
+                    artistName = albumArtist?.name ?: album.artistName,
+                ),
+            )
         }
     }
 
@@ -947,65 +883,23 @@ class SyncManager @Inject constructor(
         duration: Int = 0,
         thumbnailUrl: String? = null,
         year: Int? = null,
-    ) = withContext(Dispatchers.IO) {
-        val existingSaved = database.getSavedAlbum(albumId)
-        if (existingSaved != null) {
-            database.deleteSavedAlbum(albumId)
-            val albumEntity = database.getAlbumById(albumId)
-            if (albumEntity != null) {
-                database.update(albumEntity.copy(isLiked = false))
-            }
-        } else {
-            database.insertSavedAlbum(
-                SavedAlbumEntity(
-                    id = albumId,
-                    title = title,
-                    artistId = artistId,
-                    artistName = artistName,
-                    songCount = songCount,
-                    duration = duration,
-                    thumbnailUrl = thumbnailUrl,
-                    year = year,
-                ),
-            )
-            val existingEntity = database.getAlbumById(albumId)
-            if (existingEntity != null) {
-                database.update(existingEntity.copy(isLiked = true))
-            } else if (title.isNotBlank()) {
-                database.insert(
-                    AlbumEntity(
-                        id = albumId,
-                        title = title,
-                        songCount = songCount,
-                        duration = duration,
-                        thumbnailUrl = thumbnailUrl,
-                        year = year,
-                        isLiked = true,
-                    ),
-                )
-            }
-        }
-    }
-
-    suspend fun toggleAlbumLike(album: AlbumEntity) = withContext(Dispatchers.IO) {
-        val albumArtist = database.albumArtistMaps(album.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
-        toggleAlbumLike(
-            albumId = album.id,
-            title = album.title,
-            artistId = albumArtist?.id,
-            artistName = albumArtist?.name,
-            songCount = album.songCount,
-            duration = album.duration,
-            thumbnailUrl = album.thumbnailUrl,
-            year = album.year,
+    ) = toggleAlbumLike(
+        SavedAlbumEntity(
+            id = albumId,
+            title = title,
+            artistId = artistId,
+            artistName = artistName,
+            songCount = songCount,
+            duration = duration,
+            thumbnailUrl = thumbnailUrl,
+            year = year,
         )
-    }
+    )
 
-    suspend fun toggleArtistLike(artist: ArtistEntity) = withContext(Dispatchers.IO) {
+    suspend fun toggleArtistLike(artist: SavedArtistEntity) = withContext(Dispatchers.IO) {
         val existingSaved = database.getSavedArtist(artist.id)
         if (existingSaved != null) {
             database.deleteSavedArtist(artist.id)
-            database.update(artist.copy(isBookmarked = false))
         } else {
             database.insertSavedArtist(
                 SavedArtistEntity(
@@ -1015,7 +909,6 @@ class SyncManager @Inject constructor(
                     channelId = artist.channelId,
                 ),
             )
-            database.update(artist.copy(isBookmarked = true))
         }
     }
 
@@ -1045,32 +938,30 @@ class SyncManager @Inject constructor(
     private fun ensureArtistExists(name: String): String {
         val existing = database.artistByName(name)
         if (existing != null) return existing.id
-        val newId = ArtistEntity.generateArtistId()
-        database.insert(ArtistEntity(id = newId, name = name))
+        val newId = SavedArtistEntity.generateArtistId()
+        database.insertSavedArtist(SavedArtistEntity(id = newId, name = name))
         return newId
     }
 
     @Suppress("unused")
     private suspend fun ensureSongExists(sDto: PlaylistSongDto) {
-        if (database.getSongById(sDto.id) == null) {
+        if (database.getSavedSong(sDto.id) == null) {
             val artistId = ensureArtistExists(sDto.artistName)
-            database.insert(SongEntity(id = sDto.id, title = sDto.title, thumbnailUrl = sDto.thumbnailUrl))
-            artistId.let { database.insert(SongArtistMap(songId = sDto.id, artistId = it, position = 0)) }
+            database.insertSavedSong(SavedSongEntity(id = sDto.id, title = sDto.title, artistId = artistId, artistName = sDto.artistName, thumbnailUrl = sDto.thumbnailUrl))
         }
     }
 
     suspend fun createPlaylist(name: String, browseId: String? = null): String {
-        val id = PlaylistEntity.generatePlaylistId()
-        val playlist = PlaylistEntity(
+        val id = SavedPlaylistEntity.generatePlaylistId()
+        val playlist = SavedPlaylistEntity(
             id = id,
             name = name,
             browseId = browseId,
             createdAt = LocalDateTime.now(),
-            isLocal = true,
             isEditable = true,
         )
         withContext(Dispatchers.IO) {
-            database.insert(playlist)
+            database.insertSavedPlaylist(playlist)
         }
         Timber.d("[LOCAL_SAVE_DEBUG] New playlist created in Room: $name (ID: $id)")
         return id

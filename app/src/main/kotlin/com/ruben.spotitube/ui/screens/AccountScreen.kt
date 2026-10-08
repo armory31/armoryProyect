@@ -116,7 +116,6 @@ fun AccountScreen(
     var showEditNameDialog by rememberSaveable { mutableStateOf(false) }
     var isBackupLoading by remember { mutableStateOf(false) }
     var isRestoreLoading by remember { mutableStateOf(false) }
-    var isMigrationLoading by remember { mutableStateOf(false) }
     var isCsvImporting by remember { mutableStateOf(false) }
     val backupRestoreViewModel: BackupRestoreViewModel = hiltViewModel()
 
@@ -155,10 +154,12 @@ fun AccountScreen(
             session.saveAvatarUri(uriString)
 
             currentUser?.let { user ->
-                val profileUpdates = UserProfileChangeRequest.Builder()
-                    .setPhotoUri(newUri)
-                    .build()
-                user.updateProfile(profileUpdates)
+                coroutineScope.launch(Dispatchers.IO) {
+                    val profileUpdates = UserProfileChangeRequest.Builder()
+                        .setPhotoUri(newUri)
+                        .build()
+                    user.updateProfile(profileUpdates)
+                }
             }
             Toast.makeText(context, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show()
         }
@@ -176,10 +177,12 @@ fun AccountScreen(
                     onAccountNameChange(trimmedName)
                     session.saveNombre(trimmedName)
                     currentUser?.let { user ->
-                        val profileUpdates = UserProfileChangeRequest.Builder()
-                            .setDisplayName(trimmedName)
-                            .build()
-                        user.updateProfile(profileUpdates)
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val profileUpdates = UserProfileChangeRequest.Builder()
+                                .setDisplayName(trimmedName)
+                                .build()
+                            user.updateProfile(profileUpdates)
+                        }
                     }
                     Toast.makeText(context, "Nombre actualizado", Toast.LENGTH_SHORT).show()
                 }
@@ -426,26 +429,6 @@ fun AccountScreen(
                                     Toast.makeText(context, e.message ?: "Error al restaurar copia", Toast.LENGTH_LONG).show()
                                 } finally {
                                     isRestoreLoading = false
-                                }
-                            }
-                        },
-                        AccountSettingItem(
-                            R.drawable.sync,
-                            "Migrar datos al nuevo esquema",
-                            "Parsear biblioteca e historial actuales al nuevo formato de tablas",
-                            isLoading = isMigrationLoading
-                        ) {
-                            coroutineScope.launch {
-                                isMigrationLoading = true
-                                try {
-                                    withContext(Dispatchers.IO) {
-                                        database.migrateLegacyDataToNewSchema()
-                                    }
-                                    Toast.makeText(context, "Datos migrados con éxito al nuevo esquema", Toast.LENGTH_SHORT).show()
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Error al migrar datos: ${e.message}", Toast.LENGTH_LONG).show()
-                                } finally {
-                                    isMigrationLoading = false
                                 }
                             }
                         },

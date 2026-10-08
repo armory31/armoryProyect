@@ -9,7 +9,10 @@
 package com.ruben.spotitube.ui.screens
 
 import android.annotation.SuppressLint
+import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
@@ -122,6 +125,14 @@ import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.random.Random
 
+val lightBlueMetallicBrush = ArmoryGradients.MetallicSilver
+
+val goldMetallicBrush = ArmoryGradients.MetallicGold
+
+val silverMetallicBrush = ArmoryGradients.MetallicSilver
+
+val bronzeMetallicBrush = ArmoryGradients.MetallicCopper
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickPicksSection(
@@ -136,6 +147,18 @@ fun QuickPicksSection(
     modifier: Modifier = Modifier
 ) {
     val distinctQuickPicks = remember(quickPicks) { quickPicks.distinctBy { it.id } }
+
+    val lightBlueMetallicBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFFE0F7FA), // Brillo metálico claro
+                Color(0xFF80D8FF), // Azul cian metálico
+                Color(0xFF00B0FF), // Reflejo azul vivo
+                Color(0xFF0091EA), // Sombra metálica profunda
+                Color(0xFF80D8FF)  // Borde de brillo
+            )
+        )
+    }
 
     HorizontalCenteredHeroCarousel(
         state = rememberCarouselState { distinctQuickPicks.size },
@@ -154,7 +177,7 @@ fun QuickPicksSection(
                 .fillMaxSize()
                 .maskClip(MaterialTheme.shapes.extraLarge)
                 .maskBorder(
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
                     MaterialTheme.shapes.extraLarge
                 )
                 .combinedClickable(
@@ -330,6 +353,7 @@ fun SpeedDialSection(
                         .width(tileSize)
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(16.dp))
+                        .border(BorderStroke(1.dp, ArmoryColors.SurfaceBorder), RoundedCornerShape(16.dp))
                         .combinedClickable(
                             onClick = {
                                 if (isActive) {
@@ -584,6 +608,8 @@ fun ForgottenFavoritesSection(
                 },
                 modifier = Modifier
                     .width(horizontalLazyGridItemWidth)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(BorderStroke(1.dp, ArmoryColors.SurfaceBorder), RoundedCornerShape(12.dp))
                     .combinedClickable(
                         onClick = {
                             if (song.id == mediaMetadata?.id) {
@@ -849,80 +875,87 @@ private fun LocalGridItem(
     metadata: ItemMetadata? = null,
     modifier: Modifier = Modifier
 ) {
-    when (item) {
-        is Song -> SongGridItem(
-            song = item,
-            metadata = metadata,
-            modifier = modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    onClick = {
-                        if (item.id == mediaMetadata?.id) {
-                            playerConnection.player.togglePlayPause()
-                        } else {
-                            playerConnection.playQueue(YouTubeQueue.radio(item.toMediaMetadata()))
-                        }
-                    },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            SongMenu(
-                                originalSong = item,
-                                navController = navController,
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .border(BorderStroke(1.dp, ArmoryColors.SurfaceBorder), RoundedCornerShape(16.dp))
+    ) {
+        when (item) {
+            is Song -> SongGridItem(
+                song = item,
+                metadata = metadata,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = {
+                            if (item.id == mediaMetadata?.id) {
+                                playerConnection.player.togglePlayPause()
+                            } else {
+                                playerConnection.playQueue(YouTubeQueue.radio(item.toMediaMetadata()))
+                            }
+                        },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            menuState.show {
+                                SongMenu(
+                                    originalSong = item,
+                                    navController = navController,
                                     metadata = metadata,
-                                onDismiss = menuState::dismiss
-                            )
+                                    onDismiss = menuState::dismiss
+                                )
+                            }
                         }
-                    }
-                ),
-            isActive = item.id == mediaMetadata?.id,
-            isPlaying = isPlaying
-        )
+                    ),
+                isActive = item.id == mediaMetadata?.id,
+                isPlaying = isPlaying
+            )
 
-        is Album -> AlbumGridItem(
-            album = item,
-            isActive = item.id == mediaMetadata?.album?.id,
-            isPlaying = isPlaying,
-            coroutineScope = scope,
-            metadata = metadata,
-            modifier = modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    onClick = { navController.navigate("album/${item.id}") },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            AlbumMenu(
-                                originalAlbum = item,
-                                navController = navController,
-                                onDismiss = menuState::dismiss
-                            )
+            is Album -> AlbumGridItem(
+                album = item,
+                isActive = item.id == mediaMetadata?.album?.id,
+                isPlaying = isPlaying,
+                coroutineScope = scope,
+                metadata = metadata,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = { navController.navigate("album/${item.id}") },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            menuState.show {
+                                AlbumMenu(
+                                    originalAlbum = item,
+                                    navController = navController,
+                                    onDismiss = menuState::dismiss
+                                )
+                            }
                         }
-                    }
-                )
-        )
+                    )
+            )
 
-        is Artist -> ArtistGridItem(
-            artist = item,
-            metadata = metadata,
-            modifier = modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    onClick = { navController.navigate("artist/${item.id}") },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            ArtistMenu(
-                                originalArtist = item,
-                                coroutineScope = scope,
-                                onDismiss = menuState::dismiss
-                            )
+            is Artist -> ArtistGridItem(
+                artist = item,
+                metadata = metadata,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = { navController.navigate("artist/${item.id}") },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            menuState.show {
+                                ArtistMenu(
+                                    originalArtist = item,
+                                    coroutineScope = scope,
+                                    onDismiss = menuState::dismiss
+                                )
+                            }
                         }
-                    }
-                )
-        )
+                    )
+            )
 
-        is Playlist -> { /* Not displayed */ }
+            is Playlist -> { /* Not displayed */ }
+        }
     }
 }
 

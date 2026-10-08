@@ -12,6 +12,7 @@ package com.ruben.spotitube.viewmodels
 
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -44,6 +45,9 @@ import com.ruben.spotitube.constants.SongSortType
 import com.ruben.spotitube.constants.SongSortTypeKey
 import com.ruben.spotitube.constants.TopSize
 import com.ruben.spotitube.db.MusicDatabase
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
+import com.ruben.spotitube.ui.utils.resize
 import com.ruben.spotitube.extensions.reversed
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.innertube.YouTube
@@ -64,6 +68,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -234,7 +239,15 @@ constructor(
                     }.forEach { artist ->
                         YouTube.artist(artist.id).onSuccess { artistPage ->
                             database.query {
-                                update(artist, artistPage)
+                                database.insertSavedArtist(
+                                    SavedArtistEntity(
+                                        id = artist.id,
+                                        name = artistPage.artist.title,
+                                        thumbnailUrl = artistPage.artist.thumbnail?.resize(544, 544),
+                                        channelId = artist.channelId,
+                                        savedAt = artist.bookmarkedAt ?: LocalDateTime.now()
+                                    )
+                                )
                             }
                         }
                     }
@@ -314,6 +327,8 @@ constructor(
                         }.let { if (descending) it.reversed() else it }
                     }
                 }
+            }.onEach { albumsList ->
+                Log.d("SAVED_ALBUM_DEBUG", "3. ViewModel (allAlbums) emite ${albumsList.size} álbumes a la UI")
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun refresh(filter: AlbumFilter) {
@@ -346,13 +361,25 @@ constructor(
                             .album(album.id)
                             .onSuccess { albumPage ->
                                 database.withTransaction {
-                                    update(album.album, albumPage, album.artists)
+                                    val albumArtist = album.artists.firstOrNull()
+                                    database.insertSavedAlbum(
+                                        SavedAlbumEntity(
+                                            id = albumPage.album.browseId,
+                                            title = albumPage.album.title,
+                                            artistId = albumArtist?.id,
+                                            artistName = albumArtist?.name,
+                                            songCount = albumPage.songs.size,
+                                            duration = albumPage.songs.sumOf { song -> song.duration ?: 0 },
+                                            thumbnailUrl = albumPage.album.thumbnail,
+                                            year = albumPage.album.year
+                                        )
+                                    )
                                 }
                             }.onFailure {
                                 reportException(it)
                                 if (it.message?.contains("NOT_FOUND") == true) {
                                     database.withTransaction {
-                                        delete(album.album)
+                                        database.deleteSavedAlbum(album.album.id)
                                     }
                                 }
                             }
@@ -472,13 +499,25 @@ constructor(
                             .album(album.id)
                             .onSuccess { albumPage ->
                                 database.query {
-                                    update(album.album, albumPage, album.artists)
+                                    val albumArtist = album.artists.firstOrNull()
+                                    database.insertSavedAlbum(
+                                        SavedAlbumEntity(
+                                            id = albumPage.album.browseId,
+                                            title = albumPage.album.title,
+                                            artistId = albumArtist?.id,
+                                            artistName = albumArtist?.name,
+                                            songCount = albumPage.songs.size,
+                                            duration = albumPage.songs.sumOf { song -> song.duration ?: 0 },
+                                            thumbnailUrl = albumPage.album.thumbnail,
+                                            year = albumPage.album.year
+                                        )
+                                    )
                                 }
                             }.onFailure {
                                 reportException(it)
                                 if (it.message?.contains("NOT_FOUND") == true) {
                                     database.query {
-                                        delete(album.album)
+                                        database.deleteSavedAlbum(album.album.id)
                                     }
                                 }
                             }
@@ -498,7 +537,15 @@ constructor(
                     }.forEach { artist ->
                         YouTube.artist(artist.id).onSuccess { artistPage ->
                             database.query {
-                                update(artist, artistPage)
+                                database.insertSavedArtist(
+                                    SavedArtistEntity(
+                                        id = artist.id,
+                                        name = artistPage.artist.title,
+                                        thumbnailUrl = artistPage.artist.thumbnail?.resize(544, 544),
+                                        channelId = artist.channelId,
+                                        savedAt = artist.bookmarkedAt ?: LocalDateTime.now()
+                                    )
+                                )
                             }
                         }
                     }

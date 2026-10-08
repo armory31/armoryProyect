@@ -36,8 +36,10 @@ import com.ruben.spotitube.constants.MediaSessionConstants
 import com.ruben.spotitube.constants.PlaylistSortType
 import com.ruben.spotitube.constants.SongSortType
 import com.ruben.spotitube.db.MusicDatabase
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.Song
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.toggleRepeatMode
 import com.google.common.collect.ImmutableList
@@ -369,7 +371,20 @@ constructor(
 
                     MusicService.SONG -> {
                         val savedSongs = database.allSavedSongs().first().map { it.toSong() }
-                        val songs = if (savedSongs.isNotEmpty()) savedSongs else database.songs(sortType = SongSortType.CREATE_DATE, descending = false).first()
+                        val songs = if (savedSongs.isNotEmpty()) {
+                            savedSongs
+                        } else {
+                            val ytRecs = runCatching {
+                                com.ruben.spotitube.innertube.YouTube.musicHistory().getOrNull()?.sections?.flatMap { it.songs }
+                                    ?.map { item ->
+                                        Song(
+                                            song = SavedSongEntity(id = item.id, title = item.title, duration = item.duration ?: -1, thumbnailUrl = item.thumbnail),
+                                            artists = item.artists.map { a -> SavedArtistEntity(id = a.id ?: "", name = a.name) }
+                                        )
+                                    }
+                            }.getOrNull().orEmpty()
+                            if (ytRecs.isNotEmpty()) ytRecs else database.songs(sortType = SongSortType.CREATE_DATE, descending = false).first()
+                        }
                         songs.map { it.toMediaItem(parentId) }
                     }
 

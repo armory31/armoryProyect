@@ -490,52 +490,80 @@ fun LibraryPinnedCollectionTile(
     val animatedColor by animateColorAsState(accentColor, spring())
 
     Card(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = ArmoryColors.AbsoluteBlack
         ),
-        border = BorderStroke(1.dp, Brush.linearGradient(listOf(animatedColor.copy(alpha = 0.4f), Color.Transparent))),
-        modifier = modifier,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .background(animatedColor.copy(alpha = 0.1f), CircleShape)
-                    .border(1.dp, animatedColor.copy(alpha = 0.2f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(iconRes),
-                    contentDescription = null,
-                    tint = animatedColor,
-                    modifier = Modifier.size(22.dp),
+        border = BorderStroke(
+            1.dp,
+            Brush.verticalGradient(
+                listOf(
+                    animatedColor.copy(alpha = 0.5f),
+                    animatedColor.copy(alpha = 0.15f)
                 )
-            }
+            )
+        ),
+        modifier = modifier
+            .width(125.dp)
+            .height(120.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            animatedColor.copy(alpha = 0.18f),
+                            Color.Transparent
+                        )
+                    )
+                )
+                .padding(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .background(animatedColor.copy(alpha = 0.18f), CircleShape)
+                        .border(1.dp, animatedColor.copy(alpha = 0.35f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null,
+                        tint = animatedColor,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
 
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Spacer(Modifier.height(10.dp))
+
                 Text(
                     text = title,
                     color = ArmoryColors.Champagne,
                     fontFamily = PremiumTitleFont,
-                    fontSize = 15.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                subtitle?.takeIf { it.isNotBlank() }?.let {
+
+                if (!subtitle.isNullOrBlank()) {
                     Text(
-                        text = it,
+                        text = subtitle,
                         color = ArmoryColors.TextMuted,
                         fontFamily = PremiumBodyFont,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -935,13 +963,17 @@ fun AlbumGridItem(
         )
     },
     subtitle = {
-        Text(
-            text = album.artists.joinToString { it.name },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        val artistNames = album.artists.joinToString { it.name }.ifEmpty { album.album.artistName.orEmpty() }
+        val subtitleText = joinByBullet(artistNames, album.album.year?.toString())
+        if (subtitleText.isNotBlank()) {
+            Text(
+                text = subtitleText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     },
     badges = badges,
     thumbnailContent = {

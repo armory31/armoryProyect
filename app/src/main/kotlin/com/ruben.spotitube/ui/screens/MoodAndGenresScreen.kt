@@ -6,9 +6,11 @@
 
 package com.ruben.spotitube.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,7 +24,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.google.firebase.auth.FirebaseAuth
+import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.AppTypography
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.OpenTuneHeader
 import com.ruben.spotitube.R
@@ -51,7 +54,6 @@ import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.component.shimmer.ShimmerHost
 import com.ruben.spotitube.ui.component.shimmer.TextPlaceholder
 import com.ruben.spotitube.viewmodels.MoodAndGenresViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MoodAndGenresScreen(
@@ -86,15 +88,17 @@ fun MoodAndGenresScreen(
         )
 
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 180.dp),
+            columns = GridCells.Fixed(2),
             state = gridState,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(
-                start = 6.dp,
+                start = 12.dp,
                 top = 0.dp,
-                end = 6.dp,
-                bottom = bottomPadding,
+                end = 12.dp,
+                bottom = bottomPadding + 12.dp,
             ),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 NavigationTitle(
@@ -108,8 +112,8 @@ fun MoodAndGenresScreen(
                     ShimmerHost {
                         TextPlaceholder(
                             height = MoodAndGenresButtonHeight,
-                            shape = RoundedCornerShape(6.dp),
-                            modifier = Modifier.padding(6.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -122,11 +126,11 @@ fun MoodAndGenresScreen(
                         title = item.title,
                         stripeColor = item.stripeColor,
                         onClick = {
-                            navController.navigate("youtube_browse/${item.endpoint.browseId}?params=${item.endpoint.params}")
+                            val encodedTitle = Uri.encode(item.title)
+                            navController.navigate("youtube_browse/${item.endpoint.browseId}?params=${item.endpoint.params}&title=$encodedTitle")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(6.dp)
                             .animateItem(),
                     )
                 }
@@ -142,24 +146,22 @@ fun MoodAndGenresButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val base = Color(stripeColor)
-    val subtleLight = Color(
-        red = (base.red * 1.2f).coerceIn(0f, 1f),
-        green = (base.green * 1.2f).coerceIn(0f, 1f),
-        blue = (base.blue * 1.2f).coerceIn(0f, 1f),
-    )
-    val subtleDark = Color(
-        red = (base.red * 0.75f).coerceIn(0f, 1f),
-        green = (base.green * 0.75f).coerceIn(0f, 1f),
-        blue = (base.blue * 0.75f).coerceIn(0f, 1f),
-    )
-
-    val metallicGradient = Brush.verticalGradient(
+    val baseColor = if (stripeColor != 0L) Color(stripeColor) else ArmoryColors.Gold2
+    val cardBackground = Brush.linearGradient(
         colors = listOf(
-            subtleLight,
-            base,
-            subtleDark
-        )
+            ArmoryColors.SurfaceElevated,
+            ArmoryColors.SurfaceBlack
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(400f, 400f)
+    )
+    val topEndGlow = Brush.radialGradient(
+        colors = listOf(
+            baseColor.copy(alpha = 0.25f),
+            Color.Transparent
+        ),
+        center = Offset(400f, 0f),
+        radius = 300f
     )
 
     Box(
@@ -167,28 +169,23 @@ fun MoodAndGenresButton(
         modifier = modifier
             .height(MoodAndGenresButtonHeight)
             .clip(RoundedCornerShape(16.dp))
-            .background(metallicGradient)
+            .background(ArmoryColors.SurfaceBlack)
+            .background(cardBackground)
+            .background(topEndGlow)
             .border(
-                1.5.dp,
-                Brush.linearGradient(
-                    colors = listOf(Color.White.copy(alpha = 0.5f), Color.Transparent, Color.White.copy(alpha = 0.25f))
-                ),
+                1.dp,
+                ArmoryColors.SurfaceBorder,
                 RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(16.dp),
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
-                shadow = Shadow(
-                    color = Color.Black.copy(alpha = 0.6f),
-                    offset = Offset(0f, 1f),
-                    blurRadius = 4f,
-                ),
+            style = AppTypography.titleMedium.copy(
+                fontWeight = FontWeight.Bold
             ),
-            color = Color.White,
+            color = ArmoryColors.TextPrimary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )

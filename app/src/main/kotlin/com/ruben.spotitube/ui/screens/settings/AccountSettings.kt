@@ -935,7 +935,7 @@ private fun PlaylistSelectionDialog(onDismiss: () -> Unit) {
                     modifier = Modifier.height(400.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    items(playlists) { pl ->
+                    items(playlists, key = { it.id }) { pl ->
                         val isSelected = selectedList.contains(pl.id)
                         val backgroundColor by animateColorAsState(
                             targetValue = if (isSelected)

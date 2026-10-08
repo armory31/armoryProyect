@@ -19,7 +19,7 @@ data class Playlist(
     val playlist: PlaylistEntity,
     val songCount: Int,
     @Relation(
-        entity = SongEntity::class,
+        entity = SavedSongEntity::class,
         entityColumn = "id",
         parentColumn = "id",
         projection = ["thumbnailUrl"],
@@ -45,4 +45,8 @@ data class Playlist(
                 listOf(playlist.thumbnailUrl)
             else songThumbnails.filterNotNull()
         }
+
+    companion object {
+        fun from(savedPlaylist: SavedPlaylistEntity): Playlist = savedPlaylist.toPlaylist()
+    }
 }

@@ -34,9 +34,8 @@ import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
-import com.ruben.spotitube.db.entities.SongEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.toMediaMetadata
@@ -133,18 +132,11 @@ suspend fun importCsvPlaylistAndFetchMetadata(
         }
     }
 
-    val playlistId = PlaylistEntity.generatePlaylistId()
-    val playlist = PlaylistEntity(
-        id = playlistId,
-        name = fileName,
-        isEditable = true,
-        isLocal = true
-    )
-    database.query { insert(playlist) }
+    val playlistId = SavedPlaylistEntity.generatePlaylistId()
     database.insertSavedPlaylist(
         SavedPlaylistEntity(
-            id = playlist.id,
-            name = playlist.name,
+            id = playlistId,
+            name = fileName,
             isEditable = true
         )
     )
@@ -164,11 +156,11 @@ suspend fun importCsvPlaylistAndFetchMetadata(
                     database.query { insert(mediaMetadata) }
                 } else {
                     songId = "CSV_" + RandomStringUtils.insecure().nextAlphanumeric(8)
-                    database.query { insert(SongEntity(id = songId, title = title)) }
+                    database.insertSavedSong(SavedSongEntity(id = songId, title = title))
                 }
             }
         } else {
-            val existing = database.getSongById(songId)?.song
+            val existing = database.getSavedSong(songId)
             if (existing == null || existing.duration <= 0) {
                 val refetched = YouTube.queue(listOf(songId)).getOrNull()?.firstOrNull()?.toMediaMetadata()
                 if (refetched != null) {

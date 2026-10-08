@@ -19,7 +19,7 @@ import androidx.lifecycle.viewModelScope
 import com.ruben.spotitube.constants.ArtistSongSortType
 import com.ruben.spotitube.constants.HideExplicitKey
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.ArtistEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.pages.ArtistPage
 import com.ruben.spotitube.sync.LibraryStateHolder
@@ -106,7 +106,7 @@ class ArtistViewModel @Inject constructor(
     fun toggleLike() {
         Timber.d("[LOCAL_SAVE_DEBUG] ArtistViewModel: Intentando cambiar estado de suscripción para ${artistPage?.artist?.title ?: "local artist"}")
         val artist = libraryArtist.value?.artist ?: artistPage?.artist?.let {
-            ArtistEntity(
+            SavedArtistEntity(
                 id = it.id,
                 name = it.title,
                 thumbnailUrl = it.thumbnail,

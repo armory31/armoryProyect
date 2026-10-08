@@ -1,6 +1,7 @@
 package com.ruben.spotitube.db.entities
 
 import androidx.compose.runtime.Immutable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
@@ -16,28 +17,30 @@ data class SavedSongEntity(
     val thumbnailUrl: String? = null,
     val albumId: String? = null,
     val albumName: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    val explicit: Boolean = false,
+    val year: Int? = null,
+    val date: LocalDateTime? = null,
+    val dateModified: LocalDateTime? = null,
+    val totalPlayTime: Long = 0,
+    val dateDownload: LocalDateTime? = LocalDateTime.now(),
+    @ColumnInfo(name = "isLocal", defaultValue = "0")
+    val isLocal: Boolean = false,
+    @ColumnInfo(name = "isLiked", defaultValue = "1")
+    val isLiked: Boolean = true,
+    val bookmarkedAt: LocalDateTime? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {
     fun toSong(): Song {
-        val songEntity = SongEntity(
-            id = id,
-            title = title,
-            duration = duration,
-            thumbnailUrl = thumbnailUrl,
-            albumId = albumId,
-            albumName = albumName,
-            isLiked = true
-        )
         val artistEntity = artistName?.let {
-            ArtistEntity(
+            SavedArtistEntity(
                 id = artistId ?: "",
                 name = it
             )
         }
         return Song(
-            song = songEntity,
+            song = this,
             artists = if (artistEntity != null) listOf(artistEntity) else emptyList()
         )
     }
 }
-

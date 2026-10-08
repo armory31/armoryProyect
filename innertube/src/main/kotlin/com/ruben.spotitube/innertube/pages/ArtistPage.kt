@@ -64,6 +64,7 @@ data class ArtistPage(
                     }
                 },
                 moreEndpoint = renderer.header?.musicCarouselShelfBasicHeaderRenderer?.moreContentButton?.buttonRenderer?.navigationEndpoint?.browseEndpoint
+                    ?: renderer.header?.musicCarouselShelfBasicHeaderRenderer?.title?.runs?.firstOrNull()?.navigationEndpoint?.browseEndpoint
             )
         }
 

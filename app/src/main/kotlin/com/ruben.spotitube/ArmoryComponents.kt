@@ -1,10 +1,7 @@
 package com.ruben.spotitube
 
-import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -51,7 +48,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,12 +55,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -75,41 +69,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
-import coil3.imageLoader
 import coil3.request.ImageRequest
-import coil3.request.SuccessResult
-import coil3.request.allowHardware
 import coil3.request.crossfade
-import coil3.toBitmap
 import com.ruben.spotitube.models.MediaMetadata
 
 enum class PlayerStatus { PLAYING, PAUSED, LOADING }
-
-// ── Extractor de Color Dominante (Palette) ──────────────────────────────────
-@Composable
-fun rememberDominantColor(url: String): Color {
-    var dominantColor by remember(url) { mutableStateOf(Color.Transparent) }
-    val ctx = LocalContext.current
-
-    LaunchedEffect(url) {
-        if (url.isEmpty()) return@LaunchedEffect
-        try {
-            val loader = ctx.imageLoader
-            val request = ImageRequest.Builder(ctx).data(url).allowHardware(false).build()
-            val result = loader.execute(request)
-            val bitmap: Bitmap = (result as? SuccessResult)?.image?.toBitmap()
-                ?: return@LaunchedEffect
-
-            Palette.Builder(bitmap).generate { palette ->
-                val rgb = palette?.vibrantSwatch?.rgb ?: palette?.dominantSwatch?.rgb ?: return@generate
-                dominantColor = Color(rgb)
-            }
-        } catch (_: Exception) {}
-    }
-    return animateColorAsState(targetValue = dominantColor, animationSpec = tween(1000), label = "glowColor").value
-}
 
 // ── Thumbnail con Estilo ARMORY ──────────────────────────────────────────────
 @Composable
@@ -335,7 +300,6 @@ fun MiniPlayer(
     position: Long = 0L,
     duration: Long = 0L
 ) {
-    val dynamicColor = rememberDominantColor(nowPlaying.thumbnailUrl ?: "")
     val progress = if (duration > 0) position.toFloat() / duration else 0f
     
     // Animación de escala al pulsar
@@ -348,16 +312,10 @@ fun MiniPlayer(
             .height(68.dp)
             .graphicsLayer(scaleX = scale, scaleY = scale)
             .clip(RoundedCornerShape(16.dp))
-            .background(brush = ArmoryColors.JetBlack)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(dynamicColor.copy(alpha = 0.35f), Color.Transparent),
-                    endX = 500f
-                )
-            )
+            .background(ArmoryColors.SurfaceBlack.copy(alpha = 0.90f))
             .border(
-                width = 2.dp,
-                brush = ArmoryColors.Gold,
+                width = 1.dp,
+                color = ArmoryColors.SurfaceBorder,
                 shape = RoundedCornerShape(16.dp)
             )
             .pointerInput(Unit) {
@@ -419,14 +377,21 @@ fun MiniPlayer(
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
-                    IconButton(onClick = onToggle) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(ArmoryGradients.MetallicGold)
+                            .clickable(onClick = onToggle),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             painter = painterResource(
                                 if (playerStatus == PlayerStatus.PLAYING) R.drawable.pause else R.drawable.play
                             ),
                             contentDescription = null,
-                            tint = ArmoryColors.Gold1,
-                            modifier = Modifier.size(32.dp)
+                            tint = ArmoryColors.AbsoluteBlack,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
@@ -448,11 +413,7 @@ fun MiniPlayer(
                 .align(Alignment.BottomStart)
                 .fillMaxWidth(progress.coerceIn(0f, 1f))
                 .height(2.5.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(ArmoryColors.Gold5, ArmoryColors.Gold2)
-                    )
-                )
+                .background(ArmoryColors.Gold1)
         )
     }
 }
@@ -510,19 +471,14 @@ fun ArmoryBottomBar(
 
         if (showNavigationBar) {
             Surface(
-                color = ArmoryColors.ObsidianSoft,
+                color = ArmoryColors.SurfaceBlack.copy(alpha = 0.90f),
                 shape = RoundedCornerShape(26.dp),
                 tonalElevation = 8.dp,
                 modifier = Modifier
                     .height(76.dp)
                     .border(
                         width = 1.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.12f),
-                                Color.Transparent
-                            )
-                        ),
+                        color = ArmoryColors.SurfaceBorder,
                         shape = RoundedCornerShape(26.dp)
                     )
             ) {
@@ -583,10 +539,10 @@ fun OpenTuneNavigationBar(
         modifier = modifier
             .height(62.dp)
             .clip(RoundedCornerShape(26.dp))
-            .background(brush = ArmoryColors.JetBlack)
+            .background(ArmoryColors.SurfaceBlack)
             .border(
-                width = 2.dp,
-                brush = ArmoryColors.Gold,
+                width = 1.dp,
+                color = ArmoryColors.Gold1,
                 shape = RoundedCornerShape(26.dp)
             )
     ) {
@@ -610,30 +566,17 @@ fun OpenTuneNavigationBar(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-                                .drawWithCache {
-                                    onDrawWithContent {
-                                        drawContent()
-                                        drawRect(
-                                            brush = if (isSelected) ArmoryColors.Gold else ArmoryColors.Silver,
-                                            blendMode = BlendMode.SrcIn
-                                        )
-                                    }
-                                }
+                            tint = if (isSelected) ArmoryColors.Gold1 else ArmoryColors.Silver2,
+                            modifier = Modifier.size(24.dp)
                         )
                     },
                     label = {
                         Text(
                             text = label,
-                            style = TextStyle(
-                                brush = if (isSelected) ArmoryColors.Gold else ArmoryColors.Silver,
-                                fontSize = 11.sp,
-                                fontFamily = PremiumBodyFont,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                            )
+                            color = if (isSelected) ArmoryColors.Gold1 else ArmoryColors.Silver2,
+                            fontSize = 11.sp,
+                            fontFamily = PremiumBodyFont,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(

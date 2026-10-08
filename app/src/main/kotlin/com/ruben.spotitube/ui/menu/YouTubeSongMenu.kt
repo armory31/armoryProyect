@@ -78,6 +78,7 @@ import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.models.toMediaMetadata
+import com.ruben.spotitube.models.toSavedSongEntity
 import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.ListDialog
@@ -258,8 +259,7 @@ fun YouTubeSongMenu(
                 onClick = {  
                     coroutineScope.launch {
                         withContext(Dispatchers.IO) {
-                            database.insert(song.toMediaMetadata())
-                            syncManager.toggleLike(song.toMediaMetadata().toSongEntity())
+                            syncManager.toggleLike(song.toSavedSongEntity())
                         }
                     }
                 },  
@@ -395,8 +395,7 @@ fun YouTubeSongMenu(
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        database.insert(song.toMediaMetadata())
-                        syncManager.toggleLike(song.toMediaMetadata().toSongEntity())
+                        syncManager.toggleLike(song.toSavedSongEntity())
                     }
                 }
             )

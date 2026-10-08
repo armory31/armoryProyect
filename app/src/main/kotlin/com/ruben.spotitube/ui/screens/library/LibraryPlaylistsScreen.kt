@@ -6,18 +6,16 @@
 
 package com.ruben.spotitube.ui.screens.library
 
+import com.ruben.spotitube.GoldGradient
+
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,14 +23,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -64,9 +61,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import androidx.media3.exoplayer.offline.Download
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.PlaylistSortDescendingKey
 import com.ruben.spotitube.constants.PlaylistSortType
@@ -91,22 +86,15 @@ import com.ruben.spotitube.ui.component.LibraryArtistListItem
 import com.ruben.spotitube.ui.component.LibraryPinnedCollectionTile
 import com.ruben.spotitube.ui.component.LibraryPlaylistListItem
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
-import com.ruben.spotitube.viewmodels.CachePlaylistViewModel
 import com.ruben.spotitube.viewmodels.LibraryAlbumsViewModel
 import com.ruben.spotitube.viewmodels.LibraryArtistsViewModel
 import com.ruben.spotitube.viewmodels.LibraryPlaylistsViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-private data class PlaylistShortcutEntry(
-    val title: String,
-    @DrawableRes val iconRes: Int,
-    val route: String,
-    val accentColor: Color,
-)
+
 
 @Composable
 fun LibraryPlaylistsScreen(
@@ -204,41 +192,45 @@ fun LibraryPlaylistsScreen(
     val shortcuts = buildList {
         if (showLiked) {
             add(
-                PlaylistShortcutEntry(
+                LibraryShortcutItem(
+                    id = "liked",
                     title = likedPlaylist.playlist.name,
                     iconRes = R.drawable.favorite,
                     route = "auto_playlist/liked",
-                    accentColor = MaterialTheme.colorScheme.error,
+                    accentColor = ArmoryColors.CopperAccent,
                 ),
             )
         }
         if (showDownloaded) {
             add(
-                PlaylistShortcutEntry(
+                LibraryShortcutItem(
+                    id = "downloaded",
                     title = downloadPlaylist.playlist.name,
                     iconRes = R.drawable.offline,
                     route = "auto_playlist/downloaded",
-                    accentColor = MaterialTheme.colorScheme.primary,
+                    accentColor = ArmoryColors.SilverAccent,
                 ),
             )
         }
         if (showCached) {
             add(
-                PlaylistShortcutEntry(
+                LibraryShortcutItem(
+                    id = "cached",
                     title = cachePlaylist.playlist.name,
                     iconRes = R.drawable.cached,
                     route = "cache_playlist/cached",
-                    accentColor = MaterialTheme.colorScheme.tertiary,
+                    accentColor = ArmoryColors.Gold2,
                 ),
             )
         }
         if (showTop) {
             add(
-                PlaylistShortcutEntry(
+                LibraryShortcutItem(
+                    id = "top",
                     title = topPlaylist.playlist.name,
                     iconRes = R.drawable.trending_up,
                     route = "top_playlist/$topSize",
-                    accentColor = MaterialTheme.colorScheme.secondary,
+                    accentColor = ArmoryColors.GoldPrimary,
                 ),
             )
         }
@@ -351,78 +343,21 @@ fun LibraryPlaylistsScreen(
                 headerContent()
             }
 
-            item(key = "shortcuts") {
-                val likedSongs by database.likedSongsByRowIdAsc().collectAsState(initial = emptyList())
-                val likedCount = likedSongs.size
-                val likedMinutes = likedSongs.sumOf { maxOf(0, it.song.duration) } / 60
-
-                val downloadUtil = LocalDownloadUtil.current
-                val downloads by downloadUtil.downloads.collectAsState()
-                val downloadedSongsList = remember(downloads, likedSongs) {
-                    likedSongs.filter { downloads[it.id]?.state == Download.STATE_COMPLETED }
-                }
-                val downloadedCount = downloadedSongsList.size
-                val downloadedMinutes = downloadedSongsList.sumOf { maxOf(0, it.song.duration) } / 60
-
-                val topSongs by database.mostPlayedSongs(0L, topSize.toInt()).collectAsState(initial = emptyList())
-                val topCount = topSongs.size
-                val topMinutes = topSongs.sumOf { maxOf(0, it.song.duration) } / 60
-
-                val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
-                val cachedSongs by cacheViewModel.cachedSongs.collectAsState()
-                val cachedCount = cachedSongs.size
-                val cachedMinutes = cachedSongs.sumOf { maxOf(0, it.song.duration) } / 60
-
-                if (showLiked) {
-                    FavoritosGradientCard(
-                        songCount = likedCount,
-                        totalMinutes = likedMinutes.toLong(),
-                        onClick = { navController.navigate("auto_playlist/liked") }
-                    )
-                    Spacer(Modifier.height(12.dp))
-                }
-                if (showDownloaded) {
-                    DownloadsGradientCard(
-                        songCount = downloadedCount,
-                        totalMinutes = downloadedMinutes.toLong(),
-                        onClick = { navController.navigate("auto_playlist/downloaded") }
-                    )
-                    Spacer(Modifier.height(12.dp))
-                }
-                if (showTop) {
-                    TopGradientCard(
-                        songCount = topCount,
-                        totalMinutes = topMinutes.toLong(),
-                        onClick = { navController.navigate("top_playlist/$topSize") }
-                    )
-                    Spacer(Modifier.height(12.dp))
-                }
-                if (showCached) {
-                    CachedGradientCard(
-                        songCount = cachedCount,
-                        totalMinutes = cachedMinutes.toLong(),
-                        onClick = { navController.navigate("cache_playlist/cached") }
-                    )
-                    Spacer(Modifier.height(16.dp))
-                }
-                PlaylistShortcutGrid(
-                    entries = shortcuts.filter { 
-                        it.route != "auto_playlist/liked" && 
-                        it.route != "auto_playlist/downloaded" && 
-                        !it.route.startsWith("top_playlist") &&
-                        it.route != "cache_playlist/cached"
-                    },
-                    onClick = navController::navigate,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-            }
-
             item(key = "filter_chips") {
                 LibraryFilterChipsRow(
                     selectedFilter = filterType,
                     onFilterSelected = onFilterTypeChange,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
+            }
+
+            if (shortcuts.isNotEmpty()) {
+                item(key = "shortcuts") {
+                    LibraryShortcutsRow(
+                        shortcuts = shortcuts,
+                        onClick = { navController.navigate(it) },
+                    )
+                }
             }
 
             item(key = "playlist_section_header") {
@@ -575,12 +510,12 @@ private fun FavoritosGradientCard(
             .height(80.dp)
             .combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(Color(0xFFFF5252), Color.Transparent)))
+        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFFD32F2F), Color(0xFFB71C1C))))
+                .background(ArmoryColors.SurfaceBlack)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(
@@ -590,14 +525,14 @@ private fun FavoritosGradientCard(
             ) {
                 Text(
                     text = "Favoritos",
-                    color = Color.White,
+                    color = ArmoryColors.TextPrimary,
                     fontFamily = ArmoryFont.Title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black
                 )
                 Text(
                     text = "$songCount canciones • $totalMinutes min",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = ArmoryColors.TextMuted,
                     fontFamily = ArmoryFont.Body,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
@@ -606,7 +541,7 @@ private fun FavoritosGradientCard(
                 Icon(
                     painter = painterResource(R.drawable.favorite),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = ArmoryColors.CopperAccent,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -627,12 +562,12 @@ private fun DownloadsGradientCard(
             .height(80.dp)
             .combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(Color(0xFF448AFF), Color.Transparent)))
+        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFF1976D2), Color(0xFF0D47A1))))
+                .background(ArmoryColors.SurfaceBlack)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(
@@ -642,14 +577,14 @@ private fun DownloadsGradientCard(
             ) {
                 Text(
                     text = "Local",
-                    color = Color.White,
+                    color = ArmoryColors.TextPrimary,
                     fontFamily = ArmoryFont.Title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black
                 )
                 Text(
                     text = "$songCount canciones • $totalMinutes min",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = ArmoryColors.TextMuted,
                     fontFamily = ArmoryFont.Body,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
@@ -658,7 +593,7 @@ private fun DownloadsGradientCard(
                 Icon(
                     painter = painterResource(R.drawable.offline),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = ArmoryColors.SilverAccent,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -684,7 +619,7 @@ private fun TopGradientCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ArmoryColors.GoldGradient)
+                .background(GoldGradient)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(
@@ -731,12 +666,12 @@ private fun CachedGradientCard(
             .height(80.dp)
             .combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(Color(0xFF606060), Color.Transparent)))
+        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFF2A2A2A), Color(0xFF141414))))
+                .background(ArmoryColors.SurfaceBlack)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(
@@ -746,14 +681,14 @@ private fun CachedGradientCard(
             ) {
                 Text(
                     text = "Caché",
-                    color = Color.White,
+                    color = ArmoryColors.TextPrimary,
                     fontFamily = ArmoryFont.Title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black
                 )
                 Text(
                     text = "$songCount canciones • $totalMinutes min",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = ArmoryColors.TextMuted,
                     fontFamily = ArmoryFont.Body,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
@@ -762,7 +697,7 @@ private fun CachedGradientCard(
                 Icon(
                     painter = painterResource(R.drawable.cached),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = ArmoryColors.Gold2,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -812,38 +747,7 @@ private fun LibraryFilterChipsRow(
     }
 }
 
-@Composable
-private fun PlaylistShortcutGrid(
-    entries: List<PlaylistShortcutEntry>,
-    onClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier,
-    ) {
-        entries.chunked(2).forEach { rowEntries ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                rowEntries.forEach { entry ->
-                    LibraryPinnedCollectionTile(
-                        title = entry.title,
-                        iconRes = entry.iconRes,
-                        accentColor = entry.accentColor,
-                        modifier = Modifier
-                            .weight(1f)
-                            .combinedClickable(onClick = { onClick(entry.route) }),
-                    )
-                }
-                if (rowEntries.size == 1) {
-                    Spacer(Modifier.weight(1f))
-                }
-            }
-        }
-    }
-}
+
 
 @Composable
 private fun PlaylistHeaderSplitRow(

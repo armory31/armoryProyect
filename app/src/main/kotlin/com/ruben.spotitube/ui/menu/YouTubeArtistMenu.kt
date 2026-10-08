@@ -39,7 +39,7 @@ import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
-import com.ruben.spotitube.db.entities.ArtistEntity
+import com.ruben.spotitube.models.toSavedArtistEntity
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
@@ -172,14 +172,7 @@ fun YouTubeArtistMenu(
                 },
                 modifier = Modifier.clickable {
                     scope.launch {
-                        syncManager.toggleArtistLike(
-                            ArtistEntity(
-                                id = artist.id,
-                                name = artist.title,
-                                channelId = artist.channelId,
-                                thumbnailUrl = artist.thumbnail,
-                            )
-                        )
+                        syncManager.toggleArtistLike(artist.toSavedArtistEntity())
                     }
                 }
             )

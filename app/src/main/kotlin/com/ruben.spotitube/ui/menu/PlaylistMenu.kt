@@ -61,6 +61,7 @@ import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistSong
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.playback.ExoDownloadService
@@ -153,15 +154,16 @@ fun PlaylistMenu(
             onDismiss = { showEditDialog = false },
             onSave = { name, thumbnailUrl ->
                 onDismiss()
-                database.query {
-                    update(
-                        playlist.playlist.copy(
-                            name = name,
-                            thumbnailUrl = thumbnailUrl,
-                            lastUpdateTime = LocalDateTime.now(),
-                        )
+                database.insertSavedPlaylist(
+                    SavedPlaylistEntity(
+                        id = playlist.playlist.id,
+                        name = name,
+                        browseId = playlist.playlist.browseId,
+                        thumbnailUrl = thumbnailUrl,
+                        isEditable = playlist.playlist.isEditable,
+                        createdAt = playlist.playlist.createdAt ?: LocalDateTime.now()
                     )
-                }
+                )
                 coroutineScope.launch(Dispatchers.IO) {
                     playlist.playlist.browseId?.let { com.ruben.spotitube.innertube.YouTube.renamePlaylist(it, name) }
                 }

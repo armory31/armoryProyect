@@ -20,7 +20,9 @@ import io.ktor.client.request.headers
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -237,7 +239,7 @@ object Updater {
     private suspend fun fetchReleasesNetwork(
         perPage: Int,
         cachedEtag: String?,
-    ): ReleasesNetworkResult {
+    ): ReleasesNetworkResult = withContext(Dispatchers.IO) {
         val response: HttpResponse =
             client.get("https://api.github.com/repos/Arturo254/OpenTune/releases?per_page=$perPage") {
                 headers {
@@ -249,7 +251,7 @@ object Updater {
                 }
             }
         val etag = response.headers["ETag"]
-        return when (response.status) {
+        when (response.status) {
             HttpStatusCode.NotModified ->
                 ReleasesNetworkResult(
                     status = response.status,
@@ -273,29 +275,31 @@ object Updater {
     }
 
     private suspend fun fetchNightlyJson(): Result<NightlyInfo> = runCatching {
-        val response = client.get(NIGHTLY_JSON_URL) {
-            headers {
-                append("Accept", "application/json")
-                append("User-Agent", "OpenTune")
-            }
-        }.bodyAsText()
-        val json = JSONObject(response)
+        withContext(Dispatchers.IO) {
+            val response = client.get(NIGHTLY_JSON_URL) {
+                headers {
+                    append("Accept", "application/json")
+                    append("User-Agent", "OpenTune")
+                }
+            }.bodyAsText()
+            val json = JSONObject(response)
 
-        // El JSON está en /nightly/update.json, pero el APK debe servirse sin /nightly/
-        val rawApkUrl = json.optString("apkUrl", "")
-        val fixedApkUrl = rawApkUrl.replace(
-            "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/",
-            "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/"
-        )
+            // El JSON está en /nightly/update.json, pero el APK debe servirse sin /nightly/
+            val rawApkUrl = json.optString("apkUrl", "")
+            val fixedApkUrl = rawApkUrl.replace(
+                "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/",
+                "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/"
+            )
 
-        NightlyInfo(
-            versionName = json.optString("versionName", "unknown"),
-            apkUrl = fixedApkUrl.ifEmpty {
-                "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/app-universal-release.apk"
-            },
-            changelog = json.optString("changelog", "").takeIf { it.isNotEmpty() },
-            publishedAt = json.optString("publishedAt", "")
-        )
+            NightlyInfo(
+                versionName = json.optString("versionName", "unknown"),
+                apkUrl = fixedApkUrl.ifEmpty {
+                    "https://pub-2218e6bbd5b948e1b5d882cf4d92086d.r2.dev/app-universal-release.apk"
+                },
+                changelog = json.optString("changelog", "").takeIf { it.isNotEmpty() },
+                publishedAt = json.optString("publishedAt", "")
+            )
+        }
     }
 
     // ─── Funciones públicas (compatibilidad obligatoria) ───────────────────────

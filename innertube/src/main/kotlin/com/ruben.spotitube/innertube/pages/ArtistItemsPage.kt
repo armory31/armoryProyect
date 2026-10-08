@@ -27,32 +27,40 @@ data class ArtistItemsPage(
 ) {
     companion object {
         fun fromMusicResponsiveListItemRenderer(renderer: MusicResponsiveListItemRenderer): SongItem? {
+            val videoId = renderer.playlistItemData?.videoId
+                ?: renderer.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer
+                    ?.playNavigationEndpoint?.watchEndpoint?.videoId
+                ?: return null
+            val title = renderer.flexColumns.firstOrNull()
+                ?.musicResponsiveListItemFlexColumnRenderer?.text
+                ?.runs?.firstOrNull()?.text ?: return null
+            val artists = renderer.flexColumns.getOrNull(1)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.oddElements()?.map {
+                Artist(
+                    name = it.text,
+                    id = it.navigationEndpoint?.browseEndpoint?.browseId,
+                )
+            }.orEmpty()
+            val album = renderer.flexColumns.getOrNull(3)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.let {
+                val albumId = it.navigationEndpoint?.browseEndpoint?.browseId
+                if (albumId != null) Album(name = it.text, id = albumId) else null
+            }
+            val duration = renderer.fixedColumns?.firstOrNull()
+                ?.musicResponsiveListItemFlexColumnRenderer?.text
+                ?.runs?.firstOrNull()
+                ?.text?.parseTime()
+            val thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl().orEmpty()
+
             return SongItem(
-                id = renderer.playlistItemData?.videoId ?: return null,
-                title = renderer.flexColumns.firstOrNull()
-                    ?.musicResponsiveListItemFlexColumnRenderer?.text
-                    ?.runs?.firstOrNull()?.text ?: return null,
-                artists = renderer.flexColumns.getOrNull(1)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.oddElements()?.map {
-                    Artist(
-                        name = it.text,
-                        id = it.navigationEndpoint?.browseEndpoint?.browseId
-                    )
-                } ?: return null,
-                album = renderer.flexColumns.getOrNull(3)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.let {
-                    Album(
-                        name = it.text,
-                        id = it.navigationEndpoint?.browseEndpoint?.browseId ?: return null
-                    )
-                },
-                duration = renderer.fixedColumns?.firstOrNull()
-                    ?.musicResponsiveListItemFlexColumnRenderer?.text
-                    ?.runs?.firstOrNull()
-                    ?.text?.parseTime() ?: return null,
-                thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: return null,
-                explicit = renderer.badges?.find {
+                id = videoId,
+                title = title,
+                artists = artists,
+                album = album,
+                duration = duration,
+                thumbnail = thumbnail,
+                explicit = renderer.badges?.any {
                     it.musicInlineBadgeRenderer?.icon?.iconType == "MUSIC_EXPLICIT_BADGE"
-                } != null,
-                endpoint = renderer.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchEndpoint
+                } == true,
+                endpoint = renderer.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchEndpoint,
             )
         }
 

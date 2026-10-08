@@ -72,6 +72,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -942,6 +943,13 @@ fun PlayerPlaybackControls(
                         ),
                         modifier = Modifier
                             .size(width = playButtonWidth, height = playButtonHeight)
+                            .drawBehind {
+                                drawCircle(
+                                    color = ArmoryColors.Gold2.copy(alpha = 0.35f),
+                                    radius = size.minDimension * 0.75f,
+                                    center = center
+                                )
+                            }
                             .clip(RoundedCornerShape(32.dp))
                     ) {
                         if (isLoading) {

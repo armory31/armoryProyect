@@ -10,6 +10,7 @@ package com.ruben.spotitube.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -238,7 +239,7 @@ fun HomeScreen(
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                                    .border(BorderStroke(1.5.dp, goldMetallicBrush), RoundedCornerShape(16.dp))
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -300,7 +301,7 @@ fun HomeScreen(
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                                    .border(BorderStroke(1.5.dp, bronzeMetallicBrush), RoundedCornerShape(16.dp))
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {

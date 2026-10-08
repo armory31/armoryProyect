@@ -8,8 +8,6 @@
 
 package com.ruben.spotitube.ui.menu
 
-import com.ruben.spotitube.db.entities.AlbumEntity
-
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
@@ -75,6 +73,7 @@ import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.AlbumItem
+import com.ruben.spotitube.models.toSavedAlbumEntity
 import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.YouTubeAlbumRadio
 import com.ruben.spotitube.ui.component.ListDialog
@@ -154,7 +153,7 @@ fun YouTubeAlbumMenu(
     // Split artists by configured separators
     data class SplitArtist(
         val name: String,
-        val originalArtist: com.ruben.spotitube.db.entities.ArtistEntity?
+        val originalArtist: com.ruben.spotitube.db.entities.SavedArtistEntity?
     )
 
     val splitArtists = remember(album?.artists, artistSeparators) {
@@ -292,24 +291,7 @@ fun YouTubeAlbumMenu(
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        val albumEntity = album?.album ?: AlbumEntity(
-                            id = albumItem.id,
-                            title = albumItem.title,
-                            thumbnailUrl = albumItem.thumbnail,
-                            year = albumItem.year,
-                            songCount = 0,
-                            duration = 0
-                        )
-                        syncManager.toggleAlbumLike(
-                            albumId = albumEntity.id,
-                            title = albumEntity.title,
-                            artistId = albumItem.artists?.firstOrNull()?.id,
-                            artistName = albumItem.artists?.firstOrNull()?.name,
-                            songCount = albumEntity.songCount,
-                            duration = albumEntity.duration,
-                            thumbnailUrl = albumEntity.thumbnailUrl,
-                            year = albumEntity.year
-                        )
+                        syncManager.toggleAlbumLike(album?.album ?: albumItem.toSavedAlbumEntity())
                     }
                 },
             ) {
@@ -467,24 +449,7 @@ fun YouTubeAlbumMenu(
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        val albumEntity = album?.album ?: AlbumEntity(
-                            id = albumItem.id,
-                            title = albumItem.title,
-                            thumbnailUrl = albumItem.thumbnail,
-                            year = albumItem.year,
-                            songCount = 0,
-                            duration = 0
-                        )
-                        syncManager.toggleAlbumLike(
-                            albumId = albumEntity.id,
-                            title = albumEntity.title,
-                            artistId = albumItem.artists?.firstOrNull()?.id,
-                            artistName = albumItem.artists?.firstOrNull()?.name,
-                            songCount = albumEntity.songCount,
-                            duration = albumEntity.duration,
-                            thumbnailUrl = albumEntity.thumbnailUrl,
-                            year = albumEntity.year
-                        )
+                        syncManager.toggleAlbumLike(album?.album ?: albumItem.toSavedAlbumEntity())
                     }
                 }
             )

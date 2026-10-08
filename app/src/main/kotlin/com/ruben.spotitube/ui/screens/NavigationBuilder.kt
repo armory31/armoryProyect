@@ -170,7 +170,7 @@ fun NavGraphBuilder.navigationBuilder(
         ArtistAlbumsScreen(navController, scrollBehavior)
     }
     composable(
-        route = "artist/{artistId}/items?browseId={browseId}&params={params}",
+        route = "artist/{artistId}/items?browseId={browseId}&params={params}&title={title}",
         arguments =
             listOf(
                 navArgument("artistId") {
@@ -184,8 +184,17 @@ fun NavGraphBuilder.navigationBuilder(
                     type = NavType.StringType
                     nullable = true
                 },
+                navArgument("title") {
+                    type = NavType.StringType
+                    nullable = true
+                },
             ),
-    ) {
+    ) { backStackEntry ->
+        val artistId = backStackEntry.arguments?.getString("artistId")
+        val browseId = backStackEntry.arguments?.getString("browseId")
+        val params = backStackEntry.arguments?.getString("params")
+        val title = backStackEntry.arguments?.getString("title")
+        android.util.Log.d("ARMORY_DEBUG", "Navegando a ArtistItemsScreen: artistId=$artistId, browseId=$browseId, params=$params, title=$title")
         ArtistItemsScreen(navController, scrollBehavior)
     }
     composable(
@@ -244,7 +253,7 @@ fun NavGraphBuilder.navigationBuilder(
         TopPlaylistScreen(navController, scrollBehavior)
     }
     composable(
-        route = "youtube_browse/{browseId}?params={params}",
+        route = "youtube_browse/{browseId}?params={params}&title={title}",
         arguments =
             listOf(
                 navArgument("browseId") {
@@ -252,6 +261,10 @@ fun NavGraphBuilder.navigationBuilder(
                     nullable = true
                 },
                 navArgument("params") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument("title") {
                     type = NavType.StringType
                     nullable = true
                 },

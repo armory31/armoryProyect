@@ -80,6 +80,7 @@ import com.ruben.spotitube.constants.ArtistSeparatorsKey
 import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.db.entities.Album
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
@@ -158,7 +159,7 @@ fun AlbumMenu(
     // Split artists by configured separators
     data class SplitArtist(
         val name: String,
-        val originalArtist: com.ruben.spotitube.db.entities.ArtistEntity?
+        val originalArtist: com.ruben.spotitube.db.entities.SavedArtistEntity?
     )
 
     val splitArtists = remember(album.artists, artistSeparators) {
@@ -572,10 +573,19 @@ fun AlbumMenu(
                 modifier = Modifier.clickable {
                     refetchIconDegree -= 360
                     scope.launch(Dispatchers.IO) {
-                        YouTube.album(album.id).onSuccess {
-                            database.withTransaction {
-                                update(album.album, it, album.artists)
-                            }
+                        YouTube.album(album.id).onSuccess { albumPage ->
+                            database.insertSavedAlbum(
+                                SavedAlbumEntity(
+                                    id = albumPage.album.browseId,
+                                    title = albumPage.album.title,
+                                    artistId = albumPage.album.artists?.firstOrNull()?.id,
+                                    artistName = albumPage.album.artists?.firstOrNull()?.name,
+                                    songCount = albumPage.songs.size,
+                                    duration = albumPage.songs.sumOf { s -> s.duration ?: 0 },
+                                    thumbnailUrl = albumPage.album.thumbnail,
+                                    year = albumPage.album.year
+                                )
+                            )
                         }
                     }
                 }

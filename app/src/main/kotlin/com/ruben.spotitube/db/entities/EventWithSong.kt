@@ -17,7 +17,7 @@ data class EventWithSong(
     @Embedded
     val event: Event,
     @Relation(
-        entity = SongEntity::class,
+        entity = SavedSongEntity::class,
         parentColumn = "songId",
         entityColumn = "id",
     )

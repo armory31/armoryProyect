@@ -17,10 +17,10 @@ import androidx.room.Relation
 data class Song
 @JvmOverloads
 constructor(
-    @Embedded val song: SongEntity,
+    @Embedded val song: SavedSongEntity,
 
     @Relation(
-        entity = ArtistEntity::class,
+        entity = SavedArtistEntity::class,
         entityColumn = "id",
         parentColumn = "id",
         associateBy =
@@ -30,10 +30,10 @@ constructor(
             entityColumn = "artistId",
         ),
     )
-    val artists: List<ArtistEntity>,
+    val artists: List<SavedArtistEntity>,
 
     @Relation(
-        entity = AlbumEntity::class,
+        entity = SavedAlbumEntity::class,
         entityColumn = "id",
         parentColumn = "id",
         associateBy =
@@ -43,7 +43,7 @@ constructor(
             entityColumn = "albumId",
         ),
     )
-    val album: AlbumEntity? = null,
+    val album: SavedAlbumEntity? = null,
 
     @Relation(
         parentColumn = "id",
@@ -57,4 +57,10 @@ constructor(
         get() = song.title
     override val thumbnailUrl: String?
         get() = song.thumbnailUrl
+
+    fun toSavedSongEntity() = song
+
+    companion object {
+        fun from(savedSong: SavedSongEntity): Song = savedSong.toSong()
+    }
 }

@@ -8,12 +8,17 @@
 
 package com.ruben.spotitube.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruben.spotitube.db.MusicDatabase
+import com.ruben.spotitube.db.entities.AlbumWithSongs
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.AlbumItem
+import com.ruben.spotitube.models.toAlbumWithSongs
+import com.ruben.spotitube.models.toSavedSongEntity
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.sync.SyncManager
 import com.ruben.spotitube.utils.reportException
@@ -60,10 +65,19 @@ constructor(
     val isLiked = libraryStateHolder.isSavedAlbum(albumId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
-    val albumWithSongs =
-        database
-            .albumWithSongs(albumId)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    private val onlineAlbumWithSongs = MutableStateFlow<AlbumWithSongs?>(null)
+
+    val albumWithSongs: StateFlow<AlbumWithSongs?> = combine(
+        database.albumWithSongs(albumId),
+        onlineAlbumWithSongs
+    ) { dbData, onlineData ->
+        if (dbData != null && dbData.songs.isNotEmpty()) {
+            dbData
+        } else {
+            onlineData
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     var otherVersions = MutableStateFlow<List<AlbumItem>>(emptyList())
 
     private val _fetchState = MutableStateFlow<FetchState>(FetchState.Pending)
@@ -87,28 +101,17 @@ constructor(
     fun retry() {
         viewModelScope.launch {
             _fetchState.value = FetchState.Pending
-            val album = database.album(albumId).first()
             YouTube
                 .album(albumId)
-                .onSuccess {
-                    playlistId.value = it.album.playlistId
-                    otherVersions.value = it.otherVersions
-                    database.withTransaction {
-                        if (album == null) {
-                            insert(it)
-                        } else {
-                            update(album.album, it, album.artists)
-                        }
-                    }
+                .onSuccess { albumPage ->
+                    Log.d("SAVED_ALBUM_DEBUG", "AlbumViewModel: Obtenidas ${albumPage.songs.size} canciones desde InnerTube para el browseId $albumId")
+                    playlistId.value = albumPage.album.playlistId
+                    otherVersions.value = albumPage.otherVersions
+                    onlineAlbumWithSongs.value = albumPage.toAlbumWithSongs()
                     _fetchState.value = FetchState.Success
                 }.onFailure {
                     reportException(it)
                     val isNotFound = it.message?.contains("NOT_FOUND") == true
-                    if (isNotFound) {
-                        database.query {
-                            album?.album?.let(::delete)
-                        }
-                    }
                     _fetchState.value = FetchState.Failed(isNotFound = isNotFound)
                 }
         }
@@ -116,14 +119,33 @@ constructor(
 
     fun toggleLike() {
         viewModelScope.launch {
-            val album = albumWithSongs.value?.album
+            val current = albumWithSongs.value
+            val album = current?.album
                 ?: database.getAlbumById(albumId)
                 ?: database.getSavedAlbum(albumId)?.toAlbum()?.album
 
             if (album != null) {
                 database.withTransaction {
-                    if (getAlbumById(album.id) == null) {
-                        insert(album)
+                    if (database.getSavedAlbum(album.id) == null) {
+                        database.insertSavedAlbum(
+                            SavedAlbumEntity(
+                                id = album.id,
+                                playlistId = playlistId.value.ifEmpty { album.playlistId },
+                                title = album.title,
+                                artistId = album.artistId,
+                                artistName = album.artistName,
+                                songCount = album.songCount,
+                                duration = album.duration,
+                                thumbnailUrl = album.thumbnailUrl,
+                                year = album.year,
+                                explicit = album.explicit
+                            )
+                        )
+                        current?.songs?.forEach { song ->
+                            database.insertSavedSong(song.toSavedSongEntity())
+                        }
+                    } else {
+                        database.deleteSavedAlbum(album.id)
                     }
                 }
                 syncManager.toggleAlbumLike(album)

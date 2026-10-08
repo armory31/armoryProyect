@@ -82,9 +82,9 @@ import com.ruben.spotitube.constants.ExternalDownloaderEnabledKey
 import com.ruben.spotitube.constants.ExternalDownloaderPackageKey
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
-import com.ruben.spotitube.db.entities.ArtistEntity
 import com.ruben.spotitube.db.entities.Event
 import com.ruben.spotitube.db.entities.PlaylistSong
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
@@ -167,7 +167,7 @@ fun SongMenu(
     // Split artists by configured separators
     data class SplitArtist(
         val name: String,
-        val originalArtist: ArtistEntity?
+        val originalArtist: SavedArtistEntity?
     )
 
     val splitArtists = remember(orderedArtists, artistSeparators) {
@@ -232,10 +232,18 @@ fun SongMenu(
 
                 coroutineScope.launch {
                     database.query {
-                        update(song.song.copy(title = newTitle))
+                        insertSavedSong(song.toSavedSongEntity().copy(title = newTitle))
                         val artist = song.artists.firstOrNull()
                         if (artist != null) {
-                            update(artist.copy(name = newArtist))
+                            insertSavedArtist(
+                                SavedArtistEntity(
+                                    id = artist.id,
+                                    name = newArtist,
+                                    thumbnailUrl = artist.thumbnailUrl,
+                                    channelId = artist.channelId,
+                                    savedAt = artist.bookmarkedAt ?: java.time.LocalDateTime.now()
+                                )
+                            )
                         }
                     }
 
@@ -617,7 +625,7 @@ fun SongMenu(
                                 Modifier.clickable {
                                     onDismiss()
                                     database.query {
-                                        delete(event)
+                                        deleteHistorySong(event.id, event.songId)
                                     }
                                 },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -898,7 +906,7 @@ fun SongMenu(
                                         val newSong = it.firstOrNull()
                                         if (newSong != null) {
                                             database.withTransaction {
-                                                update(song, newSong.toMediaMetadata())
+                                                database.insert(newSong.toMediaMetadata())
                                             }
                                         }
                                     }

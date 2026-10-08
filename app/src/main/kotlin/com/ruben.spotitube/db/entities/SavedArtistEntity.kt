@@ -1,6 +1,7 @@
 package com.ruben.spotitube.db.entities
 
 import androidx.compose.runtime.Immutable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
@@ -12,20 +13,28 @@ data class SavedArtistEntity(
     val name: String,
     val thumbnailUrl: String? = null,
     val channelId: String? = null,
+    val lastUpdateTime: LocalDateTime = LocalDateTime.now(),
+    @ColumnInfo(name = "isLocal", defaultValue = "0")
+    val isLocal: Boolean = false,
+    @ColumnInfo(name = "isBookmarked", defaultValue = "1")
+    val isBookmarked: Boolean = true,
+    val bookmarkedAt: LocalDateTime? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {
+    val isYouTubeArtist: Boolean
+        get() = id.startsWith("UC") || id.startsWith("FEmusic_library_privately_owned_artist")
+
+    val isPrivatelyOwnedArtist: Boolean
+        get() = id.startsWith("FEmusic_library_privately_owned_artist")
+
     fun toArtist(): Artist {
-        val artistEntity = ArtistEntity(
-            id = id,
-            name = name,
-            thumbnailUrl = thumbnailUrl,
-            channelId = channelId,
-            isBookmarked = true
-        )
         return Artist(
-            artist = artistEntity,
+            artist = this,
             songCount = 0
         )
     }
-}
 
+    companion object {
+        fun generateArtistId() = "LA" + org.apache.commons.lang3.RandomStringUtils.insecure().next(8, true, false)
+    }
+}

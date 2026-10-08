@@ -108,7 +108,7 @@ fun StorageSettings(
     var clearCanvasCacheDialog by remember { mutableStateOf(false) }
 
     var imageCacheSize by remember {
-        mutableLongStateOf(imageDiskCache.size)
+        mutableLongStateOf(0L)
     }
     var playerCacheSize by remember {
         mutableLongStateOf(0L)
@@ -117,7 +117,7 @@ fun StorageSettings(
         mutableLongStateOf(0L)
     }
     var canvasCacheSize by remember {
-        androidx.compose.runtime.mutableIntStateOf(CanvasArtworkPlaybackCache.size())
+        androidx.compose.runtime.mutableIntStateOf(0)
     }
     val imageCacheProgress by animateFloatAsState(
         targetValue = if (imageDiskCache.maxSize > 0) {
@@ -171,7 +171,7 @@ fun StorageSettings(
     LaunchedEffect(imageDiskCache) {
         while (isActive) {
             delay(500.milliseconds)
-            imageCacheSize = imageDiskCache.size
+            imageCacheSize = withContext(Dispatchers.IO) { imageDiskCache.size }
         }
     }
     LaunchedEffect(playerCache, playerCacheDir) {
@@ -197,7 +197,7 @@ fun StorageSettings(
     LaunchedEffect(Unit) {
         while (isActive) {
             delay(500.milliseconds)
-            canvasCacheSize = CanvasArtworkPlaybackCache.size()
+            canvasCacheSize = withContext(Dispatchers.IO) { CanvasArtworkPlaybackCache.size() }
         }
     }
 

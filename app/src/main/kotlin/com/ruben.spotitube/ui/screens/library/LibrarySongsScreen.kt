@@ -4,11 +4,8 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.ui.screens.library
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,8 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -36,6 +31,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +63,6 @@ import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.playback.queues.ListQueue
-import com.ruben.spotitube.ui.component.ChipsRow
 import com.ruben.spotitube.ui.component.HideOnScrollFAB
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SongListItem
@@ -116,9 +111,13 @@ fun LibrarySongsScreen(
         }
     }
 
-    val wrappedSongs = songs.map { item -> ItemWrapper(item) }.toMutableList()
+    val wrappedSongs = remember(songs) { songs.map { item -> ItemWrapper(item) }.toMutableList() }
     var selection by remember {
         mutableStateOf(false)
+    }
+
+    val selectedCount by remember(wrappedSongs) {
+        derivedStateOf { wrappedSongs.count { it.isSelected } }
     }
 
     val lazyListState = rememberLazyListState()
@@ -152,8 +151,10 @@ fun LibrarySongsScreen(
                 key = "filter",
                 contentType = CONTENT_TYPE_HEADER,
             ) {
-                Row {
-                    Spacer(Modifier.width(12.dp))
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     FilterChip(
                         label = { Text(stringResource(R.string.songs)) },
                         selected = true,
@@ -179,17 +180,15 @@ fun LibrarySongsScreen(
                             selectedBorderColor = ArmoryColors.Gold3.copy(alpha = 0.6f)
                         )
                     )
-                    ChipsRow(
-                        chips =
-                        listOf(
+                    Spacer(Modifier.width(8.dp))
+                    LibraryFilterChips(
+                        filters = listOf(
                             SongFilter.LIKED to stringResource(R.string.filter_liked),
                             SongFilter.LIBRARY to stringResource(R.string.filter_library),
                             SongFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
                         ),
-                        currentValue = filter,
-                        onValueUpdate = {
-                            filter = it
-                        },
+                        selectedFilter = filter,
+                        onFilterSelected = { filter = it },
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -204,7 +203,6 @@ fun LibrarySongsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        val count = wrappedSongs.count { it.isSelected }
                         IconButton(
                             onClick = { selection = false },
                         ) {
@@ -214,12 +212,12 @@ fun LibrarySongsScreen(
                             )
                         }
                         Text(
-                            text = pluralStringResource(R.plurals.n_song, count, count),
+                            text = pluralStringResource(R.plurals.n_song, selectedCount, selectedCount),
                             modifier = Modifier.weight(1f)
                         )
                         IconButton(
                             onClick = {
-                                if (count == wrappedSongs.size) {
+                                if (selectedCount == wrappedSongs.size) {
                                     wrappedSongs.forEach { it.isSelected = false }
                                 } else {
                                     wrappedSongs.forEach { it.isSelected = true }
@@ -227,7 +225,7 @@ fun LibrarySongsScreen(
                             },
                         ) {
                             Icon(
-                                painter = painterResource(if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all),
+                                painter = painterResource(if (selectedCount == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all),
                                 contentDescription = null,
                             )
                         }
@@ -251,53 +249,34 @@ fun LibrarySongsScreen(
                         }
                     }
                 } else {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = ArmoryColors.Silver5.copy(alpha = 0.5f)
-                        ),
-                        shape = MaterialTheme.shapes.large,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .border(
-                                1.dp,
-                                ArmoryColors.Silver4.copy(alpha = 0.3f),
-                                MaterialTheme.shapes.large
-                            ),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                        ) {
-                            SortHeader(
-                                sortType = sortType,
-                                sortDescending = sortDescending,
-                                onSortTypeChange = onSortTypeChange,
-                                onSortDescendingChange = onSortDescendingChange,
-                                sortTypeText = { sortType ->
-                                    when (sortType) {
-                                        SongSortType.CREATE_DATE -> R.string.sort_by_create_date
-                                        SongSortType.NAME -> R.string.sort_by_name
-                                        SongSortType.ARTIST -> R.string.sort_by_artist
-                                        SongSortType.PLAY_TIME -> R.string.sort_by_play_time
-                                    }
-                                },
-                            )
+                    LibrarySortHeaderCard {
+                        SortHeader(
+                            sortType = sortType,
+                            sortDescending = sortDescending,
+                            onSortTypeChange = onSortTypeChange,
+                            onSortDescendingChange = onSortDescendingChange,
+                            sortTypeText = { sortType ->
+                                when (sortType) {
+                                    SongSortType.CREATE_DATE -> R.string.sort_by_create_date
+                                    SongSortType.NAME -> R.string.sort_by_name
+                                    SongSortType.ARTIST -> R.string.sort_by_artist
+                                    SongSortType.PLAY_TIME -> R.string.sort_by_play_time
+                                }
+                            },
+                        )
 
-                            Spacer(Modifier.weight(1f))
+                        Spacer(Modifier.weight(1f))
 
-                            Text(
-                                text = pluralStringResource(
-                                    R.plurals.n_song,
-                                    songs.size,
-                                    songs.size
-                                ).uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = ArmoryColors.Silver3,
-                                letterSpacing = 1.sp
-                            )
-                        }
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.n_song,
+                                songs.size,
+                                songs.size
+                            ).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = ArmoryColors.Silver3,
+                            letterSpacing = 1.sp
+                        )
                     }
                 }
             }

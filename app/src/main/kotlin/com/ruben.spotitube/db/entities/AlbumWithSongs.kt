@@ -16,9 +16,9 @@ import androidx.room.Relation
 @Immutable
 data class AlbumWithSongs(
     @Embedded
-    val album: AlbumEntity,
+    val album: SavedAlbumEntity,
     @Relation(
-        entity = ArtistEntity::class,
+        entity = SavedArtistEntity::class,
         entityColumn = "id",
         parentColumn = "id",
         associateBy =
@@ -28,9 +28,9 @@ data class AlbumWithSongs(
             entityColumn = "artistId",
         ),
     )
-    val artists: List<ArtistEntity>,
+    val artists: List<SavedArtistEntity>,
     @Relation(
-        entity = SongEntity::class,
+        entity = SavedSongEntity::class,
         entityColumn = "id",
         parentColumn = "id",
         associateBy =

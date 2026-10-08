@@ -6,15 +6,11 @@
 
 package com.ruben.spotitube.ui.screens.library
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -23,11 +19,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,14 +50,12 @@ import com.ruben.spotitube.constants.ArtistSortDescendingKey
 import com.ruben.spotitube.constants.ArtistSortType
 import com.ruben.spotitube.constants.ArtistSortTypeKey
 import com.ruben.spotitube.constants.ArtistViewTypeKey
-import com.ruben.spotitube.constants.CONTENT_TYPE_ARTIST
 import com.ruben.spotitube.constants.CONTENT_TYPE_HEADER
 import com.ruben.spotitube.constants.GridItemSize
 import com.ruben.spotitube.constants.GridItemsSizeKey
 import com.ruben.spotitube.constants.GridThumbnailHeight
 import com.ruben.spotitube.constants.LibraryViewType
 import com.ruben.spotitube.constants.YtmSyncKey
-import com.ruben.spotitube.ui.component.ChipsRow
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
 import com.ruben.spotitube.ui.component.LibraryArtistGridItem
 import com.ruben.spotitube.ui.component.LibraryArtistListItem
@@ -75,8 +64,6 @@ import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.LibraryArtistsViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun LibraryArtistsScreen(
@@ -98,46 +85,20 @@ fun LibraryArtistsScreen(
     val (ytmSync) = rememberPreference(YtmSyncKey, true)
 
     val filterContent = @Composable {
-        Row(modifier = Modifier.padding(vertical = 8.dp)) {
-            Spacer(Modifier.width(12.dp))
-            FilterChip(
-                label = { Text(stringResource(R.string.artists)) },
-                selected = true,
-                colors = FilterChipDefaults.filterChipColors(
-                    containerColor = ArmoryColors.Gold5.copy(alpha = 0.3f),
-                    labelColor = ArmoryColors.Gold2,
-                    selectedContainerColor = ArmoryColors.Gold5.copy(alpha = 0.5f),
-                    selectedLabelColor = ArmoryColors.Gold1
-                ),
-                onClick = onDeselect,
-                shape = RoundedCornerShape(16.dp),
-                leadingIcon = {
-                    Icon(painter = painterResource(R.drawable.close), contentDescription = "", tint = ArmoryColors.Gold2)
-                },
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = true,
-                    borderColor = ArmoryColors.Gold4.copy(alpha = 0.4f),
-                    selectedBorderColor = ArmoryColors.Gold3.copy(alpha = 0.6f)
-                )
-            )
-            ChipsRow(
-                chips = listOf(
-                    ArtistFilter.LIKED to stringResource(R.string.filter_liked),
-                    ArtistFilter.LIBRARY to stringResource(R.string.filter_library)
-                ),
-                currentValue = filter,
-                onValueUpdate = { filter = it },
-                modifier = Modifier.weight(1f),
-            )
-        }
+        LibraryFilterChips(
+            filters = listOf(
+                ArtistFilter.LIKED to stringResource(R.string.filter_liked),
+                ArtistFilter.LIBRARY to stringResource(R.string.filter_library)
+            ),
+            selectedFilter = filter,
+            onFilterSelected = { filter = it },
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
     }
 
     LaunchedEffect(Unit) {
         if (ytmSync) {
-            withContext(Dispatchers.IO) {
-                viewModel.sync()
-            }
+            viewModel.sync()
         }
     }
 
@@ -161,52 +122,41 @@ fun LibraryArtistsScreen(
     }
 
     val headerContent = @Composable {
-        Card(
-            colors = CardDefaults.cardColors(containerColor = ArmoryColors.Silver5.copy(alpha = 0.5f)),
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .border(1.dp, ArmoryColors.Silver4.copy(alpha = 0.3f), MaterialTheme.shapes.large),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-            ) {
-                SortHeader(
-                    sortType = sortType,
-                    sortDescending = sortDescending,
-                    onSortTypeChange = onSortTypeChange,
-                    onSortDescendingChange = onSortDescendingChange,
-                    sortTypeText = { sortType ->
-                        when (sortType) {
-                            ArtistSortType.CREATE_DATE -> R.string.sort_by_create_date
-                            ArtistSortType.NAME -> R.string.sort_by_name
-                            ArtistSortType.SONG_COUNT -> R.string.sort_by_song_count
-                            ArtistSortType.PLAY_TIME -> R.string.sort_by_play_time
-                        }
-                    },
+        LibrarySortHeaderCard {
+            SortHeader(
+                sortType = sortType,
+                sortDescending = sortDescending,
+                onSortTypeChange = onSortTypeChange,
+                onSortDescendingChange = onSortDescendingChange,
+                sortTypeText = { sortType ->
+                    when (sortType) {
+                        ArtistSortType.CREATE_DATE -> R.string.sort_by_create_date
+                        ArtistSortType.NAME -> R.string.sort_by_name
+                        ArtistSortType.SONG_COUNT -> R.string.sort_by_song_count
+                        ArtistSortType.PLAY_TIME -> R.string.sort_by_play_time
+                    }
+                },
+            )
+            Spacer(Modifier.weight(1f))
+            artists.let { artistsList ->
+                Text(
+                    text = pluralStringResource(R.plurals.n_artist, artistsList.size, artistsList.size).uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ArmoryColors.Silver3,
+                    letterSpacing = 1.sp
                 )
-                Spacer(Modifier.weight(1f))
-                artists?.let { artists ->
-                    Text(
-                        text = pluralStringResource(R.plurals.n_artist, artists.size, artists.size).uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = ArmoryColors.Silver3,
-                        letterSpacing = 1.sp
-                    )
-                }
-                IconButton(
-                    onClick = { viewType = viewType.toggle() },
-                    modifier = Modifier.padding(start = 6.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (viewType == LibraryViewType.LIST) R.drawable.list else R.drawable.grid_view
-                        ),
-                        contentDescription = null,
-                        tint = ArmoryColors.Gold3
-                    )
-                }
+            }
+            IconButton(
+                onClick = { viewType = viewType.toggle() },
+                modifier = Modifier.padding(start = 6.dp),
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (viewType == LibraryViewType.LIST) R.drawable.list else R.drawable.grid_view
+                    ),
+                    contentDescription = null,
+                    tint = ArmoryColors.Gold3
+                )
             }
         }
     }
@@ -225,8 +175,8 @@ fun LibraryArtistsScreen(
             ) {
                 item(key = "filter", contentType = CONTENT_TYPE_HEADER) { filterContent() }
                 item(key = "header", contentType = CONTENT_TYPE_HEADER) { headerContent() }
-                artists.let { artists ->
-                    if (artists.isEmpty()) {
+                artists.let { artistsList ->
+                    if (artistsList.isEmpty()) {
                         item {
                             EmptyPlaceholder(
                                 icon = R.drawable.artist,
@@ -235,7 +185,11 @@ fun LibraryArtistsScreen(
                             )
                         }
                     }
-                    items(items = artists.distinctBy { it.id }, key = { it.id }, contentType = { CONTENT_TYPE_ARTIST }) { artist ->
+                    items(
+                        items = artistsList.distinctBy { it.id },
+                        key = { it.id },
+                        contentType = { "artist_list_item" }
+                    ) { artist ->
                         LibraryArtistListItem(
                             navController = navController,
                             menuState = menuState,
@@ -253,8 +207,8 @@ fun LibraryArtistsScreen(
             ) {
                 item(key = "filter", span = { GridItemSpan(maxLineSpan) }, contentType = CONTENT_TYPE_HEADER) { filterContent() }
                 item(key = "header", span = { GridItemSpan(maxLineSpan) }, contentType = CONTENT_TYPE_HEADER) { headerContent() }
-                artists.let { artists ->
-                    if (artists.isEmpty()) {
+                artists.let { artistsList ->
+                    if (artistsList.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             EmptyPlaceholder(
                                 icon = R.drawable.artist,
@@ -263,7 +217,11 @@ fun LibraryArtistsScreen(
                             )
                         }
                     }
-                    items(items = artists.distinctBy { it.id }, key = { it.id }, contentType = { CONTENT_TYPE_ARTIST }) { artist ->
+                    items(
+                        items = artistsList.distinctBy { it.id },
+                        key = { it.id },
+                        contentType = { "artist_grid_item" }
+                    ) { artist ->
                         LibraryArtistGridItem(
                             navController = navController,
                             menuState = menuState,

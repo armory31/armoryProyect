@@ -27,10 +27,6 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import com.ruben.spotitube.db.entities.AlbumArtistMap
-import com.ruben.spotitube.db.entities.AlbumEntity
-import com.ruben.spotitube.db.entities.ArtistEntity
-import com.ruben.spotitube.db.entities.Event
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.HistoryAlbumEntity
 import com.ruben.spotitube.db.entities.HistoryArtistEntity
@@ -49,11 +45,7 @@ import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.SearchHistory
 import com.ruben.spotitube.db.entities.SetVideoIdEntity
-import com.ruben.spotitube.db.entities.SongAlbumMap
 import com.ruben.spotitube.db.entities.SongArtistMap
-import com.ruben.spotitube.db.entities.SongEntity
-import com.ruben.spotitube.db.entities.SortedSongAlbumMap
-import com.ruben.spotitube.db.entities.SortedSongArtistMap
 import com.ruben.spotitube.db.entities.TagEntity
 import com.ruben.spotitube.extensions.toSQLiteQuery
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -69,7 +61,7 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MusicDatabase"
-private const val CURRENT_VERSION = 30
+private const val CURRENT_VERSION = 31
 
 class MusicDatabase(
     internal var delegate: InternalDatabase,
@@ -131,7 +123,7 @@ class MusicDatabase(
 
         private fun build(context: Context): InternalDatabase {
             val universalMigrations =
-                (2..27)
+                (2..30)
                     .map { from -> UniversalMigration(context, from, CURRENT_VERSION) }
                     .toTypedArray()
 
@@ -196,18 +188,11 @@ class MusicDatabase(
 
 @Database(
     entities = [
-        SongEntity::class,
-        ArtistEntity::class,
-        AlbumEntity::class,
-        PlaylistEntity::class,
-        SongArtistMap::class,
-        SongAlbumMap::class,
-        AlbumArtistMap::class,
         PlaylistSongMap::class,
+        PlaylistEntity::class,
         SearchHistory::class,
         FormatEntity::class,
         LyricsEntity::class,
-        Event::class,
         RelatedSongMap::class,
         SetVideoIdEntity::class,
         PlayCountEntity::class,
@@ -223,8 +208,6 @@ class MusicDatabase(
         HistoryPlaylistEntity::class,
     ],
     views = [
-        SortedSongArtistMap::class,
-        SortedSongAlbumMap::class,
         PlaylistSongMapPreview::class,
     ],
     version = CURRENT_VERSION,
@@ -628,14 +611,14 @@ private val MIGRATION_1_2 = object : Migration(1, 2) {
 
         val converters = Converters()
         val artistMap = mutableMapOf<Int, String>()
-        val artists = mutableListOf<ArtistEntity>()
+        val artists = mutableListOf<SavedArtistEntity>()
         
         db.query("SELECT * FROM artist".toSQLiteQuery()).use { cursor ->
             while (cursor.moveToNext()) {
                 val oldId = cursor.getInt(0)
-                val newId = ArtistEntity.generateArtistId()
+                val newId = SavedArtistEntity.generateArtistId()
                 artistMap[oldId] = newId
-                artists.add(ArtistEntity(id = newId, name = cursor.getString(1)))
+                artists.add(SavedArtistEntity(id = newId, name = cursor.getString(1)))
             }
         }
 

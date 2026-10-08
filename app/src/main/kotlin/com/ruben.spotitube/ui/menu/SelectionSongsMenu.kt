@@ -370,7 +370,7 @@ fun SelectionSongMenu(
                         } else {
                             songSelection.forEach { song ->
                                 // Asegurarse de que esté en la DB local antes de sincronizar
-                                database.insert(song.toMediaMetadata())
+                                database.insertSavedSong(song.toMediaMetadata().toSavedSongEntity())
                                 if (song.id !in libraryStateHolder.savedSongIds.first()) {
                                     syncManager.toggleLike(song.song)
                                 }
@@ -545,7 +545,7 @@ fun SelectionMediaMetadataMenu(
         isVisible = showChoosePlaylistDialog,
         onGetSong = {
             songSelection.map {
-                database.insert(it)
+                database.insertSavedSong(it.toSavedSongEntity())
                 it.id
             }
         },
@@ -749,12 +749,12 @@ fun SelectionMediaMetadataMenu(
                         val likedIds = libraryStateHolder.savedSongIds.first()
                         if (allLiked) {
                             songSelection.forEach { song ->
-                                syncManager.toggleLike(song.toSongEntity())
+                                syncManager.toggleLike(song.toSavedSongEntity())
                             }
                         } else {
                             songSelection.filter { it.id !in likedIds }.forEach { song ->
-                                database.insert(song)
-                                syncManager.toggleLike(song.toSongEntity())
+                                database.insertSavedSong(song.toSavedSongEntity())
+                                syncManager.toggleLike(song.toSavedSongEntity())
                             }
                         }
                     }

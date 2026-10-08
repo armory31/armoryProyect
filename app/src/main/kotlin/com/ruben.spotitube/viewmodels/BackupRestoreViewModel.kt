@@ -23,9 +23,9 @@ import androidx.lifecycle.viewModelScope
 import com.ruben.spotitube.MainActivity
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.ArtistEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.db.entities.SongEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.extensions.div
 import com.ruben.spotitube.extensions.zipInputStream
 import com.ruben.spotitube.extensions.zipOutputStream
@@ -578,12 +578,12 @@ class BackupRestoreViewModel @Inject constructor(
                                     .split(';', '|')
                                     .map { it.trim() }
                                     .filter { it.isNotEmpty() }
-                                    .map { ArtistEntity(id = "", name = it) }
+                                    .map { SavedArtistEntity(id = "", name = it) }
 
                             out.add(
                                 Song(
-                                    song = SongEntity(id = "", title = title),
-                                    artists = artists.ifEmpty { listOf(ArtistEntity("", "")) },
+                                    song = SavedSongEntity(id = "", title = title),
+                                    artists = artists.ifEmpty { listOf(SavedArtistEntity("", "")) },
                                 )
                             )
                         }
@@ -641,8 +641,8 @@ class BackupRestoreViewModel @Inject constructor(
 
                                     out.add(
                                         Song(
-                                            song = SongEntity(id = "", title = title),
-                                            artists = artists.map { ArtistEntity("", it) },
+                                            song = SavedSongEntity(id = "", title = title),
+                                            artists = artists.map { SavedArtistEntity("", it) },
                                         )
                                     )
                                 }

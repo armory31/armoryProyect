@@ -14,10 +14,11 @@ import android.content.Context
 import com.ruben.spotitube.constants.SelectedYtmPlaylistsKey
 import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.ArtistEntity
-import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.PlaylistSongMap
-// import com.ruben.spotitube.db.entities.SongEntity
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.innertube.models.ArtistItem
@@ -133,7 +134,7 @@ class SyncUtils @Inject constructor(
                     playlists.filter { it.id != toKeep.id }.forEach { duplicate ->
                         Timber.d("Removing duplicate playlist: ${duplicate.playlist.name} (${duplicate.id})")
                         database.clearPlaylist(duplicate.id)
-                        database.delete(duplicate.playlist)
+                        database.deleteSavedPlaylist(duplicate.id)
                     }
                 }
             }
@@ -292,18 +293,23 @@ class SyncUtils @Inject constructor(
                     if (!isSyncStillEnabled(gen)) return@launch
                     dbWriteSemaphore.withPermit {
                         if (!isSyncStillEnabled(gen)) return@withPermit
-                        val dbAlbum = database.album(album.id).firstOrNull()
-                        YouTube.album(album.browseId).onSuccess { albumPage ->
-                            if (!isSyncStillEnabled(gen)) return@onSuccess
-                            if (dbAlbum == null) {
-                                try {
-                                    database.insert(albumPage)
-                                } catch (e: Exception) {
-                                    Timber.w(e, "syncLikedAlbums: Failed to insert album ${album.id}")
-                                }
+                        val dbAlbum = database.getSavedAlbum(album.id)
+                        if (dbAlbum == null) {
+                            try {
+                                val albumArtist = album.artists?.firstOrNull()
+                                database.insertSavedAlbum(
+                                    SavedAlbumEntity(
+                                        id = album.id,
+                                        title = album.title,
+                                        artistId = albumArtist?.id,
+                                        artistName = albumArtist?.name,
+                                        thumbnailUrl = album.thumbnail,
+                                        year = album.year
+                                    )
+                                )
+                            } catch (e: Exception) {
+                                Timber.w(e, "syncLikedAlbums: Failed to insert album ${album.id}")
                             }
-                        }.onFailure { e ->
-                            Timber.w(e, "syncLikedAlbums: Failed to fetch album ${album.id}")
                         }
                     }
                 }
@@ -353,31 +359,16 @@ class SyncUtils @Inject constructor(
                     if (!isSyncStillEnabled(gen)) return@launch
                     dbWriteSemaphore.withPermit {
                         if (!isSyncStillEnabled(gen)) return@withPermit
-                        val dbArtist = database.artist(artist.id).firstOrNull()
-                        database.withTransaction {
-                            if (!isSyncStillEnabled(gen)) return@withTransaction
-                            if (dbArtist == null) {
-                                insert(
-                                    ArtistEntity(
-                                        id = artist.id,
-                                        name = artist.title,
-                                        thumbnailUrl = artist.thumbnail,
-                                        channelId = artist.channelId,
-                                    )
+                        val dbArtist = database.getSavedArtist(artist.id)
+                        if (dbArtist == null) {
+                            database.insertSavedArtist(
+                                SavedArtistEntity(
+                                    id = artist.id,
+                                    name = artist.title,
+                                    thumbnailUrl = artist.thumbnail,
+                                    channelId = artist.channelId,
                                 )
-                            } else {
-                                val existing = dbArtist.artist
-                                if (existing.name != artist.title || existing.thumbnailUrl != artist.thumbnail || existing.channelId != artist.channelId) {
-                                    update(
-                                        existing.copy(
-                                            name = artist.title,
-                                            thumbnailUrl = artist.thumbnail,
-                                            channelId = artist.channelId,
-                                            lastUpdateTime = LocalDateTime.now()
-                                        )
-                                    )
-                                }
-                            }
+                            )
                         }
                     }
                 }
@@ -414,38 +405,25 @@ class SyncUtils @Inject constructor(
             val now = LocalDateTime.now()
             val remoteLikedIds = remotePlaylists.map { it.id }.toSet()
 
-            localPlaylists
-                .asSequence()
-                .map { it.playlist }
-                .filter { it.browseId != null }
-                .filter { it.browseId !in remoteLikedIds }
-                .forEach { database.update(it.copy(lastUpdateTime = now)) }
-
             val localPlaylistIdByBrowseId = HashMap<String, String>(remotePlaylists.size)
             for (playlist in remotePlaylists) {
                 if (!isSyncStillEnabled(gen)) return@onSuccess
                 try {
-                    val existingPlaylist = database.playlistByBrowseId(playlist.id).firstOrNull()
+                    val existingPlaylist = database.getSavedPlaylist(playlist.id)
                     if (existingPlaylist == null) {
-                        val playlistEntity = PlaylistEntity(
+                        val savedPlaylist = SavedPlaylistEntity(
+                            id = playlist.id,
                             name = playlist.title,
                             browseId = playlist.id,
                             thumbnailUrl = playlist.thumbnail,
-                            isEditable = playlist.isEditable,
-                            remoteSongCount = playlist.songCountText?.let { Regex("""\d+""").find(it)?.value?.toIntOrNull() },
-                            playEndpointParams = playlist.playEndpoint?.params,
-                            shuffleEndpointParams = playlist.shuffleEndpoint?.params,
-                            radioEndpointParams = playlist.radioEndpoint?.params
+                            isEditable = playlist.isEditable
                         )
-                        database.insert(playlistEntity)
-                        localPlaylistIdByBrowseId[playlist.id] = playlistEntity.id
+                        database.insertSavedPlaylist(savedPlaylist)
+                        localPlaylistIdByBrowseId[playlist.id] = savedPlaylist.id
                         Timber.d("syncSavedPlaylists: Created new playlist ${playlist.title} (${playlist.id})")
                     } else {
-                        val baseEntity = existingPlaylist.playlist
-                        val likedEntity = baseEntity.copy(lastUpdateTime = now)
-                        database.update(likedEntity, playlist)
-                        localPlaylistIdByBrowseId[playlist.id] = likedEntity.id
-                        Timber.d("syncSavedPlaylists: Updated existing playlist ${playlist.title} (${playlist.id})")
+                        localPlaylistIdByBrowseId[playlist.id] = existingPlaylist.id
+                        Timber.d("syncSavedPlaylists: Existing playlist ${playlist.title} (${playlist.id})")
                     }
                 } catch (e: Exception) {
                     Timber.e(e, "syncSavedPlaylists: Failed to upsert playlist ${playlist.title}")
@@ -561,9 +539,18 @@ class SyncUtils @Inject constructor(
                     database.clearPlaylist(playlistId)
                     songs.forEachIndexed { idx, song ->
                         if (!isSyncStillEnabled(gen)) return@withTransaction
-                        if (database.song(song.id).firstOrNull() == null) {
-                            database.insert(song)
-                        }
+                        database.insertSavedSong(
+                            SavedSongEntity(
+                                id = song.id,
+                                title = song.title,
+                                artistId = song.artists.firstOrNull()?.id,
+                                artistName = song.artists.firstOrNull()?.name,
+                                duration = song.duration,
+                                thumbnailUrl = song.thumbnailUrl,
+                                albumId = song.album?.id,
+                                albumName = song.album?.title
+                            )
+                        )
                         database.insert(
                             PlaylistSongMap(
                                 songId = song.id,

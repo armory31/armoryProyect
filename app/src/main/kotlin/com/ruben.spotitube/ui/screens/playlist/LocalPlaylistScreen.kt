@@ -126,6 +126,7 @@ import com.ruben.spotitube.constants.PlaylistSongSortTypeKey
 import com.ruben.spotitube.constants.SwipeToSongKey
 import com.ruben.spotitube.db.entities.PlaylistSong
 import com.ruben.spotitube.db.entities.PlaylistSongMap
+import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.extensions.move
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
@@ -293,13 +294,22 @@ fun LocalPlaylistScreen(
                 onDismiss = { showEditDialog = false },
                 onSave = { name, thumbnailUrl ->
                     database.query {
-                        update(
-                            playlistData.playlist.copy(
-                                name = name,
-                                thumbnailUrl = thumbnailUrl,
-                                lastUpdateTime = LocalDateTime.now(),
+                        val updated = playlistData.playlist.copy(
+                            name = name,
+                            thumbnailUrl = thumbnailUrl,
+                            lastUpdateTime = LocalDateTime.now(),
+                        )
+                        database.insertSavedPlaylist(
+                            SavedPlaylistEntity(
+                                id = updated.id,
+                                name = updated.name,
+                                browseId = updated.browseId,
+                                isEditable = updated.isEditable,
+                                thumbnailUrl = updated.thumbnailUrl,
+                                createdAt = updated.createdAt ?: LocalDateTime.now()
                             )
                         )
+                        update(updated)
                     }
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
                         playlistData.playlist.browseId?.let { YouTube.renamePlaylist(it, name) }
@@ -381,7 +391,7 @@ fun LocalPlaylistScreen(
                     onClick = {
                         showDeletePlaylistDialog = false
                         database.query {
-                            playlist?.let { delete(it.playlist) }
+                            playlist?.let { database.deleteSavedPlaylist(it.playlist.id) }
                         }
                         viewModel.viewModelScope.launch(Dispatchers.IO) {
                             playlist?.playlist?.browseId?.let { YouTube.deletePlaylist(it) }

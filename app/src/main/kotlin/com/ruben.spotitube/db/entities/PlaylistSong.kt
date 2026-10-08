@@ -16,7 +16,7 @@ data class PlaylistSong(
     @Relation(
         parentColumn = "songId",
         entityColumn = "id",
-        entity = SongEntity::class,
+        entity = SavedSongEntity::class,
     )
     val song: Song,
 )

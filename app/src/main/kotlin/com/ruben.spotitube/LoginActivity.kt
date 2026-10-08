@@ -266,13 +266,13 @@ class LoginActivity : ComponentActivity() {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Tu nombre", color = Color(0xFF555555)) },
+                    label = { Text("Tu nombre", color = ArmoryColors.TextMuted) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = ArmoryColors.Gold1,
-                        unfocusedBorderColor = Color(0xFF333333),
-                        focusedTextColor = Color(0xFFE8E8E8),
-                        unfocusedTextColor = Color(0xFFE8E8E8)
+                        unfocusedBorderColor = ArmoryColors.SurfaceBorder,
+                        focusedTextColor = ArmoryColors.TextPrimary,
+                        unfocusedTextColor = ArmoryColors.TextPrimary
                     ),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true
@@ -283,13 +283,13 @@ class LoginActivity : ComponentActivity() {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("tu@email.com", color = Color(0xFF555555)) },
+                label = { Text("tu@email.com", color = ArmoryColors.TextMuted) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = ArmoryColors.Gold1,
-                    unfocusedBorderColor = Color(0xFF333333),
-                    focusedTextColor = Color(0xFFE8E8E8),
-                    unfocusedTextColor = Color(0xFFE8E8E8)
+                    unfocusedBorderColor = ArmoryColors.SurfaceBorder,
+                    focusedTextColor = ArmoryColors.TextPrimary,
+                    unfocusedTextColor = ArmoryColors.TextPrimary
                 ),
                 shape = RoundedCornerShape(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -301,7 +301,7 @@ class LoginActivity : ComponentActivity() {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Contraseña", color = Color(0xFF555555)) },
+                label = { Text("Contraseña", color = ArmoryColors.TextMuted) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -312,9 +312,9 @@ class LoginActivity : ComponentActivity() {
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = ArmoryColors.Gold1,
-                    unfocusedBorderColor = Color(0xFF333333),
-                    focusedTextColor = Color(0xFFE8E8E8),
-                    unfocusedTextColor = Color(0xFFE8E8E8)
+                    unfocusedBorderColor = ArmoryColors.SurfaceBorder,
+                    focusedTextColor = ArmoryColors.TextPrimary,
+                    unfocusedTextColor = ArmoryColors.TextPrimary
                 ),
                 shape = RoundedCornerShape(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -378,8 +378,8 @@ class LoginActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRegisterMode) Color(0xFF1E1E1E) else ArmoryColors.Gold1,
-                        contentColor = if (isRegisterMode) ArmoryColors.Gold1 else Color.Black
+                        containerColor = if (isRegisterMode) ArmoryColors.SurfaceElevated else ArmoryColors.Gold1,
+                        contentColor = if (isRegisterMode) ArmoryColors.Gold1 else ArmoryColors.AbsoluteBlack
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {

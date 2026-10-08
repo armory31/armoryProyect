@@ -116,6 +116,14 @@ class OnlinePlaylistViewModel @Inject constructor(
             val entity = database.withTransaction {
                 var local = getPlaylistById(currentPlaylist.id)?.playlist
                 if (local == null) {
+                    val savedEntity = com.ruben.spotitube.db.entities.SavedPlaylistEntity(
+                        id = currentPlaylist.id,
+                        name = currentPlaylist.title,
+                        browseId = currentPlaylist.id,
+                        thumbnailUrl = currentPlaylist.thumbnail,
+                        isEditable = true
+                    )
+                    insertSavedPlaylist(savedEntity)
                     val newEntity = com.ruben.spotitube.db.entities.PlaylistEntity(
                         id = currentPlaylist.id,
                         name = currentPlaylist.title,
@@ -125,7 +133,7 @@ class OnlinePlaylistViewModel @Inject constructor(
                         shuffleEndpointParams = currentPlaylist.shuffleEndpoint?.params,
                         radioEndpointParams = currentPlaylist.radioEndpoint?.params
                     )
-                    insert(newEntity)
+                    update(newEntity)
                     newEntity
                 } else {
                     local

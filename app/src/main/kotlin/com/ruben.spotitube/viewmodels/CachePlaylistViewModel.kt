@@ -26,7 +26,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -64,7 +63,7 @@ class CachePlaylistViewModel @Inject constructor(
                     database.query {
                         completeSongs.forEach {
                             if (it.song.dateDownload == null) {
-                                update(it.song.copy(dateDownload = LocalDateTime.now()))
+                                database.insertSavedSong(it.toSavedSongEntity())
                             }
                         }
                     }

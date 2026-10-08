@@ -122,14 +122,14 @@ import com.ruben.spotitube.constants.TogetherClientIdKey
 import com.ruben.spotitube.constants.WakelockKey
 import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.AlbumEntity
-import com.ruben.spotitube.db.entities.ArtistEntity
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.Event
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.RelatedSongMap
 import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.db.entities.SongEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.di.DownloadCache
 import com.ruben.spotitube.di.PlayerCache
 import com.ruben.spotitube.extensions.SilentHandler
@@ -151,6 +151,7 @@ import com.ruben.spotitube.lyrics.LyricsHelper
 import com.ruben.spotitube.lyrics.LyricsPreloadManager
 import com.ruben.spotitube.models.PersistPlayerState
 import com.ruben.spotitube.models.PersistQueue
+import com.ruben.spotitube.models.toHistorySongEntity
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.EmptyQueue
 import com.ruben.spotitube.playback.queues.Queue
@@ -1353,7 +1354,7 @@ class MusicService :
             ?: -1
         database.query {
             if (song == null) insert(mediaMetadata.copy(duration = duration))
-            else if (song.song.duration == -1) update(song.song.copy(duration = duration))
+            else if (song.song.duration == -1) insertSavedSong(mediaMetadata.copy(duration = duration).toSavedSongEntity())
         }
         if (!database.hasRelatedSongs(mediaId).first()) {
             val relatedEndpoint =
@@ -3121,11 +3122,7 @@ class MusicService :
     fun toggleLike() {
         scope.launch(Dispatchers.IO) {
             val metadata = currentMediaMetadata.value ?: return@launch
-            var song = database.getSongById(metadata.id)?.song
-            if (song == null) {
-                database.insert(metadata)
-                song = database.getSongById(metadata.id)?.song ?: metadata.toSongEntity()
-            }
+            val song = metadata.toSavedSongEntity()
             syncManager.toggleLike(song)
 
             val isLiked = libraryStateHolder.isSavedSong(song.id).first()
@@ -3410,7 +3407,20 @@ class MusicService :
     }
 
     val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
-    currentMediaMetadata.value = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
+    val currentMetadata = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
+    currentMediaMetadata.value = currentMetadata
+
+    if (mediaItem != null && currentMetadata != null && !dataStore.get(PauseListenHistoryKey, false)) {
+        ioScope.launch {
+            try {
+                database.query {
+                    insertHistorySong(currentMetadata.toHistorySongEntity())
+                }
+                database.incrementPlayCount(currentMetadata.id)
+            } catch (_: Exception) {
+            }
+        }
+    }
 
     if (!timelineEmpty &&
         dataStore.get(AutoLoadMoreKey, true) &&
@@ -4124,33 +4134,26 @@ class MusicService :
         playbackStats: PlaybackStats,
     ) {
         val mediaItem = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window()).mediaItem
+        val metadata = mediaItem.metadata
 
         if (playbackStats.totalPlayTimeMs >= 25_000L &&
             !dataStore.get(PauseListenHistoryKey, false)
         ) {
-            database.query {
-                incrementTotalPlayTime(mediaItem.mediaId, playbackStats.totalPlayTimeMs)
+            ioScope.launch {
                 try {
-                    insert(
-                        Event(
-                            songId = mediaItem.mediaId,
-                            timestamp = LocalDateTime.now(),
-                            playTime = playbackStats.totalPlayTimeMs,
-                        ),
+                    val historyEntity = metadata?.toHistorySongEntity() ?: HistorySongEntity(
+                        playedAt = System.currentTimeMillis(),
+                        songId = mediaItem.mediaId,
+                        duration = (mediaItem.mediaMetadata.durationMs ?: -1L).toInt() / 1000,
+                        playTimeMs = playbackStats.totalPlayTimeMs,
                     )
-                    insertHistorySong(
-                        HistorySongEntity(
-                            playedAt = System.currentTimeMillis(),
-                            songId = mediaItem.mediaId,
-                            duration = (mediaItem.mediaMetadata.durationMs ?: -1L).toInt() / 1000,
-                            playTimeMs = playbackStats.totalPlayTimeMs
-                        )
-                    )
-                } catch (_: SQLException) {
+                    database.query {
+                        incrementTotalPlayTime(mediaItem.mediaId, playbackStats.totalPlayTimeMs)
+                        insertHistorySong(historyEntity)
+                    }
+                    database.incrementPlayCount(mediaItem.mediaId)
+                } catch (_: Exception) {
                 }
-            }
-
-            CoroutineScope(Dispatchers.IO).launch {
                 runCatching { registerRemoteListeningHistory(mediaItem.mediaId) }
             }
         }
@@ -4198,7 +4201,7 @@ class MusicService :
 
     // Create a transient Song object from current Player MediaMetadata when the DB doesn't have it.
     private fun createTransientSongFromMedia(media: com.ruben.spotitube.models.MediaMetadata): Song {
-        val songEntity = SongEntity(
+        val songEntity = SavedSongEntity(
             id = media.id,
             title = media.title,
             duration = media.duration,
@@ -4209,7 +4212,7 @@ class MusicService :
         )
 
         val artists = media.artists.map { artist ->
-            ArtistEntity(
+            SavedArtistEntity(
                 id = artist.id ?: "LA_unknown_${artist.name}",
                 name = artist.name,
                 thumbnailUrl = if (!artist.thumbnailUrl.isNullOrBlank()) artist.thumbnailUrl else media.thumbnailUrl,
@@ -4217,7 +4220,7 @@ class MusicService :
         }
 
         val album = media.album?.let { alb ->
-            AlbumEntity(
+            SavedAlbumEntity(
                 id = alb.id,
                 playlistId = null,
                 title = alb.title,

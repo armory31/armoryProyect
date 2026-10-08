@@ -7,6 +7,7 @@
 package com.ruben.spotitube.ui.component
 
 import com.ruben.spotitube.LyricsGlassStyle
+import com.ruben.spotitube.ArmoryColors
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -428,12 +429,12 @@ fun MinimalLayout(
     val fontFamily = rememberLyricsFontFamily()
     val isDark     = config.glassStyle.isDark
 
-    val bgColor      = if (isDark) Color(0xFF0F0F0F) else Color(0xFFF5F5F5)
-    val mainText     = if (isDark) Color.White else Color(0xFF1A1A1A)
-    val secondaryTxt = if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF1A1A1A).copy(alpha = 0.5f)
+    val bgColor      = if (isDark) ArmoryColors.SurfaceBlack else Color(0xFFF5F5F5)
+    val mainText     = if (isDark) ArmoryColors.TextPrimary else Color(0xFF1A1A1A)
+    val secondaryTxt = if (isDark) ArmoryColors.TextMuted else Color(0xFF1A1A1A).copy(alpha = 0.5f)
     // Acento: usa el tint del estilo si no es negro/blanco puro
     val accent = config.glassStyle.surfaceTint.let {
-        if (it == Color.Black || it == Color.White) Color(0xFF6366F1) else it.copy(alpha = 1f)
+        if (it == Color.Black || it == Color.White) ArmoryColors.Gold2 else it.copy(alpha = 1f)
     }
 
     Box(

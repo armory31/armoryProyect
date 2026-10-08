@@ -33,11 +33,13 @@ constructor(
 ) : ViewModel() {
     private val browseId = savedStateHandle.get<String>("browseId")!!
     private val params = savedStateHandle.get<String>("params")
+    val passedTitle: String? = savedStateHandle.get<String>("title")
 
     val result = MutableStateFlow<BrowseResult?>(value = null)
     val error = MutableStateFlow(value = false)
 
     init {
+        result.value = null
         viewModelScope.launch {
             error.value = false
             YouTube

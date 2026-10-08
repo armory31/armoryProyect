@@ -88,33 +88,42 @@ data class AlbumPage(
         }
 
         fun getSong(renderer: MusicResponsiveListItemRenderer, album: AlbumItem? = null): SongItem? {
+            val videoId = renderer.playlistItemData?.videoId
+                ?: renderer.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer
+                    ?.playNavigationEndpoint?.watchEndpoint?.videoId
+                ?: return null
+            val title = PageHelper.extractRuns(renderer.flexColumns, "MUSIC_VIDEO").firstOrNull()?.text
+                ?: renderer.flexColumns.firstOrNull()?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.text
+                ?: return null
+            val artists = PageHelper.extractRuns(renderer.flexColumns, "MUSIC_PAGE_TYPE_ARTIST").map {
+                Artist(
+                    name = it.text,
+                    id = it.navigationEndpoint?.browseEndpoint?.browseId,
+                )
+            }.ifEmpty {
+                album?.artists.orEmpty()
+            }
+            val albumObj = album?.let {
+                Album(it.title, it.browseId)
+            } ?: renderer.flexColumns.getOrNull(2)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.let {
+                val albumId = it.navigationEndpoint?.browseEndpoint?.browseId
+                if (albumId != null) Album(name = it.text, id = albumId) else null
+            }
+            val duration = renderer.fixedColumns?.firstOrNull()
+                ?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()
+                ?.text?.parseTime()
+            val thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: album?.thumbnail.orEmpty()
+
             return SongItem(
-                id = renderer.playlistItemData?.videoId ?: return null,
-                title = PageHelper.extractRuns(renderer.flexColumns, "MUSIC_VIDEO").firstOrNull()?.text ?: return null,
-                artists = PageHelper.extractRuns(renderer.flexColumns, "MUSIC_PAGE_TYPE_ARTIST").map{
-                    Artist(
-                        name = it.text,
-                        id = it.navigationEndpoint?.browseEndpoint?.browseId
-                    )
-                }.ifEmpty {
-                    // Fallback to album artists if no artists found in song data
-                    album?.artists ?: emptyList()
-                },
-                album = album?.let {
-                    Album(it.title, it.browseId)
-                } ?: renderer.flexColumns.getOrNull(2)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.let {
-                    Album(
-                        name = it.text,
-                        id = it.navigationEndpoint?.browseEndpoint?.browseId!!
-                    )
-                }!!,
-                duration = renderer.fixedColumns?.firstOrNull()
-                    ?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()
-                    ?.text?.parseTime() ?: return null,
-                thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: album?.thumbnail!!,
-                explicit = renderer.badges?.find {
+                id = videoId,
+                title = title,
+                artists = artists,
+                album = albumObj,
+                duration = duration,
+                thumbnail = thumbnail,
+                explicit = renderer.badges?.any {
                     it.musicInlineBadgeRenderer?.icon?.iconType == "MUSIC_EXPLICIT_BADGE"
-                } != null
+                } == true,
             )
         }
     }
