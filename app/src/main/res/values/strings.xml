@@ -205,11 +205,11 @@
     <string name="settings">Settings</string>
     <!-- Color Palette -->
     <!-- Palette Names -->
-    <string name="palette_opentune_gold">ARMORY Gold</string>
-    <string name="palette_opentune_silver">ARMORY Silver</string>
-    <string name="palette_opentune_copper">ARMORY Copper</string>
-    <string name="palette_opentune_rust">ARMORY Rust</string>
-    <string name="palette_opentune_diamond">ARMORY Diamond</string>
+    <string name="palette_armory_gold">ARMORY Gold</string>
+    <string name="palette_armory_silver">ARMORY Silver</string>
+    <string name="palette_armory_copper">ARMORY Copper</string>
+    <string name="palette_armory_rust">ARMORY Rust</string>
+    <string name="palette_armory_diamond">ARMORY Diamond</string>
     <!-- Blues -->
     <!-- Greens -->
     <!-- Oranges & Yellows -->
@@ -239,7 +239,7 @@
     <string name="action_logout">Log out</string>
     <string name="login">Login</string>
     <string name="not_logged_in">Not logged in</string>
-    <string name="playback_requires_youtube_music_confirmation">Confirm playback in YouTube Music, then return to ARMORY.</string>
+    <string name="playback_requires_youtube_music_confirmation">YouTube is asking to confirm you\'re not a bot. Open YouTube Music, play something to verify, and try again.</string>
     <string name="queue">Queue</string>
     <string name="artist_separators">Symbols to split artists</string>
     <string name="open_with_downloader">Open with Downloader</string>
@@ -424,11 +424,6 @@
     <string name="together_welcome_permissions_title">Permissions and safety</string>
     <string name="together_welcome_permissions_body">Hosts can decide whether guests can add songs, control playback, or require approval to join.</string>
 
-    <string name="po_token_generation">PO Token Generation</string>
-    <string name="web_client_po_token">Web Client PO Token</string>
-    <string name="web_client_po_token_desc">Enable PO token generation for web-based player clients</string>
-    <string name="po_token_gvs">PO Token (GVS)</string>
-    <string name="po_token_player">PO Token (Player)</string>
     <string name="visitor_data">Visitor Data</string>
     <string name="supported_clients">Supported Clients</string>
     <string name="generated_tokens">Generated Tokens</string>
@@ -474,4 +469,16 @@
     <string name="new_releases_empty_desc">No new releases found at the moment.</string>
 
     <string name="error_loading">Error loading content</string>
+
+    <string name="total_time_listened">Total Time Listened</string>
+    <string name="your_favourite_artist">Your Favourite Artist</string>
+    <string name="your_favourite_song">Your Favourite Song</string>
+    <plurals name="n_songs_played">
+        <item quantity="one">%d song played</item>
+        <item quantity="other">%d songs played</item>
+    </plurals>
+    <plurals name="n_plays">
+        <item quantity="one">%d play</item>
+        <item quantity="other">%d plays</item>
+    </plurals>
 </resources>

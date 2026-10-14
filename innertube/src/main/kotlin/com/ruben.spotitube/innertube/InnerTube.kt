@@ -47,10 +47,9 @@ class InnerTube {
         gl = Locale.getDefault().country,
         hl = Locale.getDefault().toLanguageTag()
     )
-    var visitorData: String? = null
-    var dataSyncId: String? = null
-    var poToken: String? = null
-    var cookie: String? = null
+    @Volatile var visitorData: String? = null
+    @Volatile var dataSyncId: String? = null
+    @Volatile var cookie: String? = null
         set(value) {
             field = value
             cookieMap = if (value == null) emptyMap() else parseCookieString(value)
@@ -178,7 +177,6 @@ class InnerTube {
         videoId: String,
         playlistId: String?,
         signatureTimestamp: Int?,
-        poToken: String? = null,
     ) = withRetry {
         httpClient.post("player") {
         ytClient(client, setLogin = true)
@@ -202,9 +200,6 @@ class InnerTube {
                         )
                     )
                 } else null,
-                serviceIntegrityDimensions = poToken?.let {
-                    PlayerBody.ServiceIntegrityDimensions(poToken = it)
-                },
             )
         )
         }
@@ -214,7 +209,6 @@ class InnerTube {
         url: String,
         cpn: String,
         playlistId: String?,
-        poToken: String? = null,
         client: YouTubeClient = YouTubeClient.WEB_REMIX,
     ) = withRetry {
         httpClient.get(url) {
@@ -222,10 +216,6 @@ class InnerTube {
             parameter("ver", "2")
             parameter("c", client.clientName)
             parameter("cpn", cpn)
-
-            if (!poToken.isNullOrBlank()) {
-                parameter("pot", poToken)
-            }
 
             if (playlistId != null) {
                 parameter("list", playlistId)

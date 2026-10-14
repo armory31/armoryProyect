@@ -146,13 +146,15 @@ fun PlaybackError(
                 }
             }
 
+            val displayText = if (errorInfo.kind == PlaybackErrorKind.ConfirmationRequired) reason else details
+
             Surface(
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.06f),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = details,
+                    text = displayText,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.92f),
                     modifier = Modifier.padding(12.dp),

@@ -18,7 +18,6 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,7 +69,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -104,10 +102,9 @@ import com.ruben.spotitube.GoldDivider
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.OpenTuneColors
-import com.ruben.spotitube.PremiumTitleFont
+
+import com.ruben.spotitube.GlobalFont
 import com.ruben.spotitube.R
-import com.ruben.spotitube.constants.AppBarHeight
 import com.ruben.spotitube.constants.DisableBlurKey
 import com.ruben.spotitube.constants.HideExplicitKey
 import com.ruben.spotitube.extensions.toMediaItem
@@ -121,10 +118,13 @@ import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.AlbumGridItem
-import com.ruben.spotitube.ui.component.HideOnScrollFAB
 import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.ui.component.NavigationTitle
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
+import com.ruben.spotitube.SectionHeader
+import com.ruben.spotitube.ArmoryButton
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
@@ -179,8 +179,8 @@ fun ArtistScreen(
 
     // Gradient colors for mesh background
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = OpenTuneColors.AbsoluteBlack.toArgb()
-    val surfaceColor = OpenTuneColors.AbsoluteBlack
+    val fallbackColor = ArmoryColors.AbsoluteBlack.toArgb()
+    val surfaceColor = ArmoryColors.AbsoluteBlack
 
     // Get thumbnail URL
     val thumbnail = artistPage?.artist?.thumbnail ?: libraryArtist?.artist?.thumbnailUrl
@@ -215,7 +215,7 @@ fun ArtistScreen(
                     
                     // Inyectar el dorado Armory para consistencia de marca
                     if (extractedColors.size >= 3) {
-                        extractedColors.add(0, OpenTuneColors.Gold3)
+                        extractedColors.add(0, ArmoryColors.Gold3)
                     }
                     
                     gradientColors = extractedColors
@@ -245,13 +245,13 @@ fun ArtistScreen(
     }
 
     val appBarContainerColor by animateColorAsState(
-        targetValue = if (transparentAppBar) Color.Transparent else OpenTuneColors.AbsoluteBlack.copy(alpha = 0.95f),
+        targetValue = if (transparentAppBar) Color.Transparent else ArmoryColors.AbsoluteBlack.copy(alpha = 0.95f),
         animationSpec = tween(500),
         label = "appBarContainerColor"
     )
 
     val appBarContentColor by animateColorAsState(
-        targetValue = if (transparentAppBar) Color.White else OpenTuneColors.Gold3,
+        targetValue = if (transparentAppBar) Color.White else ArmoryColors.Gold3,
         animationSpec = tween(500),
         label = "appBarContentColor"
     )
@@ -262,39 +262,15 @@ fun ArtistScreen(
 
     Scaffold(
         topBar = {
-            // Se movió la TopAppBar al slot oficial del Scaffold para evitar que bloquee los eventos de clic del contenido
-            TopAppBar(
+            ArmoryTopBar(
+                title = "",
+                onBack = navController::navigateUp,
+                overImage = true,
                 scrollBehavior = scrollBehavior,
-                title = {
-                    val animatedAlpha by animateFloatAsState(
-                        targetValue = if (!transparentAppBar) 1f else 0f,
-                        animationSpec = tween(400),
-                        label = "titleAlpha"
-                    )
-                    Text(
-                        text = artistPage?.artist?.title ?: libraryArtist?.artist?.name ?: "",
-                        modifier = Modifier.alpha(animatedAlpha),
-                        maxLines = 1,
-                        fontFamily = PremiumTitleFont,
-                        color = OpenTuneColors.Champagne,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.arrow_back),
-                            contentDescription = null,
-                            tint = appBarContentColor
-                        )
-                    }
-                },
                 actions = {
-                    // Share/Copy link button
-                    IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.link),
+                        contentDescription = "Copiar enlace",
                         onClick = {
                             viewModel.artistPage?.artist?.shareLink?.let { link ->
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -303,17 +279,11 @@ fun ArtistScreen(
                                 Toast.makeText(context, R.string.link_copied, Toast.LENGTH_SHORT).show()
                             }
                         },
-                        onLongClick = {},
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.link),
-                            contentDescription = null,
-                            tint = appBarContentColor
-                        )
-                    }
-
-                    // Share button
-                    IconButton(
+                        overImage = true
+                    )
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.share),
+                        contentDescription = "Compartir",
                         onClick = {
                             val shareIntent = Intent().apply {
                                 action = Intent.ACTION_SEND
@@ -326,22 +296,9 @@ fun ArtistScreen(
                             }
                             context.startActivity(Intent.createChooser(shareIntent, null))
                         },
-                        onLongClick = {},
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.share),
-                            contentDescription = null,
-                            tint = appBarContentColor
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = appBarContainerColor,
-                    scrolledContainerColor = appBarContainerColor,
-                    navigationIconContentColor = appBarContentColor,
-                    titleContentColor = OpenTuneColors.Champagne,
-                    actionIconContentColor = appBarContentColor
-                )
+                        overImage = true
+                    )
+                }
             )
         },
         snackbarHost = {
@@ -485,7 +442,7 @@ fun ArtistScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = systemBarsTopPadding + AppBarHeight)
+                                    .padding(top = 12.dp)
                             ) {
                                 // Artist image placeholder - circular
                                 Box(
@@ -572,7 +529,7 @@ fun ArtistScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = systemBarsTopPadding + AppBarHeight),
+                                .padding(top = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Artist Image - Circular with shadow
@@ -598,11 +555,11 @@ fun ArtistScreen(
                                             .background(MaterialTheme.colorScheme.surfaceVariant),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
+                                        ArmoryIcon(
                                             painter = painterResource(R.drawable.person),
                                             contentDescription = null,
                                             modifier = Modifier.size(80.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            active = true
                                         )
                                     }
                                 }
@@ -612,8 +569,7 @@ fun ArtistScreen(
                             Text(
                                 text = artistName ?: stringResource(R.string.unknown_artist),
                                 style = MaterialTheme.typography.headlineMedium,
-                                fontFamily = PremiumTitleFont,
-                                color = OpenTuneColors.Champagne,
+                                fontFamily = GlobalFont,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
@@ -644,7 +600,6 @@ fun ArtistScreen(
                                             description
                                         },
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         textAlign = TextAlign.Center,
                                         maxLines = maxLines,
                                         overflow = TextOverflow.Ellipsis
@@ -654,7 +609,6 @@ fun ArtistScreen(
                                         Text(
                                             text = stringResource(R.string.more),
                                             style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.padding(top = 4.dp)
                                         )
@@ -689,8 +643,8 @@ fun ArtistScreen(
                                     StatItem(
                                         value = if (hasMoreSongs) "$songCount+" else songCount.toString(),
                                         label = stringResource(R.string.songs),
-                                        valueColor = OpenTuneColors.Gold2,
-                                        labelColor = OpenTuneColors.Silver3
+                                        valueColor = ArmoryColors.Gold2,
+                                        labelColor = ArmoryColors.Silver3
                                     )
                                 }
 
@@ -714,49 +668,48 @@ fun ArtistScreen(
                                     StatItem(
                                         value = if (hasMoreAlbums) "$albumCount+" else albumCount.toString(),
                                         label = stringResource(R.string.albums),
-                                        valueColor = OpenTuneColors.Gold2,
-                                        labelColor = OpenTuneColors.Silver3
+                                        valueColor = ArmoryColors.Gold2,
+                                        labelColor = ArmoryColors.Silver3
                                     )
                                 }
                             }
 
-                            // Action Buttons
-                            // 1. Suscrito Button (Full width on top, MetallicGold)
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp, vertical = 6.dp)
                             ) {
-                                Button(
-                                    onClick = { viewModel.toggleLike() },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.Transparent,
-                                        contentColor = ArmoryColors.AbsoluteBlack
-                                    ),
-                                    shape = RoundedCornerShape(24.dp),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(48.dp)
-                                        .then(
-                                            if (isSubscribed)
-                                                Modifier.background(ArmoryGradients.MetallicGold, shape = RoundedCornerShape(24.dp))
-                                            else
-                                                Modifier.border(1.dp, ArmoryColors.Gold1, RoundedCornerShape(24.dp)).background(ArmoryColors.SurfaceElevated, shape = RoundedCornerShape(24.dp))
+                                if (isSubscribed) {
+                                    ArmoryButton(
+                                        text = stringResource(R.string.subscribed),
+                                        onClick = { viewModel.toggleLike() },
+                                        painter = painterResource(R.drawable.done),
+                                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                                    )
+                                } else {
+                                    Button(
+                                        onClick = { viewModel.toggleLike() },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = ArmoryColors.SurfaceElevated,
+                                            contentColor = ArmoryColors.TextPrimary
+                                        ),
+                                        shape = RoundedCornerShape(24.dp),
+                                        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp)
+                                    ) {
+                                        ArmoryIcon(
+                                            painter = painterResource(R.drawable.add),
+                                            contentDescription = null,
+                                            active = true
                                         )
-                                ) {
-                                    Icon(
-                                        painter = painterResource(if (isSubscribed) R.drawable.done else R.drawable.add),
-                                        contentDescription = null,
-                                        tint = if (isSubscribed) ArmoryColors.AbsoluteBlack else ArmoryColors.Gold1,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = stringResource(if (isSubscribed) R.string.subscribed else R.string.subscribe),
-                                        color = if (isSubscribed) ArmoryColors.AbsoluteBlack else ArmoryColors.Gold1,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1
-                                    )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.subscribe),
+                                            style = MaterialTheme.typography.labelLarge
+                                        )
+                                    }
                                 }
                             }
 
@@ -795,16 +748,15 @@ fun ArtistScreen(
                                         .weight(1f)
                                         .height(48.dp)
                                 ) {
-                                    Icon(
+                                    ArmoryIcon(
                                         painter = painterResource(R.drawable.shuffle),
                                         contentDescription = null,
-                                        tint = ArmoryColors.TextPrimary,
-                                        modifier = Modifier.size(20.dp)
+                                        active = true
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = stringResource(R.string.shuffle),
-                                        color = ArmoryColors.TextPrimary,
+                                        style = MaterialTheme.typography.labelLarge,
                                         maxLines = 1
                                     )
                                 }
@@ -828,16 +780,15 @@ fun ArtistScreen(
                                         .weight(1f)
                                         .height(48.dp)
                                 ) {
-                                    Icon(
+                                    ArmoryIcon(
                                         painter = painterResource(R.drawable.radio),
                                         contentDescription = null,
-                                        tint = ArmoryColors.TextPrimary,
-                                        modifier = Modifier.size(20.dp)
+                                        active = true
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = stringResource(R.string.radio),
-                                        color = ArmoryColors.TextPrimary,
+                                        style = MaterialTheme.typography.labelLarge,
                                         maxLines = 1
                                     )
                                 }
@@ -855,8 +806,8 @@ fun ArtistScreen(
                                 GoldDivider(modifier = Modifier.padding(bottom = 8.dp))
                             }
                             item {
-                                NavigationTitle(
-                                    title = stringResource(R.string.songs),
+                                SectionHeader(
+                                    text = stringResource(R.string.songs),
                                     onClick = {
                                         val route = "artist/${viewModel.artistId}/songs"
                                         if (navController.currentDestination?.route != route) {
@@ -961,8 +912,8 @@ fun ArtistScreen(
                         // Local Albums Section
                         if (libraryAlbums.isNotEmpty()) {
                             item {
-                                NavigationTitle(
-                                    title = stringResource(R.string.albums),
+                                SectionHeader(
+                                    text = stringResource(R.string.albums),
                                     onClick = {
                                         val route = "artist/${viewModel.artistId}/albums"
                                         if (navController.currentDestination?.route != route) {
@@ -1019,8 +970,8 @@ fun ArtistScreen(
                         artistPage?.sections?.fastForEach { section ->
                             if (section.items.isNotEmpty()) {
                                 item {
-                                    NavigationTitle(
-                                        title = section.title,
+                                    SectionHeader(
+                                        text = section.title,
                                         onClick = section.moreEndpoint?.let { endpoint ->
                                             {
                                                 val encodedTitle = android.net.Uri.encode(section.title)
@@ -1186,17 +1137,6 @@ fun ArtistScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-
-            // FAB for switching between local/remote view
-            HideOnScrollFAB(
-                visible = librarySongs.isNotEmpty() && libraryArtist?.artist?.isLocal != true,
-                lazyListState = lazyListState,
-                icon = if (showLocal) R.drawable.language else R.drawable.library_music,
-                onClick = {
-                    showLocal = showLocal.not()
-                    if (!showLocal && artistPage == null) viewModel.fetchArtistsFromYTM()
-                }
-            )
         }
     }
 }
@@ -1209,8 +1149,8 @@ private fun StatItem(
     value: String,
     label: String,
     modifier: Modifier = Modifier,
-    valueColor: Color = OpenTuneColors.Gold2,
-    labelColor: Color = OpenTuneColors.Silver3
+    valueColor: Color = ArmoryColors.Gold2,
+    labelColor: Color = ArmoryColors.Silver3
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1219,7 +1159,7 @@ private fun StatItem(
         Text(
             text = value,
             style = MaterialTheme.typography.titleLarge,
-            fontFamily = PremiumTitleFont,
+            fontFamily = GlobalFont,
             fontWeight = FontWeight.Bold,
             color = valueColor
         )

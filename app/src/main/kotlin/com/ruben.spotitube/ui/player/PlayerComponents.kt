@@ -9,6 +9,8 @@
 package com.ruben.spotitube.ui.player
 
 import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.PlayerSliderColors
+import com.ruben.spotitube.ArmoryGradients
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -96,7 +98,6 @@ import androidx.media3.common.Player.STATE_ENDED
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.OpenTuneColors
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.PlayerBackgroundStyle
 import com.ruben.spotitube.constants.PlayerDesignStyle
@@ -110,7 +111,7 @@ import com.ruben.spotitube.playback.PlayerConnection
 import com.ruben.spotitube.ui.component.BottomSheetPageState
 import com.ruben.spotitube.ui.component.BottomSheetState
 import com.ruben.spotitube.ui.component.MenuState
-import com.ruben.spotitube.ui.component.PlayerSliderColors
+
 import com.ruben.spotitube.ui.component.PlayerSliderTrack
 import com.ruben.spotitube.ui.component.ResizableIconButton
 import com.ruben.spotitube.ui.menu.PlayerMenu
@@ -400,7 +401,7 @@ fun PlayerTopActions(
                         context.startActivity(Intent.createChooser(intent, null))
                     },
                     shape = RoundedCornerShape(14.dp),
-                    color = OpenTuneColors.Diamond2.copy(alpha = 0.12f),
+                    color = ArmoryColors.Diamond2.copy(alpha = 0.12f),
                     modifier = Modifier
                         .height(44.dp)
                         .width(44.dp)
@@ -409,7 +410,7 @@ fun PlayerTopActions(
                         Icon(
                             painter = painterResource(R.drawable.share),
                             contentDescription = null,
-                            tint = OpenTuneColors.Diamond2,
+                            tint = ArmoryColors.Diamond2,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -745,7 +746,7 @@ fun StyledPlaybackSlider(
                 valueRange = valueRange,
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
-                colors = PlayerSliderColors.standardSliderColors(activeColor),
+                colors = PlayerSliderColors.getSliderColors(),
                 modifier = modifier
             )
         }
@@ -756,7 +757,7 @@ fun StyledPlaybackSlider(
                 valueRange = valueRange,
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
-                colors = PlayerSliderColors.wavySliderColors(activeColor),
+                colors = PlayerSliderColors.getSliderColors(),
                 modifier = modifier,
                 squigglesSpec = SquigglySlider.SquigglesSpec(
                     amplitude = if (isPlaying) 2.dp else 0.dp,
@@ -771,12 +772,12 @@ fun StyledPlaybackSlider(
                 valueRange = valueRange,
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
-                colors = PlayerSliderColors.thickSliderColors(activeColor),
+                colors = PlayerSliderColors.getSliderColors(),
                 thumb = { Spacer(modifier = Modifier.size(0.dp)) },
                 track = { sliderState ->
                     PlayerSliderTrack(
                         sliderState = sliderState,
-                        colors = PlayerSliderColors.thickSliderColors(activeColor),
+                        colors = PlayerSliderColors.getSliderColors(),
                         trackHeight = 12.dp
                     )
                 },
@@ -790,7 +791,7 @@ fun StyledPlaybackSlider(
                 valueRange = valueRange,
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
-                colors = PlayerSliderColors.circularSliderColors(activeColor),
+                colors = PlayerSliderColors.getSliderColors(),
                 modifier = modifier,
                 squigglesSpec = SquigglySlider.SquigglesSpec(
                     amplitude = if (isPlaying) 2.dp else 0.dp,
@@ -805,12 +806,12 @@ fun StyledPlaybackSlider(
                 valueRange = valueRange,
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
-                colors = PlayerSliderColors.simpleSliderColors(activeColor),
+                colors = PlayerSliderColors.getSliderColors(),
                 thumb = { Spacer(modifier = Modifier.size(0.dp)) },
                 track = { sliderState ->
                     PlayerSliderTrack(
                         sliderState = sliderState,
-                        colors = PlayerSliderColors.simpleSliderColors(activeColor),
+                        colors = PlayerSliderColors.getSliderColors(),
                         trackHeight = 3.dp
                     )
                 },
@@ -1030,7 +1031,7 @@ fun PlayerPlaybackControls(
                         modifier = Modifier
                             .size(52.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(OpenTuneColors.GoldPrimary.copy(alpha = 0.15f))
+                            .background(ArmoryColors.Gold1.copy(alpha = 0.15f))
                             .clickable(enabled = canSkipPrevious) {
                                 playerConnection.seekToPrevious()
                             },
@@ -1039,7 +1040,7 @@ fun PlayerPlaybackControls(
                         Icon(
                             painter = painterResource(R.drawable.skip_previous),
                             contentDescription = null,
-                            tint = OpenTuneColors.GoldPrimary.copy(alpha = if (canSkipPrevious) 1f else 0.4f),
+                            tint = ArmoryColors.Gold1.copy(alpha = if (canSkipPrevious) 1f else 0.4f),
                             modifier = Modifier.size(26.dp)
                         )
                     }
@@ -1048,7 +1049,7 @@ fun PlayerPlaybackControls(
                         modifier = Modifier
                             .size(70.dp)
                             .clip(RoundedCornerShape(50))
-                            .background(OpenTuneColors.GoldPrimary)
+                            .background(ArmoryColors.Gold1)
                             .clickable {
                                 if (playbackState == STATE_ENDED) {
                                     playerConnection.player.seekTo(0, 0)
@@ -1084,7 +1085,7 @@ fun PlayerPlaybackControls(
                         modifier = Modifier
                             .size(52.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(OpenTuneColors.GoldPrimary.copy(alpha = 0.15f))
+                            .background(ArmoryColors.Gold1.copy(alpha = 0.15f))
                             .clickable(enabled = canSkipNext) {
                                 playerConnection.seekToNext()
                             },
@@ -1093,7 +1094,7 @@ fun PlayerPlaybackControls(
                         Icon(
                             painter = painterResource(R.drawable.skip_next),
                             contentDescription = null,
-                            tint = OpenTuneColors.GoldPrimary.copy(alpha = if (canSkipNext) 1f else 0.4f),
+                            tint = ArmoryColors.Gold1.copy(alpha = if (canSkipNext) 1f else 0.4f),
                             modifier = Modifier.size(26.dp)
                         )
                     }
@@ -1164,7 +1165,7 @@ fun PlayerPlaybackControls(
                                 .size(small)
                                 .clip(RoundedCornerShape(smallRadius))
                                 .background(
-                                    brush = ArmoryColors.Copper,
+                                    brush = ArmoryGradients.MetallicCopper,
                                     alpha = if (shuffleModeEnabled) 1f else 0.75f
                                 )
                                 .clickable {
@@ -1187,7 +1188,7 @@ fun PlayerPlaybackControls(
                                 .size(large)
                                 .clip(RoundedCornerShape(largeRadius))
                                 .background(
-                                    brush = ArmoryColors.Silver,
+                                    brush = ArmoryGradients.MetallicSilver,
                                     alpha = if (canSkipPrevious) 1f else 0.6f
                                 )
                                 .clickable(enabled = canSkipPrevious) { playerConnection.seekToPrevious() },
@@ -1207,7 +1208,7 @@ fun PlayerPlaybackControls(
                             .padding(horizontal = 20.dp)
                             .size(88.dp)
                             .clip(RoundedCornerShape(22.dp))
-                            .background(brush = ArmoryColors.Gold)
+                            .background(brush = ArmoryGradients.MetallicGold)
                             .clickable {
                                 if (playbackState == STATE_ENDED) {
                                     playerConnection.player.seekTo(0, 0)
@@ -1249,7 +1250,7 @@ fun PlayerPlaybackControls(
                                 .size(large)
                                 .clip(RoundedCornerShape(largeRadius))
                                 .background(
-                                    brush = ArmoryColors.Silver,
+                                    brush = ArmoryGradients.MetallicSilver,
                                     alpha = if (canSkipNext) 1f else 0.6f
                                 )
                                 .clickable(enabled = canSkipNext) { playerConnection.seekToNext() },
@@ -1270,7 +1271,7 @@ fun PlayerPlaybackControls(
                                 .size(small)
                                 .clip(RoundedCornerShape(smallRadius))
                                 .background(
-                                    brush = ArmoryColors.Copper,
+                                    brush = ArmoryGradients.MetallicCopper,
                                     alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 1f else 0.75f
                                 )
                                 .clickable { playerConnection.player.toggleRepeatMode() },
@@ -1738,7 +1739,7 @@ fun PlayerControlsContent(
         label = "playPauseRoundness",
     )
 
-    val goldColor = OpenTuneColors.GoldPrimary
+    val goldColor = ArmoryColors.Gold1
     val effectiveIcBackgroundColor = Color.Black
 
     Row(
@@ -1899,7 +1900,7 @@ fun PlayerBackground(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(OpenTuneColors.ObsidianSoft.copy(alpha = 0.15f))
+                                    .background(ArmoryColors.SurfaceBlack.copy(alpha = 0.15f))
                             )
                         }
                     }
@@ -1920,13 +1921,13 @@ fun PlayerBackground(
                                 arrayOf(
                                     0.0f to colors[0].copy(alpha = 0.85f), 
                                     0.5f to colors[1].copy(alpha = 0.65f),
-                                    1.0f to OpenTuneColors.ObsidianSoft.copy(alpha = 0.95f) 
+                                    1.0f to ArmoryColors.SurfaceBlack.copy(alpha = 0.95f) 
                                 )
                             } else {
                                 arrayOf(
                                     0.0f to colors[0].copy(alpha = 0.8f),
                                     0.6f to colors[0].copy(alpha = 0.45f),
-                                    1.0f to OpenTuneColors.ObsidianSoft
+                                    1.0f to ArmoryColors.SurfaceBlack
                                 )
                             }
                             Box(

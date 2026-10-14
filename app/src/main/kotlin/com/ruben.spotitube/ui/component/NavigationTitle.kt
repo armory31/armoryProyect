@@ -1,11 +1,3 @@
-/*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
- * Licensed Under GPL-3.0 | see git history for contributors
- */
-
-
-
 package com.ruben.spotitube.ui.component
 
 import androidx.compose.foundation.clickable
@@ -26,9 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.R
 
 @Composable
@@ -46,51 +38,21 @@ fun NavigationTitle(
         modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-            .clickable(enabled = onClick != null) {
-                onClick?.invoke()
-            }
+            .clickable(enabled = onClick != null) { onClick?.invoke() }
             .padding(horizontal = 12.dp, vertical = 12.dp)
     ) {
         thumbnail?.invoke()
 
-        Column(
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.weight(1f)
-        ) {
-            label?.let { label ->
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    overflow = TextOverflow.Ellipsis,
-                )
+        Column(verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
+            label?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-
+            Text(title, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             subtitle?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
+                Text(it, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
 
-        if (onClick != null) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_forward),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
+        if (onClick != null) Icon(painterResource(R.drawable.arrow_forward), contentDescription = null, tint = ArmoryColors.TextGold)
     }
 }

@@ -175,7 +175,7 @@ fun LyricsShareCarouselSheet(
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                LyricsGlassStyle.allPresets.forEach { preset ->
+                LyricsGlassStyle.AllStyles.forEach { preset ->
                     GlassStyleChip(
                         preset     = preset,
                         isSelected = config.glassStyle == preset,
@@ -542,7 +542,7 @@ private fun CustomizationPanel(
                     ToggleRow("Mostrar título",    config.showTitle)   { onConfigChange(config.copy(showTitle   = it)) }
                     ToggleRow("Mostrar artista",   config.showArtist)  { onConfigChange(config.copy(showArtist  = it)) }
                     ToggleRow("Mostrar portada",   config.showCoverArt){ onConfigChange(config.copy(showCoverArt = it)) }
-                    ToggleRow("Mostrar OpenTune",  config.showBranding){ onConfigChange(config.copy(showBranding = it)) }
+                    ToggleRow("Mostrar ARMORY", config.showBranding){ onConfigChange(config.copy(showBranding = it)) }
                 }
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f))

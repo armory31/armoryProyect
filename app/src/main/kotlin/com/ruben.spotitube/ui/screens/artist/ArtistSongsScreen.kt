@@ -20,11 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +38,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSongSortDescendingKey
 import com.ruben.spotitube.constants.ArtistSongSortType
@@ -122,7 +122,6 @@ fun ArtistSongsScreen(
                     Text(
                         text = pluralStringResource(R.plurals.n_song, songs.size, songs.size),
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.secondary,
                     )
                 }
             }
@@ -137,7 +136,9 @@ fun ArtistSongsScreen(
                     isActive = song.id == mediaMetadata?.id,
                     isPlaying = isPlaying,
                     trailingContent = {
-                        IconButton(
+                        ArmoryIconButton(
+                            painter = painterResource(R.drawable.more_vert),
+                            contentDescription = null,
                             onClick = {
                                 menuState.show {
                                     SongMenu(
@@ -146,13 +147,8 @@ fun ArtistSongsScreen(
                                         onDismiss = menuState::dismiss,
                                     )
                                 }
-                            },
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.more_vert),
-                                contentDescription = null,
-                            )
-                        }
+                            }
+                        )
                     },
                     modifier =
                     Modifier
@@ -187,19 +183,10 @@ fun ArtistSongsScreen(
             }
         }
 
-        TopAppBar(
-            title = { Text(artist?.artist?.name.orEmpty()) },
-            navigationIcon = {
-                IconButton(
-                    onClick = navController::navigateUp,
-                    onLongClick = navController::backToMain,
-                ) {
-                    Icon(
-                        painterResource(R.drawable.arrow_back),
-                        contentDescription = null,
-                    )
-                }
-            },
+        ArmoryTopBar(
+            title = artist?.artist?.name.orEmpty(),
+            onBack = navController::navigateUp,
+            scrollBehavior = scrollBehavior
         )
 
         HideOnScrollFAB(

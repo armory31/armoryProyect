@@ -30,12 +30,10 @@ import com.ruben.spotitube.ui.screens.playlist.LocalPlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.OnlinePlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.TopPlaylistScreen
 import com.ruben.spotitube.ui.screens.search.OnlineSearchResult
-import com.ruben.spotitube.ui.screens.settings.AboutScreen
 import com.ruben.spotitube.ui.screens.settings.ChangelogScreen
 import com.ruben.spotitube.ui.screens.settings.DebugSettings
 import com.ruben.spotitube.ui.screens.settings.IntegrationScreen
 import com.ruben.spotitube.ui.screens.settings.MusicTogetherScreen
-import com.ruben.spotitube.ui.screens.settings.PoTokenScreen
 import com.ruben.spotitube.ui.screens.settings.SettingsScreen
 import com.ruben.spotitube.ui.screens.settings.StorageSettings
 import com.ruben.spotitube.ui.screens.settings.UpdateScreen
@@ -293,12 +291,6 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/changelog") {
         ChangelogScreen(navController, scrollBehavior)
-    }
-    composable("settings/about") {
-        AboutScreen(navController)
-    }
-    composable("settings/po_token") {
-        PoTokenScreen(navController, scrollBehavior)
     }
 
 

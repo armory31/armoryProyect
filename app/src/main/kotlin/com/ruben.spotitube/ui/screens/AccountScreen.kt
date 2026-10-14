@@ -12,7 +12,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -41,10 +40,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.ruben.spotitube.ArmoryTopBar
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ruben.spotitube.ui.component.importCsvPlaylistAndFetchMetadata
 import com.ruben.spotitube.viewmodels.BackupRestoreViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,8 +82,8 @@ import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.isInternetAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.ruben.spotitube.utils.rememberPreference
+import com.ruben.spotitube.rememberAvatarUrl
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 
@@ -109,41 +107,14 @@ fun AccountScreen(
         ?: currentUser?.displayName?.takeIf { it.isNotBlank() }
         ?: currentUser?.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
         ?: "Usuario"
-    val avatarUrl = accountAvatarUriPref.ifEmpty { session.getAvatarUri().ifEmpty { currentUser?.photoUrl?.toString() } }
+    val avatarUrl = rememberAvatarUrl()
 
     var showLogoutConfirmation by rememberSaveable { mutableStateOf(false) }
     var showLogoutProgress by rememberSaveable { mutableStateOf(false) }
     var showEditNameDialog by rememberSaveable { mutableStateOf(false) }
     var isBackupLoading by remember { mutableStateOf(false) }
     var isRestoreLoading by remember { mutableStateOf(false) }
-    var isCsvImporting by remember { mutableStateOf(false) }
     val backupRestoreViewModel: BackupRestoreViewModel = hiltViewModel()
-
-    val csvLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        isCsvImporting = true
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                val playlistId = importCsvPlaylistAndFetchMetadata(context, uri, database, backupRestoreViewModel)
-                withContext(Dispatchers.Main) {
-                    isCsvImporting = false
-                    if (playlistId != null) {
-                        Toast.makeText(context, "Playlist CSV importada con éxito", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "No se encontraron canciones en el archivo CSV", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    isCsvImporting = false
-                    Toast.makeText(context, "Error al importar CSV: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -244,19 +215,9 @@ fun AccountScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.account)) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.arrow_back),
-                            contentDescription = null,
-                        )
-                    }
-                }
+            ArmoryTopBar(
+                title = stringResource(R.string.account),
+                onBack = navController::navigateUp
             )
         }
     ) { innerPadding ->
@@ -384,19 +345,11 @@ fun AccountScreen(
                     .background(ArmoryGradients.ObsidianGradient),
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Transparent,
-                border = BorderStroke(1.5.dp, ArmoryColors.Gold)
+                border = BorderStroke(1.5.dp, ArmoryGradients.MetallicGold)
             ) {
                 Column {
                     val accountItems = listOf(
                         AccountSettingItem(R.drawable.fire, stringResource(R.string.music_together), stringResource(R.string.integration)) { navController.navigate("settings/music_together") },
-                        AccountSettingItem(
-                            R.drawable.add,
-                            "Importar playlist desde CSV",
-                            "Crea una playlist local e importa canciones desde un archivo .csv",
-                            isLoading = isCsvImporting
-                        ) {
-                            csvLauncher.launch("*/*")
-                        },
                         AccountSettingItem(R.drawable.add_circle, "Guardar copia de seguridad en Firebase", "Subida manual inmediata a la nube", isLoading = isBackupLoading) {
                             coroutineScope.launch {
                                 isBackupLoading = true
@@ -432,6 +385,9 @@ fun AccountScreen(
                                 }
                             }
                         },
+                        AccountSettingItem(R.drawable.favorite, "Mi Año en Música", "Resumen anual de tus canciones y artistas") { navController.navigate("year_in_music") },
+                        AccountSettingItem(R.drawable.equalizer, "Estadísticas", "Tus hábitos de reproducción y tiempos escuchados") { navController.navigate("stats") },
+                        AccountSettingItem(R.drawable.queue_music, "Historial de Reproducción", "Registro de canciones reproducidas recientemente") { navController.navigate("history") },
                         AccountSettingItem(
                             R.drawable.logout,
                             stringResource(R.string.action_logout),
@@ -485,15 +441,13 @@ fun AccountScreen(
                     .background(ArmoryGradients.ObsidianGradient),
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Transparent,
-                border = BorderStroke(1.5.dp, ArmoryColors.Silver)
+                border = BorderStroke(1.5.dp, ArmoryGradients.MetallicSilver)
             ) {
                 Column {
                     val settingsItems = listOf(
                         AccountSettingItem(R.drawable.storage, stringResource(R.string.storage), stringResource(R.string.cache)) { navController.navigate("settings/storage") },
-                        AccountSettingItem(R.drawable.link, "Configurar PO Token", "Token de origen de YouTube") { navController.navigate("settings/po_token") },
                         AccountSettingItem(R.drawable.experiment, stringResource(R.string.experiment_settings), stringResource(R.string.misc)) { navController.navigate("settings/misc") },
                         AccountSettingItem(R.drawable.update, stringResource(R.string.updates), BuildConfig.VERSION_NAME) { navController.navigate("settings/update") },
-                        AccountSettingItem(R.drawable.info, stringResource(R.string.about), "ARMORY") { navController.navigate("settings/about") },
                     )
 
                     settingsItems.forEachIndexed { index, item ->

@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -325,12 +326,10 @@ fun LyricsScreen(
                             Text(
                                 text = stringResource(R.string.now_playing),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = ArmoryColors.Gold2
                             )
                             Text(
                                 text = mediaMetadata.title,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = ArmoryColors.Gold1,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -463,7 +462,7 @@ fun LyricsScreen(
                                         .size(42.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(
-                                            brush = ArmoryColors.Copper,
+                                            brush = ArmoryGradients.MetallicCopper,
                                             alpha = if (shuffleModeEnabled) 1f else 0.75f
                                         )
                                         .clickable {
@@ -484,7 +483,7 @@ fun LyricsScreen(
                                     modifier = Modifier
                                         .size(50.dp)
                                         .clip(RoundedCornerShape(14.dp))
-                                        .background(brush = ArmoryColors.Silver)
+                                        .background(brush = ArmoryGradients.MetallicSilver)
                                         .clickable { player.seekToPrevious() },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -501,7 +500,7 @@ fun LyricsScreen(
                                     modifier = Modifier
                                         .size(72.dp)
                                         .clip(RoundedCornerShape(18.dp))
-                                        .background(brush = ArmoryColors.Gold)
+                                        .background(brush = ArmoryGradients.MetallicGold)
                                         .clickable { player.togglePlayPause() },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -528,7 +527,7 @@ fun LyricsScreen(
                                     modifier = Modifier
                                         .size(50.dp)
                                         .clip(RoundedCornerShape(14.dp))
-                                        .background(brush = ArmoryColors.Silver)
+                                        .background(brush = ArmoryGradients.MetallicSilver)
                                         .clickable { player.seekToNext() },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -546,7 +545,7 @@ fun LyricsScreen(
                                         .size(42.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(
-                                            brush = ArmoryColors.Copper,
+                                            brush = ArmoryGradients.MetallicCopper,
                                             alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 1f else 0.75f
                                         )
                                         .clickable { playerConnection.player.toggleRepeatMode() },
@@ -648,12 +647,10 @@ fun LyricsScreen(
                             Text(
                                 text = stringResource(R.string.now_playing),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = ArmoryColors.Gold2
                             )
                             Text(
                                 text = mediaMetadata.title,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = ArmoryColors.Gold1,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -768,7 +765,7 @@ fun LyricsScreen(
                                     .size(42.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
-                                        brush = ArmoryColors.Copper,
+                                        brush = ArmoryGradients.MetallicCopper,
                                         alpha = if (shuffleModeEnabled) 1f else 0.75f
                                     )
                                     .clickable {
@@ -789,7 +786,7 @@ fun LyricsScreen(
                                 modifier = Modifier
                                     .size(50.dp)
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(brush = ArmoryColors.Silver)
+                                    .background(brush = ArmoryGradients.MetallicSilver)
                                     .clickable { player.seekToPrevious() },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -806,7 +803,7 @@ fun LyricsScreen(
                                 modifier = Modifier
                                     .size(72.dp)
                                     .clip(RoundedCornerShape(18.dp))
-                                    .background(brush = ArmoryColors.Gold)
+                                    .background(brush = ArmoryGradients.MetallicGold)
                                     .clickable { player.togglePlayPause() },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -833,7 +830,7 @@ fun LyricsScreen(
                                 modifier = Modifier
                                     .size(50.dp)
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(brush = ArmoryColors.Silver)
+                                    .background(brush = ArmoryGradients.MetallicSilver)
                                     .clickable { player.seekToNext() },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -851,7 +848,7 @@ fun LyricsScreen(
                                     .size(42.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
-                                        brush = ArmoryColors.Copper,
+                                        brush = ArmoryGradients.MetallicCopper,
                                         alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 1f else 0.75f
                                     )
                                     .clickable { playerConnection.player.toggleRepeatMode() },

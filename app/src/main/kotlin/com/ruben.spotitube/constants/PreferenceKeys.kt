@@ -404,7 +404,6 @@ enum class SearchSource {
 val VisitorDataKey = stringPreferencesKey("visitorData")
 val DataSyncIdKey = stringPreferencesKey("dataSyncId")
 val InnerTubeCookieKey = stringPreferencesKey("innerTubeCookie")
-val PoTokenKey = stringPreferencesKey("poToken")
 val AccountNameKey = stringPreferencesKey("accountName")
 val AccountEmailKey = stringPreferencesKey("accountEmail")
 val AccountAvatarUriKey = stringPreferencesKey("accountAvatarUri")
@@ -418,11 +417,7 @@ val ArmoryAccountUidKey = stringPreferencesKey("armory_account_uid")
 val ArmorySyncEnabledKey = booleanPreferencesKey("armory_sync_enabled")
 val ArmoryLastSyncKey = longPreferencesKey("armory_last_sync")
 
-val WebClientPoTokenEnabledKey = booleanPreferencesKey("webClientPoTokenEnabled")
-val PoTokenGvsKey = stringPreferencesKey("poTokenGvs")
-val PoTokenPlayerKey = stringPreferencesKey("poTokenPlayer")
 val UseVisitorDataKey = booleanPreferencesKey("useVisitorData")
-val PoTokenSourceUrlKey = stringPreferencesKey("poTokenSourceUrl")
 
 val LanguageCodeToName =
     mapOf(

@@ -62,6 +62,7 @@ import com.ruben.spotitube.sync.LibrarySummary
 import com.ruben.spotitube.ui.utils.resize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -92,7 +93,7 @@ interface DatabaseDao {
     fun allAlbumsByRowIdAsc(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() } }
     fun allArtistsByNameAsc(): Flow<List<Artist>> = allSavedArtists().map { list -> list.map { it.toArtist() } }
 
-    fun editablePlaylistsByCreateDateAsc(): Flow<List<Playlist>> = allSavedPlaylists().map { list -> list.map { it.toPlaylist() } }
+    fun editablePlaylistsByCreateDateAsc(): Flow<List<Playlist>> = playlistsWithMetadata().map { list -> list.filter { it.playlist.isEditable } }
 
     @Query("SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = :playlistId AND songId = :songId")
     suspend fun checkInPlaylist(playlistId: String, songId: String): Int
@@ -174,37 +175,6 @@ interface DatabaseDao {
         savedList.filter { it.artistId == artistId }.map { it.toSong() }.take(previewSize)
     }.flowOn(Dispatchers.IO)
 
-    @Transaction
-    @Query(
-        """
-        SELECT song.*
-        FROM (SELECT *, COUNT(1) AS referredCount
-              FROM related_song_map
-              GROUP BY relatedSongId) map
-                 JOIN song ON song.id = map.relatedSongId
-        WHERE songId IN (SELECT songId
-                         FROM (SELECT songId
-                               FROM event
-                               ORDER BY ROWID DESC
-                               LIMIT 5)
-                         UNION
-                         SELECT songId
-                         FROM (SELECT songId
-                               FROM event
-                               WHERE timestamp > :now - 86400000 * 7
-                               GROUP BY songId
-                               ORDER BY SUM(playTime) DESC
-                               LIMIT 5)
-                         UNION
-                         SELECT id
-                         FROM (SELECT id
-                               FROM song
-                               ORDER BY totalPlayTime DESC
-                               LIMIT 10))
-        ORDER BY referredCount DESC
-        LIMIT 100
-    """,
-    )
     fun quickPicks(now: Long = System.currentTimeMillis()): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
 
     fun getRecommendationAlbum(
@@ -213,31 +183,6 @@ interface DatabaseDao {
         offset: Int = 0,
     ): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() }.take(limit) }
 
-    @Transaction
-    @Query(
-        """
-             SELECT song.id, song.title, song.thumbnailUrl,
-               (SELECT COUNT(1)
-                FROM event
-                WHERE songId = song.id
-                  AND timestamp > :fromTimeStamp AND timestamp <= :toTimeStamp) AS songCountListened,
-               (SELECT SUM(event.playTime)
-                FROM event
-                WHERE songId = song.id
-                  AND timestamp > :fromTimeStamp AND timestamp <= :toTimeStamp) AS timeListened
-        FROM song
-        JOIN (SELECT songId
-                     FROM event
-                     WHERE timestamp > :fromTimeStamp
-                     AND timestamp <= :toTimeStamp
-                     GROUP BY songId
-                     ORDER BY SUM(playTime) DESC
-                     LIMIT :limit)
-        ON song.id = songId
-        LIMIT :limit
-        OFFSET :offset
-    """,
-    )
     fun mostPlayedSongsStats(
         fromTimeStamp: Long,
         limit: Int = 6,
@@ -253,7 +198,7 @@ interface DatabaseDao {
             songId to Pair(playCount, totalTime)
         }.sortedByDescending { it.second.second }
             .drop(offset)
-            .take(limit)
+            .let { if (limit >= 0) it.take(limit) else it }
 
         sorted.mapNotNull { (songId, stats) ->
             val savedSong = getSavedSong(songId)
@@ -286,7 +231,7 @@ interface DatabaseDao {
             songId to Pair(playCount, totalTime)
         }.sortedByDescending { it.second.second }
             .drop(offset)
-            .take(limit)
+            .let { if (limit >= 0) it.take(limit) else it }
 
         sorted.mapNotNull { (songId, _) ->
             val savedSong = getSavedSong(songId)
@@ -309,7 +254,7 @@ interface DatabaseDao {
             artistId to items.size
         }.sortedByDescending { it.second }
             .drop(offset)
-            .take(limit)
+            .let { if (limit >= 0) it.take(limit) else it }
 
         sorted.mapNotNull { (artistId, count) ->
             val savedArtist = getSavedArtist(artistId)
@@ -334,7 +279,7 @@ interface DatabaseDao {
             albumId to items.size
         }.sortedByDescending { it.second }
             .drop(offset)
-            .take(limit)
+            .let { if (limit >= 0) it.take(limit) else it }
 
         sorted.mapNotNull { (albumId, count) ->
             val savedAlbum = getSavedAlbum(albumId)
@@ -464,10 +409,41 @@ interface DatabaseDao {
 
     fun albumArtistMaps(albumId: String): List<AlbumArtistMap> = emptyList()
 
-    fun playlistsByRowIdAsc(): Flow<List<Playlist>> = allSavedPlaylists().map { list -> list.map { it.toPlaylist() } }
-    fun playlistsByUpdatedDateAsc(): Flow<List<Playlist>> = allSavedPlaylists().map { list -> list.map { it.toPlaylist() } }
-    fun playlistsByNameAsc(): Flow<List<Playlist>> = allSavedPlaylists().map { list -> list.map { it.toPlaylist() } }
-    fun playlistsByCustomOrderAsc(): Flow<List<Playlist>> = allSavedPlaylists().map { list -> list.map { it.toPlaylist() } }
+    @Query("SELECT * FROM playlist_song_map ORDER BY position ASC")
+    fun allPlaylistSongMaps(): Flow<List<PlaylistSongMap>>
+
+    fun playlistsWithMetadata(): Flow<List<Playlist>> = combine(
+        allSavedPlaylists(),
+        allPlaylistSongMaps(),
+        allSavedSongs()
+    ) { savedPlaylists, songMaps, savedSongs ->
+        val mapsByPlaylistId = songMaps.groupBy { it.playlistId }
+        val songMap = savedSongs.associateBy { it.id }
+
+        savedPlaylists.map { saved ->
+            val matchingMaps = mapsByPlaylistId[saved.id]
+                ?: (saved.browseId?.let { mapsByPlaylistId[it] })
+                ?: (mapsByPlaylistId[saved.id.removePrefix("VL")])
+                ?: (mapsByPlaylistId["VL" + saved.id.removePrefix("VL")])
+                ?: emptyList()
+
+            val count = matchingMaps.size
+            val thumbnails = matchingMaps
+                .mapNotNull { songMap[it.songId]?.thumbnailUrl }
+                .distinct()
+                .take(4)
+
+            saved.toPlaylist(
+                songCount = count,
+                songThumbnails = if (saved.thumbnailUrl != null) listOf(saved.thumbnailUrl) else thumbnails
+            )
+        }
+    }
+
+    fun playlistsByRowIdAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
+    fun playlistsByUpdatedDateAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
+    fun playlistsByNameAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
+    fun playlistsByCustomOrderAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
 
     @Query("SELECT songId FROM playlist_song_map WHERE playlistId = :playlistId AND songId IN (:songIds)")
     suspend fun playlistDuplicates(playlistId: String, songIds: List<String>): List<String>
@@ -504,7 +480,7 @@ interface DatabaseDao {
         if (descending && sortType != PlaylistSortType.CUSTOM) list.asReversed() else list
     }
 
-    fun likedSongsByRowIdAsc(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
+    fun likedSongsByRowIdAsc(): Flow<List<Song>> = allSavedSongs().map { list -> list.filter { it.isLiked }.map { it.toSong() } }
 
     fun albumsLikedInternal(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() } }
 
@@ -543,7 +519,7 @@ interface DatabaseDao {
     @Query("SELECT id FROM savedalbum")
     fun getSavedAlbumIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM savedsong UNION SELECT videoId FROM set_video_id")
+    @Query("SELECT id FROM savedsong WHERE isLiked = 1 UNION SELECT videoId FROM set_video_id")
     fun getSavedSongIds(): Flow<List<String>>
 
     @Query("SELECT id FROM savedplaylist UNION SELECT browseId FROM savedplaylist WHERE browseId IS NOT NULL")
@@ -576,13 +552,13 @@ interface DatabaseDao {
         }
     }.flowOn(Dispatchers.IO)
 
-    fun playlist(id: String): Flow<Playlist?> = allSavedPlaylists().map { list -> list.firstOrNull { it.id == id || it.browseId == id }?.toPlaylist() }
+    fun playlist(id: String): Flow<Playlist?> = playlistsWithMetadata().map { list -> list.firstOrNull { it.id == id || it.playlist.browseId == id } }
 
-    suspend fun getPlaylistById(playlistId: String): Playlist? = getSavedPlaylist(playlistId)?.toPlaylist()
+    suspend fun getPlaylistById(playlistId: String): Playlist? = playlistsWithMetadata().first().firstOrNull { it.id == playlistId || it.playlist.browseId == playlistId }
 
-    fun getPlaylistByIdBlocking(playlistId: String): Playlist? = kotlinx.coroutines.runBlocking { getSavedPlaylist(playlistId)?.toPlaylist() }
+    fun getPlaylistByIdBlocking(playlistId: String): Playlist? = kotlinx.coroutines.runBlocking { getPlaylistById(playlistId) }
 
-    fun playlistByBrowseId(browseId: String): Flow<Playlist?> = allSavedPlaylists().map { list -> list.firstOrNull { it.browseId == browseId }?.toPlaylist() }
+    fun playlistByBrowseId(browseId: String): Flow<Playlist?> = playlistsWithMetadata().map { list -> list.firstOrNull { it.playlist.browseId == browseId } }
 
     fun rawSearchSongs(
         query: String,
@@ -702,7 +678,7 @@ interface DatabaseDao {
     fun searchPlaylists(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Playlist>> = allSavedPlaylists().map { list -> list.filter { it.name.contains(query, ignoreCase = true) }.map { it.toPlaylist() }.take(previewSize) }
+    ): Flow<List<Playlist>> = playlistsWithMetadata().map { list -> list.filter { it.playlist.name.contains(query, ignoreCase = true) }.take(previewSize) }
 
     fun events(): Flow<List<EventWithSong>> = historySongsWithMetadata()
 

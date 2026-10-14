@@ -365,7 +365,7 @@
     <!-- Adiciones de traducciones completas -->
     <string name="error_no_similar_songs">No hay canciones similares disponibles</string>
     <string name="error_automix_failed">Error al cargar la reproducción automática</string>
-    <string name="playback_requires_youtube_music_confirmation">Se requiere confirmación de YouTube Music</string>
+    <string name="playback_requires_youtube_music_confirmation">YouTube está pidiendo confirmar que no eres un bot. Abre YouTube Music, reproduce algo para verificarlo y vuelve a intentarlo.</string>
     <string name="assign_tags">Asignar etiquetas</string>
     <string name="no_tags_available">No hay etiquetas disponibles</string>
     <string name="manage_tags">Gestionar etiquetas</string>
@@ -461,13 +461,8 @@
     <string name="tokens_generated">Tokens generados con éxito</string>
     <string name="source_url">URL de origen</string>
     <string name="source_url_placeholder">https://www.youtube.com/…</string>
-    <string name="po_token_generation">Generación de PO Token</string>
-    <string name="web_client_po_token">PO Token de cliente web</string>
-    <string name="web_client_po_token_desc">Habilitar soporte para PO Token de web</string>
     <string name="generated_tokens">Tokens generados</string>
-    <string name="po_token_gvs">PO Token GVS</string>
     <string name="token_copied">Token copiado</string>
-    <string name="po_token_player">PO Token de reproductor</string>
     <string name="visitor_data">Datos de visitante</string>
     <string name="supported_clients">Clientes soportados</string>
     <string name="token_settings">Ajustes de token</string>
@@ -489,11 +484,11 @@
     <string name="canvas_cache_items">Elementos en caché de Canvas</string>
     <string name="clear_canvas_cache">Limpiar caché de Canvas</string>
     <string name="clear_canvas_cache_dialog">¿Limpiar caché de Canvas?</string>
-    <string name="palette_opentune_gold">Oro ARMORY</string>
-    <string name="palette_opentune_silver">Plata ARMORY</string>
-    <string name="palette_opentune_copper">Cobre ARMORY</string>
-    <string name="palette_opentune_rust">Óxido ARMORY</string>
-    <string name="palette_opentune_diamond">Diamante ARMORY</string>
+    <string name="palette_armory_gold">Oro ARMORY</string>
+    <string name="palette_armory_silver">Plata ARMORY</string>
+    <string name="palette_armory_copper">Cobre ARMORY</string>
+    <string name="palette_armory_rust">Óxido ARMORY</string>
+    <string name="palette_armory_diamond">Diamante ARMORY</string>
     <string name="information">Información</string>
     <string name="description">Descripción</string>
     <string name="subscribers">Suscriptores</string>
@@ -514,4 +509,26 @@
     <string name="cloud_upload_failed">Fallo al subir a la nube</string>
     <string name="cloud_upload_error">Error de subida a la nube</string>
 
+    <string name="total_time_listened">Tiempo total escuchado</string>
+    <string name="your_favourite_artist">Tu artista favorito</string>
+    <string name="your_favourite_song">Tu canción favorita</string>
+    <plurals name="n_songs_played">
+        <item quantity="one">%d canción reproducida</item>
+        <item quantity="many">%d canciones reproducidas</item>
+        <item quantity="other">%d canciones reproducidas</item>
+    </plurals>
+    <plurals name="n_plays">
+        <item quantity="one">%d reproducción</item>
+        <item quantity="many">%d reproducciones</item>
+        <item quantity="other">%d reproducciones</item>
+    </plurals>
+
+    <string name="continuous">Continuo</string>
+    <string name="weeks">Semanas</string>
+    <string name="months">Meses</string>
+    <string name="years">Años</string>
+
+    <string name="liked">Favoritas</string>
+    <string name="offline">Descargadas</string>
+    <string name="cached_playlist">En caché</string>
 </resources>

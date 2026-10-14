@@ -8,7 +8,7 @@ package com.ruben.spotitube.ui.theme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.palette.graphics.Palette
-import com.ruben.spotitube.OpenTuneColors
+import com.ruben.spotitube.ArmoryColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -44,7 +44,7 @@ object PlayerColorExtractor {
         addIfUnique(lightMutedColor, 1.0f)
 
         val fallbackSeed =
-            Color(fallbackColor).takeUnless { isNearGray(it) } ?: OpenTuneColors.Gold1
+            Color(fallbackColor).takeUnless { isNearGray(it) } ?: ArmoryColors.Gold1
 
         val seed = availableColors.firstOrNull() ?: fallbackSeed
         val targets = listOf(25f, -25f, 55f, -55f, 120f, -120f, 180f, 150f, -150f)

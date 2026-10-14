@@ -102,7 +102,7 @@ internal fun rememberArtworkPainter(thumbnailUrl: String?): Painter =
             .build()
     )
 
-/** Fila de marca OpenTune — aparece en el pie de todos los layouts si showBranding=true */
+/** Fila de marca ARMORY — aparece en el pie de todos los layouts si showBranding=true */
 @Composable
 internal fun LyricsBrandingRow(
     secondaryColor: Color,

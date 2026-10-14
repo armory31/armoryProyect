@@ -101,8 +101,7 @@ import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.PremiumBodyFont
-import com.ruben.spotitube.PremiumTitleFont
+import com.ruben.spotitube.GlobalFont
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.CropThumbnailToSquareKey
 import com.ruben.spotitube.constants.DisableBlurKey
@@ -138,6 +137,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material3.LocalContentColor
+import com.ruben.spotitube.ArmoryIcon
 
 const val ActiveBoxAlpha = 0.6f
 
@@ -148,7 +150,7 @@ inline fun ListItem(
     noinline subtitle: (@Composable RowScope.() -> Unit)? = null,
     crossinline badges: @Composable RowScope.() -> Unit = {},
     thumbnailContent: @Composable () -> Unit,
-    trailingContent: @Composable RowScope.() -> Unit = {},
+    crossinline trailingContent: @Composable RowScope.() -> Unit = {},
     isActive: Boolean = false
 ) {
     Row(
@@ -162,8 +164,7 @@ inline fun ListItem(
         Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 1, overflow = TextOverflow.Ellipsis
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -171,7 +172,7 @@ inline fun ListItem(
                 subtitle?.invoke(this)
             }
         }
-        trailingContent()
+        CompositionLocalProvider(LocalContentColor provides ArmoryColors.TextSecondary) { trailingContent() }
     }
 }
 
@@ -191,7 +192,7 @@ fun ListItem(
     subtitle = {
         badges()
         if (!subtitle.isNullOrEmpty()) {
-            Text(text = subtitle, color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     },
     thumbnailContent = thumbnailContent,
@@ -310,7 +311,7 @@ fun LibraryPlaylistFeatureCard(
                     Icon(
                         painter = painterResource(playlistPlaceholderIcon(playlist, autoPlaylist)),
                         contentDescription = null,
-                        tint = ArmoryColors.Gold3.copy(alpha = 0.7f),
+                        tint = ArmoryColors.Gold2,
                         modifier = Modifier.size(thumbnailSize / 2.5f),
                     )
                 },
@@ -324,15 +325,12 @@ fun LibraryPlaylistFeatureCard(
                 Text(
                     text = playlist.playlist.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = ArmoryColors.Silver1,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = subtitleText,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = ArmoryColors.Silver3,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -544,25 +542,15 @@ fun LibraryPinnedCollectionTile(
 
                 Text(
                     text = title,
-                    color = ArmoryColors.Champagne,
-                    fontFamily = PremiumTitleFont,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 if (!subtitle.isNullOrBlank()) {
                     Text(
                         text = subtitle,
-                        color = ArmoryColors.TextMuted,
-                        fontFamily = PremiumBodyFont,
-                        fontSize = 11.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -585,8 +573,7 @@ fun GridItem(
     title = {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Start,
@@ -597,7 +584,6 @@ fun GridItem(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -726,8 +712,7 @@ fun SongGridItem(
     title = {
         Text(
             text = song.song.title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.basicMarquee().fillMaxWidth()
@@ -740,7 +725,6 @@ fun SongGridItem(
                 makeTimeString(song.song.duration * 1000L)
             ),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
@@ -955,8 +939,7 @@ fun AlbumGridItem(
     title = {
         Text(
             text = album.album.title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.basicMarquee().fillMaxWidth()
@@ -969,7 +952,6 @@ fun AlbumGridItem(
             Text(
                 text = subtitleText,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1157,7 +1139,6 @@ fun OverlayPlaylistListItem(
                     }
                     Text(
                         text = subtitle,
-                        color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -1206,8 +1187,7 @@ fun PlaylistGridItem(
     title = {
         Text(
             text = playlist.playlist.name,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.basicMarquee().fillMaxWidth()
@@ -1234,7 +1214,6 @@ fun PlaylistGridItem(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -1437,8 +1416,7 @@ fun YouTubeGridItem(
     title = {
         Text(
             text = item.title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = if (item is ArtistItem) TextAlign.Center else TextAlign.Start,
@@ -1456,7 +1434,6 @@ fun YouTubeGridItem(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )

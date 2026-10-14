@@ -1,11 +1,12 @@
 /*
- * OpenTune Insight — Year in Music, redesigned (2026)
+ * ARMORY Insignia — Year in Music, redesigned (2026)
  * Arturo254 (github.com/Arturo254)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
 package com.ruben.spotitube.ui.screens
 
+import com.ruben.spotitube.ArmoryColors
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.view.View
@@ -103,9 +104,13 @@ import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.Artist
+import com.ruben.spotitube.db.entities.SavedAlbumEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.db.entities.SongWithStats
-import com.ruben.spotitube.ui.component.IconButton
+import com.ruben.spotitube.ArmoryIconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.menu.ArtistMenu
 import com.ruben.spotitube.ui.menu.SongMenu
@@ -129,44 +134,44 @@ import kotlin.time.Duration.Companion.milliseconds
 // Design tokens
 // ─────────────────────────────────────────────────────────────────────────────
 
-private val Ink      = Color(0xFF040406)
-private val Snow     = Color(0xFFFDFDFD)
-private val SnowMid  = Color(0xB3FDFDFD)
-private val SnowDim  = Color(0x55FDFDFD)
+private val Ink      = ArmoryColors.AbsoluteBlack
+private val Snow     = ArmoryColors.TextPrimary
+private val SnowMid  = ArmoryColors.TextSecondary
+private val SnowDim  = ArmoryColors.TextMuted
 private val GlassHi  = Color(0x28FFFFFF)
-private val GlassBorder = Color(0x18FFFFFF)
+private val GlassBorder = ArmoryColors.SurfaceBorder
 
-// Per-card gradient palettes ─ each card has its own visual identity
-private val WelcomeA  = Color(0xFF110024)
-private val WelcomeB  = Color(0xFF8A1FFF)
-private val WelcomeC  = Color(0xFFFB3E7E)
+// Per-card gradient palettes ─ each card has its own visual identity (Blacks, Golds, Bronze, Silver)
+private val WelcomeA  = ArmoryColors.AbsoluteBlack
+private val WelcomeB  = ArmoryColors.Gold3
+private val WelcomeC  = ArmoryColors.Gold1
 
-private val MinutesA  = Color(0xFF000E30)
-private val MinutesB  = Color(0xFF1560FF)
-private val MinutesC  = Color(0xFF00CFFF)
+private val MinutesA  = ArmoryColors.AbsoluteBlack
+private val MinutesB  = ArmoryColors.Gold2
+private val MinutesC  = ArmoryColors.Copper2
 
-private val SongsA    = Color(0xFF001409)
-private val SongsB    = Color(0xFF1DB954)
-private val SongsC    = Color(0xFFB3FF6E)
+private val SongsA    = ArmoryColors.AbsoluteBlack
+private val SongsB    = ArmoryColors.Silver1
+private val SongsC    = ArmoryColors.Gold1
 
-private val SpotA     = Color(0xFF200028)
-private val SpotB     = Color(0xFFFF2D78)
+private val SpotA     = ArmoryColors.AbsoluteBlack
+private val SpotB     = ArmoryColors.Gold3
 
-private val ArtistA   = Color(0xFF0F001E)
-private val ArtistB   = Color(0xFFBF00FF)
-private val ArtistC   = Color(0xFF5500CC)
+private val ArtistA   = ArmoryColors.AbsoluteBlack
+private val ArtistB   = ArmoryColors.Copper2
+private val ArtistC   = ArmoryColors.Gold2
 
-private val AlbumA    = Color(0xFF170900)
-private val AlbumB    = Color(0xFFFF7A00)
-private val AlbumC    = Color(0xFFFFD000)
+private val AlbumA    = ArmoryColors.AbsoluteBlack
+private val AlbumB    = ArmoryColors.Gold1
+private val AlbumC    = ArmoryColors.Silver1
 
-private val PersonA   = Color(0xFF001918)
-private val PersonB   = Color(0xFF00E5C3)
+private val PersonA = ArmoryColors.AbsoluteBlack
+private val PersonB   = ArmoryColors.Gold2
 
-private val SummaryA  = Color(0xFF0E0018)
-private val SummaryB  = Color(0xFF6A0DAD)
-private val SummaryC  = Color(0xFF1560FF)
-private val SummaryD  = Color(0xFF1DB954)
+private val SummaryA  = ArmoryColors.AbsoluteBlack
+private val SummaryB  = ArmoryColors.SurfaceBlack
+private val SummaryC  = ArmoryColors.Gold3
+private val SummaryD  = ArmoryColors.Copper2
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Listening Personality
@@ -174,31 +179,46 @@ private val SummaryD  = Color(0xFF1DB954)
 
 private data class InsightPersonality(
     val title: String,
+    val shortTitle: String,
     val description: String,
     val gradTop: Color,
     val gradBot: Color,
     val accent: Color,
+    val badgeRes: Int? = null,
 )
 
 private val PersonalityDevoted = InsightPersonality(
-    title = "Devoted Fan",
-    description = "When you find a song you love, you play it on repeat. Your loyalty to your favourites is unmatched — and that's your superpower.",
+    title = "Fan Devoto",
+    shortTitle = "Devoto",
+    description = "Cuando encuentras una canción que te encanta, la pones en bucle. Tu lealtad a tus favoritos no tiene igual — y ese es tu superpoder.",
     gradTop = PersonA, gradBot = PersonB, accent = PersonB,
+    badgeRes = R.drawable.devot_badge,
 )
 private val PersonalityExplorer = InsightPersonality(
-    title = "Music Explorer",
-    description = "Always discovering, never settling. Your taste spans worlds, and your playlist never sounds the same twice.",
+    title = "Explorador Musical",
+    shortTitle = "Explorador",
+    description = "Siempre descubriendo, nunca conformándote. Tu gusto abarca mundos y tu lista nunca suena igual dos veces.",
     gradTop = WelcomeA, gradBot = WelcomeB, accent = WelcomeB,
+    badgeRes = R.drawable.explorer_badge,
 )
 private val PersonalityAudiophile = InsightPersonality(
-    title = "True Audiophile",
-    description = "Hours melt away when you're in the zone. Music isn't background noise for you — it's everything.",
+    title = "Verdadero Audiófilo",
+    shortTitle = "Audiófilo",
+    description = "Las horas se desvanecen cuando estás en la zona. La música no es ruido de fondo para ti; lo es todo.",
     gradTop = MinutesA, gradBot = MinutesB, accent = MinutesC,
 )
 private val PersonalityCasual = InsightPersonality(
-    title = "Laid-Back Listener",
-    description = "Music moves effortlessly with your life. It's always there when you need it, easy and perfectly in tune.",
+    title = "Oyente Relajado",
+    shortTitle = "Relajado",
+    description = "La música se mueve sin esfuerzo con tu vida. Siempre está ahí cuando la necesitas, fácil y perfectamente afinada.",
     gradTop = SongsA, gradBot = SongsB, accent = SongsC,
+)
+
+private val allPersonalities = listOf(
+    PersonalityDevoted,
+    PersonalityExplorer,
+    PersonalityAudiophile,
+    PersonalityCasual,
 )
 
 private fun computePersonality(
@@ -223,7 +243,9 @@ private fun computePersonality(
 
 private enum class InsightPage {
     Welcome, Minutes, TopSongsList, SongSpotlight,
-    ArtistSpotlight, TopAlbumsList, Personality, Summary,
+    ArtistSpotlight, TopAlbumsList,
+    PersonalityDevotedCard, PersonalityExplorerCard, PersonalityAudiophileCard, PersonalityCasualCard,
+    Summary,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -259,18 +281,33 @@ fun YearInMusicScreen(
 
     val shareArgb = Ink.toArgb()
 
-    // Build page list dynamically based on available data
-    val pages = remember(topSongsStats, topArtists, topAlbums, totalListeningTime, totalSongsPlayed) {
+    // Build page list dynamically with fallback preview support
+    val displayListeningTime = if (totalListeningTime > 0) totalListeningTime else 36_000_000L
+    val displaySongsPlayed = if (totalSongsPlayed > 0) totalSongsPlayed else 142L
+    val displayTopSongsStats = if (topSongsStats.isNotEmpty()) topSongsStats else listOf(
+        SongWithStats("1", "Bohemian Rhapsody", "", 84, 354_000L),
+        SongWithStats("2", "Stairway to Heaven", "", 65, 480_000L),
+        SongWithStats("3", "Hotel California", "", 52, 390_000L),
+    )
+    val displayTopArtists = if (topArtists.isNotEmpty()) topArtists else listOf(
+        Artist(SavedArtistEntity(id = "dummy1", name = "Queen"), 45, 180000)
+    )
+    val displayTopAlbums = if (topAlbums.isNotEmpty()) topAlbums else listOf(
+        Album(SavedAlbumEntity(id = "dummyA1", title = "A Night at the Opera"), emptyList(), 35, 120000)
+    )
+
+    val pages = remember(displayTopSongsStats, displayTopArtists, displayTopAlbums, displayListeningTime, displaySongsPlayed) {
         buildList {
             add(InsightPage.Welcome)
-            if (totalListeningTime > 0 || totalSongsPlayed > 0) add(InsightPage.Minutes)
-            if (topSongsStats.isNotEmpty()) {
-                add(InsightPage.TopSongsList)
-                add(InsightPage.SongSpotlight)
-            }
-            if (topArtists.isNotEmpty()) add(InsightPage.ArtistSpotlight)
-            if (topAlbums.isNotEmpty()) add(InsightPage.TopAlbumsList)
-            if (topSongsStats.isNotEmpty()) add(InsightPage.Personality)
+            add(InsightPage.Minutes)
+            add(InsightPage.TopSongsList)
+            add(InsightPage.SongSpotlight)
+            add(InsightPage.ArtistSpotlight)
+            add(InsightPage.TopAlbumsList)
+            add(InsightPage.PersonalityDevotedCard)
+            add(InsightPage.PersonalityExplorerCard)
+            add(InsightPage.PersonalityAudiophileCard)
+            add(InsightPage.PersonalityCasualCard)
             add(InsightPage.Summary)
         }
     }
@@ -278,7 +315,7 @@ fun YearInMusicScreen(
     val pagerState = rememberPagerState { pages.size }
     val currentPage = pagerState.currentPage
     val isLastPage  = currentPage == pages.lastIndex
-    val hasData     = topSongsStats.isNotEmpty() || topArtists.isNotEmpty() || topAlbums.isNotEmpty()
+    val hasData     = true
 
     // Jump to summary when capturing share screenshot
     LaunchedEffect(isShareCaptureMode) {
@@ -302,12 +339,12 @@ fun YearInMusicScreen(
             InsightPageContent(
                 page               = pages.getOrNull(pageIndex) ?: InsightPage.Summary,
                 year               = selectedYear,
-                totalListeningTime = totalListeningTime,
-                totalSongsPlayed   = totalSongsPlayed,
-                topSongsStats      = topSongsStats,
+                totalListeningTime = displayListeningTime,
+                totalSongsPlayed   = displaySongsPlayed,
+                topSongsStats      = displayTopSongsStats,
                 topSongs           = topSongs,
-                topArtists         = topArtists,
-                topAlbums          = topAlbums,
+                topArtists         = displayTopArtists,
+                topAlbums          = displayTopAlbums,
                 menuState          = menuState,
                 haptic             = haptic,
                 navController      = navController,
@@ -382,12 +419,11 @@ fun YearInMusicScreen(
                         .padding(horizontal = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(
-                        onClick   = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(painterResource(R.drawable.arrow_back), null, tint = Snow)
-                    }
+                    ArmoryIconButton(
+                        icon = androidx.compose.material.icons.Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "Atrás",
+                        onClick = navController::navigateUp
+                    )
                     Spacer(Modifier.weight(1f))
                     // Brand label — centered
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -399,7 +435,7 @@ fun YearInMusicScreen(
                             letterSpacing = 1.5.sp,
                         )
                         Text(
-                            text       = "Insight",
+                            text       = "Insignia",
                             style      = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color      = Snow,
@@ -538,7 +574,7 @@ private fun InsightPageContent(
                     topSongs.firstOrNull()?.let { entity ->
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         menuState.show {
-                            SongMenu(
+                          SongMenu(
                                 originalSong = entity,
                                 navController = navController,
                                 onDismiss = menuState::dismiss,
@@ -569,12 +605,14 @@ private fun InsightPageContent(
         InsightPage.TopAlbumsList ->
             TopAlbumsPage(albums = topAlbums, modifier = modifier)
 
-        InsightPage.Personality ->
-            PersonalityPage(
-                personality = computePersonality(topSongsStats, totalSongsPlayed, totalListeningTime),
-                topSong     = topSongsStats.firstOrNull(),
-                modifier    = modifier,
-            )
+        InsightPage.PersonalityDevotedCard ->
+            PersonalityPage(personality = PersonalityDevoted, topSong = topSongsStats.firstOrNull(), modifier = modifier)
+        InsightPage.PersonalityExplorerCard ->
+            PersonalityPage(personality = PersonalityExplorer, topSong = topSongsStats.firstOrNull(), modifier = modifier)
+        InsightPage.PersonalityAudiophileCard ->
+            PersonalityPage(personality = PersonalityAudiophile, topSong = topSongsStats.firstOrNull(), modifier = modifier)
+        InsightPage.PersonalityCasualCard ->
+            PersonalityPage(personality = PersonalityCasual, topSong = topSongsStats.firstOrNull(), modifier = modifier)
 
         InsightPage.Summary ->
             SummaryPage(
@@ -634,7 +672,7 @@ private fun WelcomePage(year: Int, modifier: Modifier = Modifier) {
         ) {
             // "Your" label
             Text(
-                text       = "your",
+                text       = "tu",
                 style      = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Light,
                 color      = SnowMid,
@@ -642,9 +680,9 @@ private fun WelcomePage(year: Int, modifier: Modifier = Modifier) {
             )
             Spacer(Modifier.height(4.dp))
 
-            // "Insight" wordmark
+            // "Insignia" wordmark
             Text(
-                text       = "Insight",
+                text       = "Insignia",
                 style      = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
                 fontWeight = FontWeight.ExtraBold,
                 color      = Snow,
@@ -675,7 +713,7 @@ private fun WelcomePage(year: Int, modifier: Modifier = Modifier) {
 
             // Tagline
             Text(
-                text       = "Everything you listened to\nthis year, in one place.",
+                text       = "Todo lo que escuchaste\neste año, en un solo lugar.",
                 style      = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color      = SnowMid,
@@ -706,7 +744,7 @@ private fun WelcomePage(year: Int, modifier: Modifier = Modifier) {
                 }
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text  = "Swipe to explore",
+                    text  = "Desliza para explorar",
                     style = MaterialTheme.typography.labelMedium,
                     color = SnowDim,
                 )
@@ -728,7 +766,7 @@ private fun MinutesPage(
     val totalMinutes  = totalListeningTimeMs / 60_000L
     val totalHours    = totalMinutes / 60L
     val displayValue  = if (totalHours > 0) totalHours else totalMinutes
-    val displayLabel  = if (totalHours > 0) "hours" else "minutes"
+    val displayLabel  = if (totalHours > 0) "horas" else "minutos"
 
     val animatedValue = rememberAnimatedLong(displayValue)
 
@@ -773,7 +811,7 @@ private fun MinutesPage(
             Spacer(Modifier.height(32.dp))
 
             Text(
-                text       = "You listened to",
+                text       = "Escuchaste",
                 style      = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Light,
                 color      = SnowMid,
@@ -799,7 +837,7 @@ private fun MinutesPage(
             )
 
             Text(
-                text  = "of music",
+                text  = "de música",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Light,
                 color = SnowMid,
@@ -817,7 +855,7 @@ private fun MinutesPage(
                     ) {
                         Text("🎬", fontSize = 28.sp)
                         Text(
-                            text = "That's like watching $movieCount full movies back-to-back.",
+                            text = "Es como ver $movieCount películas completas seguidas.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = SnowMid,
                             lineHeight = 22.sp,
@@ -835,7 +873,7 @@ private fun MinutesPage(
                 ) {
                     Text("🎵", fontSize = 28.sp)
                     Text(
-                        text  = "Across $totalSongsPlayed plays of your top songs.",
+                        text  = "En $totalSongsPlayed reproducciones de tus canciones principales.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = SnowMid,
                     )
@@ -874,13 +912,13 @@ private fun TopSongsListPage(songs: List<SongWithStats>, modifier: Modifier = Mo
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text       = "Your Top",
+                text       = "Tus Top",
                 style      = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Light,
                 color      = SnowMid,
             )
             Text(
-                text       = "Songs",
+                text       = "Canciones",
                 style      = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Black,
                 color      = SongsB,
@@ -1026,7 +1064,7 @@ private fun SongSpotlightPage(
 
             // Badge
             InsightBadge(
-                text       = "#1 Song this year",
+                text       = "Canción #1 del año",
                 background = Brush.linearGradient(listOf(SpotB, SpotA.copy(alpha = 0.6f))),
             )
 
@@ -1073,7 +1111,7 @@ private fun SongSpotlightPage(
             Spacer(Modifier.weight(0.5f))
 
             Text(
-                text  = "Hold to see song options",
+                text  = "Mantén presionado para opciones",
                 style = MaterialTheme.typography.labelSmall,
                 color = SnowDim,
             )
@@ -1130,7 +1168,7 @@ private fun ArtistSpotlightPage(
             verticalArrangement = Arrangement.Center,
         ) {
             InsightBadge(
-                text       = "#1 Artist",
+                text       = "Artista #1",
                 background = Brush.linearGradient(listOf(ArtistB, ArtistC)),
             )
 
@@ -1195,7 +1233,7 @@ private fun ArtistSpotlightPage(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                text  = "Hold to see artist options",
+                text  = "Mantén presionado para opciones",
                 style = MaterialTheme.typography.labelSmall,
                 color = SnowDim,
             )
@@ -1232,13 +1270,13 @@ private fun TopAlbumsPage(albums: List<Album>, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text       = "Your Top",
+                text       = "Tus Top",
                 style      = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Light,
                 color      = SnowMid,
             )
             Text(
-                text       = "Albums",
+                text       = "Álbumes",
                 style      = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Black,
                 color      = AlbumB,
@@ -1322,18 +1360,23 @@ private fun PersonalityPage(
     topSong: SongWithStats?,
     modifier: Modifier = Modifier,
 ) {
+    val initialIndex = remember(personality) {
+        allPersonalities.indexOfFirst { it.title == personality.title }.coerceAtLeast(0)
+    }
+    var selectedIndex by remember { mutableStateOf(initialIndex) }
+    val currentPersonality = allPersonalities[selectedIndex]
 
     Box(
         modifier = modifier.background(
             Brush.verticalGradient(
-                listOf(personality.gradTop, personality.gradBot.copy(alpha = 0.9f), personality.gradTop)
+                listOf(currentPersonality.gradTop, currentPersonality.gradBot.copy(alpha = 0.9f), currentPersonality.gradTop)
             )
         )
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    listOf(personality.accent.copy(alpha = 0.25f), Color.Transparent),
+                    listOf(currentPersonality.accent.copy(alpha = 0.25f), Color.Transparent),
                     center = Offset(size.width / 2f, size.height * 0.35f),
                     radius = size.width * 0.75f,
                 )
@@ -1349,30 +1392,68 @@ private fun PersonalityPage(
             horizontalAlignment = Alignment.Start,
         ) {
             Text(
-                text  = "Your listening\npersonality",
+                text  = "Tu personalidad\nde escucha",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Light,
                 color = SnowMid,
                 lineHeight = 32.sp,
             )
 
-            Spacer(Modifier.height(32.dp))
-
             Spacer(Modifier.height(16.dp))
 
+            // Personality selector chips
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                allPersonalities.forEachIndexed { index, p ->
+                    val isSelected = index == selectedIndex
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { selectedIndex = index }
+                            .background(if (isSelected) p.accent.copy(alpha = 0.3f) else GlassHi)
+                            .border(1.dp, if (isSelected) p.accent else GlassBorder, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = p.shortTitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) Snow else SnowDim,
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
             Text(
-                text       = personality.title,
+                text       = currentPersonality.title,
                 style      = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Black,
-                color      = personality.accent,
+                color      = currentPersonality.accent,
                 letterSpacing = (-1).sp,
             )
+
+            currentPersonality.badgeRes?.let { resId ->
+                Spacer(Modifier.height(16.dp))
+                androidx.compose.foundation.Image(
+                    painter = painterResource(resId),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, currentPersonality.accent, CircleShape),
+                    contentScale = ContentScale.Crop,
+                )
+            }
 
             Spacer(Modifier.height(16.dp))
 
             InsightGlassCard {
                 Text(
-                    text       = personality.description,
+                    text       = currentPersonality.description,
                     style      = MaterialTheme.typography.bodyLarge,
                     color      = SnowMid,
                     lineHeight = 26.sp,
@@ -1388,7 +1469,7 @@ private fun PersonalityPage(
                     ) {
                         Text("🎵", fontSize = 20.sp)
                         Text(
-                            text  = "Your anthem this year: ${song.title}",
+                            text  = "Tu himno de este año: ${song.title}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = SnowMid,
                             maxLines = 2,
@@ -1483,7 +1564,7 @@ private fun SummaryPage(
                     }
                     Column {
                         Text(
-                            "OpenTune Insight",
+                            "Insignia de ARMORY",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = Snow,
@@ -1499,7 +1580,7 @@ private fun SummaryPage(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text       = "Your year\nwrapped up.",
+                    text       = "Tu año\nen resumen.",
                     style      = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Black,
                     color      = Snow,
@@ -1516,14 +1597,14 @@ private fun SummaryPage(
                 ) {
                     SummaryStatBox(
                         emoji = "⏱",
-                        label = "Time listened",
+                        label = "Tiempo escuchado",
                         value = makeTimeString(totalListeningTime),
                         accent = MinutesC,
                         modifier = Modifier.weight(1f),
                     )
                     SummaryStatBox(
                         emoji = "▶",
-                        label = "Total plays",
+                        label = "Reproducciones",
                         value = totalSongsPlayed.toString(),
                         accent = SongsB,
                         modifier = Modifier.weight(1f),
@@ -1541,7 +1622,7 @@ private fun SummaryPage(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
-                            text  = "Highlights",
+                            text  = "Destacados",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = SnowMid,
@@ -1549,7 +1630,7 @@ private fun SummaryPage(
                         topSong?.let {
                             SummaryHighlight(
                                 emoji  = "🎵",
-                                label  = "Top Song",
+                                label  = "Canción Top",
                                 value  = it.title,
                                 accent = SpotB,
                             )
@@ -1557,7 +1638,7 @@ private fun SummaryPage(
                         topArtist?.let {
                             SummaryHighlight(
                                 emoji  = "🎤",
-                                label  = "Top Artist",
+                                label  = "Artista Top",
                                 value  = it.artist.name,
                                 accent = ArtistB,
                             )
@@ -1565,7 +1646,7 @@ private fun SummaryPage(
                         topAlbum?.let {
                             SummaryHighlight(
                                 emoji  = "💿",
-                                label  = "Top Album",
+                                label  = "Álbum Top",
                                 value  = it.album.title,
                                 accent = AlbumB,
                             )
@@ -1595,7 +1676,7 @@ private fun SummaryPage(
                     color = SnowDim,
                 )
                 Text(
-                    "ARMORY Insight",
+                    "Insignia de ARMORY ",
                     style = MaterialTheme.typography.labelSmall,
                     color = SnowDim,
                 )
@@ -1709,7 +1790,7 @@ private fun InsightShareFab(
             onClick      = onClick,
             modifier     = Modifier.fillMaxSize(),
             shape        = CircleShape,
-            containerColor = Color(0xFF111111),
+            containerColor = ArmoryColors.SurfaceBlack,
             contentColor = Snow,
         ) {
             if (isGenerating) {
@@ -1734,11 +1815,11 @@ private fun InsightYearPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest  = onDismiss,
-        containerColor    = Color(0xFF111118),
+        containerColor    = ArmoryColors.SurfaceElevated,
         titleContentColor = Snow,
         title = {
             Text(
-                "Select year",
+                "Seleccionar año",
                 fontWeight = FontWeight.ExtraBold,
                 color      = Snow,
             )

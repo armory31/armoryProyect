@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.ui.screens
 
 import android.annotation.SuppressLint
@@ -23,14 +21,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,22 +37,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.ruben.spotitube.ArmoryIcon
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
+import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.constants.HistorySource
 import com.ruben.spotitube.constants.InnerTubeCookieKey
 import com.ruben.spotitube.db.entities.EventWithSong
@@ -70,15 +65,12 @@ import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.ChipsRow
 import com.ruben.spotitube.ui.component.HideOnScrollFAB
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.menu.SelectionMediaMetadataMenu
 import com.ruben.spotitube.ui.menu.SongMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.DateAgo
 import com.ruben.spotitube.viewmodels.HistoryViewModel
@@ -98,15 +90,11 @@ fun HistoryScreen(
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
-    var selection by remember {
-        mutableStateOf(false)
-    }
-
+    var selection by remember { mutableStateOf(false) }
     var isSearching by rememberSaveable { mutableStateOf(false) }
-    var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue())
-    }
+    var query by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue()) }
     val focusRequester = remember { FocusRequester() }
+
     LaunchedEffect(isSearching) {
         if (isSearching) {
             focusRequester.requestFocus()
@@ -132,7 +120,6 @@ fun HistoryScreen(
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
 
-    @SuppressLint("LocalContextGetResourceValueCall")
     fun dateAgoToString(dateAgo: DateAgo): String {
         return when (dateAgo) {
             DateAgo.Today -> context.getString(R.string.today)
@@ -155,10 +142,7 @@ fun HistoryScreen(
                 songs.filter { event ->
                     event.song.song.title.contains(query.text, ignoreCase = true) ||
                             event.song.artists.any {
-                                it.name.contains(
-                                    query.text,
-                                    ignoreCase = true
-                                )
+                                it.name.contains(query.text, ignoreCase = true)
                             }
                 }
             }.filterValues { it.isNotEmpty() }
@@ -198,9 +182,7 @@ fun HistoryScreen(
             contentPadding = LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                 .asPaddingValues(),
             modifier = Modifier.windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(
-                    WindowInsetsSides.Top
-                )
+                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
             )
         ) {
             item {
@@ -214,7 +196,7 @@ fun HistoryScreen(
                     currentValue = historySource,
                     onValueUpdate = {
                         viewModel.historySource.value = it
-                        if (it == HistorySource.REMOTE){
+                        if (it == HistorySource.REMOTE) {
                             viewModel.fetchRemoteHistory()
                         }
                     }
@@ -224,8 +206,8 @@ fun HistoryScreen(
             if (historySource == HistorySource.REMOTE && isLoggedIn) {
                 filteredRemoteContent?.forEach { section ->
                     stickyHeader {
-                        NavigationTitle(
-                            title = section.title,
+                        SectionHeader(
+                            text = section.title,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.background)
@@ -241,7 +223,9 @@ fun HistoryScreen(
                             isActive = song.id == mediaMetadata?.id,
                             isPlaying = isPlaying,
                             trailingContent = {
-                                IconButton(
+                                ArmoryIconButton(
+                                    icon = Icons.Rounded.MoreVert,
+                                    contentDescription = "Opciones",
                                     onClick = {
                                         menuState.show {
                                             YouTubeSongMenu(
@@ -251,12 +235,7 @@ fun HistoryScreen(
                                             )
                                         }
                                     }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.more_vert),
-                                        contentDescription = null
-                                    )
-                                }
+                                )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -287,8 +266,8 @@ fun HistoryScreen(
             } else {
                 filteredEvents.forEach { (dateAgo, events) ->
                     stickyHeader {
-                        NavigationTitle(
-                            title = dateAgoToString(dateAgo),
+                        SectionHeader(
+                            text = dateAgoToString(dateAgo),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.surface)
@@ -296,7 +275,7 @@ fun HistoryScreen(
                     }
 
                     val currentDateWrappedItems = wrappedItemsMap[dateAgo] ?: emptyList()
-                    
+
                     itemsIndexed(
                         items = currentDateWrappedItems,
                         key = { index, wrappedItem -> "${dateAgo}_${wrappedItem.item.event.id}_$index" }
@@ -308,11 +287,12 @@ fun HistoryScreen(
                             isPlaying = isPlaying,
                             showInLibraryIcon = true,
                             isSelected = wrappedItem.isSelected && selection,
-
                             trailingContent = {
-                                IconButton(
-                                    onClick = {
-                                        if (!selection) {
+                                if (!selection) {
+                                    ArmoryIconButton(
+                                        icon = Icons.Rounded.MoreVert,
+                                        contentDescription = "Opciones",
+                                        onClick = {
                                             menuState.show {
                                                 SongMenu(
                                                     originalSong = event.song,
@@ -322,11 +302,6 @@ fun HistoryScreen(
                                                 )
                                             }
                                         }
-                                    }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.more_vert),
-                                        contentDescription = null
                                     )
                                 }
                             },
@@ -397,94 +372,45 @@ fun HistoryScreen(
         )
     }
 
-    TopAppBar(
-        title = {
-            if (selection) {
-                val count = allWrappedItems.count { it.isSelected }
-                Text(
-                    text = pluralStringResource(R.plurals.n_song, count, count),
-                    style = MaterialTheme.typography.titleLarge
-                )
-            } else if (isSearching) {
-                TextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.search),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.titleLarge,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                )
-            } else {
-                Text(stringResource(R.string.history))
-            }
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    when {
-                        isSearching -> {
-                            isSearching = false
-                            query = TextFieldValue()
-                        }
+    val topBarTitle = when {
+        selection -> {
+            val count = allWrappedItems.count { it.isSelected }
+            pluralStringResource(R.plurals.n_song, count, count)
+        }
+        isSearching -> if (query.text.isNotEmpty()) query.text else stringResource(R.string.search)
+        else -> stringResource(R.string.history)
+    }
 
-                        selection -> {
-                            selection = false
-                        }
-
-                        else -> {
-                            navController.navigateUp()
-                        }
-                    }
-                },
-                onLongClick = {
-                    if (!isSearching && !selection) {
-                        navController.backToMain()
-                    }
+    ArmoryTopBar(
+        title = topBarTitle,
+        onBack = {
+            when {
+                isSearching -> {
+                    isSearching = false
+                    query = TextFieldValue()
                 }
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (selection) R.drawable.close else R.drawable.arrow_back
-                    ),
-                    contentDescription = null
-                )
+                selection -> {
+                    selection = false
+                }
+                else -> {
+                    navController.navigateUp()
+                }
             }
         },
         actions = {
             if (selection) {
                 val count = allWrappedItems.count { it.isSelected }
-                IconButton(
+                ArmoryIconButton(
+                    icon = Icons.Rounded.SelectAll,
+                    contentDescription = "Seleccionar",
                     onClick = {
-                        if (count == allWrappedItems.size) {
-                            allWrappedItems.forEach { it.isSelected = false }
-                        } else {
-                            allWrappedItems.forEach { it.isSelected = true }
-                        }
+                        val selectAll = count != allWrappedItems.size
+                        allWrappedItems.forEach { it.isSelected = selectAll }
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (count == allWrappedItems.size) R.drawable.deselect else R.drawable.select_all
-                        ),
-                        contentDescription = null
-                    )
-                }
-                IconButton(
+                )
+                ArmoryIconButton(
+                    icon = Icons.Rounded.MoreVert,
+                    contentDescription = "Más",
                     onClick = {
                         menuState.show {
                             SelectionMediaMetadataMenu(
@@ -497,21 +423,13 @@ fun HistoryScreen(
                             )
                         }
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.more_vert),
-                        contentDescription = null
-                    )
-                }
+                )
             } else if (!isSearching) {
-                IconButton(
+                ArmoryIconButton(
+                    icon = Icons.Rounded.Search,
+                    contentDescription = "Buscar",
                     onClick = { isSearching = true }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.search),
-                        contentDescription = null
-                    )
-                }
+                )
             }
         }
     )

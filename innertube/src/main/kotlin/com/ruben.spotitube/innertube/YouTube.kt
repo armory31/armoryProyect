@@ -33,6 +33,7 @@ import com.ruben.spotitube.innertube.models.YouTubeLocale
 import com.ruben.spotitube.innertube.models.getContinuation
 import com.ruben.spotitube.innertube.models.getItems
 import com.ruben.spotitube.innertube.models.oddElements
+import com.ruben.spotitube.innertube.utils.runCatchingCancellable
 import com.ruben.spotitube.innertube.models.response.AccountMenuResponse
 import com.ruben.spotitube.innertube.models.response.BrowseResponse
 import com.ruben.spotitube.innertube.models.response.CreatePlaylistResponse
@@ -73,7 +74,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.Proxy
-import java.util.Locale
 import kotlin.random.Random
 
 /**
@@ -103,14 +103,6 @@ object YouTube {
         set(value) {
             innerTube.cookie = value
         }
-    var poToken: String?
-        get() = innerTube.poToken
-        set(value) {
-            innerTube.poToken = value
-        }
-    var webClientPoTokenEnabled: Boolean = false
-    var poTokenGvs: String? = null
-    var poTokenPlayer: String? = null
     var proxy: Proxy?
         get() = innerTube.proxy
         set(value) {
@@ -124,18 +116,6 @@ object YouTube {
         set(value) {
             innerTube.useLoginForBrowse = value
         }
-
-    private fun needsServiceIntegrity(client: YouTubeClient): Boolean {
-        val name = client.clientName.uppercase(Locale.US)
-        return name == "WEB" ||
-            name == "WEB_REMIX" ||
-            name == "WEB_CREATOR" ||
-            name == "MWEB" ||
-            name == "WEB_EMBEDDED_PLAYER" ||
-            name == "TVHTML5" ||
-            name == "TVHTML5_SIMPLY_EMBEDDED_PLAYER" ||
-            name == "TVHTML5_SIMPLY"
-    }
 
 
     /**
@@ -243,34 +223,7 @@ object YouTube {
         val isEmpty: Boolean get() = albums.isEmpty() && singles.isEmpty() && eps.isEmpty()
     }
 
-    private fun resolvePlayerPoToken(client: YouTubeClient, videoId: String, explicitPoToken: String?): String? {
-        val explicit = explicitPoToken?.takeIf { it.isNotBlank() }
-        if (explicit != null) return explicit
-        if (!webClientPoTokenEnabled) return null
-        if (!needsServiceIntegrity(client)) return null
 
-        val userExtracted = poTokenPlayer?.takeIf { it.isNotBlank() }
-        if (userExtracted != null) return userExtracted
-
-        val webFallback = poToken?.takeIf { it.isNotBlank() }
-        if (webFallback != null) return webFallback
-
-        return null
-    }
-
-    internal fun resolveGvsPoToken(): String? {
-        if (!webClientPoTokenEnabled) return null
-        return poTokenGvs?.takeIf { it.isNotBlank() }
-            ?: poToken?.takeIf { it.isNotBlank() }
-    }
-
-    internal fun appendGvsPoToken(url: String, client: YouTubeClient? = null): String {
-        val token = resolveGvsPoToken() ?: return url
-        if (url.contains("pot=")) return url
-
-        val separator = if (url.contains("?")) "&" else "?"
-        return "$url${separator}pot=$token"
-    }
 
     suspend fun searchSuggestions(query: String): Result<SearchSuggestions> = runCatching {
         val response = innerTube.getSearchSuggestions(WEB_REMIX, query).body<GetSearchSuggestionsResponse>()
@@ -947,66 +900,107 @@ object YouTube {
     }
 
     suspend fun getChartsPage(continuation: String? = null): Result<ChartsPage> = runCatching {
-        val response = innerTube.browse(
+        var response = innerTube.browse(
             client = WEB_REMIX,
             browseId = "FEmusic_charts",
-            params = "ggMGCgQIgAQ%3D",
+            params = if (continuation == null) "ggMGCgQIgAQ%3D" else null,
             continuation = continuation
         ).body<BrowseResponse>()
 
+        var parsed = parseChartsResponse(response)
+
+        if (parsed.sections.isEmpty() && continuation == null) {
+            response = innerTube.browse(
+                client = WEB_REMIX,
+                browseId = "FEmusic_charts",
+            ).body<BrowseResponse>()
+            parsed = parseChartsResponse(response)
+        }
+
+        if (parsed.sections.isEmpty() && continuation == null) {
+            response = innerTube.browse(
+                client = WEB_REMIX,
+                browseId = "FEmusic_explore",
+            ).body<BrowseResponse>()
+            parsed = parseChartsResponse(response)
+        }
+
+        parsed
+    }
+
+    private fun parseChartsResponse(response: BrowseResponse): ChartsPage {
         val sections = mutableListOf<ChartsPage.ChartSection>()
     
-        response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
-            ?.tabRenderer?.content?.sectionListRenderer?.contents?.forEach { content ->
+        val contents = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
+            ?.tabRenderer?.content?.sectionListRenderer?.contents
+            ?: response.contents?.sectionListRenderer?.contents
+
+        contents?.forEach { content ->
+            content.musicCarouselShelfRenderer?.let { renderer ->
+                val title = renderer.header?.musicCarouselShelfBasicHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                    ?: return@forEach
             
-                content.musicCarouselShelfRenderer?.let { renderer ->
-                    val title = renderer.header?.musicCarouselShelfBasicHeaderRenderer?.title?.runs?.firstOrNull()?.text
-                        ?: return@forEach
-                
-                    val items = renderer.contents.mapNotNull { item ->
-                        when {
-                            item.musicResponsiveListItemRenderer != null -> 
-                                convertToChartItem(item.musicResponsiveListItemRenderer)
-                            item.musicTwoRowItemRenderer != null -> 
-                                convertMusicTwoRowItem(item.musicTwoRowItemRenderer)
-                            else -> null
-                        }
-                    }
-                
-                    if (items.isNotEmpty()) {
-                        sections.add(
-                            ChartsPage.ChartSection(
-                                title = title,
-                                items = items,
-                                chartType = determineChartType(title)
-                            )
-                        )
+                val items = renderer.contents.mapNotNull { item ->
+                    when {
+                        item.musicResponsiveListItemRenderer != null -> 
+                            convertToChartItem(item.musicResponsiveListItemRenderer)
+                        item.musicTwoRowItemRenderer != null -> 
+                            convertMusicTwoRowItem(item.musicTwoRowItemRenderer)
+                        else -> null
                     }
                 }
             
-                content.gridRenderer?.let { renderer ->
-                    val title = renderer.header?.gridHeaderRenderer?.title?.runs?.firstOrNull()?.text
-                        ?: return@let
-                
-                    val items = renderer.items.mapNotNull { item ->
-                        item.musicTwoRowItemRenderer?.let { renderer ->
-                            convertMusicTwoRowItem(renderer)
-                        }
-                    }
-                
-                    if (items.isNotEmpty()) {
-                        sections.add(
-                            ChartsPage.ChartSection(
-                                title = title,
-                                items = items,
-                                chartType = ChartsPage.ChartType.NEW_RELEASES
-                            )
+                if (items.isNotEmpty()) {
+                    sections.add(
+                        ChartsPage.ChartSection(
+                            title = title,
+                            items = items,
+                            chartType = determineChartType(title)
                         )
-                    }
+                    )
                 }
             }
 
-        ChartsPage(
+            content.musicShelfRenderer?.let { renderer ->
+                val title = renderer.title?.runs?.firstOrNull()?.text ?: "Top"
+                val items = renderer.contents?.mapNotNull { item ->
+                    item.musicResponsiveListItemRenderer?.let { convertToChartItem(it) }
+                }.orEmpty()
+
+                if (items.isNotEmpty()) {
+                    sections.add(
+                        ChartsPage.ChartSection(
+                            title = title,
+                            items = items,
+                            chartType = determineChartType(title)
+                        )
+                    )
+                }
+            }
+        
+            content.gridRenderer?.let { renderer ->
+                val title = renderer.header?.gridHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                    ?: return@let
+            
+                val items = renderer.items.mapNotNull { item ->
+                    item.musicTwoRowItemRenderer?.let { renderer ->
+                        convertMusicTwoRowItem(renderer)
+                    }
+                }
+            
+                if (items.isNotEmpty()) {
+                    sections.add(
+                        ChartsPage.ChartSection(
+                            title = title,
+                            items = items,
+                            chartType = ChartsPage.ChartType.NEW_RELEASES
+                        )
+                    )
+                }
+            }
+        }
+
+        return ChartsPage(
             sections = sections,
             continuation = response.continuationContents?.sectionListContinuation?.continuations?.getContinuation()
         )
@@ -1188,12 +1182,11 @@ object YouTube {
         innerTube.deletePlaylist(WEB_REMIX, playlistId)
     }
 
-    suspend fun player(videoId: String, playlistId: String? = null, client: YouTubeClient, signatureTimestamp: Int? = null, poToken: String? = null): Result<PlayerResponse> = runCatching {
-        val resolvedPoToken = resolvePlayerPoToken(client, videoId, poToken)
-        innerTube.player(client, videoId, playlistId, signatureTimestamp, resolvedPoToken).body<PlayerResponse>()
+    suspend fun player(videoId: String, playlistId: String? = null, client: YouTubeClient, signatureTimestamp: Int? = null): Result<PlayerResponse> = runCatchingCancellable {
+        innerTube.player(client, videoId, playlistId, signatureTimestamp).body<PlayerResponse>()
     }
 
-    suspend fun registerPlayback(playlistId: String? = null, playbackTracking: String) = runCatching {
+    suspend fun registerPlayback(playlistId: String? = null, playbackTracking: String) = runCatchingCancellable {
         val cpn = (1..16).map {
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"[Random.nextInt(
                 0,
@@ -1210,7 +1203,6 @@ object YouTube {
             url = playbackUrl,
             playlistId = playlistId,
             cpn = cpn,
-            poToken = resolveGvsPoToken()
         )
     }
 
@@ -1317,7 +1309,7 @@ object YouTube {
         }!!
     }
 
-    suspend fun visitorData(): Result<String> = runCatching {
+    suspend fun visitorData(): Result<String> = runCatchingCancellable {
         Json.parseToJsonElement(innerTube.getSwJsData().bodyAsText().substring(5))
             .jsonArray[0]
             .jsonArray[2]

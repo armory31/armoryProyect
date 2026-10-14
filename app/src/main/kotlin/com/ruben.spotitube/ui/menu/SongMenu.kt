@@ -774,6 +774,13 @@ fun SongMenu(
                                 },
                                 modifier =
                                     Modifier.clickable {
+                                        coroutineScope.launch(Dispatchers.IO) {
+                                            val existing = database.getSavedSong(song.id)
+                                            val isLiked = existing?.isLiked ?: false
+                                            database.insertSavedSong(
+                                                song.toSavedSongEntity().copy(isLiked = isLiked)
+                                            )
+                                        }
                                         val downloadRequest =
                                             DownloadRequest
                                                 .Builder(song.id, song.id.toUri())

@@ -8,7 +8,6 @@
 
 package com.ruben.spotitube.ui.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -50,14 +49,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.OpenTuneColors
-import com.ruben.spotitube.OpenTuneHeader
-import com.ruben.spotitube.constants.DisableBlurKey
+import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
+import com.ruben.spotitube.ArmoryHeader
+import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.constants.InnerTubeCookieKey
-import com.ruben.spotitube.constants.ShowHomeCategoryChipsKey
 import com.ruben.spotitube.innertube.utils.parseCookieString
 import com.google.firebase.auth.FirebaseAuth
-import com.ruben.spotitube.ui.component.LocalBottomSheetPageState
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
@@ -75,7 +73,6 @@ fun HomeScreen(
         onVisible()
     }
     val menuState = LocalMenuState.current
-    val bottomSheetPageState = LocalBottomSheetPageState.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val haptic = LocalHapticFeedback.current
 
@@ -83,16 +80,13 @@ fun HomeScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
     val quickPicks by viewModel.quickPicks.collectAsState()
-    val speedDialSongs by viewModel.speedDialSongs.collectAsState()
+    val speedDialItems by viewModel.speedDialItems.collectAsState()
     val forgottenFavorites by viewModel.forgottenFavorites.collectAsState()
     val forgottenFavoritesDaysRemaining by viewModel.forgottenFavoritesDaysRemaining.collectAsState()
     val keepListening by viewModel.keepListening.collectAsState()
     val homePage by viewModel.homePage.collectAsState()
     val allItemsMetadata by viewModel.allItemsMetadata.collectAsState()
 
-    val selectedChip by viewModel.selectedChip.collectAsState()
-
-    val isLoading: Boolean by viewModel.isLoading.collectAsState()
     val isInitialLoadComplete by viewModel.isInitialLoadComplete.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
@@ -105,16 +99,13 @@ fun HomeScreen(
 
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
-    val accountName by viewModel.accountName.collectAsState()
     val accountImageUrl by viewModel.accountImageUrl.collectAsState()
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
-    val (disableBlur) = rememberPreference(DisableBlurKey, true)
-    val (showHomeCategoryChips) = rememberPreference(ShowHomeCategoryChipsKey, true)
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
-    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
-    val url = if (isLoggedIn && !accountImageUrl.isNullOrEmpty()) accountImageUrl else currentUser?.photoUrl?.toString()
+    val savedAvatarUrl = rememberAvatarUrl()
+    val url = savedAvatarUrl ?: if (isLoggedIn && !accountImageUrl.isNullOrEmpty()) accountImageUrl else null
 
     val scope = rememberCoroutineScope()
     val lazylistState = rememberLazyListState()
@@ -139,39 +130,18 @@ fun HomeScreen(
             }
     }
 
-    if (selectedChip != null) {
-        BackHandler {
-            // if a chip is selected, go back to the normal homepage first
-            viewModel.toggleChip(selectedChip)
-        }
-    }
-
-    LaunchedEffect(showHomeCategoryChips, selectedChip) {
-        if (!showHomeCategoryChips && selectedChip != null) {
-            viewModel.toggleChip(selectedChip)
-        }
-    }
-
     LaunchedEffect(forgottenFavorites) {
         forgottenFavoritesLazyGridState.scrollToItem(0)
     }
 
-    // Capture M3 Expressive colors from theme outside drawBehind
-    val color1 = MaterialTheme.colorScheme.primary
-    val color2 = MaterialTheme.colorScheme.secondary
-    val color3 = MaterialTheme.colorScheme.tertiary
-    val color4 = MaterialTheme.colorScheme.primaryContainer
-    val color5 = MaterialTheme.colorScheme.secondaryContainer
-    val surfaceColor = MaterialTheme.colorScheme.surface
-
-    // CONTENEDOR PLANO ABSOLUTO PARA OpenTune
+    // CONTENEDOR PLANO ABSOLUTO PARA ARMORY
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(OpenTuneColors.AbsoluteBlack)
+            .background(ArmoryColors.AbsoluteBlack)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            OpenTuneHeader(
+            ArmoryHeader(
                 avatarUrl = url,
                 onSettings = { navController.navigate("account") }
             )
@@ -232,19 +202,19 @@ fun HomeScreen(
                             title = "Marcado rápido",
                             modifier = Modifier.padding(top = 24.dp)
                         )
-                        if (speedDialSongs.isEmpty()) {
+                        if (speedDialItems.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                    .border(BorderStroke(1.5.dp, goldMetallicBrush), RoundedCornerShape(16.dp))
+                                    .border(BorderStroke(1.5.dp, ArmoryGradients.MetallicCopper), RoundedCornerShape(16.dp))
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No hay canciones marcadas. Usa el menú de cualquier canción para añadirla a Marcado rápido.",
+                                    text = "No hay elementos marcados. Usa el menú de cualquier canción, álbum o playlist para añadirlo a Marcado rápido.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -252,7 +222,7 @@ fun HomeScreen(
                             }
                         } else {
                             SpeedDialSection(
-                                speedDialSongs = speedDialSongs,
+                                speedDialItems = speedDialItems,
                                 mediaMetadata = mediaMetadata,
                                 isPlaying = isPlaying,
                                 navController = navController,
@@ -301,7 +271,7 @@ fun HomeScreen(
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                    .border(BorderStroke(1.5.dp, bronzeMetallicBrush), RoundedCornerShape(16.dp))
+                                    .border(BorderStroke(1.5.dp, ArmoryGradients.MetallicCopper), RoundedCornerShape(16.dp))
                                     .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -313,7 +283,7 @@ fun HomeScreen(
                                         text = "⏳ Desbloqueando en $remaining días",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = OpenTuneColors.Gold2,
+                                        color = ArmoryColors.Gold2,
                                         textAlign = TextAlign.Center
                                     )
                                     Text(

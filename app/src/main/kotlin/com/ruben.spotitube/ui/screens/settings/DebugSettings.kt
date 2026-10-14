@@ -8,6 +8,7 @@
 
 package com.ruben.spotitube.ui.screens.settings
 
+import com.ruben.spotitube.ArmoryColors
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.text.format.DateFormat
@@ -814,7 +815,7 @@ private fun NerdStatsSection(playerConnection: com.ruben.spotitube.playback.Play
                             .height(8.dp)
                             .clip(RoundedCornerShape(4.dp)),
                         color = when {
-                            bufferPercentage > 70 -> Color(0xFF43B581)
+                            bufferPercentage > 70 -> ArmoryColors.SuccessGreen
                             bufferPercentage > 30 -> MaterialTheme.colorScheme.tertiary
                             else -> MaterialTheme.colorScheme.error
                         },
@@ -835,7 +836,7 @@ private fun NerdStatsSection(playerConnection: com.ruben.spotitube.playback.Play
                     }
 
                     val stateColor = when (player.playbackState) {
-                        Player.STATE_READY -> Color(0xFF43B581)
+                        Player.STATE_READY -> ArmoryColors.SuccessGreen
                         Player.STATE_BUFFERING -> MaterialTheme.colorScheme.tertiary
                         Player.STATE_IDLE -> MaterialTheme.colorScheme.outline
                         else -> MaterialTheme.colorScheme.error

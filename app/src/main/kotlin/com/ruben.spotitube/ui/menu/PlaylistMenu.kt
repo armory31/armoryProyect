@@ -59,6 +59,8 @@ import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
+import com.ruben.spotitube.constants.SpeedDialSongIdsKey
+import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistSong
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
@@ -154,17 +156,17 @@ fun PlaylistMenu(
             onDismiss = { showEditDialog = false },
             onSave = { name, thumbnailUrl ->
                 onDismiss()
-                database.insertSavedPlaylist(
-                    SavedPlaylistEntity(
-                        id = playlist.playlist.id,
-                        name = name,
-                        browseId = playlist.playlist.browseId,
-                        thumbnailUrl = thumbnailUrl,
-                        isEditable = playlist.playlist.isEditable,
-                        createdAt = playlist.playlist.createdAt ?: LocalDateTime.now()
-                    )
-                )
                 coroutineScope.launch(Dispatchers.IO) {
+                    database.insertSavedPlaylist(
+                        SavedPlaylistEntity(
+                            id = playlist.playlist.id,
+                            name = name,
+                            browseId = playlist.playlist.browseId,
+                            thumbnailUrl = thumbnailUrl,
+                            isEditable = playlist.playlist.isEditable,
+                            createdAt = playlist.playlist.createdAt ?: LocalDateTime.now()
+                        )
+                    )
                     playlist.playlist.browseId?.let { com.ruben.spotitube.innertube.YouTube.renamePlaylist(it, name) }
                 }
             },
@@ -671,6 +673,48 @@ fun PlaylistMenu(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     )
                 }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        item {
+            val (speedDialIds, onSpeedDialIdsChange) = rememberPreference(SpeedDialSongIdsKey, "")
+            val speedDialList = remember(speedDialIds) {
+                speedDialIds.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            }
+            val playlistKey = "playlist:${playlist.id}"
+            val isInSpeedDial = remember(speedDialList, playlistKey) { playlistKey in speedDialList }
+
+            MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(
+                                if (isInSpeedDial) R.string.remove_from_speed_dial
+                                else R.string.pin_to_speed_dial,
+                            ),
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(if (isInSpeedDial) R.drawable.bookmark_filled else R.drawable.bookmark),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        val updatedIds = if (isInSpeedDial) {
+                            speedDialList.filterNot { it == playlistKey }
+                        } else {
+                            (speedDialList + playlistKey).distinct().take(24)
+                        }
+                        onSpeedDialIdsChange(updatedIds.joinToString(","))
+                        onDismiss()
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                )
             }
         }
     }

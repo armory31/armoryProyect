@@ -35,9 +35,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -578,34 +581,16 @@ fun StatsScreen(
             )
         }
 
-        TopAppBar(
-            title = { Text(stringResource(R.string.stats)) },
-            navigationIcon = {
-                IconButton(
-                    onClick = navController::navigateUp,
-                    onLongClick = navController::backToMain,
-                ) {
-                    Icon(
-                        painterResource(R.drawable.arrow_back),
-                        contentDescription = null,
-                    )
-                }
-            },
+        ArmoryTopBar(
+            title = stringResource(R.string.stats),
+            onBack = navController::navigateUp,
             actions = {
-                IconButton(
-                    onClick = { navController.navigate("year_in_music") },
-                    onLongClick = { }
-                ) {
-                    Icon(
-                        painterResource(R.drawable.calendar_today),
-                        contentDescription = stringResource(R.string.year_in_music),
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Transparent
-            )
+                ArmoryIconButton(
+                    icon = androidx.compose.material.icons.Icons.Rounded.CalendarToday,
+                    contentDescription = stringResource(R.string.year_in_music),
+                    onClick = { navController.navigate("year_in_music") }
+                )
+            }
         )
     }
 }

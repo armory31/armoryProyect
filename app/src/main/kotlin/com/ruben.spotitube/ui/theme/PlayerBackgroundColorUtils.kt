@@ -8,7 +8,7 @@ package com.ruben.spotitube.ui.theme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
-import com.ruben.spotitube.OpenTuneColors
+import com.ruben.spotitube.ArmoryColors
 import android.graphics.Color as AndroidColor
 
 object PlayerBackgroundColorUtils {
@@ -38,12 +38,12 @@ object PlayerBackgroundColorUtils {
     fun buildColoringStops(baseColor: Color): Array<Pair<Float, Color>> {
         // Combinación de degradado recomendada: Dorado Principal hacia tonos oscuros[cite: 6]
         val comfortable = ensureComfortableColor(baseColor, minBrightness = 0.12f, maxBrightness = 0.35f)
-        val mid = lerp(comfortable, OpenTuneColors.Copper2, 0.3f) // Transición Dorado-Cobre suave[cite: 6]
+        val mid = lerp(comfortable, ArmoryColors.Copper2, 0.3f) // Transición Dorado-Cobre suave[cite: 6]
         return arrayOf(
             0f to comfortable.copy(alpha = 0.95f),
             0.4f to mid.copy(alpha = 0.92f),
-            0.8f to OpenTuneColors.Silver4.copy(alpha = 0.96f),
-            1f to OpenTuneColors.Silver4
+            0.8f to ArmoryColors.Silver4.copy(alpha = 0.96f),
+            1f to ArmoryColors.Silver4
         )
     }
 
@@ -53,8 +53,8 @@ object PlayerBackgroundColorUtils {
         }
         val comfortable = colors.map(::ensureComfortableColor)
         val first = comfortable[0]
-        val second = comfortable.getOrNull(1) ?: OpenTuneColors.Copper2
-        val third = comfortable.getOrNull(2) ?: OpenTuneColors.Silver4
+        val second = comfortable.getOrNull(1) ?: ArmoryColors.Copper2
+        val third = comfortable.getOrNull(2) ?: ArmoryColors.Silver4
         return arrayOf(
             0f to first.copy(alpha = 0.40f),
             0.5f to lerp(first, second, 0.5f).copy(alpha = 0.35f),
@@ -71,8 +71,8 @@ object PlayerBackgroundColorUtils {
         }
         val comfortable = colors.map(::ensureComfortableColor)
         val first = comfortable[0]
-        val second = comfortable.getOrNull(1) ?: OpenTuneColors.Copper2
-        val third = comfortable.getOrNull(2) ?: OpenTuneColors.Silver4
+        val second = comfortable.getOrNull(1) ?: ArmoryColors.Copper2
+        val third = comfortable.getOrNull(2) ?: ArmoryColors.Silver4
         return arrayOf(
             0f to first.copy(alpha = 0.50f),
             0.5f to second.copy(alpha = 0.40f), // <- Asegúrate de que tenga la 'f' aquí
@@ -80,7 +80,7 @@ object PlayerBackgroundColorUtils {
         )
     }
     private fun defaultBlurOverlayStops(): Array<Pair<Float, Color>> = arrayOf(
-        0f to OpenTuneColors.Silver4.copy(alpha = 0.50f),
+        0f to ArmoryColors.Silver4.copy(alpha = 0.50f),
         1f to Color.Black.copy(alpha = 0.80f)
     )
 

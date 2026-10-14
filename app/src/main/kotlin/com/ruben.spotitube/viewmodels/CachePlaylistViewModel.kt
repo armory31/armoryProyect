@@ -59,16 +59,6 @@ class CachePlaylistViewModel @Inject constructor(
                     contentLength != null && playerCache.isCached(it.song.id, 0, contentLength)
                 }
 
-                if (completeSongs.isNotEmpty()) {
-                    database.query {
-                        completeSongs.forEach {
-                            if (it.song.dateDownload == null) {
-                                database.insertSavedSong(it.toSavedSongEntity())
-                            }
-                        }
-                    }
-                }
-
                 _cachedSongs.value = completeSongs
                     .filter { it.song.dateDownload != null }
                     .sortedByDescending { it.song.dateDownload }

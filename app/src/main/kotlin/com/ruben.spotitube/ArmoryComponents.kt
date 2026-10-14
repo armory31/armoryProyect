@@ -1,12 +1,12 @@
 package com.ruben.spotitube
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,31 +23,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Style
-import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,21 +50,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.google.firebase.auth.FirebaseAuth
+import com.ruben.spotitube.constants.AccountAvatarUriKey
+import com.ruben.spotitube.utils.SessionManager
+import com.ruben.spotitube.utils.rememberPreference
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.ruben.spotitube.models.MediaMetadata
@@ -91,7 +91,20 @@ fun TrackThumbnail(url: String, size: Int = 52, radius: Int = 4) {
     )
 }
 
+@Composable
+fun rememberAvatarUrl(): String? {
+    val context = LocalContext.current
+    val session = remember(context) { SessionManager(context) }
+    val (accountAvatarUriPref) = rememberPreference(AccountAvatarUriKey, "")
+    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
 
+    val rawUrl = accountAvatarUriPref.ifEmpty {
+        session.getAvatarUri().ifEmpty {
+            currentUser?.photoUrl?.toString().orEmpty()
+        }
+    }
+    return rawUrl.takeIf { it.isNotBlank() }
+}
 
 // ── Header ARMORY ───────────────────────────────────────────────────────────
 @Composable
@@ -119,20 +132,14 @@ fun ArmoryHeader(
             )
         }
 
-        // 3/5 (60%) - Palabra ARMORY con color gradiente gold nuevo
+        // 3/5 (60%) - Palabra ARMORY con estilo central
         Box(
             modifier = Modifier.weight(3f),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "ARMORY",
-                style = TextStyle(
-                    brush = ArmoryColors.Gold
-                ),
-                fontFamily = PremiumTitleFont,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 4.sp,
+                style = MaterialTheme.typography.displayLarge.copy(letterSpacing = 4.sp),
                 textAlign = TextAlign.Center
             )
         }
@@ -145,23 +152,20 @@ fun ArmoryHeader(
             if (onSettings != null) {
                 IconButton(
                     onClick = onSettings,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), CircleShape)
+                    modifier = Modifier.size(40.dp).border(1.dp, ArmoryColors.SurfaceBorder, CircleShape)
                 ) {
-                    if (avatarUrl != null) {
-                        AsyncImage(
+                    Log.d("AvatarDbg", "avatarUrl=[$avatarUrl] nullOrBlank=${avatarUrl.isNullOrBlank()}") // TEMP-DEBUG
+                    if (avatarUrl.isNullOrBlank()) {
+                        ArmoryIcon(Icons.Filled.Person, "Cuenta")
+                    } else {
+                        SubcomposeAsyncImage(
                             model = avatarUrl,
                             contentDescription = "Cuenta",
-                            modifier = Modifier.size(24.dp).clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Cuenta",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(28.dp).clip(CircleShape),
+                            contentScale = ContentScale.Crop,
+                            onError = { Log.d("AvatarDbg", "ERROR: ${it.result.throwable}") }, // TEMP-DEBUG
+                            onSuccess = { Log.d("AvatarDbg", "OK") }, // TEMP-DEBUG
+                            error = { ArmoryIcon(Icons.Filled.Person, "Cuenta") },
                         )
                     }
                 }
@@ -177,32 +181,23 @@ fun ArmoryFilterChip(
     label: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        selected = selected,
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) ArmoryColors.GoldPrimary else ArmoryColors.SurfaceBlack,
-        border = if (selected) null else BorderStroke(1.dp, ArmoryColors.Divider),
+    val shape = RoundedCornerShape(14.dp)
+    Box(
         modifier = modifier
+            .clip(shape)
+            .then(
+                if (selected) Modifier.background(ArmoryGradients.MetallicGold)
+                else Modifier.background(ArmoryColors.SurfaceBlack).border(1.dp, ArmoryColors.SurfaceBorder, shape)
+            )
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            label()
-        }
+        CompositionLocalProvider(
+            LocalContentColor provides if (selected) ArmoryColors.AbsoluteBlack else ArmoryColors.TextSecondary
+        ) { label() }
     }
 }
-
-/**
- * Alias de compatibilidad
- */
-@Composable
-fun OpenTuneHeader(
-    avatarUrl: String? = null,
-    onLogout: (() -> Unit)? = null,
-    onSettings: (() -> Unit)? = null
-) = ArmoryHeader(avatarUrl, onLogout, onSettings)
 
 @Composable
 fun GoldDivider(modifier: Modifier = Modifier) {
@@ -224,70 +219,6 @@ fun GoldDivider(modifier: Modifier = Modifier) {
     )
 }
 
-
-
-// ── Playlist Card Metálica ──────────────────────────────────────────────────
-@Composable
-fun MetallicPlaylistCard(playlist: PlaylistItem, onClick: () -> Unit) {
-    val brandColor = playlist.gradientColors.first()
-    val darkVariant = when (brandColor) {
-        ArmoryColors.Gold3 -> ArmoryColors.Gold5
-        ArmoryColors.Silver3 -> ArmoryColors.Silver5
-        ArmoryColors.Copper3 -> ArmoryColors.Copper5
-        ArmoryColors.Rust3 -> ArmoryColors.Rust5
-        ArmoryColors.Diamond3 -> ArmoryColors.Diamond5
-        else -> ArmoryColors.AbsoluteBlack
-    }
-    
-    Box(
-        modifier = Modifier
-            .width(155.dp)
-            .height(195.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(ArmoryColors.AbsoluteBlack)
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(brandColor.copy(alpha = 0.25f), Color.Transparent),
-                    start = Offset(0f, 0f),
-                    end = Offset(100f, 100f)
-                ),
-                shape = RoundedCornerShape(24.dp)
-            )
-            .clickable(onClick = onClick)
-    ) {
-        Box(modifier = Modifier.fillMaxSize().background(
-            Brush.verticalGradient(listOf(darkVariant.copy(alpha = 0.6f), Color.Transparent), endY = 500f)
-        ))
-        Box(modifier = Modifier.fillMaxSize().background(
-            Brush.radialGradient(listOf(brandColor.copy(alpha = 0.2f), Color.Transparent), center = Offset(0f, 0f), radius = 450f)
-        ))
-        
-        Column(modifier = Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Box(modifier = Modifier.size(48.dp).background(brandColor.copy(alpha = 0.15f), CircleShape).border(1.dp, brandColor.copy(alpha = 0.4f), CircleShape), contentAlignment = Alignment.Center) {
-                PlaylistIcon(playlist.iconType, brandColor)
-            }
-            Column {
-                Text(playlist.title, color = ArmoryColors.Champagne, fontFamily = PremiumTitleFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 2)
-                Text(playlist.subtitle, color = ArmoryColors.TextMuted, fontFamily = PremiumBodyFont, fontSize = 11.sp, maxLines = 1)
-            }
-        }
-    }
-}
-
-@Composable
-fun PlaylistIcon(type: PlaylistIconType, tint: Color) {
-    val icon = when (type) {
-        PlaylistIconType.VINYL -> Icons.Filled.Album
-        PlaylistIconType.CROWN -> Icons.Filled.Star
-        PlaylistIconType.GUITAR -> Icons.Filled.MusicNote
-        PlaylistIconType.NOTES -> Icons.Filled.LibraryMusic
-        PlaylistIconType.DIAMOND -> Icons.Filled.Diamond
-        PlaylistIconType.FLAME -> Icons.Filled.Whatshot
-    }
-    Icon(icon, null, tint = tint, modifier = Modifier.size(24.dp))
-}
-
 // ── Mini Player Premium ─────────────────────────────────────────────────────
 @Composable
 fun MiniPlayer(
@@ -302,7 +233,6 @@ fun MiniPlayer(
 ) {
     val progress = if (duration > 0) position.toFloat() / duration else 0f
     
-    // Animación de escala al pulsar
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isPressed) 0.97f else 1f, label = "scale")
 
@@ -339,40 +269,19 @@ fun MiniPlayer(
             TrackThumbnail(nowPlaying.thumbnailUrl ?: "", size = 48, radius = 10)
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    nowPlaying.title,
-                    color = ArmoryColors.Silver1,
-                    fontSize = 14.sp,
-                    fontFamily = PremiumTitleFont,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    nowPlaying.artists.joinToString { it.name },
-                    color = ArmoryColors.Silver3,
-                    fontSize = 12.sp,
-                    fontFamily = PremiumBodyFont,
-                    maxLines = 1
-                )
+                Text(nowPlaying.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(nowPlaying.artists.joinToString { it.name }, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                IconButton(onClick = onPrevious) {
-                    Icon(
-                        painter = painterResource(R.drawable.skip_previous),
-                        contentDescription = null,
-                        tint = ArmoryColors.Silver1,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                ArmoryIconButton(painterResource(R.drawable.skip_previous), null, onPrevious)
 
                 if (playerStatus == PlayerStatus.LOADING) {
                     CircularProgressIndicator(
-                        color = ArmoryColors.Gold1,
+                        color = ArmoryColors.Gold2,
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(24.dp)
                     )
@@ -396,14 +305,7 @@ fun MiniPlayer(
                     }
                 }
 
-                IconButton(onClick = onNext) {
-                    Icon(
-                        painter = painterResource(R.drawable.skip_next),
-                        contentDescription = null,
-                        tint = ArmoryColors.Silver1,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                ArmoryIconButton(painterResource(R.drawable.skip_next), null, onNext)
             }
         }
 
@@ -413,7 +315,7 @@ fun MiniPlayer(
                 .align(Alignment.BottomStart)
                 .fillMaxWidth(progress.coerceIn(0f, 1f))
                 .height(2.5.dp)
-                .background(ArmoryColors.Gold1)
+                .background(ArmoryColors.Gold2)
         )
     }
 }
@@ -469,65 +371,12 @@ fun ArmoryBottomBar(
             }
         }
 
-        if (showNavigationBar) {
-            Surface(
-                color = ArmoryColors.SurfaceBlack.copy(alpha = 0.90f),
-                shape = RoundedCornerShape(26.dp),
-                tonalElevation = 8.dp,
-                modifier = Modifier
-                    .height(76.dp)
-                    .border(
-                        width = 1.dp,
-                        color = ArmoryColors.SurfaceBorder,
-                        shape = RoundedCornerShape(26.dp)
-                    )
-            ) {
-                NavigationBar(
-                    containerColor = Color.Transparent,
-                    tonalElevation = 0.dp,
-                    windowInsets = WindowInsets(0, 0, 0, 0)
-                ) {
-                    val tabs = listOf(
-                        Triple(0, Icons.Filled.Home, "Inicio"),
-                        Triple(1, Icons.Filled.Explore, "Explorar"),
-                        Triple(2, Icons.Filled.Style, "Géneros"),
-                        Triple(3, Icons.Filled.LibraryMusic, "Biblioteca")
-                    )
-                    tabs.forEach { (idx, icon, label) ->
-                        val isSelected = selectedTab == idx
-                        NavigationBarItem(
-                            selected = isSelected,
-                            onClick = { onTabChange(idx) },
-                            icon = {
-                                Icon(
-                                    icon,
-                                    null,
-                                    tint = if (isSelected) ArmoryColors.Gold2 else ArmoryColors.Silver3.copy(alpha = 0.8f),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            label = {
-                                Text(
-                                    label,
-                                    color = if (isSelected) ArmoryColors.Gold2 else ArmoryColors.Silver3.copy(alpha = 0.8f),
-                                    fontSize = 11.sp,
-                                    fontFamily = PremiumBodyFont,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                )
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = ArmoryColors.GoldPrimary.copy(alpha = 0.12f)
-                            )
-                        )
-                    }
-                }
-            }
-        }
+        if (showNavigationBar) ArmoryNavigationBar(selectedTab, onTabChange, Modifier.height(76.dp))
     }
 }
 
 @Composable
-fun OpenTuneNavigationBar(
+fun ArmoryNavigationBar(
     selectedTab: Int,
     onTabChange: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -562,21 +411,13 @@ fun OpenTuneNavigationBar(
                 NavigationBarItem(
                     selected = isSelected,
                     onClick = { onTabChange(idx) },
-                    icon = {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = if (isSelected) ArmoryColors.Gold1 else ArmoryColors.Silver2,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    },
+                    icon = { ArmoryIcon(icon, null, active = isSelected) },
                     label = {
                         Text(
-                            text = label,
-                            color = if (isSelected) ArmoryColors.Gold1 else ArmoryColors.Silver2,
-                            fontSize = 11.sp,
-                            fontFamily = PremiumBodyFont,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            label,
+                            style = MaterialTheme.typography.bodySmall.let {
+                                if (isSelected) it.copy(color = ArmoryColors.TextGold, fontWeight = FontWeight.Bold) else it
+                            }
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
@@ -584,70 +425,6 @@ fun OpenTuneNavigationBar(
                     )
                 )
             }
-        }
-    }
-}
-
-/**
- * Alias de compatibilidad
- */
-@Composable
-fun OpenTuneBottomBar(
-    selectedTab: Int,
-    onTabChange: (Int) -> Unit,
-    nowPlaying: MediaMetadata?,
-    playerStatus: PlayerStatus,
-    onToggle: () -> Unit,
-    onNext: () -> Unit,
-    onPrevious: () -> Unit,
-    onPlayerClick: () -> Unit,
-    position: Long = 0L,
-    duration: Long = 0L,
-    showNavigationBar: Boolean = true
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .padding(bottom = if (showNavigationBar) 12.dp else 24.dp)
-    ) {
-        // El MiniPlayer se mantiene aquí temporalmente para no romper la compilación,
-        // pero en el siguiente paso lo eliminaremos de aquí para moverlo al BottomSheet.
-        AnimatedVisibility(
-            visible = nowPlaying != null,
-            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = if (showNavigationBar) 10.dp else 0.dp)
-                ) {
-                    if (nowPlaying != null) {
-                        MiniPlayer(
-                            nowPlaying = nowPlaying,
-                            playerStatus = playerStatus,
-                            onToggle = onToggle,
-                            onNext = onNext,
-                            onPrevious = onPrevious,
-                            onClick = onPlayerClick,
-                            position = position,
-                            duration = duration
-                        )
-                    }
-                }
-            }
-        }
-
-        if (showNavigationBar) {
-            OpenTuneNavigationBar(
-                selectedTab = selectedTab,
-                onTabChange = onTabChange
-            )
         }
     }
 }

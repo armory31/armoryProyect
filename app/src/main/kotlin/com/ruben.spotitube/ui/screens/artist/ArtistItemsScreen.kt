@@ -49,6 +49,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.GridThumbnailHeight
 import com.ruben.spotitube.extensions.toMediaItem
@@ -129,14 +132,13 @@ fun ArtistItemsScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
+            ArmoryTopBar(
                 title = {
                     if (itemsPage != null) {
                         Column {
                             Text(
                                 text = displayTitle,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -144,27 +146,19 @@ fun ArtistItemsScreen(
                                 Text(
                                     text = "${items.size} elementos",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
                     }
                 },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.arrow_back),
-                            contentDescription = null,
-                        )
-                    }
-                },
+                onBack = navController::navigateUp,
+                scrollBehavior = scrollBehavior,
                 actions = {
                     val songs = itemsPage?.items.orEmpty().filterIsInstance<SongItem>()
                     if (songs.isNotEmpty()) {
-                        IconButton(
+                        ArmoryIconButton(
+                            painter = painterResource(R.drawable.play),
+                            contentDescription = "Reproducir",
                             onClick = {
                                 playerConnection.playQueue(
                                     ListQueue(
@@ -172,14 +166,11 @@ fun ArtistItemsScreen(
                                         items = songs.map { it.toMediaItem() },
                                     ),
                                 )
-                            },
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.play),
-                                contentDescription = null,
-                            )
-                        }
-                        IconButton(
+                            }
+                        )
+                        ArmoryIconButton(
+                            painter = painterResource(R.drawable.shuffle),
+                            contentDescription = "Aleatorio",
                             onClick = {
                                 playerConnection.playQueue(
                                     ListQueue(
@@ -187,19 +178,10 @@ fun ArtistItemsScreen(
                                         items = songs.shuffled().map { it.toMediaItem() },
                                     ),
                                 )
-                            },
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.shuffle),
-                                contentDescription = null,
-                            )
-                        }
+                            }
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+                }
             )
         },
     ) { paddingValues ->
@@ -225,7 +207,6 @@ fun ArtistItemsScreen(
                     Text(
                         text = "No hay elementos disponibles",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             } else {
@@ -252,7 +233,9 @@ fun ArtistItemsScreen(
                                 },
                                 isPlaying = isPlaying,
                                 trailingContent = {
-                                    IconButton(
+                                    ArmoryIconButton(
+                                        painter = painterResource(R.drawable.more_vert),
+                                        contentDescription = null,
                                         onClick = {
                                             menuState.show {
                                                 when (item) {
@@ -284,13 +267,8 @@ fun ArtistItemsScreen(
                                                         )
                                                 }
                                             }
-                                        },
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.more_vert),
-                                            contentDescription = null,
-                                        )
-                                    }
+                                        }
+                                    )
                                 },
                                 modifier = Modifier.clickable {
                                     when (item) {

@@ -9,6 +9,7 @@
 package com.ruben.spotitube
 
 import android.Manifest
+import com.ruben.spotitube.ArmoryGradients
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -77,12 +78,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
@@ -257,16 +260,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Liberamos el Main Thread difiriendo de forma asíncrona la vinculación pesada
-        // del servicio de hardware de audio de Media3 a un hilo de background secundario.
-        lifecycleScope.launch(Dispatchers.IO) {
-            val intent = Intent(this@MainActivity, MusicService::class.java)
-            val bound = bindService(intent, serviceConnection, BIND_AUTO_CREATE)
-            withContext(Dispatchers.Main) {
-                isMusicServiceBound = bound
-                playPendingDeepLinkSongIfReady()
-            }
-        }
+        val intent = Intent(this@MainActivity, MusicService::class.java)
+        isMusicServiceBound = bindService(intent, serviceConnection, BIND_AUTO_CREATE)
+        playPendingDeepLinkSongIfReady()
     }
 
     private fun safeUnbindMusicService() {
@@ -551,6 +547,7 @@ class MainActivity : ComponentActivity() {
                     val topLevelScreens =
                         listOf(
                             Screens.Home.route,
+                            Screens.Explore.route,
                             Screens.Search.route,
                             Screens.MoodAndGenres.route,
                             Screens.Library.route,
@@ -596,9 +593,11 @@ class MainActivity : ComponentActivity() {
                     val route = navBackStackEntry?.destination?.route
                     val canShowNav = (route == null ||
                             navigationItems.fastAny { it.first == route } ||
-                            topLevelScreens.contains(route)) &&
-                            !active &&
-                            route?.startsWith("search/") != true
+                            topLevelScreens.contains(route) ||
+                            route.startsWith("settings") ||
+                            route.startsWith("history") ||
+                            route.startsWith("search")) &&
+                            !active
 
                     val systemNavPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                     val navBarHeight = if (canShowNav && !useRail) 88.dp else 0.dp
@@ -881,11 +880,8 @@ class MainActivity : ComponentActivity() {
                         ) {
                             var bottomPadding = 0.dp
                             if (!useRail) {
-                                if (shouldShowNavigationBar) {
-                                    bottomPadding += 84.dp // Altura de la nueva OpenTuneBottomBar
-                                }
                                 if (shouldShowMiniPlayer && nowPlaying != null) {
-                                    bottomPadding += 76.dp // Espacio para el MiniPlayer de OpenTune
+                                    bottomPadding += 72.dp // Espacio para el MiniPlayer de OpenTune
                                 }
                             }
                             windowsInsets
@@ -908,16 +904,12 @@ class MainActivity : ComponentActivity() {
                         LocalBottomSheetPageState provides bottomSheetPageState,
                         LocalMenuState provides menuState,
                     ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            if (isUiReady) {
-                                DynamicBackground(thumbnailUrl = nowPlaying?.thumbnailUrl ?: "")
-                            }
-
+                        Box(modifier = Modifier.fillMaxSize().background(ArmoryColors.AbsoluteBlack)) {
                             Scaffold(
                                 containerColor = Color.Transparent,
                                 contentWindowInsets = WindowInsets(0, 0, 0, 0),
                                 topBar = {
-                                    // Se ha eliminado la TopAppBar antigua para dejar solo el diseño OpenTune
+                                    // Se ha eliminado la TopAppBar antigua para dejar solo el diseño Armory
                                 },
                                 bottomBar = {
                                     if (shouldShowNavigationBar && !useRail) {
@@ -927,7 +919,7 @@ class MainActivity : ComponentActivity() {
                                                 .padding(horizontal = 12.dp)
                                                 .padding(bottom = 12.dp)
                                         ) {
-                                            OpenTuneNavigationBar(
+                                            ArmoryNavigationBar(
                                                 selectedTab = when (currentRoute) {
                                                     Screens.Home.route -> 0
                                                     Screens.Explore.route -> 1
@@ -973,6 +965,52 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(paddingValues)
+                                        .then(if (!shouldShowNavigationBar && systemNavPadding > 0.dp) Modifier.navigationBarsPadding() else Modifier)
+                                        .then(
+                                            if (route in listOf(Screens.Home.route, Screens.Explore.route, Screens.MoodAndGenres.route, Screens.Library.route)) {
+                                                Modifier.pointerInput(route) {
+                                                    var totalDrag = 0f
+                                                    detectHorizontalDragGestures(
+                                                        onDragStart = { totalDrag = 0f },
+                                                        onHorizontalDrag = { _, dragAmount -> totalDrag += dragAmount },
+                                                        onDragEnd = {
+                                                            val currentIdx = when (route) {
+                                                                Screens.Home.route -> 0
+                                                                Screens.Explore.route -> 1
+                                                                Screens.MoodAndGenres.route -> 2
+                                                                Screens.Library.route -> 3
+                                                                else -> 0
+                                                            }
+                                                            if (totalDrag < -120f && currentIdx < 3) {
+                                                                val nextRoute = when (currentIdx + 1) {
+                                                                    1 -> Screens.Explore.route
+                                                                    2 -> Screens.MoodAndGenres.route
+                                                                    3 -> Screens.Library.route
+                                                                    else -> Screens.Home.route
+                                                                }
+                                                                navController.navigate(nextRoute) {
+                                                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                                    launchSingleTop = true
+                                                                    restoreState = true
+                                                                }
+                                                            } else if (totalDrag > 120f && currentIdx > 0) {
+                                                                val prevRoute = when (currentIdx - 1) {
+                                                                    0 -> Screens.Home.route
+                                                                    1 -> Screens.Explore.route
+                                                                    2 -> Screens.MoodAndGenres.route
+                                                                    else -> Screens.Home.route
+                                                                }
+                                                                navController.navigate(prevRoute) {
+                                                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                                    launchSingleTop = true
+                                                                    restoreState = true
+                                                                }
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            } else Modifier
+                                        )
                                 ) {
                                     val tabOpenedFromShortcut = remember {
                                         when (intent?.action) {
@@ -1039,6 +1077,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
+                        }
 
                             if (isUiReady) {
                                 Box(
@@ -1074,7 +1113,6 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                        }
                     }
 
                     LaunchedEffect(shouldShowSearchBar, openSearchImmediately) {
@@ -1098,14 +1136,15 @@ class MainActivity : ComponentActivity() {
         val coroutineScope = lifecycleScope
 
         val authority = uri.authority?.lowercase()
-        if (uri.scheme.equals("OpenTune", ignoreCase = true) && authority == "together") {
+        val isSupportedScheme = uri.scheme.equals("armory", ignoreCase = true) || uri.scheme.equals("OpenTune", ignoreCase = true)
+        if (isSupportedScheme && authority == "together") {
             pendingTogetherJoinLink = uri.toString()
             startMusicServiceSafely()
             joinPendingTogetherIfReady()
             return
         }
 
-        if (uri.scheme.equals("OpenTune", ignoreCase = true) && authority == "login") {
+        if (isSupportedScheme && authority == "login") {
             // navController.navigate(buildLoginRoute(uri.getQueryParameter(LOGIN_URL_ARGUMENT)))
             return
         }

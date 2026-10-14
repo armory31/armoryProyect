@@ -68,6 +68,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import com.ruben.spotitube.utils.YTPlayerUtils
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -79,7 +80,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.window.core.layout.WindowWidthSizeClass
 import coil3.compose.AsyncImage
-import com.ruben.spotitube.OpenTuneColors
+import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.canvas.models.CanvasArtwork
@@ -301,7 +302,7 @@ fun Thumbnail(
         defaultValue = PlayerBackgroundStyle.DEFAULT
     )
 
-    val textBackgroundColor = OpenTuneColors.GoldPrimary
+    val textBackgroundColor = ArmoryColors.Gold1
 
     LaunchedEffect(maxCanvasCacheSize) {
         CanvasArtworkPlaybackCache.setMaxSize(maxCanvasCacheSize)
@@ -433,6 +434,7 @@ fun Thumbnail(
                     error = playbackError,
                     mediaId = currentMediaItem?.mediaId,
                     retry = {
+                        YTPlayerUtils.resetForRetry(currentMediaItem?.mediaId)
                         playerConnection.player.prepare()
                         playerConnection.player.play()
                     },

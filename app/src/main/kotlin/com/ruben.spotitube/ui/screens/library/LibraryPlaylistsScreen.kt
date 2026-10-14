@@ -6,10 +6,8 @@
 
 package com.ruben.spotitube.ui.screens.library
 
-import com.ruben.spotitube.GoldGradient
+import com.ruben.spotitube.ArmoryGradients
 
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,12 +21,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,19 +43,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryFilterChip
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
@@ -75,7 +68,6 @@ import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.extensions.move
-import com.ruben.spotitube.ArmoryFont
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.constants.AlbumViewTypeKey
 import com.ruben.spotitube.constants.ArtistViewTypeKey
@@ -83,7 +75,6 @@ import com.ruben.spotitube.constants.LibraryFilter
 import com.ruben.spotitube.constants.LibraryViewType
 import com.ruben.spotitube.ui.component.LibraryAlbumListItem
 import com.ruben.spotitube.ui.component.LibraryArtistListItem
-import com.ruben.spotitube.ui.component.LibraryPinnedCollectionTile
 import com.ruben.spotitube.ui.component.LibraryPlaylistListItem
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.utils.rememberEnumPreference
@@ -197,7 +188,7 @@ fun LibraryPlaylistsScreen(
                     title = likedPlaylist.playlist.name,
                     iconRes = R.drawable.favorite,
                     route = "auto_playlist/liked",
-                    accentColor = ArmoryColors.CopperAccent,
+                    accentColor = ArmoryColors.Copper2,
                 ),
             )
         }
@@ -208,7 +199,7 @@ fun LibraryPlaylistsScreen(
                     title = downloadPlaylist.playlist.name,
                     iconRes = R.drawable.offline,
                     route = "auto_playlist/downloaded",
-                    accentColor = ArmoryColors.SilverAccent,
+                    accentColor = ArmoryColors.Silver2,
                 ),
             )
         }
@@ -230,7 +221,7 @@ fun LibraryPlaylistsScreen(
                     title = topPlaylist.playlist.name,
                     iconRes = R.drawable.trending_up,
                     route = "top_playlist/$topSize",
-                    accentColor = ArmoryColors.GoldPrimary,
+                    accentColor = ArmoryColors.Gold1,
                 ),
             )
         }
@@ -498,251 +489,23 @@ fun LibraryPlaylistsScreen(
 }
 
 @Composable
-private fun FavoritosGradientCard(
-    songCount: Int,
-    totalMinutes: Long,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(80.dp)
-            .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(ArmoryColors.SurfaceBlack)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Favoritos",
-                    color = ArmoryColors.TextPrimary,
-                    fontFamily = ArmoryFont.Title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Text(
-                    text = "$songCount canciones • $totalMinutes min",
-                    color = ArmoryColors.TextMuted,
-                    fontFamily = ArmoryFont.Body,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
-                )
-                Icon(
-                    painter = painterResource(R.drawable.favorite),
-                    contentDescription = null,
-                    tint = ArmoryColors.CopperAccent,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DownloadsGradientCard(
-    songCount: Int,
-    totalMinutes: Long,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(80.dp)
-            .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(ArmoryColors.SurfaceBlack)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Local",
-                    color = ArmoryColors.TextPrimary,
-                    fontFamily = ArmoryFont.Title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Text(
-                    text = "$songCount canciones • $totalMinutes min",
-                    color = ArmoryColors.TextMuted,
-                    fontFamily = ArmoryFont.Body,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
-                )
-                Icon(
-                    painter = painterResource(R.drawable.offline),
-                    contentDescription = null,
-                    tint = ArmoryColors.SilverAccent,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TopGradientCard(
-    songCount: Int,
-    totalMinutes: Long,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(80.dp)
-            .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Brush.verticalGradient(listOf(ArmoryColors.Gold1, Color.Transparent)))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(GoldGradient)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Top 50",
-                    color = ArmoryColors.AbsoluteBlack,
-                    fontFamily = ArmoryFont.Title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Text(
-                    text = "$songCount canciones • $totalMinutes min",
-                    color = ArmoryColors.AbsoluteBlack.copy(alpha = 0.8f),
-                    fontFamily = ArmoryFont.Body,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
-                )
-                Icon(
-                    painter = painterResource(R.drawable.trending_up),
-                    contentDescription = null,
-                    tint = ArmoryColors.AbsoluteBlack,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CachedGradientCard(
-    songCount: Int,
-    totalMinutes: Long,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(80.dp)
-            .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(ArmoryColors.SurfaceBlack)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Caché",
-                    color = ArmoryColors.TextPrimary,
-                    fontFamily = ArmoryFont.Title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Text(
-                    text = "$songCount canciones • $totalMinutes min",
-                    color = ArmoryColors.TextMuted,
-                    fontFamily = ArmoryFont.Body,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
-                )
-                Icon(
-                    painter = painterResource(R.drawable.cached),
-                    contentDescription = null,
-                    tint = ArmoryColors.Gold2,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun LibraryFilterChipsRow(
     selectedFilter: LibraryFilter,
     onFilterSelected: (LibraryFilter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(
             LibraryFilter.PLAYLISTS to "Playlists",
             LibraryFilter.ALBUMS to "Álbumes",
-            LibraryFilter.ARTISTS to "Artistas"
+            LibraryFilter.ARTISTS to "Artistas",
         ).forEach { (filter, label) ->
-            val isSelected = selectedFilter == filter
-            val alpha = if (isSelected) 1.0f else 0.5f
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .graphicsLayer { this.alpha = alpha }
-                    .background(
-                        brush = ArmoryColors.Gold,
-                        shape = RoundedCornerShape(14.dp)
-                    )
-                    .combinedClickable(onClick = { onFilterSelected(filter) })
-                    .padding(vertical = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = label,
-                    fontSize = 13.sp,
-                    fontFamily = ArmoryFont.Body,
-                    color = ArmoryColors.AbsoluteBlack,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            ArmoryFilterChip(
+                selected = selectedFilter == filter,
+                onClick = { onFilterSelected(filter) },
+                label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
@@ -770,7 +533,7 @@ private fun PlaylistHeaderSplitRow(
                 .weight(3f)
                 .height(52.dp)
                 .background(
-                    brush = ArmoryColors.Silver,
+                    brush = ArmoryGradients.MetallicSilver,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .padding(horizontal = 16.dp),
@@ -781,19 +544,8 @@ private fun PlaylistHeaderSplitRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = title.uppercase(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Black,
-                    color = ArmoryColors.AbsoluteBlack,
-                    letterSpacing = 1.sp,
-                )
-                Text(
-                    text = summary,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = ArmoryColors.AbsoluteBlack.copy(alpha = 0.75f),
-                )
+                Text(title.uppercase(), style = MaterialTheme.typography.titleMedium.copy(color = ArmoryColors.AbsoluteBlack, letterSpacing = 1.sp))
+                Text(summary, style = MaterialTheme.typography.labelMedium.copy(color = ArmoryColors.AbsoluteBlack))
             }
         }
 
@@ -803,7 +555,7 @@ private fun PlaylistHeaderSplitRow(
                 .weight(1f)
                 .height(52.dp)
                 .background(
-                    brush = ArmoryColors.Copper,
+                    brush = ArmoryGradients.MetallicCopper,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .combinedClickable(onClick = onButton1Click),
@@ -825,7 +577,7 @@ private fun PlaylistHeaderSplitRow(
                 .weight(1f)
                 .height(52.dp)
                 .background(
-                    brush = ArmoryColors.Copper,
+                    brush = ArmoryGradients.MetallicCopper,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .combinedClickable(onClick = onButton2Click),

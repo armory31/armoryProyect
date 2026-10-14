@@ -8,6 +8,7 @@ package com.ruben.spotitube.utils
 
 import androidx.datastore.preferences.core.edit
 import com.ruben.spotitube.App
+import com.ruben.spotitube.innertube.utils.runCatchingCancellable
 import com.ruben.spotitube.constants.GitHubReleasesEtagKey
 import com.ruben.spotitube.constants.GitHubReleasesFingerprintKey
 import com.ruben.spotitube.constants.GitHubReleasesJsonKey
@@ -244,7 +245,7 @@ object Updater {
             client.get("https://api.github.com/repos/Arturo254/OpenTune/releases?per_page=$perPage") {
                 headers {
                     append("Accept", "application/vnd.github+json")
-                    append("User-Agent", "OpenTune")
+                    append("User-Agent", "ARMORY")
                     if (!cachedEtag.isNullOrBlank()) {
                         append("If-None-Match", cachedEtag)
                     }
@@ -274,12 +275,12 @@ object Updater {
         return runCatching { UpdateChannel.valueOf(channelName) }.getOrDefault(UpdateChannel.STABLE)
     }
 
-    private suspend fun fetchNightlyJson(): Result<NightlyInfo> = runCatching {
+    private suspend fun fetchNightlyJson(): Result<NightlyInfo> = runCatchingCancellable {
         withContext(Dispatchers.IO) {
             val response = client.get(NIGHTLY_JSON_URL) {
                 headers {
                     append("Accept", "application/json")
-                    append("User-Agent", "OpenTune")
+                    append("User-Agent", "ARMORY")
                 }
             }.bodyAsText()
             val json = JSONObject(response)
@@ -313,7 +314,7 @@ object Updater {
             ?: emptyList()
     }
 
-    suspend fun getLatestVersionName(): Result<String> = runCatching {
+    suspend fun getLatestVersionName(): Result<String> = runCatchingCancellable {
         when (getCurrentUpdateChannel()) {
             UpdateChannel.STABLE -> {
                 val latest = getLatestReleaseInfo().getOrThrow()
@@ -325,14 +326,14 @@ object Updater {
         }
     }
 
-    suspend fun getLatestReleaseNotes(): Result<String?> = runCatching {
+    suspend fun getLatestReleaseNotes(): Result<String?> = runCatchingCancellable {
         when (getCurrentUpdateChannel()) {
             UpdateChannel.STABLE -> getLatestReleaseInfo().getOrThrow().body
             UpdateChannel.NIGHTLY -> fetchNightlyJson().getOrThrow().changelog
         }
     }
 
-    suspend fun getLatestReleaseInfo(): Result<ReleaseInfo> = runCatching {
+    suspend fun getLatestReleaseInfo(): Result<ReleaseInfo> = runCatchingCancellable {
         when (getCurrentUpdateChannel()) {
             UpdateChannel.STABLE -> {
                 val releases = getAllReleases().getOrThrow()
@@ -367,7 +368,7 @@ object Updater {
      *   reciente instalada.
      */
     suspend fun checkForUpdate(currentVersionName: String): Result<UpdateInfo?> =
-        runCatching {
+        runCatchingCancellable {
             when (getCurrentUpdateChannel()) {
                 UpdateChannel.STABLE -> checkForUpdateStable(currentVersionName)
                 UpdateChannel.NIGHTLY -> checkForUpdateNightly(currentVersionName)
@@ -426,7 +427,7 @@ object Updater {
             ) {
                 headers {
                     append("Accept", "application/vnd.github+json")
-                    append("User-Agent", "OpenTune")
+                    append("User-Agent", "ARMORY")
                 }
             }.bodyAsText()
 
@@ -445,12 +446,12 @@ object Updater {
     // ─────────────────────────────────────────────────────────────────────────
 
     suspend fun getCommitHistory(count: Int = 20, branch: String = "master"): Result<List<GitCommit>> =
-        runCatching {
+        runCatchingCancellable {
             val response =
                 client.get("https://api.github.com/repos/Arturo254/OpenTune/commits?sha=$branch&per_page=$count") {
                     headers {
                         append("Accept", "application/vnd.github+json")
-                        append("User-Agent", "OpenTune")
+                        append("User-Agent", "ARMORY")
                     }
                 }.bodyAsText()
             val jsonArray = JSONArray(response)

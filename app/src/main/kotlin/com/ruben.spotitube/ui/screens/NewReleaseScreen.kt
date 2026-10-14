@@ -35,8 +35,6 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -67,6 +65,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
+import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.GridThumbnailHeight
 import com.ruben.spotitube.ui.component.IconButton
@@ -103,32 +105,10 @@ fun NewReleaseScreen(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         contentWindowInsets = LocalPlayerAwareWindowInsets.current,
         topBar = {
-            LargeTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.new_releases),
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.arrow_back),
-                            contentDescription = null,
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    navigationIconContentColor = Color.Unspecified,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = Color.Unspecified
-                ),
-                scrollBehavior = scrollBehavior,
+            ArmoryTopBar(
+                title = stringResource(R.string.new_releases),
+                onBack = navController::navigateUp,
+                scrollBehavior = scrollBehavior
             )
         },
     ) { innerPadding ->
@@ -290,16 +270,10 @@ private fun NewReleaseSectionHeader(
             .fillMaxWidth()
             .padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 4.dp),
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        SectionHeader(text = title)
         Text(
             text = stringResource(R.string.n_releases, count),
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -375,7 +349,6 @@ private fun NewReleaseLoadingState(
                     text = stringResource(R.string.loading_new_releases),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -416,10 +389,11 @@ private fun NewReleaseErrorState(
                     modifier = Modifier.size(88.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
+                        ArmoryIcon(
                             painter = painterResource(R.drawable.error),
                             contentDescription = null,
                             modifier = Modifier.size(44.dp),
+                            active = true
                         )
                     }
                 }
@@ -429,14 +403,12 @@ private fun NewReleaseErrorState(
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Text(
                     text = stringResource(R.string.new_releases_error_desc),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 if (message.isNotBlank()) {
@@ -444,7 +416,6 @@ private fun NewReleaseErrorState(
                         text = message,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
@@ -504,10 +475,11 @@ private fun NewReleaseEmptyState(
                     modifier = Modifier.size(88.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
+                        ArmoryIcon(
                             painter = painterResource(R.drawable.album),
                             contentDescription = null,
                             modifier = Modifier.size(44.dp),
+                            active = true
                         )
                     }
                 }
@@ -517,14 +489,12 @@ private fun NewReleaseEmptyState(
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Text(
                     text = stringResource(R.string.new_releases_empty_desc),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

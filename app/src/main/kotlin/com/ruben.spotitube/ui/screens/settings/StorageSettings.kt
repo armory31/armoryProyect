@@ -27,8 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.ruben.spotitube.ArmoryTopBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -404,23 +404,9 @@ fun StorageSettings(
         }
     }
 
-    TopAppBar(
-        title = { Text(stringResource(R.string.storage)) },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background, // Inactivado surface
-            scrolledContainerColor = MaterialTheme.colorScheme.background // Inactivado surface
-        ),
-        navigationIcon = {
-            IconButton(
-                onClick = navController::navigateUp,
-                onLongClick = navController::backToMain,
-            ) {
-                Icon(
-                    painterResource(R.drawable.arrow_back),
-                    contentDescription = null,
-                )
-            }
-        }
+    ArmoryTopBar(
+        title = stringResource(R.string.storage),
+        onBack = navController::navigateUp
     )
 }
 

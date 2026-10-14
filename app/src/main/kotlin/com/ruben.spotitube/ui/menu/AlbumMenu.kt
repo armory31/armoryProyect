@@ -79,6 +79,7 @@ import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSeparatorsKey
 import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.constants.ListThumbnailSize
+import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.Song
@@ -588,6 +589,40 @@ fun AlbumMenu(
                             )
                         }
                     }
+                }
+            )
+        }
+        item {
+            val (speedDialIds, onSpeedDialIdsChange) = rememberPreference(SpeedDialSongIdsKey, "")
+            val speedDialList = remember(speedDialIds) {
+                speedDialIds.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            }
+            val albumKey = "album:${album.id}"
+            val isInSpeedDial = remember(speedDialList, albumKey) { albumKey in speedDialList }
+
+            ListItem(
+                headlineContent = {
+                    Text(
+                        text = stringResource(
+                            if (isInSpeedDial) R.string.remove_from_speed_dial
+                            else R.string.pin_to_speed_dial,
+                        ),
+                    )
+                },
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(if (isInSpeedDial) R.drawable.bookmark_filled else R.drawable.bookmark),
+                        contentDescription = null,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    val updatedIds = if (isInSpeedDial) {
+                        speedDialList.filterNot { it == albumKey }
+                    } else {
+                        (speedDialList + albumKey).distinct().take(24)
+                    }
+                    onSpeedDialIdsChange(updatedIds.joinToString(","))
+                    onDismiss()
                 }
             )
         }

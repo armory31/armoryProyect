@@ -8,6 +8,8 @@
 
 package com.ruben.spotitube.ui.component
 
+import com.ruben.spotitube.PlayerSliderColors
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,14 +35,14 @@ fun BigSeekBar(
         onValueChange = onProgressChange,
         valueRange = 0f..1f,
         steps = steps,
-        colors = PlayerSliderColors.standardSliderColors(color),
+        colors = PlayerSliderColors.getSliderColors(),
         thumb = {
             Spacer(modifier = Modifier.size(0.dp))
         },
         track = { sliderState ->
             PlayerSliderTrack(
                 sliderState = sliderState,
-                colors = PlayerSliderColors.standardSliderColors(color),
+                colors = PlayerSliderColors.getSliderColors(),
                 trackHeight = 10.dp
             )
         },

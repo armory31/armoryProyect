@@ -5,8 +5,10 @@
 
 package com.ruben.spotitube.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,11 +47,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.ruben.spotitube.OpenTuneHeader
-import com.ruben.spotitube.PremiumTitleFont
+import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryHeader
+import com.ruben.spotitube.rememberAvatarUrl
+import com.ruben.spotitube.GlobalFont
 import com.ruben.spotitube.R
+import com.ruben.spotitube.ui.screens.musicrecognition.MusicRecognitionRoute
 import com.ruben.spotitube.ui.screens.search.OnlineSearchScreen
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ExploreScreen(
@@ -59,12 +64,12 @@ fun ExploreScreen(
     }
     val focusManager = LocalFocusManager.current
 
-    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
-    val avatarUrl = currentUser?.photoUrl?.toString()
+    val avatarUrl = rememberAvatarUrl()
 
     val onSearch = { query: String ->
         if (query.isNotBlank()) {
-            navController.navigate("search/${query}")
+            textFieldValue = TextFieldValue(query, androidx.compose.ui.text.TextRange(query.length))
+            focusManager.clearFocus()
         }
     }
 
@@ -73,20 +78,20 @@ fun ExploreScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        OpenTuneHeader(
+        ArmoryHeader(
             avatarUrl = avatarUrl,
             onSettings = { navController.navigate("account") }
         )
 
-        // Barra de Búsqueda ARMORY (Material 3 Expressive Style)
+        // Barra de Búsqueda ARMORY
         Box(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp)
                 .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(28.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(28.dp))
-                .padding(horizontal = 20.dp),
+                .height(52.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(26.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(26.dp))
+                .padding(horizontal = 18.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -94,17 +99,17 @@ fun ExploreScreen(
                     painter = painterResource(R.drawable.search),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(20.dp)
                 )
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(10.dp))
                 
                 Box(modifier = Modifier.weight(1f)) {
                     if (textFieldValue.text.isEmpty()) {
                         Text(
                             text = stringResource(R.string.search_yt_music),
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            fontFamily = PremiumTitleFont,
-                            fontSize = 16.sp
+                            fontFamily = GlobalFont,
+                            fontSize = 15.sp
                         )
                     }
                     BasicTextField(
@@ -112,8 +117,8 @@ fun ExploreScreen(
                         onValueChange = { textFieldValue = it },
                         textStyle = TextStyle(
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontFamily = PremiumTitleFont,
-                            fontSize = 16.sp,
+                            fontFamily = GlobalFont,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Medium
                         ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -142,6 +147,35 @@ fun ExploreScreen(
             }
         }
 
+        // Fila de accesos rápidos a pantallas de descubrimiento
+        if (textFieldValue.text.isEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ExploreShortcutChip(
+                    iconRes = R.drawable.album,
+                    label = "Novedades",
+                    onClick = { navController.navigate("new_release") },
+                    modifier = Modifier.weight(1f)
+                )
+                ExploreShortcutChip(
+                    iconRes = R.drawable.trending_up,
+                    label = "Éxitos",
+                    onClick = { navController.navigate("charts_screen") },
+                    modifier = Modifier.weight(1f)
+                )
+                ExploreShortcutChip(
+                    iconRes = R.drawable.music_note,
+                    label = "Identificar",
+                    onClick = { navController.navigate(MusicRecognitionRoute) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
         // El componente de búsqueda
         Box(modifier = Modifier.weight(1f)) {
             OnlineSearchScreen(
@@ -150,6 +184,45 @@ fun ExploreScreen(
                 navController = navController,
                 onSearch = onSearch,
                 onDismiss = { focusManager.clearFocus() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExploreShortcutChip(
+    iconRes: Int,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = ArmoryColors.SurfaceBlack,
+        border = BorderStroke(1.dp, ArmoryColors.Gold3.copy(alpha = 0.4f)),
+        modifier = modifier.height(42.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp)
+        ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = label,
+                tint = ArmoryColors.Gold1,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                color = ArmoryColors.Silver1,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
             )
         }
     }

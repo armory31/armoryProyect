@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.PremiumTitleFont
+import com.ruben.spotitube.GlobalFont
 
 @Composable
 fun SearchPreviewScreen(onGenreClick: (String) -> Unit) {
@@ -51,8 +51,8 @@ fun SearchPreviewScreen(onGenreClick: (String) -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "Explorar Todo",
-            color = ArmoryColors.GoldPrimary,
-            fontFamily = PremiumTitleFont,
+            color = ArmoryColors.Gold1,
+            fontFamily = GlobalFont,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -82,7 +82,7 @@ fun GenreCard(genre: GenreItem, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(100.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(ArmoryColors.ObsidianSoft)
+            .background(ArmoryColors.SurfaceBlack)
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(
@@ -105,8 +105,8 @@ fun GenreCard(genre: GenreItem, onClick: () -> Unit) {
 
         Text(
             text = genre.name,
-            color = ArmoryColors.Champagne,
-            fontFamily = PremiumTitleFont,
+            color = ArmoryColors.Gold1,
+            fontFamily = GlobalFont,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
             modifier = Modifier

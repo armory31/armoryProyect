@@ -935,7 +935,7 @@ fun LyricsV2(
         }
 
         val availableStyles = remember(paletteGlassStyle) {
-            val base = LyricsGlassStyle.allPresets.toMutableList()
+            val base = LyricsGlassStyle.AllStyles.toMutableList()
             paletteGlassStyle?.let { base.add(0, it) }
             base
         }

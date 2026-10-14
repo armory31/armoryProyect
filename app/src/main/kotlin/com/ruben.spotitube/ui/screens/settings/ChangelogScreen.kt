@@ -30,7 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.ruben.spotitube.ArmoryTopBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -148,29 +148,13 @@ fun ChangelogScreen(
         loadContent()
     }
 
+    val titleText = if (updateChannel == UpdateChannel.NIGHTLY) "Nightly Changelog" else stringResource(R.string.changelog)
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        if (updateChannel == UpdateChannel.NIGHTLY)
-                            "Nightly Changelog"
-                        else
-                            stringResource(R.string.changelog)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.arrow_back),
-                            contentDescription = null,
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
+            ArmoryTopBar(
+                title = titleText,
+                onBack = navController::navigateUp
             )
         }
     ) { paddingValues ->

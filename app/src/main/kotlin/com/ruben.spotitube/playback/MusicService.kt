@@ -250,6 +250,7 @@ class MusicService :
     private val binder = MusicBinder()
     private var hasBoundClients = false
     private var idleStopJob: Job? = null
+    private var historyJob: Job? = null
 
     private lateinit var connectivityManager: ConnectivityManager
     lateinit var connectivityObserver: NetworkConnectivityObserver
@@ -266,8 +267,6 @@ class MusicService :
         PlayerStreamClientKey,
         PlayerStreamClient.ANDROID_VR
     )
-    private val playbackUrlCache = ConcurrentHashMap<String, Pair<String, Long>>()
-    private val streamRecoveryState = ConcurrentHashMap<String, Pair<Int, Long>>()
     @Volatile
     private var pendingStreamRefreshValidationMediaId: String? = null
     @Volatile
@@ -1271,63 +1270,68 @@ class MusicService :
     }
 
     private fun updateNotification() {
-        try {
-            val isLiked = currentSong.value?.let { song ->
-                runBlocking { libraryStateHolder.isSavedSong(song.song.id).first() }
-            } ?: false
+        scope.launch {
+            try {
+                val song = currentSong.value
+                val isLiked = if (song != null) {
+                    withContext(Dispatchers.IO) {
+                        libraryStateHolder.isSavedSong(song.song.id).first()
+                    }
+                } else false
 
-            val customLayout = listOf(
-                CommandButton
-                    .Builder()
-                    .setDisplayName(
-                        getString(
-                            if (isLiked) {
-                                R.string.action_remove_like
-                            } else {
-                                R.string.action_like
-                            },
-                        ),
-                    )
-                    .setIconResId(if (isLiked) R.drawable.favorite else R.drawable.favorite_border)
-                    .setSessionCommand(CommandToggleLike)
-                    .setEnabled(currentSong.value != null)
-                    .build(),
-                CommandButton
-                    .Builder()
-                    .setDisplayName(
-                        getString(
+                val customLayout = listOf(
+                    CommandButton
+                        .Builder()
+                        .setDisplayName(
+                            getString(
+                                if (isLiked) {
+                                    R.string.action_remove_like
+                                } else {
+                                    R.string.action_like
+                                },
+                            ),
+                        )
+                        .setIconResId(if (isLiked) R.drawable.favorite else R.drawable.favorite_border)
+                        .setSessionCommand(CommandToggleLike)
+                        .setEnabled(song != null)
+                        .build(),
+                    CommandButton
+                        .Builder()
+                        .setDisplayName(
+                            getString(
+                                when (player.repeatMode) {
+                                    REPEAT_MODE_OFF -> R.string.repeat_mode_off
+                                    Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
+                                    Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
+                                    else -> R.string.repeat_mode_off
+                                },
+                            ),
+                        ).setIconResId(
                             when (player.repeatMode) {
-                                REPEAT_MODE_OFF -> R.string.repeat_mode_off
-                                Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
-                                Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
-                                else -> R.string.repeat_mode_off
+                                REPEAT_MODE_OFF -> R.drawable.repeat
+                                Player.REPEAT_MODE_ONE -> R.drawable.repeat_one_on
+                                Player.REPEAT_MODE_ALL -> R.drawable.repeat_on
+                                else -> R.drawable.repeat
                             },
-                        ),
-                    ).setIconResId(
-                        when (player.repeatMode) {
-                            REPEAT_MODE_OFF -> R.drawable.repeat
-                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one_on
-                            Player.REPEAT_MODE_ALL -> R.drawable.repeat_on
-                            else -> R.drawable.repeat
-                        },
-                    ).setSessionCommand(CommandToggleRepeatMode)
-                    .build(),
-                CommandButton
-                    .Builder()
-                    .setDisplayName(getString(if (player.shuffleModeEnabled) R.string.action_shuffle_off else R.string.action_shuffle_on))
-                    .setIconResId(if (player.shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle)
-                    .setSessionCommand(CommandToggleShuffle)
-                    .build(),
-                CommandButton.Builder()
-                    .setDisplayName(getString(R.string.start_radio))
-                    .setIconResId(R.drawable.radio)
-                    .setSessionCommand(CommandToggleStartRadio)
-                    .setEnabled(currentSong.value != null)
-                    .build(),
-            )
-            mediaSession?.setCustomLayout(customLayout)
-        } catch (e: Exception) {
-            reportException(e)
+                        ).setSessionCommand(CommandToggleRepeatMode)
+                        .build(),
+                    CommandButton
+                        .Builder()
+                        .setDisplayName(getString(if (player.shuffleModeEnabled) R.string.action_shuffle_off else R.string.action_shuffle_on))
+                        .setIconResId(if (player.shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle)
+                        .setSessionCommand(CommandToggleShuffle)
+                        .build(),
+                    CommandButton.Builder()
+                        .setDisplayName(getString(R.string.start_radio))
+                        .setIconResId(R.drawable.radio)
+                        .setSessionCommand(CommandToggleStartRadio)
+                        .setEnabled(song != null)
+                        .build(),
+                )
+                mediaSession?.setCustomLayout(customLayout)
+            } catch (e: Exception) {
+                reportException(e)
+            }
         }
     }
 
@@ -1352,9 +1356,12 @@ class MusicService :
             ?: (playbackData?.videoDetails ?: YTPlayerUtils.playerResponseForMetadata(mediaId)
                 .getOrNull()?.videoDetails)?.lengthSeconds?.toInt()
             ?: -1
-        database.query {
-            if (song == null) insert(mediaMetadata.copy(duration = duration))
-            else if (song.song.duration == -1) insertSavedSong(mediaMetadata.copy(duration = duration).toSavedSongEntity())
+        if (song != null && song.song.duration == -1) {
+            database.getSavedSong(mediaId)?.let { saved ->
+                database.query {
+                    database.insertSavedSong(saved.copy(duration = duration))
+                }
+            }
         }
         if (!database.hasRelatedSongs(mediaId).first()) {
             val relatedEndpoint =
@@ -3410,13 +3417,18 @@ class MusicService :
     val currentMetadata = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
     currentMediaMetadata.value = currentMetadata
 
+    historyJob?.cancel()
     if (mediaItem != null && currentMetadata != null && !dataStore.get(PauseListenHistoryKey, false)) {
-        ioScope.launch {
+        val targetMediaId = mediaItem.mediaId
+        historyJob = ioScope.launch {
             try {
-                database.query {
-                    insertHistorySong(currentMetadata.toHistorySongEntity())
+                delay(25_000L) // 25 seconds minimum listening threshold
+                if (isActive && player.currentMediaItem?.mediaId == targetMediaId) {
+                    database.query {
+                        insertHistorySong(currentMetadata.toHistorySongEntity())
+                    }
+                    database.incrementPlayCount(currentMetadata.id)
                 }
-                database.incrementPlayCount(currentMetadata.id)
             } catch (_: Exception) {
             }
         }
@@ -4515,6 +4527,14 @@ class MusicService :
     }
 
     companion object {
+        internal val playbackUrlCache = ConcurrentHashMap<String, Pair<String, Long>>()
+        internal val streamRecoveryState = ConcurrentHashMap<String, Pair<Int, Long>>()
+
+        fun clearPlaybackCacheAndRecoveryForRetry(mediaId: String) {
+            playbackUrlCache.remove(mediaId)
+            streamRecoveryState.remove(mediaId)
+        }
+
         internal fun shouldStopServiceOnTaskRemoved(
             stopMusicOnTaskClearEnabled: Boolean,
             isHostSessionActive: Boolean,

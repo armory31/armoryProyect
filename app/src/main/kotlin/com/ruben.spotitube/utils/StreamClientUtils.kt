@@ -112,8 +112,7 @@ object StreamClientUtils {
     }
 
     /**
-     * Check whether the given client parameter represents a web-type client
-     * that requires poToken for playback requests.
+     * Check whether the given client parameter represents a web-type client.
      */
     fun isWebClient(clientParam: String): Boolean = resolveRequestProfile(clientParam = clientParam).requiresPlaybackProbeRanges
 
@@ -136,19 +135,6 @@ object StreamClientUtils {
     fun patchClientVersion(url: String, clientVersion: String): String {
         if (!url.contains("cver=")) return url
         return url.replace(Regex("cver=[^&]+"), "cver=$clientVersion")
-    }
-
-    /**
-     * Append a poToken to a stream URL as the `pot` query parameter.
-     *
-     * @param url      the stream URL
-     * @param poToken  the token to append
-     * @return the URL with the `pot` parameter appended
-     */
-    fun appendPoToken(url: String, poToken: String): String {
-        if (url.contains("pot=")) return url
-        val separator = if (url.contains("?")) "&" else "?"
-        return "$url${separator}pot=$poToken"
     }
 
     private fun resolveClient(

@@ -9,6 +9,7 @@
 package com.ruben.spotitube.kugou
 
 import com.ruben.spotitube.kugou.models.DownloadLyricsResponse
+import com.ruben.spotitube.kugou.utils.runCatchingCancellable
 import com.ruben.spotitube.kugou.models.Keyword
 import com.ruben.spotitube.kugou.models.SearchLyricsResponse
 import com.ruben.spotitube.kugou.models.SearchSongResponse
@@ -64,7 +65,7 @@ object KuGou {
     var useTraditionalChinese: Boolean = false
 
     suspend fun getLyrics(title: String, artist: String, duration: Int): Result<String> =
-        runCatching {
+        runCatchingCancellable {
             val keyword = generateKeyword(title, artist)
             getLyricsCandidate(keyword, duration)?.let { candidate ->
                 Base64.decode(

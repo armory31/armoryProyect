@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.innertube.models.body
 
 import com.ruben.spotitube.innertube.models.Context
@@ -17,7 +15,6 @@ data class PlayerBody(
     val videoId: String,
     val playlistId: String?,
     val playbackContext: PlaybackContext? = null,
-    val serviceIntegrityDimensions: ServiceIntegrityDimensions? = null,
     val contentCheckOk: Boolean = true,
     val racyCheckOk: Boolean = true,
 ) {
@@ -30,9 +27,4 @@ data class PlayerBody(
             val signatureTimestamp: Int
         )
     }
-
-    @Serializable
-    data class ServiceIntegrityDimensions(
-        val poToken: String
-    )
 }

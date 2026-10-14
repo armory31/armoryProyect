@@ -49,7 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.ruben.spotitube.ArmoryTopBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -236,15 +236,9 @@ fun UpdateScreen(
     // ── Layout ────────────────────────────────────────────────────────────────
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.updates)) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain
-                    ) { Icon(painterResource(R.drawable.arrow_back), null) }
-                },
-                scrollBehavior = scrollBehavior
+            ArmoryTopBar(
+                title = stringResource(R.string.updates),
+                onBack = navController::navigateUp
             )
         }
     ) { paddingValues ->

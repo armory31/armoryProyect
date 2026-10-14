@@ -2045,10 +2045,10 @@ fun Lyrics(
     }
 }
 
-private const val OpenTune_AUTO_SCROLL_DURATION = 1500L
-private const val OpenTune_INITIAL_SCROLL_DURATION = 1000L
-private const val OpenTune_SEEK_DURATION = 800L
-private const val OpenTune_FAST_SEEK_DURATION = 600L
+private const val ARMORY_AUTO_SCROLL_DURATION = 1500L
+private const val ARMORY_INITIAL_SCROLL_DURATION = 1000L
+private const val ARMORY_SEEK_DURATION = 800L
+private const val ARMORY_FAST_SEEK_DURATION = 600L
 
 private const val LyricsWordSyncLeadMs = 300L
 

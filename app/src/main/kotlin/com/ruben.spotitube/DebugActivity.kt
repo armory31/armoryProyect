@@ -1,5 +1,5 @@
 /*
- * OpenTune Project Original (2026)
+ * ARMORY Project Original (2026)
  * Arturo254 (github.com/Arturo254)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
@@ -362,7 +362,7 @@ private fun buildCrashReport(
     }.getOrDefault("")
 
     val header = buildString {
-        appendLine("OpenTune crash report")
+        appendLine("ARMORY crash report")
         if (timestampText.isNotBlank()) appendLine("Time: $timestampText")
         if (versionName.isNotBlank() || versionCode.isNotBlank()) {
             appendLine("App: $versionName ($versionCode)")

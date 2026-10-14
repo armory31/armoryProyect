@@ -17,18 +17,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.OpenTuneHeader
+import com.ruben.spotitube.ArmoryHeader
+import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.constants.ChipSortTypeKey
 import com.ruben.spotitube.constants.LibraryFilter
 import com.ruben.spotitube.utils.rememberEnumPreference
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LibraryScreen(navController: NavController) {
     var filterType by rememberEnumPreference(ChipSortTypeKey, LibraryFilter.PLAYLISTS)
 
-    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
-    val avatarUrl = currentUser?.photoUrl?.toString()
+    val avatarUrl = rememberAvatarUrl()
 
     val headerContent = @Composable {}
 
@@ -38,7 +37,7 @@ fun LibraryScreen(navController: NavController) {
             .background(ArmoryColors.AbsoluteBlack)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            OpenTuneHeader(
+            ArmoryHeader(
                 avatarUrl = avatarUrl,
                 onSettings = { navController.navigate("account") }
             )

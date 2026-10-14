@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.ArmoryFont
+import com.ruben.spotitube.GlobalFont
 import com.ruben.spotitube.ui.component.LibraryPinnedCollectionTile
 
 data class LibraryShortcutItem(
@@ -89,7 +89,7 @@ fun <T> LibraryFilterChips(
                 label = {
                     Text(
                         text = label,
-                        fontFamily = ArmoryFont.Body,
+                        fontFamily = GlobalFont,
                         color = if (isSelected) ArmoryColors.Gold1 else ArmoryColors.Silver2
                     )
                 },

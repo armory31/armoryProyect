@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import com.ruben.spotitube.sync.SyncManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
 @HiltWorker
@@ -22,9 +23,12 @@ class SyncWorker @AssistedInject constructor(
             syncManager.syncLibrary()
             Timber.d("SyncWorker: Background sync completed successfully")
             Result.success()
+        } catch (e: CancellationException) {
+            Timber.d("SyncWorker: Background sync cancelled")
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "SyncWorker: Background sync failed")
-            Result.retry()
+            Result.failure()
         }
     }
 }

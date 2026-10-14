@@ -15,6 +15,7 @@ package com.ruben.spotitube.ui.screens
  import androidx.compose.foundation.lazy.grid.items
  import androidx.compose.material3.Icon
  import androidx.compose.material3.Text
+ import com.ruben.spotitube.ArmoryTopBar
  import androidx.compose.material3.TopAppBar
  import androidx.compose.material3.TopAppBarScrollBehavior
  import androidx.compose.runtime.Composable
@@ -132,18 +133,9 @@ package com.ruben.spotitube.ui.screens
          }
      }
  
-     TopAppBar(
-         title = { Text(title ?: "") },
-         navigationIcon = {
-             IconButton(
-                 onClick = navController::navigateUp,
-                 onLongClick = navController::backToMain
-             ) {
-                 Icon(
-                     painterResource(R.drawable.arrow_back),
-                     contentDescription = null
-                 )
-             }
-         }
+     ArmoryTopBar(
+         title = title.orEmpty(),
+         onBack = navController::navigateUp,
+         scrollBehavior = scrollBehavior
      )
  }

@@ -14,7 +14,7 @@ import com.ruben.spotitube.innertube.pages.PlaylistPage
 import java.security.MessageDigest
 
 @JvmName("completedLibrary")
-suspend fun Result<PlaylistPage>.completed(): Result<PlaylistPage> = runCatching {
+suspend fun Result<PlaylistPage>.completed(): Result<PlaylistPage> = runCatchingCancellable {
     val page = getOrThrow()
     val songs = page.songs.toMutableList()
     var continuation = page.songsContinuation
@@ -51,7 +51,7 @@ suspend fun Result<PlaylistPage>.completed(): Result<PlaylistPage> = runCatching
 }
 
 @JvmName("completedPlaylist")
-suspend fun Result<LibraryPage>.completed(): Result<LibraryPage> = runCatching {
+suspend fun Result<LibraryPage>.completed(): Result<LibraryPage> = runCatchingCancellable {
     val page = getOrThrow()
     val items = page.items.toMutableList()
     var continuation = page.continuation

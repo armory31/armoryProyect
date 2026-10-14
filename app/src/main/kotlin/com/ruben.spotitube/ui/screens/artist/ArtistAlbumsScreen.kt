@@ -21,12 +21,10 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,6 +46,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.CONTENT_TYPE_ALBUM
 import com.ruben.spotitube.constants.CONTENT_TYPE_HEADER
@@ -113,8 +114,7 @@ fun ArtistAlbumsScreen(
 
                     Text(
                         text = pluralStringResource(R.plurals.n_album, albums.size, albums.size),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        style = MaterialTheme.typography.titleSmall
                     )
                 }
             }
@@ -136,19 +136,9 @@ fun ArtistAlbumsScreen(
             }
         }
 
-        TopAppBar(
-            title = { Text(artist?.artist?.name.orEmpty()) },
-            navigationIcon = {
-                IconButton(
-                    onClick = navController::navigateUp,
-                    onLongClick = navController::backToMain
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow_back),
-                        contentDescription = null
-                    )
-                }
-            },
+        ArmoryTopBar(
+            title = artist?.artist?.name.orEmpty(),
+            onBack = navController::navigateUp,
             scrollBehavior = scrollBehavior
         )
 

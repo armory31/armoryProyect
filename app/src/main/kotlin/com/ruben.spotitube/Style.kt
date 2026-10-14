@@ -9,122 +9,98 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import com.ruben.spotitube.ui.component.NavigationTitle
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
 
 // ── 1. TIPOGRAFÍA Y JERARQUÍA ────────────────────────────────────────────────
 val GlobalFont = FontFamily(Font(R.font.baskerville))
 
-val PremiumTitleFont = GlobalFont
-val PremiumBodyFont = GlobalFont
+private val displayStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 32.sp, lineHeight = 40.sp, brush = ArmoryGradients.HeaderGold)
+private val headlineStyle = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 32.sp, color = ArmoryColors.TextGold)
+private val sectionStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 28.sp, color = ArmoryColors.TextGold)
+private val titleStyle    = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 18.sp, lineHeight = 24.sp, color = ArmoryColors.TextPrimary)
+private val bodyStyle     = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, color = ArmoryColors.TextSecondary)
+private val labelStyle    = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp)
+private val captionStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp, color = ArmoryColors.TextMuted)
 
-object ArmoryFont {
-    val Title = GlobalFont
-    val Body = GlobalFont
-}
-
-private fun buildTypography() = Typography(
-    displayLarge = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Black, fontSize = 32.sp, lineHeight = 40.sp),
-    headlineLarge = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 32.sp),
-    headlineMedium = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 28.sp),
-    titleLarge = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp),
-    titleMedium = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 22.sp),
-    bodyLarge = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
-    bodyMedium = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp),
-    labelLarge = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
+val AppTypography = Typography(
+    displayLarge = displayStyle,
+    displayMedium = displayStyle,
+    displaySmall = displayStyle,
+    headlineLarge = headlineStyle,
+    titleLarge = headlineStyle,
+    headlineMedium = sectionStyle,
+    headlineSmall = sectionStyle,
+    titleMedium = titleStyle,
+    bodyLarge = bodyStyle,
+    bodyMedium = bodyStyle,
+    titleSmall = labelStyle,
+    labelLarge = labelStyle,
+    labelMedium = labelStyle,
+    bodySmall = captionStyle,
+    labelSmall = captionStyle
 )
-
-val AppTypography = buildTypography()
 
 // ── 2. COLORES Y SUPERFICIES (ArmoryColors) ──────────────────────────────────
 object ArmoryColors {
-    // Fondos y Superficies Neutras
     val AbsoluteBlack   = Color(0xFF000000)
-    val Background      = Color(0xFF0A0A0A) // Fondo general profundo
-    val SurfaceBlack    = Color(0xFF141414) // Tarjetas e ítems de lista
-    val SurfaceElevated = Color(0xFF1F1F1F) // Diálogos, mini player y menús
-    val SurfaceBorder   = Color(0xFF2E2A20) // Borde sutil dorado/oscuro
-    val SurfaceBorderMuted = Color(0xFF222222) // Borde neutro para tarjetas secundarias
+    val Background      = Color(0xFF0A0A0A)
+    val SurfaceBlack    = Color(0xFF141414)
+    val SurfaceElevated = Color(0xFF1F1F1F)
+    val SurfaceBorder   = Color(0xFF2E2A20)
+    val SurfaceBorderMuted = Color(0xFF222222)
+    val SuccessGreen    = Color(0xFF43B581)
 
-    // Dorado (Identidad Principal & Accent)
-    val Gold1 = Color(0xFFE6C687) // Champagne / Brillo
-    val Gold2 = Color(0xFFD4AF37) // Dorado Metálico Base
-    val Gold3 = Color(0xFFB8860B) // Dorado Oscuro
-    val Gold4 = Color(0xFF8B6914) // Bronce Dorado
-    val Gold5 = Color(0xFF3D2B00) // Fondo / Contenedor Dorado Oscuro
-
-    // Cobre y Plata (Metales Secundarios)
-    val CopperAccent = Color(0xFFCD7F32)
-    val SilverAccent = Color(0xFFB0B0B0)
-
-    // Texto con Jerarquía por Opacidad
-    val TextPrimary   = Color(0xFFFFFFFF)                        // 100% Opacidad - Títulos principales
-    val TextSecondary = Color(0xFFFFFFFF).copy(alpha = 0.70f)  // 70% Opacidad - Artistas / Subtítulos
-    val TextMuted     = Color(0xFFFFFFFF).copy(alpha = 0.45f)   // 45% Opacidad - Tiempos, metadatos, inactivos
-    val TextGold      = Gold1                                   // Encabezados de sección (ej. "Selecciones rápidas")
-
-    // Capa de Legibilidad (Scrim)
-    val PlayerScrim   = Color(0xCC000000) // Sombra inferior de reproducción
-
-    // Pinceles (Brushes) Requeridos
-    val Gold = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF8C6126),
-            Color(0xFFC89B48),
-            Color(0xFFECC675),
-            Color(0xFFFAF0BD),
-            Color(0xFFC89B48)
-        )
-    )
-
-    val Copper = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFFA36B56),
-            Color(0xFFD49A83),
-            Color(0xFFF8D3C4),
-            Color(0xFFD49A83)
-        )
-    )
-
-    val Silver = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF828588),
-            Color(0xFFB8BBBE),
-            Color(0xFFE6E8EA),
-            Color(0xFFB8BBBE)
-        )
-    )
-
-    val JetBlack = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF0A0A0A),
-            Color(0xFF141414),
-            Color(0xFF2A2A2A),
-            Color(0xFF141414)
-        )
-    )
-
-    // Alias de Compatibilidad
-    val GoldPrimary = Gold1
-    val Champagne = Gold1
-    val ObsidianSoft = SurfaceBlack
-    val Divider = SurfaceBorder
+    val Gold1 = Color(0xFFE6C687)
+    val Gold2 = Color(0xFFD4AF37)
+    val Gold3 = Color(0xFFB8860B)
+    val Gold4 = Color(0xFF8B6914)
+    val Gold5 = Color(0xFF3D2B00)
 
     val Silver1 = Color(0xFFC0C0C0)
     val Silver2 = Color(0xFFB0B0B0)
@@ -149,9 +125,14 @@ object ArmoryColors {
     val Diamond3 = Color(0xFF0288D1)
     val Diamond4 = Color(0xFF01002A)
     val Diamond5 = Color(0xFF00051A)
-}
 
-val OpenTuneColors = ArmoryColors
+    val TextPrimary   = Color(0xFFFFFFFF)
+    val TextSecondary = Silver2
+    val TextMuted     = Color(0xFF8A8A8A)
+    val TextGold      = Gold1
+
+    val PlayerScrim   = Color(0xCC000000)
+}
 
 // ── 3. GRADIENTES METÁLICOS (ArmoryGradients) ───────────────────────────────
 object ArmoryGradients {
@@ -164,39 +145,22 @@ object ArmoryGradients {
         )
     )
 
-    val GoldGradient = MetallicGold
-
-    val MetallicCopper = Brush.linearGradient(
+    val HeaderGold = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFD49A83),
-            Color(0xFFA36B56),
-            Color(0xFF3D1A00)
+            Color(0xFFC89B48),
+            Color(0xFFECC675),
+            Color(0xFFFAF0BD),
+            Color(0xFFC89B48)
         )
     )
 
-    val MetallicSilver = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFFE6E8EA),
-            Color(0xFFB8BBBE),
-            Color(0xFF606060)
-        )
-    )
+    val MetallicCopper = Brush.linearGradient(colors = listOf(Color(0xFFD49A83), Color(0xFFA36B56), ArmoryColors.Copper3))
+    val MetallicSilver = Brush.linearGradient(colors = listOf(Color(0xFFE6E8EA), Color(0xFFB8BBBE), Color(0xFF8E9194)))
 
-    val GoldCopperGradient = Brush.linearGradient(
-        colors = listOf(ArmoryColors.Gold3, ArmoryColors.CopperAccent)
-    )
-
-    val GoldSilverGradient = Brush.linearGradient(
-        colors = listOf(ArmoryColors.Gold3, ArmoryColors.SilverAccent)
-    )
-
-    val GoldRustGradient = Brush.linearGradient(
-        colors = listOf(ArmoryColors.Gold3, ArmoryColors.Rust2)
-    )
-
-    val GoldDiamondGradient = Brush.linearGradient(
-        colors = listOf(ArmoryColors.Gold3, ArmoryColors.Diamond2)
-    )
+    val GoldCopperGradient = Brush.linearGradient(colors = listOf(ArmoryColors.Gold3, ArmoryColors.Copper2))
+    val GoldSilverGradient = Brush.linearGradient(colors = listOf(ArmoryColors.Gold3, ArmoryColors.Silver2))
+    val GoldRustGradient = Brush.linearGradient(colors = listOf(ArmoryColors.Gold3, ArmoryColors.Rust2))
+    val GoldDiamondGradient = Brush.linearGradient(colors = listOf(ArmoryColors.Gold3, ArmoryColors.Diamond2))
 
     val GlassGoldBackground = Brush.verticalGradient(
         colors = listOf(
@@ -219,16 +183,16 @@ object ArmoryGradients {
             Color(0xB3000000)
         )
     )
-}
 
-// Alias Top-Level de Gradientes
-val GoldGradient = ArmoryGradients.GoldGradient
-val GoldCopperGradient = ArmoryGradients.GoldCopperGradient
-val GoldSilverGradient = ArmoryGradients.GoldSilverGradient
-val GoldRustGradient = ArmoryGradients.GoldRustGradient
-val GoldDiamondGradient = ArmoryGradients.GoldDiamondGradient
-val GlassGoldBackground = ArmoryGradients.GlassGoldBackground
-val ObsidianGradient = ArmoryGradients.ObsidianGradient
+    val JetBlack = Brush.linearGradient(
+        colors = listOf(
+            ArmoryColors.Background,
+            ArmoryColors.SurfaceBlack,
+            ArmoryColors.Silver4,
+            ArmoryColors.SurfaceBlack
+        )
+    )
+}
 
 // ── 4. ESTILOS DE CRISTAL / VIDRIO (LyricsGlassStyle) ────────────────────────
 data class LyricsGlassStyle(
@@ -236,20 +200,20 @@ data class LyricsGlassStyle(
     val surfaceTint: Color,
     val surfaceAlpha: Float,
     val cloudyRadius: Int,
-    val refraction: Float,
-    val curve: Float,
-    val dispersion: Float,
-    val glassSaturation: Float,
-    val glassContrast: Float,
-    val glassEdge: Float,
-    val glassCornerRadius: Float,
+    val refraction: Float = 0.20f,
+    val curve: Float = 0.20f,
+    val dispersion: Float = 0.0f,
+    val glassSaturation: Float = 1.10f,
+    val glassContrast: Float = 1.0f,
+    val glassEdge: Float = 0.2f,
+    val glassCornerRadius: Float = 40f,
     val glassTint: Color,
-    val textColor: Color,
-    val secondaryTextColor: Color,
-    val overlayColor: Color,
-    val overlayAlpha: Float,
-    val isDark: Boolean,
-    val backgroundDimAlpha: Float = 0.3f,
+    val textColor: Color = Color.White,
+    val secondaryTextColor: Color = Color.White.copy(alpha = 0.7f),
+    val isDark: Boolean = true,
+    val overlayColor: Color = if (isDark) Color.Black else Color.White,
+    val overlayAlpha: Float = 0.25f,
+    val backgroundDimAlpha: Float = 0.35f,
 ) {
     companion object {
         val FrostedDark = LyricsGlassStyle(
@@ -257,20 +221,7 @@ data class LyricsGlassStyle(
             surfaceTint = Color.Black,
             surfaceAlpha = 0.35f,
             cloudyRadius = 15,
-            refraction = 0.20f,
-            curve = 0.20f,
-            dispersion = 0.0f,
-            glassSaturation = 1.10f,
-            glassContrast = 1.0f,
-            glassEdge = 0.2f,
-            glassCornerRadius = 40f,
-            glassTint = Color.Black.copy(alpha = 0.35f),
-            textColor = Color.White,
-            secondaryTextColor = Color.White.copy(alpha = 0.7f),
-            overlayColor = Color.Black,
-            overlayAlpha = 0.25f,
-            isDark = true,
-            backgroundDimAlpha = 0.35f,
+            glassTint = Color.Black.copy(alpha = 0.35f)
         )
 
         val FrostedLight = LyricsGlassStyle(
@@ -280,18 +231,14 @@ data class LyricsGlassStyle(
             cloudyRadius = 15,
             refraction = 0.18f,
             curve = 0.18f,
-            dispersion = 0.0f,
             glassSaturation = 1.05f,
-            glassContrast = 1.0f,
             glassEdge = 0.25f,
-            glassCornerRadius = 40f,
             glassTint = Color.White.copy(alpha = 0.15f),
             textColor = Color(0xFF1A1A1A),
             secondaryTextColor = Color(0xFF1A1A1A).copy(alpha = 0.65f),
-            overlayColor = Color.White,
-            overlayAlpha = 0.35f,
             isDark = false,
-            backgroundDimAlpha = 0.15f,
+            overlayAlpha = 0.35f,
+            backgroundDimAlpha = 0.15f
         )
 
         val ClearGlass = LyricsGlassStyle(
@@ -301,18 +248,11 @@ data class LyricsGlassStyle(
             cloudyRadius = 12,
             refraction = 0.25f,
             curve = 0.25f,
-            dispersion = 0.0f,
             glassSaturation = 1.15f,
             glassContrast = 1.05f,
-            glassEdge = 0.2f,
-            glassCornerRadius = 40f,
             glassTint = Color.White.copy(alpha = 0.05f),
-            textColor = Color.White,
-            secondaryTextColor = Color.White.copy(alpha = 0.7f),
-            overlayColor = Color.Black,
             overlayAlpha = 0.2f,
-            isDark = true,
-            backgroundDimAlpha = 0.25f,
+            backgroundDimAlpha = 0.25f
         )
 
         val UltraClear = LyricsGlassStyle(
@@ -322,18 +262,13 @@ data class LyricsGlassStyle(
             cloudyRadius = 8,
             refraction = 0.30f,
             curve = 0.30f,
-            dispersion = 0.0f,
             glassSaturation = 1.20f,
             glassContrast = 1.10f,
             glassEdge = 0.15f,
-            glassCornerRadius = 40f,
             glassTint = Color.White.copy(alpha = 0.03f),
-            textColor = Color.White,
             secondaryTextColor = Color.White.copy(alpha = 0.75f),
-            overlayColor = Color.Black,
             overlayAlpha = 0.15f,
-            isDark = true,
-            backgroundDimAlpha = 0.20f,
+            backgroundDimAlpha = 0.20f
         )
 
         val SmokyGlass = LyricsGlassStyle(
@@ -343,18 +278,13 @@ data class LyricsGlassStyle(
             cloudyRadius = 20,
             refraction = 0.15f,
             curve = 0.15f,
-            dispersion = 0.0f,
             glassSaturation = 1.0f,
             glassContrast = 0.95f,
             glassEdge = 0.15f,
-            glassCornerRadius = 40f,
             glassTint = Color.Black.copy(alpha = 0.5f),
-            textColor = Color.White,
             secondaryTextColor = Color.White.copy(alpha = 0.65f),
-            overlayColor = Color.Black,
             overlayAlpha = 0.35f,
-            isDark = true,
-            backgroundDimAlpha = 0.45f,
+            backgroundDimAlpha = 0.45f
         )
 
         val GoldenGlass = LyricsGlassStyle(
@@ -364,18 +294,12 @@ data class LyricsGlassStyle(
             cloudyRadius = 15,
             refraction = 0.22f,
             curve = 0.22f,
-            dispersion = 0.0f,
             glassSaturation = 1.25f,
             glassContrast = 1.05f,
             glassEdge = 0.3f,
-            glassCornerRadius = 40f,
             glassTint = Color(0xFFFFD700).copy(alpha = 0.15f),
-            textColor = Color.White,
             secondaryTextColor = Color(0xFFFFF8DC).copy(alpha = 0.8f),
-            overlayColor = Color.Black,
-            overlayAlpha = 0.25f,
-            isDark = true,
-            backgroundDimAlpha = 0.3f,
+            backgroundDimAlpha = 0.3f
         )
 
         val MidnightGlass = LyricsGlassStyle(
@@ -385,18 +309,11 @@ data class LyricsGlassStyle(
             cloudyRadius = 18,
             refraction = 0.18f,
             curve = 0.18f,
-            dispersion = 0.0f,
             glassSaturation = 1.15f,
-            glassContrast = 1.0f,
-            glassEdge = 0.2f,
-            glassCornerRadius = 40f,
             glassTint = Color(0xFF191970).copy(alpha = 0.3f),
-            textColor = Color.White,
             secondaryTextColor = Color(0xFFE6E6FA).copy(alpha = 0.75f),
-            overlayColor = Color.Black,
             overlayAlpha = 0.3f,
-            isDark = true,
-            backgroundDimAlpha = 0.4f,
+            backgroundDimAlpha = 0.4f
         )
 
         val EmeraldGlass = LyricsGlassStyle(
@@ -406,18 +323,12 @@ data class LyricsGlassStyle(
             cloudyRadius = 15,
             refraction = 0.20f,
             curve = 0.20f,
-            dispersion = 0.0f,
             glassSaturation = 1.20f,
-            glassContrast = 1.0f,
             glassEdge = 0.25f,
-            glassCornerRadius = 40f,
             glassTint = Color(0xFF004D40).copy(alpha = 0.25f),
-            textColor = Color.White,
             secondaryTextColor = Color(0xFFE0F2F1).copy(alpha = 0.75f),
-            overlayColor = Color.Black,
             overlayAlpha = 0.25f,
-            isDark = true,
-            backgroundDimAlpha = 0.35f,
+            backgroundDimAlpha = 0.35f
         )
 
         val SunsetGlass = LyricsGlassStyle(
@@ -427,18 +338,13 @@ data class LyricsGlassStyle(
             cloudyRadius = 15,
             refraction = 0.20f,
             curve = 0.20f,
-            dispersion = 0.0f,
             glassSaturation = 1.30f,
             glassContrast = 1.05f,
             glassEdge = 0.3f,
-            glassCornerRadius = 40f,
             glassTint = Color(0xFFFF4500).copy(alpha = 0.2f),
-            textColor = Color.White,
             secondaryTextColor = Color(0xFFFFE4E1).copy(alpha = 0.8f),
-            overlayColor = Color.Black,
             overlayAlpha = 0.25f,
-            isDark = true,
-            backgroundDimAlpha = 0.3f,
+            backgroundDimAlpha = 0.3f
         )
 
         val AllStyles = listOf(
@@ -452,8 +358,6 @@ data class LyricsGlassStyle(
             EmeraldGlass,
             SunsetGlass,
         )
-
-        val allPresets = AllStyles
 
         fun fromPalette(palette: Palette?): LyricsGlassStyle {
             if (palette == null) return FrostedDark
@@ -494,34 +398,9 @@ object PlayerSliderColors {
             inactiveTrackColor = Color.White.copy(alpha = 0.20f)
         )
     }
-
-    @Composable
-    fun standardSliderColors(buttonColor: Color): SliderColors = getSliderColors()
-
-    @Composable
-    fun wavySliderColors(buttonColor: Color): SliderColors = getSliderColors()
-
-    @Composable
-    fun thickSliderColors(buttonColor: Color): SliderColors = getSliderColors()
-
-    @Composable
-    fun circularSliderColors(buttonColor: Color): SliderColors = getSliderColors()
-
-    @Composable
-    fun simpleSliderColors(buttonColor: Color): SliderColors = getSliderColors()
-
-    object Config {
-        const val INACTIVE_TRACK_ALPHA = 0.20f
-        const val THICK_INACTIVE_TRACK_ALPHA = 0.25f
-        const val SIMPLE_ACTIVE_TRACK_ALPHA = 0.8f
-        const val SIMPLE_INACTIVE_TRACK_ALPHA = 0.15f
-        const val INACTIVE_TICK_ALPHA = 0.2f
-        val DEFAULT_ACTIVE_COLOR = ArmoryColors.Copper2
-        val DEFAULT_INACTIVE_COLOR = Color.White.copy(alpha = INACTIVE_TRACK_ALPHA)
-    }
 }
 
-// ── 7. FONDO DINÁMICO DE REPRODUCTOR (DynamicBackground) ────────────────────
+// ── 7. FONDO DINÁMICO DE REPRODUCTOR (DynamicPlayerBackground) ─────────────
 @Composable
 fun DynamicPlayerBackground(
     dominantColor: Color = Color.Black,
@@ -551,13 +430,6 @@ fun DynamicPlayerBackground(
     }
 }
 
-@Composable
-fun DynamicBackground(thumbnailUrl: String) {
-    DynamicPlayerBackground(dominantColor = Color.Black) {
-        // Empty placeholder content for background
-    }
-}
-
 // ── 8. TEMA MATERIAL 3 (ArmoryTheme) ────────────────────────────────────────
 @Composable
 fun ArmoryTheme(
@@ -573,17 +445,17 @@ fun ArmoryTheme(
         onPrimaryContainer = ArmoryColors.Gold1,
         inversePrimary = ArmoryColors.Gold1,
 
-        secondary = ArmoryColors.SilverAccent,
+        secondary = ArmoryColors.Silver2,
         onSecondary = ArmoryColors.AbsoluteBlack,
         secondaryContainer = ArmoryColors.SurfaceElevated,
         onSecondaryContainer = ArmoryColors.TextPrimary,
 
-        tertiary = ArmoryColors.CopperAccent,
+        tertiary = ArmoryColors.Copper2,
         onTertiary = ArmoryColors.AbsoluteBlack,
-        tertiaryContainer = Color(0xFF3D1A00),
-        onTertiaryContainer = Color(0xFFE8956D),
+        tertiaryContainer = ArmoryColors.Copper4,
+        onTertiaryContainer = ArmoryColors.Copper1,
 
-        background = ArmoryColors.Background,
+        background = ArmoryColors.AbsoluteBlack,
         onBackground = ArmoryColors.TextPrimary,
         surface = ArmoryColors.SurfaceBlack,
         onSurface = ArmoryColors.TextPrimary,
@@ -597,10 +469,10 @@ fun ArmoryTheme(
         scrim = ArmoryColors.AbsoluteBlack,
         surfaceTint = ArmoryColors.Gold2,
 
-        error = Color(0xFFC0392B),
+        error = ArmoryColors.Rust2,
         onError = ArmoryColors.AbsoluteBlack,
-        errorContainer = Color(0xFF2C0000),
-        onErrorContainer = Color(0xFFE57373),
+        errorContainer = ArmoryColors.Rust4,
+        onErrorContainer = ArmoryColors.Rust1,
 
         surfaceBright = ArmoryColors.SurfaceElevated,
         surfaceDim = ArmoryColors.Background,
@@ -608,7 +480,7 @@ fun ArmoryTheme(
         surfaceContainerLow = ArmoryColors.Background,
         surfaceContainerLowest = ArmoryColors.AbsoluteBlack,
         surfaceContainerHigh = ArmoryColors.SurfaceElevated,
-        surfaceContainerHighest = Color(0xFF2A2A2A)
+        surfaceContainerHighest = ArmoryColors.Silver4
     )
 
     val animatedColorScheme = animateColorScheme(colorScheme)
@@ -622,43 +494,156 @@ fun ArmoryTheme(
 
 @Composable
 private fun animateColorScheme(targetColorScheme: ColorScheme): ColorScheme {
-    val animationSpec = spring<Color>(stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
+    val animSpec = spring<Color>(stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
+    @Composable
+    fun anim(target: Color, label: String) = animateColorAsState(target, animSpec, label = label).value
+
     return ColorScheme(
-        primary = animateColorAsState(targetColorScheme.primary, animationSpec, label = "primary").value,
-        onPrimary = animateColorAsState(targetColorScheme.onPrimary, animationSpec, label = "onPrimary").value,
-        primaryContainer = animateColorAsState(targetColorScheme.primaryContainer, animationSpec, label = "primaryContainer").value,
-        onPrimaryContainer = animateColorAsState(targetColorScheme.onPrimaryContainer, animationSpec, label = "onPrimaryContainer").value,
-        inversePrimary = animateColorAsState(targetColorScheme.inversePrimary, animationSpec, label = "inversePrimary").value,
-        secondary = animateColorAsState(targetColorScheme.secondary, animationSpec, label = "secondary").value,
-        onSecondary = animateColorAsState(targetColorScheme.onSecondary, animationSpec, label = "onSecondary").value,
-        secondaryContainer = animateColorAsState(targetColorScheme.secondaryContainer, animationSpec, label = "secondaryContainer").value,
-        onSecondaryContainer = animateColorAsState(targetColorScheme.onSecondaryContainer, animationSpec, label = "onSecondaryContainer").value,
-        tertiary = animateColorAsState(targetColorScheme.tertiary, animationSpec, label = "tertiary").value,
-        onTertiary = animateColorAsState(targetColorScheme.onTertiary, animationSpec, label = "onTertiary").value,
-        tertiaryContainer = animateColorAsState(targetColorScheme.tertiaryContainer, animationSpec, label = "tertiaryContainer").value,
-        onTertiaryContainer = animateColorAsState(targetColorScheme.onTertiaryContainer, animationSpec, label = "onTertiaryContainer").value,
-        background = animateColorAsState(targetColorScheme.background, animationSpec, label = "background").value,
-        onBackground = animateColorAsState(targetColorScheme.onBackground, animationSpec, label = "onBackground").value,
-        surface = animateColorAsState(targetColorScheme.surface, animationSpec, label = "surface").value,
-        onSurface = animateColorAsState(targetColorScheme.onSurface, animationSpec, label = "onSurface").value,
-        surfaceVariant = animateColorAsState(targetColorScheme.surfaceVariant, animationSpec, label = "surfaceVariant").value,
-        onSurfaceVariant = animateColorAsState(targetColorScheme.onSurfaceVariant, animationSpec, label = "onSurfaceVariant").value,
-        surfaceTint = animateColorAsState(targetColorScheme.surfaceTint, animationSpec, label = "surfaceTint").value,
-        inverseSurface = animateColorAsState(targetColorScheme.inverseSurface, animationSpec, label = "inverseSurface").value,
-        inverseOnSurface = animateColorAsState(targetColorScheme.inverseOnSurface, animationSpec, label = "inverseOnSurface").value,
-        error = animateColorAsState(targetColorScheme.error, animationSpec, label = "error").value,
-        onError = animateColorAsState(targetColorScheme.onError, animationSpec, label = "onError").value,
-        errorContainer = animateColorAsState(targetColorScheme.errorContainer, animationSpec, label = "errorContainer").value,
-        onErrorContainer = animateColorAsState(targetColorScheme.onErrorContainer, animationSpec, label = "onErrorContainer").value,
-        outline = animateColorAsState(targetColorScheme.outline, animationSpec, label = "outline").value,
-        outlineVariant = animateColorAsState(targetColorScheme.outlineVariant, animationSpec, label = "outlineVariant").value,
-        scrim = animateColorAsState(targetColorScheme.scrim, animationSpec, label = "scrim").value,
-        surfaceBright = animateColorAsState(targetColorScheme.surfaceBright, animationSpec, label = "surfaceBright").value,
-        surfaceDim = animateColorAsState(targetColorScheme.surfaceDim, animationSpec, label = "surfaceDim").value,
-        surfaceContainer = animateColorAsState(targetColorScheme.surfaceContainer, animationSpec, label = "surfaceContainer").value,
-        surfaceContainerLow = animateColorAsState(targetColorScheme.surfaceContainerLow, animationSpec, label = "surfaceContainerLow").value,
-        surfaceContainerLowest = animateColorAsState(targetColorScheme.surfaceContainerLowest, animationSpec, label = "surfaceContainerLowest").value,
-        surfaceContainerHigh = animateColorAsState(targetColorScheme.surfaceContainerHigh, animationSpec, label = "surfaceContainerHigh").value,
-        surfaceContainerHighest = animateColorAsState(targetColorScheme.surfaceContainerHighest, animationSpec, label = "surfaceContainerHighest").value
+        primary = anim(targetColorScheme.primary, "primary"),
+        onPrimary = anim(targetColorScheme.onPrimary, "onPrimary"),
+        primaryContainer = anim(targetColorScheme.primaryContainer, "primaryContainer"),
+        onPrimaryContainer = anim(targetColorScheme.onPrimaryContainer, "onPrimaryContainer"),
+        inversePrimary = anim(targetColorScheme.inversePrimary, "inversePrimary"),
+        secondary = anim(targetColorScheme.secondary, "secondary"),
+        onSecondary = anim(targetColorScheme.onSecondary, "onSecondary"),
+        secondaryContainer = anim(targetColorScheme.secondaryContainer, "secondaryContainer"),
+        onSecondaryContainer = anim(targetColorScheme.onSecondaryContainer, "onSecondaryContainer"),
+        tertiary = anim(targetColorScheme.tertiary, "tertiary"),
+        onTertiary = anim(targetColorScheme.onTertiary, "onTertiary"),
+        tertiaryContainer = anim(targetColorScheme.tertiaryContainer, "tertiaryContainer"),
+        onTertiaryContainer = anim(targetColorScheme.onTertiaryContainer, "onTertiaryContainer"),
+        background = anim(targetColorScheme.background, "background"),
+        onBackground = anim(targetColorScheme.onBackground, "onBackground"),
+        surface = anim(targetColorScheme.surface, "surface"),
+        onSurface = anim(targetColorScheme.onSurface, "onSurface"),
+        surfaceVariant = anim(targetColorScheme.surfaceVariant, "surfaceVariant"),
+        onSurfaceVariant = anim(targetColorScheme.onSurfaceVariant, "onSurfaceVariant"),
+        surfaceTint = anim(targetColorScheme.surfaceTint, "surfaceTint"),
+        inverseSurface = anim(targetColorScheme.inverseSurface, "inverseSurface"),
+        inverseOnSurface = anim(targetColorScheme.inverseOnSurface, "inverseOnSurface"),
+        error = anim(targetColorScheme.error, "error"),
+        onError = anim(targetColorScheme.onError, "onError"),
+        errorContainer = anim(targetColorScheme.errorContainer, "errorContainer"),
+        onErrorContainer = anim(targetColorScheme.onErrorContainer, "onErrorContainer"),
+        outline = anim(targetColorScheme.outline, "outline"),
+        outlineVariant = anim(targetColorScheme.outlineVariant, "outlineVariant"),
+        scrim = anim(targetColorScheme.scrim, "scrim"),
+        surfaceBright = anim(targetColorScheme.surfaceBright, "surfaceBright"),
+        surfaceDim = anim(targetColorScheme.surfaceDim, "surfaceDim"),
+        surfaceContainer = anim(targetColorScheme.surfaceContainer, "surfaceContainer"),
+        surfaceContainerLow = anim(targetColorScheme.surfaceContainerLow, "surfaceContainerLow"),
+        surfaceContainerLowest = anim(targetColorScheme.surfaceContainerLowest, "surfaceContainerLowest"),
+        surfaceContainerHigh = anim(targetColorScheme.surfaceContainerHigh, "surfaceContainerHigh"),
+        surfaceContainerHighest = anim(targetColorScheme.surfaceContainerHighest, "surfaceContainerHighest")
     )
+}
+
+// ── PASO 2: COMPARTIDOS ─────────────────────────────────────────────────────
+@Composable
+fun ArmoryIcon(icon: ImageVector, contentDescription: String?, modifier: Modifier = Modifier, active: Boolean = true) =
+    Icon(icon, contentDescription, modifier, if (active) ArmoryColors.Gold2 else ArmoryColors.TextMuted)
+
+@Composable
+fun ArmoryIcon(painter: androidx.compose.ui.graphics.painter.Painter, contentDescription: String?, modifier: Modifier = Modifier, active: Boolean = true) =
+    Icon(painter, contentDescription, modifier, if (active) ArmoryColors.Gold2 else ArmoryColors.TextMuted)
+
+@Composable
+fun ArmoryIconButton(icon: ImageVector, contentDescription: String?, onClick: () -> Unit, modifier: Modifier = Modifier, active: Boolean = true, overImage: Boolean = false) =
+    IconButton(onClick = onClick, modifier = if (overImage) modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else modifier) {
+        ArmoryIcon(icon, contentDescription, active = active)
+    }
+
+@Composable
+fun ArmoryIconButton(painter: androidx.compose.ui.graphics.painter.Painter, contentDescription: String?, onClick: () -> Unit, modifier: Modifier = Modifier, active: Boolean = true, overImage: Boolean = false) =
+    IconButton(onClick = onClick, modifier = if (overImage) modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else modifier) {
+        ArmoryIcon(painter, contentDescription, active = active)
+    }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArmoryTopBar(
+    title: String,
+    onBack: (() -> Unit)? = null,
+    overImage: Boolean = false,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {}
+) = TopAppBar(
+    modifier = modifier,
+    title = { Text(title, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+    navigationIcon = {
+        if (onBack != null) IconButton(
+            onClick = onBack,
+            modifier = if (overImage) Modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else Modifier
+        ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.TextGold) }
+    },
+    actions = actions,
+    scrollBehavior = scrollBehavior,
+    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArmoryTopBar(
+    title: @Composable () -> Unit,
+    onBack: (() -> Unit)? = null,
+    overImage: Boolean = false,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {}
+) = TopAppBar(
+    modifier = modifier,
+    title = title,
+    navigationIcon = {
+        if (onBack != null) IconButton(
+            onClick = onBack,
+            modifier = if (overImage) Modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else Modifier
+        ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.TextGold) }
+    },
+    actions = actions,
+    scrollBehavior = scrollBehavior,
+    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
+)
+
+@Composable
+fun SectionHeader(
+    text: String,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    subtitle: String? = null,
+    thumbnail: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+) {
+    if (onClick != null || label != null || subtitle != null || thumbnail != null) {
+        NavigationTitle(
+            title = text,
+            modifier = modifier,
+            label = label,
+            subtitle = subtitle,
+            thumbnail = thumbnail,
+            onClick = onClick
+        )
+    } else {
+        Text(text, modifier, style = MaterialTheme.typography.headlineMedium)
+    }
+}
+
+@Composable
+fun ArmoryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    brush: Brush = ArmoryGradients.MetallicGold,
+    icon: ImageVector? = null,
+    painter: androidx.compose.ui.graphics.painter.Painter? = null
+) = Row(
+    modifier.defaultMinSize(minHeight = 44.dp).clip(CircleShape).background(brush)
+        .clickable(role = Role.Button, onClick = onClick).padding(horizontal = 24.dp),
+    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+) {
+    CompositionLocalProvider(LocalContentColor provides ArmoryColors.AbsoluteBlack) {
+        if (icon != null) { Icon(icon, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)) }
+        if (painter != null) { Icon(painter, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)) }
+        Text(text, style = MaterialTheme.typography.labelLarge)
+    }
 }

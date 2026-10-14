@@ -9,6 +9,7 @@
 package com.ruben.spotitube.ui.screens
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.material3.ButtonDefaults
 
 import android.content.ContentValues
@@ -120,7 +121,10 @@ import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.LocalAlbumRadio
 import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.ui.component.NavigationTitle
+import com.ruben.spotitube.SectionHeader
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.shimmer.ButtonPlaceholder
@@ -829,7 +833,7 @@ fun AlbumScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
-                                    .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
+                                    .background(brush = ArmoryGradients.MetallicSilver, shape = RoundedCornerShape(24.dp))
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.play),
@@ -856,7 +860,7 @@ fun AlbumScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
-                                    .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
+                                    .background(brush = ArmoryGradients.MetallicSilver, shape = RoundedCornerShape(24.dp))
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.shuffle),
@@ -912,7 +916,7 @@ fun AlbumScreen(
                                 color = Color.Transparent,
                                 modifier = Modifier
                                     .size(48.dp)
-                                    .background(ArmoryColors.Copper, shape = CircleShape)
+                                    .background(brush = ArmoryGradients.MetallicCopper, shape = CircleShape)
                             ) {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
@@ -964,7 +968,7 @@ fun AlbumScreen(
                                 color = Color.Transparent,
                                 modifier = Modifier
                                     .size(48.dp)
-                                    .background(ArmoryColors.Copper, shape = CircleShape)
+                                    .background(brush = ArmoryGradients.MetallicCopper, shape = CircleShape)
                             ) {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
@@ -986,8 +990,8 @@ fun AlbumScreen(
 
                 // Songs Section Header
                 item(key = "songs_header") {
-                    NavigationTitle(
-                        title = stringResource(R.string.songs),
+                    SectionHeader(
+                        text = stringResource(R.string.songs),
                     )
                 }
 
@@ -1054,8 +1058,8 @@ fun AlbumScreen(
                 // Other Versions Section
                 if (otherVersions.isNotEmpty()) {
                     item(key = "other_versions_header") {
-                        NavigationTitle(
-                            title = stringResource(R.string.other_versions),
+                        SectionHeader(
+                            text = stringResource(R.string.other_versions),
                         )
                     }
                     item(key = "other_versions_list") {
@@ -1242,26 +1246,8 @@ fun AlbumScreen(
             }
         }
 
-        // Top App Bar
-        val topAppBarColors = if (transparentAppBar) {
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Transparent,
-                navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                actionIconContentColor = MaterialTheme.colorScheme.onBackground
-            )
-        } else {
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface
-            )
-        }
-
-        TopAppBar(
+        ArmoryTopBar(
             modifier = Modifier.align(Alignment.TopCenter),
-            colors = topAppBarColors,
-            scrollBehavior = scrollBehavior,
             title = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
@@ -1278,33 +1264,23 @@ fun AlbumScreen(
                     )
                 }
             },
-            navigationIcon = {
-                IconButton(
-                    onClick = {
-                        if (selection) {
-                            selection = false
-                        } else {
-                            navController.navigateUp()
-                        }
-                    },
-                    onLongClick = {
-                        if (!selection) {
-                            navController.backToMain()
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (selection) R.drawable.close else R.drawable.arrow_back
-                        ),
-                        contentDescription = null
-                    )
+            onBack = {
+                if (selection) {
+                    selection = false
+                } else {
+                    navController.navigateUp()
                 }
             },
+            overImage = transparentAppBar,
+            scrollBehavior = scrollBehavior,
             actions = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
-                    IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(
+                            if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all
+                        ),
+                        contentDescription = "Seleccionar",
                         onClick = {
                             if (count == wrappedSongs.size) {
                                 wrappedSongs.forEach { it.isSelected = false }
@@ -1312,17 +1288,11 @@ fun AlbumScreen(
                                 wrappedSongs.forEach { it.isSelected = true }
                             }
                         },
-                        onLongClick = {}
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all
-                            ),
-                            contentDescription = null
-                        )
-                    }
-
-                    IconButton(
+                        overImage = transparentAppBar
+                    )
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.more_vert),
+                        contentDescription = "Más",
                         onClick = {
                             menuState.show {
                                 SelectionSongMenu(
@@ -1333,13 +1303,8 @@ fun AlbumScreen(
                                 )
                             }
                         },
-                        onLongClick = {}
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null
-                        )
-                    }
+                        overImage = transparentAppBar
+                    )
                 }
             }
         )

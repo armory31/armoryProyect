@@ -57,7 +57,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.ruben.spotitube.ArmoryTopBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -443,17 +443,9 @@ fun MusicTogetherScreen(
         )
     }
 
-    TopAppBar(
-        title = { Text(stringResource(R.string.music_together)) },
-        navigationIcon = {
-            AtIconButton(
-                onClick = navController::navigateUp,
-                onLongClick = navController::backToMain,
-            ) {
-                Icon(painterResource(R.drawable.arrow_back), null)
-            }
-        },
-        scrollBehavior = scrollBehavior,
+    ArmoryTopBar(
+        title = stringResource(R.string.music_together),
+        onBack = navController::navigateUp
     )
 }
 

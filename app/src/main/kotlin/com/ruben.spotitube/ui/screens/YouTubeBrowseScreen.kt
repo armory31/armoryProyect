@@ -32,8 +32,6 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,7 +66,10 @@ import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
 import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.ui.component.NavigationTitle
+import com.ruben.spotitube.SectionHeader
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.component.shimmer.GridItemPlaceHolder
@@ -105,31 +106,9 @@ fun YouTubeBrowseScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = displayTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navController::navigateUp,
-                        onLongClick = navController::backToMain,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.arrow_back),
-                            contentDescription = null,
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+            ArmoryTopBar(
+                title = displayTitle,
+                onBack = navController::navigateUp
             )
         },
     ) { paddingValues ->
@@ -191,7 +170,7 @@ fun YouTubeBrowseScreen(
                         if (it.items.isNotEmpty()) {
                             it.title?.let { title ->
                                 item {
-                                    NavigationTitle(title)
+                                    SectionHeader(text = title)
                                 }
                             }
                             if (it.items.all { item -> item is SongItem }) {
@@ -218,7 +197,9 @@ fun YouTubeBrowseScreen(
                                                     isPlaying = isPlaying,
                                                     isSwipeable = false,
                                                     trailingContent = {
-                                                        IconButton(
+                                                        ArmoryIconButton(
+                                                            painter = painterResource(R.drawable.more_vert),
+                                                            contentDescription = null,
                                                             onClick = {
                                                                 menuState.show {
                                                                     YouTubeSongMenu(
@@ -228,12 +209,7 @@ fun YouTubeBrowseScreen(
                                                                     )
                                                                 }
                                                             }
-                                                        ) {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.more_vert),
-                                                                contentDescription = null,
-                                                            )
-                                                        }
+                                                        )
                                                     },
                                                     modifier =
                                                     Modifier

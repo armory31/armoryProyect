@@ -73,6 +73,8 @@ import com.ruben.spotitube.LocalSyncUtils
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
+import com.ruben.spotitube.constants.SpeedDialSongIdsKey
+import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.PlaylistSongMap
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
@@ -781,6 +783,48 @@ fun YouTubePlaylistMenu(
                         )
                     }
                 }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        item {
+            val (speedDialIds, onSpeedDialIdsChange) = rememberPreference(SpeedDialSongIdsKey, "")
+            val speedDialList = remember(speedDialIds) {
+                speedDialIds.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            }
+            val playlistKey = "playlist:${playlist.id}"
+            val isInSpeedDial = remember(speedDialList, playlistKey) { playlistKey in speedDialList }
+
+            MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(
+                                if (isInSpeedDial) R.string.remove_from_speed_dial
+                                else R.string.pin_to_speed_dial,
+                            ),
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(if (isInSpeedDial) R.drawable.bookmark_filled else R.drawable.bookmark),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        val updatedIds = if (isInSpeedDial) {
+                            speedDialList.filterNot { it == playlistKey }
+                        } else {
+                            (speedDialList + playlistKey).distinct().take(24)
+                        }
+                        onSpeedDialIdsChange(updatedIds.joinToString(","))
+                        onDismiss()
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                )
             }
         }
     }

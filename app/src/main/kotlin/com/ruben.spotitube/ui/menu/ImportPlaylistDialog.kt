@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.TextFieldDialog
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +58,8 @@ fun ImportPlaylistDialog(
     var currentPlaylistName by remember(playlistTitle) { mutableStateOf(playlistTitle) }
     var songIds by remember { mutableStateOf<List<String>?>(null) }
     var isImporting by remember { mutableStateOf(false) }
+    var processedCount by remember { mutableStateOf(0) }
+    var totalCount by remember { mutableStateOf(0) }
     var showDuplicateDialog by remember { mutableStateOf(false) }
     var existingPlaylistId by remember { mutableStateOf<String?>(null) }
     var isProcessingDuplicate by remember { mutableStateOf(false) }
@@ -78,6 +79,8 @@ fun ImportPlaylistDialog(
     fun resetState() {
         songIds = null
         isImporting = false
+        processedCount = 0
+        totalCount = 0
         showDuplicateDialog = false
         existingPlaylistId = null
         isProcessingDuplicate = false
@@ -95,7 +98,17 @@ fun ImportPlaylistDialog(
             },
             extraContent = {
                 if (isImporting) {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.height(64.dp)
+                    ) {
+                        CircularProgressIndicator()
+                        if (totalCount > 0) {
+                            val percent = ((processedCount.toFloat() / totalCount.toFloat()) * 100).toInt()
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(text = "$processedCount / $totalCount ($percent%)")
+                        }
+                    }
                 }
             },
             onDone = { finalName ->
@@ -106,6 +119,8 @@ fun ImportPlaylistDialog(
                     try {
                         val ids = onGetSong()
                         songIds = ids
+                        totalCount = ids.size
+                        processedCount = ids.size
 
                         if (ids.isEmpty()) {
                             showMessage(context.getString(R.string.import_failed))
@@ -128,16 +143,8 @@ fun ImportPlaylistDialog(
                             }
                         }
 
-                        ids.forEach { sId ->
-                            val existingSong = database.getSongById(sId)?.song
-                            if (existingSong == null || existingSong.duration <= 0) {
-                                val refetched = com.ruben.spotitube.innertube.YouTube.queue(listOf(sId)).getOrNull()?.firstOrNull()?.let {
-                                    it.toMediaMetadata()
-                                }
-                                if (refetched != null) {
-                                    database.query { insert(refetched) }
-                                }
-                            }
+                        ids.forEachIndexed { index, _ ->
+                            processedCount = index + 1
                         }
 
                         val playlistId = SavedPlaylistEntity.generatePlaylistId()

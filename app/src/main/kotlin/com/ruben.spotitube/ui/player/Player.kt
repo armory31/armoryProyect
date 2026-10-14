@@ -125,7 +125,7 @@ import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.MiniPlayer
 import com.ruben.spotitube.PlayerStatus
-import com.ruben.spotitube.OpenTuneColors
+import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.BlurRadiusKey
 import com.ruben.spotitube.constants.DisableBlurKey
@@ -331,7 +331,7 @@ fun BottomSheetPlayer(
         }
     }
 
-    val textBackgroundColor = OpenTuneColors.GoldPrimary
+    val textBackgroundColor = ArmoryColors.Gold1
 
     val icBackgroundColor =
         if (playerDesignStyle == PlayerDesignStyle.V7) Color.Black
@@ -1106,7 +1106,7 @@ fun BottomSheetPlayer(
         // --- AQUÍ CERRAMOS EL BOX DEL MAIN PLAYER CONTENIDO ---
         }
 
-        val queueOnBackgroundColor = OpenTuneColors.GoldPrimary
+        val queueOnBackgroundColor = ArmoryColors.Gold1
         val queueSurfaceColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
 
         val (_, _) = when (playerButtonsStyle) {
@@ -1349,9 +1349,7 @@ private fun LittlePlayerContent(
                     ) { title ->
                         Text(
                             text = title,
-                            color = titleColor,
-                            fontSize = titleSize,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.basicMarquee(),
@@ -1368,7 +1366,6 @@ private fun LittlePlayerContent(
                         ) { album ->
                             Text(
                                 text = album,
-                                color = secondaryColor,
                                 style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -1385,7 +1382,6 @@ private fun LittlePlayerContent(
                         ) { artistLine ->
                             Text(
                                 text = "by - $artistLine",
-                                color = secondaryColor,
                                 style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -1399,9 +1395,7 @@ private fun LittlePlayerContent(
 
                 Text(
                     text = timeText,
-                    color = timeColor,
-                    fontSize = timeSize,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.End,
                     maxLines = 1,
                     modifier = Modifier.widthIn(min = (140f * scale).dp),
@@ -1419,7 +1413,7 @@ private fun LittlePlayerContent(
                 Icon(
                     painter = painterResource(R.drawable.expand_more),
                     contentDescription = null,
-                    tint = textColor.copy(alpha = 0.8f),
+                    tint = ArmoryColors.Gold2,
                     modifier =
                         Modifier
                             .size(collapseIconSize)
@@ -1435,9 +1429,7 @@ private fun LittlePlayerContent(
                 Icon(
                     painter = painterResource(if (liked) R.drawable.favorite else R.drawable.favorite_border),
                     contentDescription = null,
-                    tint =
-                        if (liked) MaterialTheme.colorScheme.error.copy(alpha = 0.9f)
-                        else textColor.copy(alpha = 0.78f),
+                    tint = if (liked) ArmoryColors.Gold2 else ArmoryColors.TextMuted,
                     modifier =
                         Modifier
                             .size(iconSize)

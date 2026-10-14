@@ -4,16 +4,13 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.ui.screens.search
-
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,14 +33,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -52,18 +51,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.extensions.togglePlayPause
+import com.ruben.spotitube.innertube.YouTube.SearchFilter.Companion.FILTER_ALBUM
+import com.ruben.spotitube.innertube.YouTube.SearchFilter.Companion.FILTER_ARTIST
+import com.ruben.spotitube.innertube.YouTube.SearchFilter.Companion.FILTER_COMMUNITY_PLAYLIST
+import com.ruben.spotitube.innertube.YouTube.SearchFilter.Companion.FILTER_SONG
+import com.ruben.spotitube.innertube.YouTube.SearchFilter.Companion.FILTER_VIDEO
 import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.innertube.models.ArtistItem
 import com.ruben.spotitube.innertube.models.PlaylistItem
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.YouTubeQueue
+import com.ruben.spotitube.ui.component.ChipsRow
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
@@ -71,7 +76,9 @@ import com.ruben.spotitube.ui.menu.YouTubeArtistMenu
 import com.ruben.spotitube.ui.menu.YouTubePlaylistMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
 import com.ruben.spotitube.viewmodels.OnlineSearchSuggestionViewModel
+import com.ruben.spotitube.viewmodels.OnlineSearchViewModel
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 
 @Composable
 fun OnlineSearchScreen(
@@ -81,6 +88,7 @@ fun OnlineSearchScreen(
     onSearch: (String) -> Unit,
     onDismiss: () -> Unit,
     viewModel: OnlineSearchSuggestionViewModel = hiltViewModel(),
+    onlineSearchViewModel: OnlineSearchViewModel = hiltViewModel(),
 ) {
     val database = LocalDatabase.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -88,13 +96,23 @@ fun OnlineSearchScreen(
     val playerConnection = LocalPlayerConnection.current ?: return
 
     val scope = rememberCoroutineScope()
-
     val haptic = LocalHapticFeedback.current
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val viewState by viewModel.viewState.collectAsState()
+
+    val searchFilter by onlineSearchViewModel.filter.collectAsState()
+    val searchSummary = onlineSearchViewModel.summaryPage
+
+    val itemsPage by remember(searchFilter) {
+        derivedStateOf {
+            searchFilter?.value?.let {
+                onlineSearchViewModel.viewStateMap[it]
+            }
+        }
+    }
 
     val lazyListState = rememberLazyListState()
 
@@ -108,206 +126,216 @@ fun OnlineSearchScreen(
 
     LaunchedEffect(query) {
         viewModel.query.value = query
+        if (query.isNotBlank()) {
+            onlineSearchViewModel.performSearch(query)
+        }
     }
 
-    LazyColumn(
-        state = lazyListState,
-        contentPadding = PaddingValues(top = 8.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .background(Color.Black)
-    ) {
-        items(viewState.history, key = { "history_${it.query}" }) { history ->
-            SuggestionItem(
-                query = history.query,
-                online = false,
-                onClick = {
-                    onSearch(history.query)
-                    onDismiss()
-                },
-                onDelete = {
-                    database.query {
-                        delete(history)
-                    }
-                },
-                onFillTextField = {
-                    onQueryChange(TextFieldValue(history.query, TextRange(history.query.length)))
-                },
-                modifier = Modifier.animateItem()
-            )
-        }
-
-        items(viewState.suggestions, key = { "suggestion_$it" }) { query ->
-            SuggestionItem(
-                query = query,
-                online = true,
-                onClick = {
-                    onSearch(query)
-                    onDismiss()
-                },
-                onFillTextField = {
-                    onQueryChange(TextFieldValue(query, TextRange(query.length)))
-                },
-                modifier = Modifier.animateItem()
-            )
-        }
-
-        if (viewState.items.isNotEmpty() && viewState.history.size + viewState.suggestions.size > 0) {
-            item {
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(3.dp)
-                            .height(16.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        text = stringResource(R.string.top_results),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+    LaunchedEffect(lazyListState) {
+        snapshotFlow {
+            lazyListState.layoutInfo.visibleItemsInfo.any { it.key == "loading" }
+        }.collect { shouldLoadMore ->
+            if (shouldLoadMore && query.isNotBlank()) {
+                onlineSearchViewModel.loadMore()
             }
         }
+    }
 
-        items(viewState.items.distinctBy { it.id }, key = { "item_${it.id}" }) { item ->
-            YouTubeListItem(
-                item = item,
-                isActive = when (item) {
-                    is SongItem -> mediaMetadata?.id == item.id
-                    is AlbumItem -> mediaMetadata?.album?.id == item.id
-                    else -> false
-                },
-                isPlaying = isPlaying,
-                trailingContent = {
-                    IconButton(
-                        onClick = {
-                            menuState.show {
-                                when (item) {
-                                    is SongItem -> YouTubeSongMenu(
-                                        song = item,
-                                        navController = navController,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-                                    is AlbumItem -> YouTubeAlbumMenu(
-                                        albumItem = item,
-                                        navController = navController,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-                                    is ArtistItem -> YouTubeArtistMenu(
-                                        artist = item,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-                                    is PlaylistItem -> YouTubePlaylistMenu(
-                                        playlist = item,
-                                        coroutineScope = scope,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null
-                        )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        // Barra de Filtros por Categoría cuando hay búsqueda activa
+        if (query.isNotBlank()) {
+            ChipsRow(
+                chips = listOf(
+                    null to stringResource(R.string.filter_all),
+                    FILTER_SONG to stringResource(R.string.filter_songs),
+                    FILTER_VIDEO to stringResource(R.string.filter_videos),
+                    FILTER_ALBUM to stringResource(R.string.filter_albums),
+                    FILTER_ARTIST to stringResource(R.string.filter_artists),
+                    FILTER_COMMUNITY_PLAYLIST to stringResource(R.string.filter_community_playlists),
+                ),
+                currentValue = searchFilter,
+                onValueUpdate = { newFilter ->
+                    if (onlineSearchViewModel.filter.value != newFilter) {
+                        onlineSearchViewModel.filter.value = newFilter
+                    }
+                    coroutineScope.launch {
+                        lazyListState.animateScrollToItem(0)
                     }
                 },
-                modifier = Modifier
-                    .combinedClickable(
+                icons = mapOf(
+                    null to R.drawable.search,
+                    FILTER_SONG to R.drawable.music_note,
+                    FILTER_VIDEO to R.drawable.slow_motion_video,
+                    FILTER_ALBUM to R.drawable.album,
+                    FILTER_ARTIST to R.drawable.person,
+                    FILTER_COMMUNITY_PLAYLIST to R.drawable.queue_music,
+                ),
+            )
+        }
+
+        LazyColumn(
+            state = lazyListState,
+            contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp),
+            modifier = Modifier.fillMaxSize().imePadding()
+        ) {
+            if (query.isBlank()) {
+                items(viewState.history, key = { "history_${it.query}" }) { history ->
+                    SuggestionItem(
+                        query = history.query,
+                        online = false,
                         onClick = {
-                            when (item) {
-                                is SongItem -> {
-                                    if (item.id == mediaMetadata?.id) {
-                                        playerConnection.player.togglePlayPause()
-                                    } else {
-                                        playerConnection.playQueue(
-                                            YouTubeQueue.radio(item.toMediaMetadata())
-                                        )
-                                        onDismiss()
-                                    }
-                                }
-
-                                is AlbumItem -> {
-                                    navController.navigate("album/${item.id}")
-                                    onDismiss()
-                                }
-
-                                is ArtistItem -> {
-                                    navController.navigate("artist/${item.id}")
-                                    onDismiss()
-                                }
-
-                                is PlaylistItem -> {
-                                    navController.navigate("online_playlist/${item.id}")
-                                    onDismiss()
-                                }
+                            onSearch(history.query)
+                            onDismiss()
+                        },
+                        onDelete = {
+                            database.query {
+                                delete(history)
                             }
                         },
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            menuState.show {
-                                when (item) {
-                                    is SongItem -> YouTubeSongMenu(
-                                        song = item,
-                                        navController = navController,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
+                        onFillTextField = {
+                            onQueryChange(TextFieldValue(history.query, TextRange(history.query.length)))
+                        },
+                        modifier = Modifier.animateItem()
+                    )
+                }
 
-                                    is AlbumItem -> YouTubeAlbumMenu(
-                                        albumItem = item,
-                                        navController = navController,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-
-                                    is ArtistItem -> YouTubeArtistMenu(
-                                        artist = item,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-
-                                    is PlaylistItem -> YouTubePlaylistMenu(
-                                        playlist = item,
-                                        coroutineScope = coroutineScope,
-                                        onDismiss = {
-                                            menuState.dismiss()
-                                            onDismiss()
-                                        }
-                                    )
-                                }
+                items(viewState.suggestions, key = { "suggestion_$it" }) { q ->
+                    SuggestionItem(
+                        query = q,
+                        online = true,
+                        onClick = {
+                            onSearch(q)
+                            onDismiss()
+                        },
+                        onFillTextField = {
+                            onQueryChange(TextFieldValue(q, TextRange(q.length)))
+                        },
+                        modifier = Modifier.animateItem()
+                    )
+                }
+            } else {
+                // MODO BÚSQUEDA ACTIVADO CON O SIN FILTRO
+                if (searchFilter == null) {
+                    val summaries = searchSummary?.summaries.orEmpty()
+                    summaries.forEachIndexed { index, summary ->
+                        if (index > 0) {
+                            item(key = "divider_$index") {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
                             }
                         }
-                    )
-                    .animateItem()
-            )
+
+                        item(key = "section_header_${summary.title}_$index") {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(3.dp)
+                                        .height(16.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(MaterialTheme.colorScheme.primary)
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    text = summary.title,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+
+                        items(summary.items.distinctBy { it.id }, key = { "sum_${it.id}_$index" }) { item ->
+                            YouTubeListItem(
+                                item = item,
+                                isActive = when (item) {
+                                    is SongItem -> mediaMetadata?.id == item.id
+                                    is AlbumItem -> mediaMetadata?.album?.id == item.id
+                                    else -> false
+                                },
+                                isPlaying = isPlaying,
+                                trailingContent = {
+                                    IconButton(
+                                        onClick = {
+                                            menuState.show {
+                                                when (item) {
+                                                    is SongItem -> YouTubeSongMenu(song = item, navController = navController, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                    is AlbumItem -> YouTubeAlbumMenu(albumItem = item, navController = navController, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                    is ArtistItem -> YouTubeArtistMenu(artist = item, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                    is PlaylistItem -> YouTubePlaylistMenu(playlist = item, coroutineScope = scope, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                }
+                                            }
+                                        }
+                                    ) {
+                                        Icon(painter = painterResource(R.drawable.more_vert), contentDescription = null)
+                                    }
+                                },
+                                modifier = Modifier.clickable {
+                                    when (item) {
+                                        is SongItem -> {
+                                            if (item.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
+                                            else { playerConnection.playQueue(YouTubeQueue.radio(item.toMediaMetadata())); onDismiss() }
+                                        }
+                                        is AlbumItem -> { navController.navigate("album/${item.id}"); onDismiss() }
+                                        is ArtistItem -> { navController.navigate("artist/${item.id}"); onDismiss() }
+                                        is PlaylistItem -> { navController.navigate("online_playlist/${item.id}"); onDismiss() }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                } else {
+                    // MODO FILTRADO (Canciones, Álbumes, Artistas, Listas, Videos)
+                    val filterItems = itemsPage?.items.orEmpty()
+                    items(filterItems.distinctBy { it.id }, key = { "filt_${it.id}" }) { item ->
+                        YouTubeListItem(
+                            item = item,
+                            isActive = when (item) {
+                                is SongItem -> mediaMetadata?.id == item.id
+                                is AlbumItem -> mediaMetadata?.album?.id == item.id
+                                else -> false
+                            },
+                            isPlaying = isPlaying,
+                            trailingContent = {
+                                IconButton(
+                                    onClick = {
+                                        menuState.show {
+                                            when (item) {
+                                                is SongItem -> YouTubeSongMenu(song = item, navController = navController, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                is AlbumItem -> YouTubeAlbumMenu(albumItem = item, navController = navController, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                is ArtistItem -> YouTubeArtistMenu(artist = item, onDismiss = { menuState.dismiss(); onDismiss() })
+                                                is PlaylistItem -> YouTubePlaylistMenu(playlist = item, coroutineScope = scope, onDismiss = { menuState.dismiss(); onDismiss() })
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Icon(painter = painterResource(R.drawable.more_vert), contentDescription = null)
+                                }
+                            },
+                            modifier = Modifier.clickable {
+                                when (item) {
+                                    is SongItem -> {
+                                        if (item.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
+                                        else { playerConnection.playQueue(YouTubeQueue.radio(item.toMediaMetadata())); onDismiss() }
+                                    }
+                                    is AlbumItem -> { navController.navigate("album/${item.id}"); onDismiss() }
+                                    is ArtistItem -> { navController.navigate("artist/${item.id}"); onDismiss() }
+                                    is PlaylistItem -> { navController.navigate("online_playlist/${item.id}"); onDismiss() }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }

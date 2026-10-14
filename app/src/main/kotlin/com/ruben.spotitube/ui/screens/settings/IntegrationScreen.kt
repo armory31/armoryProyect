@@ -13,19 +13,14 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
-import com.ruben.spotitube.ui.component.IconButton
-import com.ruben.spotitube.ui.utils.backToMain
 
 @Composable
 fun IntegrationScreen(
@@ -46,18 +41,8 @@ fun IntegrationScreen(
         )
     }
 
-    TopAppBar(
-        title = { Text(stringResource(R.string.integration)) },
-        navigationIcon = {
-            IconButton(
-                onClick = navController::navigateUp,
-                onLongClick = navController::backToMain
-            ) {
-                Icon(
-                    painterResource(R.drawable.arrow_back),
-                    contentDescription = null
-                )
-            }
-        }
+    ArmoryTopBar(
+        title = stringResource(R.string.integration),
+        onBack = navController::navigateUp
     )
 }

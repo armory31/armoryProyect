@@ -13,6 +13,7 @@ import android.net.ConnectivityManager
 import androidx.datastore.preferences.core.edit
 import androidx.media3.common.PlaybackException
 import com.ruben.spotitube.App
+import com.ruben.spotitube.playback.MusicService
 import com.ruben.spotitube.constants.AudioQuality
 import com.ruben.spotitube.constants.PlayerStreamClient
 import com.ruben.spotitube.constants.YouTubeClientScoresKey
@@ -166,6 +167,28 @@ object YTPlayerUtils {
     fun invalidateCachedStreamUrls(videoId: String) {
         val prefix = "$videoId:"
         streamUrlCache.keys.removeIf { it.startsWith(prefix) }
+    }
+
+    fun resetClientScores() {
+        STREAM_FALLBACK_CLIENTS.forEach { clientScores[it.clientName] = 10 }
+        clientScores[MAIN_CLIENT.clientName] = 10
+        val newJson = getScoresAsJson()
+        lastInitJson = newJson
+        App.instance.applicationScope.launch(Dispatchers.IO) {
+            App.instance.dataStore.edit { settings ->
+                settings[YouTubeClientScoresKey] = newJson
+            }
+        }
+    }
+
+    fun resetForRetry(videoId: String?) {
+        if (!videoId.isNullOrBlank()) {
+            val prefix = "$videoId:"
+            failedStreamClientsUntil.keys.removeIf { it.startsWith(prefix) }
+            invalidateCachedStreamUrls(videoId)
+            MusicService.clearPlaybackCacheAndRecoveryForRetry(videoId)
+        }
+        resetClientScores()
     }
 
     fun markStreamClientFailed(videoId: String, clientKey: String?, httpStatusCode: Int?) {
@@ -326,6 +349,7 @@ object YTPlayerUtils {
                 }
 
         val botDetectedClients = mutableSetOf<String>()
+        val pendingBotPenalties = mutableSetOf<String>()
         var gateFailure: PlaybackGateFailure? = null
 
         for ((index, client) in streamClients.withIndex()) {
@@ -361,7 +385,7 @@ object YTPlayerUtils {
                     "Player response status not OK: ${streamPlayerResponse.playabilityStatus.status}, reason: $reason, loginRecovery: $isLoginRecovery, botDetection: $isBotDetection"
                 )
                 if (isBotDetection) {
-                    updateClientScore(client.clientName, -2)
+                    pendingBotPenalties.add(client.clientName)
                     botDetectedClients.add(client.clientName)
                 } else if (isLoginRecovery) {
                     gateFailure = PlaybackGateFailure(
@@ -389,7 +413,6 @@ object YTPlayerUtils {
 
             for (candidate in candidates.asSequence().take(6)) {
                 if (isLoggedIn && expectedDurationMs != null && isLikelyPreview(candidate, expectedDurationMs)) continue
-                if (shouldSkipCipheredWebCandidate(client, candidate)) continue
                 val cacheKey = buildCacheKey(videoId, candidate.itag)
                 val cached = streamUrlCache[cacheKey]
                 val candidateUrl =
@@ -417,6 +440,9 @@ object YTPlayerUtils {
             val valid = validateStatus(streamUrl, client.userAgent)
             if (valid) {
                 Timber.tag(LOG_TAG).i("Stream validated successfully with client: ${client.clientName}")
+                for (failedClient in pendingBotPenalties) {
+                    updateClientScore(failedClient, -2)
+                }
                 updateClientScore(client.clientName, 1)
                 break
             }
@@ -611,24 +637,6 @@ object YTPlayerUtils {
     private fun extractCodec(mimeType: String): String? {
         val match = Regex("""codecs="([^"]+)"""").find(mimeType) ?: return null
         return match.groupValues.getOrNull(1)?.split(",")?.firstOrNull()?.trim()
-    }
-
-    private fun isCipheredFormat(format: PlayerResponse.StreamingData.Format): Boolean {
-        return format.url == null && (format.signatureCipher != null || format.cipher != null)
-    }
-
-    private fun shouldSkipCipheredWebCandidate(
-        client: YouTubeClient,
-        format: PlayerResponse.StreamingData.Format,
-    ): Boolean {
-        if (!YouTube.webClientPoTokenEnabled) return false
-        if (!StreamClientUtils.isWebClient(client.clientName)) return false
-        if (!isCipheredFormat(format)) return false
-
-        Timber.tag(LOG_TAG).w(
-            "Skipping ciphered ${client.clientName} stream candidate while Web PoToken is enabled; using a direct URL or fallback client instead"
-        )
-        return true
     }
 
     private fun codecRank(codec: String?): Int =

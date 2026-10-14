@@ -196,7 +196,7 @@ fun LibraryMixScreen(
                     title = likedPlaylist.playlist.name,
                     iconRes = R.drawable.favorite,
                     route = "auto_playlist/liked",
-                    accentColor = ArmoryColors.CopperAccent,
+                    accentColor = ArmoryColors.Copper2,
                 ),
             )
         }
@@ -207,7 +207,7 @@ fun LibraryMixScreen(
                     title = downloadPlaylist.playlist.name,
                     iconRes = R.drawable.offline,
                     route = "auto_playlist/downloaded",
-                    accentColor = ArmoryColors.SilverAccent,
+                    accentColor = ArmoryColors.Silver2,
                 ),
             )
         }
@@ -229,7 +229,7 @@ fun LibraryMixScreen(
                     title = topPlaylist.playlist.name,
                     iconRes = R.drawable.trending_up,
                     route = "top_playlist/$topSize",
-                    accentColor = ArmoryColors.GoldPrimary,
+                    accentColor = ArmoryColors.Gold1,
                 ),
             )
         }

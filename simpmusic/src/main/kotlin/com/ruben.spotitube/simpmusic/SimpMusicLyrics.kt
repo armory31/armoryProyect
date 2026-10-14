@@ -9,6 +9,7 @@
 package com.ruben.spotitube.simpmusic
 
 import com.ruben.spotitube.simpmusic.models.LyricsData
+import com.ruben.spotitube.simpmusic.utils.runCatchingCancellable
 import com.ruben.spotitube.simpmusic.models.SimpMusicApiResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -56,7 +57,7 @@ object SimpMusicLyrics {
         }
     }
 
-    suspend fun getLyricsByVideoId(videoId: String): List<LyricsData> = runCatching {
+    suspend fun getLyricsByVideoId(videoId: String): List<LyricsData> = runCatchingCancellable {
         val response = client.get(BASE_URL + videoId)
         
         if (response.status == HttpStatusCode.OK) {

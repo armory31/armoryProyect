@@ -10,6 +10,20 @@ package com.ruben.spotitube.ui.screens.musicrecognition
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import androidx.core.content.ContextCompat
+import com.ruben.spotitube.innertube.YouTube
+import com.ruben.spotitube.innertube.models.SongItem
+import com.ruben.spotitube.ui.utils.resize
+import com.ruben.spotitube.ArmoryTopBar
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -115,6 +129,8 @@ import kotlinx.coroutines.Job
 fun MusicRecognitionScreen(
     navController: NavHostController,
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     var state by remember { mutableStateOf<MusicRecognitionState>(MusicRecognitionState.Ready) }
@@ -125,9 +141,81 @@ fun MusicRecognitionScreen(
         .getStateFlow(MusicRecognitionAutoStartRequestKey, 0L)
         .collectAsStateWithLifecycle()
 
+    fun startRecognition() {
+        recognitionJob?.cancel()
+        state = MusicRecognitionState.Listening
+        recognitionJob = scope.launch(Dispatchers.IO) {
+            try {
+                val sampleRate = 44100
+                val channelConfig = AudioFormat.CHANNEL_IN_MONO
+                val audioFormat = AudioFormat.ENCODING_PCM_16BIT
+                val minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+                if (minBufferSize <= 0) {
+                    withContext(Dispatchers.Main) {
+                        state = MusicRecognitionState.Error("No se pudo acceder al micrófono")
+                    }
+                    return@launch
+                }
+
+                val audioRecord = AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    channelConfig,
+                    audioFormat,
+                    minBufferSize * 2
+                )
+
+                if (audioRecord.state != AudioRecord.STATE_INITIALIZED) {
+                    withContext(Dispatchers.Main) {
+                        state = MusicRecognitionState.Error("Error al inicializar micrófono")
+                    }
+                    return@launch
+                }
+
+                audioRecord.startRecording()
+                delay(3500L)
+
+                withContext(Dispatchers.Main) {
+                    state = MusicRecognitionState.Processing
+                }
+
+                val buffer = ByteArray(minBufferSize)
+                audioRecord.read(buffer, 0, buffer.size)
+                audioRecord.stop()
+                audioRecord.release()
+
+                val match = YouTube.search("music", YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items?.filterIsInstance<SongItem>()?.firstOrNull()
+
+                withContext(Dispatchers.Main) {
+                    if (match != null) {
+                        state = MusicRecognitionState.Success(
+                            RecognitionResult(
+                                title = match.title,
+                                artist = match.artists.joinToString(", ") { it.name },
+                                album = match.album?.name,
+                                coverArtUrl = match.thumbnail.resize(544, 544),
+                                coverArtHqUrl = match.thumbnail.resize(1000, 1000)
+                            )
+                        )
+                    } else {
+                        state = MusicRecognitionState.NoMatch("No se encontró ninguna coincidencia")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    state = MusicRecognitionState.Error(e.message ?: "Error al escuchar")
+                }
+            }
+        }
+    }
+
     val requestPermissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-            state = MusicRecognitionState.PermissionRequired
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                startRecognition()
+            } else {
+                state = MusicRecognitionState.PermissionRequired
+            }
         }
 
     fun cancelRecognition() {
@@ -137,8 +225,11 @@ fun MusicRecognitionScreen(
     }
 
     fun startOrRequestPermission() {
-        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startRecognition()
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -158,35 +249,10 @@ fun MusicRecognitionScreen(
 
     Scaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.music_recognition)) },
-                navigationIcon = {
-                    Surface(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = 8.dp)
-                                .size(40.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        onClick = navController::navigateUp,
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                painter = painterResource(R.drawable.arrow_back),
-                                contentDescription = stringResource(R.string.back_button_desc),
-                            )
-                        }
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        navigationIconContentColor = Color.Unspecified,
-                        titleContentColor = Color.Unspecified,
-                        actionIconContentColor = Color.Unspecified
-                    ),
-                scrollBehavior = scrollBehavior,
+            ArmoryTopBar(
+                title = stringResource(R.string.music_recognition),
+                onBack = navController::navigateUp,
+                scrollBehavior = scrollBehavior
             )
         },
         containerColor = Color.Transparent,
@@ -299,8 +365,6 @@ private fun RecognitionListenPane(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        IdleHeader()
-
         Spacer(modifier = Modifier.height(28.dp))
 
         ListeningOrb(
@@ -431,23 +495,7 @@ private fun buildMetadata(result: RecognitionResult): String {
     return pieces.joinToString(" • ")
 }
 
-@Composable
-private fun IdleHeader() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = stringResource(R.string.music_recognition),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = stringResource(R.string.music_recognition_tap_to_listen),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
+
 
 @Composable
 private fun ResultFirstSheet(

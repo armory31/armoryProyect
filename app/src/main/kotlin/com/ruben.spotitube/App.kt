@@ -36,9 +36,6 @@ import com.ruben.spotitube.constants.DataSyncIdKey
 import com.ruben.spotitube.constants.InnerTubeCookieKey
 import com.ruben.spotitube.constants.LanguageCodeToName
 import com.ruben.spotitube.constants.MaxImageCacheSizeKey
-import com.ruben.spotitube.constants.PoTokenGvsKey
-import com.ruben.spotitube.constants.PoTokenKey
-import com.ruben.spotitube.constants.PoTokenPlayerKey
 import com.ruben.spotitube.constants.ProxyEnabledKey
 import com.ruben.spotitube.constants.ProxyTypeKey
 import com.ruben.spotitube.constants.ProxyUrlKey
@@ -47,7 +44,6 @@ import com.ruben.spotitube.constants.SmartTrimmerKey
 import com.ruben.spotitube.constants.StreamBypassProxyKey
 import com.ruben.spotitube.constants.UseLoginForBrowse
 import com.ruben.spotitube.constants.VisitorDataKey
-import com.ruben.spotitube.constants.WebClientPoTokenEnabledKey
 import com.ruben.spotitube.constants.YouTubeClientScoresKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.extensions.toEnum
@@ -98,7 +94,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             .setWorkerFactory(workerFactory)
             .build()
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    internal val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized = _isInitialized.asStateFlow()
     private val didRunImageCacheTrim = AtomicBoolean(false)
@@ -195,17 +191,13 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
 
                     // YT Settings
                     YouTube.useLoginForBrowse = prefs[UseLoginForBrowse] != false
-                    YouTube.visitorData = prefs[VisitorDataKey]?.takeIf { it != "null" } ?: YouTube.visitorData
+                    YouTube.visitorData = prefs[VisitorDataKey]?.takeIf { it.isNotBlank() && it != "null" } ?: YouTube.visitorData
                     YouTube.dataSyncId = prefs[DataSyncIdKey]?.let {
                         it.takeIf { !it.contains("||") }
                             ?: it.takeIf { it.endsWith("||") }?.substringBefore("||")
                             ?: it.substringAfter("||")
                     }
                     YouTube.cookie = prefs[InnerTubeCookieKey]
-                    YouTube.webClientPoTokenEnabled = prefs[WebClientPoTokenEnabledKey] ?: false
-                    YouTube.poToken = prefs[PoTokenKey]?.takeIf { it.isNotBlank() }
-                    YouTube.poTokenGvs = prefs[PoTokenGvsKey]?.takeIf { it.isNotBlank() }
-                    YouTube.poTokenPlayer = prefs[PoTokenPlayerKey]?.takeIf { it.isNotBlank() }
                     
                     val scoresJson = prefs[YouTubeClientScoresKey]
                     if (scoresJson != null) {
@@ -226,7 +218,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
                 .map { it[VisitorDataKey] }
                 .distinctUntilChanged()
                 .collect { visitorData ->
-                    if (visitorData == null || visitorData == "null") {
+                    if (visitorData.isNullOrBlank() || visitorData == "null") {
                         YouTube.visitorData().onSuccess { newVisitorData ->
                             dataStore.edit { settings ->
                                 settings[VisitorDataKey] = newVisitorData
@@ -314,7 +306,6 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             CoroutineScope(Dispatchers.IO).launch {
                 context.dataStore.edit { settings ->
                     settings.remove(InnerTubeCookieKey)
-                    settings.remove(PoTokenKey)
                     settings.remove(VisitorDataKey)
                     settings.remove(DataSyncIdKey)
                     settings.remove(AccountNameKey)

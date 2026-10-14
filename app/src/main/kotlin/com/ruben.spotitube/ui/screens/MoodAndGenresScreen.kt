@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -44,11 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.google.firebase.auth.FirebaseAuth
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.AppTypography
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.OpenTuneHeader
+import com.ruben.spotitube.ArmoryHeader
+import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.R
 import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.component.shimmer.ShimmerHost
@@ -69,8 +68,7 @@ fun MoodAndGenresScreen(
     val scrollToTop =
         backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
 
-    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
-    val avatarUrl = currentUser?.photoUrl?.toString()
+    val avatarUrl = rememberAvatarUrl()
 
     LaunchedEffect(scrollToTop?.value) {
         if (scrollToTop?.value == true) {
@@ -82,7 +80,7 @@ fun MoodAndGenresScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        OpenTuneHeader(
+        ArmoryHeader(
             avatarUrl = avatarUrl,
             onSettings = { navController.navigate("account") }
         )
@@ -100,13 +98,6 @@ fun MoodAndGenresScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                NavigationTitle(
-                    title = stringResource(R.string.mood_and_genres),
-                    modifier = Modifier.animateItem(),
-                )
-            }
-
             if (moodAndGenres == null) {
                 items(12) {
                     ShimmerHost {
@@ -185,7 +176,7 @@ fun MoodAndGenresButton(
             style = AppTypography.titleMedium.copy(
                 fontWeight = FontWeight.Bold
             ),
-            color = ArmoryColors.TextPrimary,
+            color = ArmoryColors.TextGold,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )

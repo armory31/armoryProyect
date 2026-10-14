@@ -10,6 +10,7 @@ package com.ruben.spotitube.innertube.pages
 
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.YouTubeClient
+import com.ruben.spotitube.innertube.utils.runCatchingCancellable
 import com.ruben.spotitube.innertube.models.response.PlayerResponse
 import io.ktor.http.URLBuilder
 import io.ktor.http.parseQueryString
@@ -115,7 +116,7 @@ object NewPipeUtils {
                 url.toString()
             }
 
-            val resolvedUrl = runCatching {
+            runCatchingCancellable {
                 retryWithBackoff(
                     maxAttempts = 3,
                     initialDelayMs = 250L,
@@ -124,8 +125,6 @@ object NewPipeUtils {
                     YoutubeJavaScriptPlayerManager.getUrlWithThrottlingParameterDeobfuscated(videoId, url)
                 }
             }.getOrElse { url }
-
-            YouTube.appendGvsPoToken(resolvedUrl, client)
         }
 
     private inline fun <T> retryWithBackoff(

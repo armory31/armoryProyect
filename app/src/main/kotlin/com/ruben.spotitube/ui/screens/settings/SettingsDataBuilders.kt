@@ -135,16 +135,6 @@ fun buildSettingsGroups(
                     )
                     add(
                         SettingsItem(
-                            icon = painterResource(R.drawable.link),
-                            title = "Configurar PO Token",
-                            subtitle = "Token de origen obligatorio de YouTube",
-                            accentColor = MaterialTheme.colorScheme.primary,
-                            keywords = listOf("po_token", "youtube", "token", "origin", "fix"),
-                            onClick = { resetSearch(); navController.navigate("settings/po_token") },
-                        ),
-                    )
-                    add(
-                        SettingsItem(
                             icon = painterResource(R.drawable.update),
                             title = stringResource(R.string.updates),
                             subtitle = if (hasUpdate) {
@@ -162,16 +152,7 @@ fun buildSettingsGroups(
                             onClick = { resetSearch(); navController.navigate("settings/update") },
                         ),
                     )
-                    add(
-                        SettingsItem(
-                            icon = painterResource(R.drawable.info),
-                            title = stringResource(R.string.about),
-                            subtitle = "ARMORY",
-                            accentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            keywords = listOf("about", "app info", "license", "contributors"),
-                            onClick = { resetSearch(); navController.navigate("settings/about") },
-                        ),
-                    )
+
                 },
             ),
         )

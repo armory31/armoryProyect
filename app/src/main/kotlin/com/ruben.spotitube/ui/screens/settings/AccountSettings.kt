@@ -87,7 +87,6 @@ import com.ruben.spotitube.constants.AccountChannelHandleKey
 import com.ruben.spotitube.constants.AccountNameKey
 import com.ruben.spotitube.constants.DataSyncIdKey
 import com.ruben.spotitube.constants.InnerTubeCookieKey
-import com.ruben.spotitube.constants.PoTokenKey
 import com.ruben.spotitube.constants.SelectedYtmPlaylistsKey
 import com.ruben.spotitube.constants.VisitorDataKey
 import com.ruben.spotitube.innertube.YouTube
@@ -116,7 +115,6 @@ fun AccountSettings(
     val (accountAvatarUriPref) = rememberPreference(AccountAvatarUriKey, "")
     val (accountChannelHandle, onAccountChannelHandleChange) = rememberPreference(AccountChannelHandleKey, "")
     val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
-    val (poToken, onPoTokenChange) = rememberPreference(PoTokenKey, "")
     val (visitorData, onVisitorDataChange) = rememberPreference(VisitorDataKey, "")
     val (dataSyncId, onDataSyncIdChange) = rememberPreference(DataSyncIdKey, "")
 
@@ -211,7 +209,6 @@ fun AccountSettings(
                     accountEmail = accountEmail,
                     accountChannelHandle = accountChannelHandle,
                     onInnerTubeCookieChange = onInnerTubeCookieChange,
-                    onPoTokenChange = onPoTokenChange,
                     onVisitorDataChange = onVisitorDataChange,
                     onDataSyncIdChange = onDataSyncIdChange,
                     onAccountNameChange = onAccountNameChange,
@@ -802,7 +799,6 @@ private fun TokenEditorDialog(
     accountEmail: String,
     accountChannelHandle: String,
     onInnerTubeCookieChange: (String) -> Unit,
-    onPoTokenChange: (String) -> Unit,
     onVisitorDataChange: (String) -> Unit,
     onDataSyncIdChange: (String) -> Unit,
     onAccountNameChange: (String) -> Unit,
@@ -814,7 +810,6 @@ private fun TokenEditorDialog(
         ***INNERTUBE COOKIE*** =$innerTubeCookie
         ***VISITOR DATA*** =$visitorData
         ***DATASYNC ID*** =$dataSyncId
-        ***PO TOKEN*** =${YouTube.poToken.orEmpty()}
         ***ACCOUNT NAME*** =$accountNamePref
         ***ACCOUNT EMAIL*** =$accountEmail
         ***ACCOUNT CHANNEL HANDLE*** =$accountChannelHandle
@@ -823,15 +818,14 @@ private fun TokenEditorDialog(
     TextFieldDialog(
         initialTextFieldValue = TextFieldValue(text),
         onDone = { data ->
-            data.split("\n").forEach {
+            data.split("\n").forEach { line ->
                 when {
-                    it.startsWith("***INNERTUBE COOKIE*** =") -> onInnerTubeCookieChange(it.substringAfter("="))
-                    it.startsWith("***VISITOR DATA*** =") -> onVisitorDataChange(it.substringAfter("="))
-                    it.startsWith("***DATASYNC ID*** =") -> onDataSyncIdChange(it.substringAfter("="))
-                    it.startsWith("***PO TOKEN*** =") -> onPoTokenChange(it.substringAfter("="))
-                    it.startsWith("***ACCOUNT NAME*** =") -> onAccountNameChange(it.substringAfter("="))
-                    it.startsWith("***ACCOUNT EMAIL*** =") -> onAccountEmailChange(it.substringAfter("="))
-                    it.startsWith("***ACCOUNT CHANNEL HANDLE*** =") -> onAccountChannelHandleChange(it.substringAfter("="))
+                    line.startsWith("***INNERTUBE COOKIE*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onInnerTubeCookieChange)
+                    line.startsWith("***VISITOR DATA*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onVisitorDataChange)
+                    line.startsWith("***DATASYNC ID*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onDataSyncIdChange)
+                    line.startsWith("***ACCOUNT NAME*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onAccountNameChange)
+                    line.startsWith("***ACCOUNT EMAIL*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onAccountEmailChange)
+                    line.startsWith("***ACCOUNT CHANNEL HANDLE*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onAccountChannelHandleChange)
                 }
             }
         },

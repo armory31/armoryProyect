@@ -9,6 +9,7 @@
 package com.ruben.spotitube.ui.screens.playlist
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.material3.ButtonDefaults
 
 import android.annotation.SuppressLint
@@ -50,9 +51,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
+import com.ruben.spotitube.SectionHeader
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -770,11 +773,7 @@ fun LocalPlaylistScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     // Song Count
-                                    val songCount = if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null) {
-                                        playlist.playlist.remoteSongCount
-                                    } else {
-                                        playlist.songCount
-                                    }
+                                    val songCount = if (songs.isNotEmpty()) songs.size else (playlist.songCount.takeIf { it > 0 } ?: playlist.playlist.remoteSongCount ?: 0)
                                     MetadataChip(
                                         icon = R.drawable.music_note,
                                         text = pluralStringResource(R.plurals.n_song, songCount, songCount),
@@ -868,7 +867,7 @@ fun LocalPlaylistScreen(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
-                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
+                                            .background(brush = ArmoryGradients.MetallicSilver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.play),
@@ -897,7 +896,7 @@ fun LocalPlaylistScreen(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
-                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
+                                            .background(brush = ArmoryGradients.MetallicSilver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.shuffle),
@@ -945,7 +944,7 @@ fun LocalPlaylistScreen(
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .size(48.dp)
-                                            .background(ArmoryColors.Copper, shape = CircleShape)
+                                            .background(brush = ArmoryGradients.MetallicCopper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -1399,24 +1398,7 @@ fun LocalPlaylistScreen(
             headerItems = headerItems
         )
 
-        // Top App Bar
-        val topAppBarColors = if (transparentAppBar) {
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Transparent,
-                navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                actionIconContentColor = MaterialTheme.colorScheme.onBackground
-            )
-        } else {
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface
-            )
-        }
-
-        TopAppBar(
-            colors = topAppBarColors,
+        ArmoryTopBar(
             title = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
@@ -1431,11 +1413,11 @@ fun LocalPlaylistScreen(
                         placeholder = {
                             Text(
                                 text = stringResource(R.string.search),
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleMedium
                             )
                         },
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.titleLarge,
+                        textStyle = MaterialTheme.typography.titleMedium,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
@@ -1449,39 +1431,31 @@ fun LocalPlaylistScreen(
                             .focusRequester(focusRequester)
                     )
                 } else if (showTopBarTitle) {
-                    Text(playlist?.playlist?.name.orEmpty())
-                }
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = {
-                        if (isSearching) {
-                            isSearching = false
-                            query = TextFieldValue()
-                        } else if (selection) {
-                            selection = false
-                        } else {
-                            navController.navigateUp()
-                        }
-                    },
-                    onLongClick = {
-                        if (!isSearching) {
-                            navController.backToMain()
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (selection) R.drawable.close else R.drawable.arrow_back
-                        ),
-                        contentDescription = null
+                    Text(
+                        text = playlist?.playlist?.name.orEmpty(),
+                        style = MaterialTheme.typography.titleLarge
                     )
                 }
             },
+            onBack = {
+                if (isSearching) {
+                    isSearching = false
+                    query = TextFieldValue()
+                } else if (selection) {
+                    selection = false
+                } else {
+                    navController.navigateUp()
+                }
+            },
+            overImage = transparentAppBar,
             actions = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
-                    IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(
+                            if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all
+                        ),
+                        contentDescription = "Seleccionar",
                         onClick = {
                             if (count == wrappedSongs.size) {
                                 wrappedSongs.forEach { it.isSelected = false }
@@ -1489,17 +1463,12 @@ fun LocalPlaylistScreen(
                                 wrappedSongs.forEach { it.isSelected = true }
                             }
                         },
-                        onLongClick = {}
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all
-                            ),
-                            contentDescription = null
-                        )
-                    }
+                        overImage = transparentAppBar
+                    )
 
-                    IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.more_vert),
+                        contentDescription = "Más",
                         onClick = {
                             menuState.show {
                                 SelectionSongMenu(
@@ -1515,23 +1484,15 @@ fun LocalPlaylistScreen(
                                 )
                             }
                         },
-                        onLongClick = {}
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null
-                        )
-                    }
+                        overImage = transparentAppBar
+                    )
                 } else if (!isSearching) {
-                    IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.search),
+                        contentDescription = "Buscar",
                         onClick = { isSearching = true },
-                        onLongClick = {}
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.search),
-                            contentDescription = null
-                        )
-                    }
+                        overImage = transparentAppBar
+                    )
                 }
             }
         )

@@ -158,13 +158,28 @@ constructor(
                     ),
                 )
 
-                val now = LocalDateTime.now()
+                val existingSong = runBlocking { getSavedSong(mediaId) }
+                val preIsLiked = existingSong?.isLiked ?: false
+                val titleToSave = existingSong?.title?.takeIf { it != "Unknown" && it.isNotBlank() }
+                    ?: playbackData.videoDetails?.title
+                    ?: "Unknown"
+                val durationToSave = existingSong?.duration?.takeIf { it > 0 }
+                    ?: playbackData.videoDetails?.lengthSeconds?.toIntOrNull()
+                    ?: 0
+                val thumbnailToSave = existingSong?.thumbnailUrl?.takeIf { it.isNotBlank() }
+                    ?: playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url
+                val artistToSave = existingSong?.artistName
+                val albumToSave = existingSong?.albumName
+
                 insertSavedSong(
                     SavedSongEntity(
                         id = mediaId,
-                        title = playbackData.videoDetails?.title ?: "Unknown",
-                        duration = playbackData.videoDetails?.lengthSeconds?.toIntOrNull() ?: 0,
-                        thumbnailUrl = playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url
+                        title = titleToSave,
+                        artistName = artistToSave,
+                        albumName = albumToSave,
+                        duration = durationToSave,
+                        thumbnailUrl = thumbnailToSave,
+                        isLiked = preIsLiked
                     )
                 )
             }

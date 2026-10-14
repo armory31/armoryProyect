@@ -18,7 +18,10 @@ data class SavedPlaylistEntity(
     val thumbnailUrl: String? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
-    fun toPlaylist(): Playlist {
+    fun toPlaylist(
+        songCount: Int = 0,
+        songThumbnails: List<String?> = if (thumbnailUrl != null) listOf(thumbnailUrl) else emptyList()
+    ): Playlist {
         val playlistEntity = PlaylistEntity(
             id = id,
             name = name,
@@ -29,8 +32,8 @@ data class SavedPlaylistEntity(
         )
         return Playlist(
             playlist = playlistEntity,
-            songCount = 0,
-            songThumbnails = if (thumbnailUrl != null) listOf(thumbnailUrl) else emptyList()
+            songCount = songCount,
+            songThumbnails = songThumbnails
         )
     }
 

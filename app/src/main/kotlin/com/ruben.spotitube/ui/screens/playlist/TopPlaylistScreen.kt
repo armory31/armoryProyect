@@ -9,6 +9,7 @@
 package com.ruben.spotitube.ui.screens.playlist
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.material3.ButtonDefaults
 
 import androidx.activity.compose.BackHandler
@@ -44,8 +45,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -110,7 +109,10 @@ import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.DraggableScrollbar
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
-import com.ruben.spotitube.ui.component.IconButton
+import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.ArmoryIcon
+import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.SortHeader
@@ -590,7 +592,7 @@ fun TopPlaylistScreen(
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .size(48.dp)
-                                            .background(ArmoryColors.Copper, shape = CircleShape)
+                                            .background(brush = ArmoryGradients.MetallicCopper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -643,7 +645,7 @@ fun TopPlaylistScreen(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
-                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
+                                            .background(brush = ArmoryGradients.MetallicSilver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.play),
@@ -672,7 +674,7 @@ fun TopPlaylistScreen(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(48.dp)
-                                            .background(ArmoryColors.Silver, shape = RoundedCornerShape(24.dp))
+                                            .background(brush = ArmoryGradients.MetallicSilver, shape = RoundedCornerShape(24.dp))
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.shuffle),
@@ -693,7 +695,7 @@ fun TopPlaylistScreen(
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .size(48.dp)
-                                            .background(ArmoryColors.Copper, shape = CircleShape)
+                                            .background(brush = ArmoryGradients.MetallicCopper, shape = CircleShape)
                                     ) {
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
@@ -819,11 +821,7 @@ fun TopPlaylistScreen(
             headerItems = headerItems
         )
 
-        TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = if (transparentAppBar) Color.Transparent else MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface
-            ),
+        ArmoryTopBar(
             title = {
                 when {
                     selection -> {
@@ -840,11 +838,11 @@ fun TopPlaylistScreen(
                             placeholder = {
                                 Text(
                                     text = stringResource(R.string.search),
-                                    style = MaterialTheme.typography.titleLarge
+                                    style = MaterialTheme.typography.titleMedium
                                 )
                             },
                             singleLine = true,
-                            textStyle = MaterialTheme.typography.titleLarge,
+                            textStyle = MaterialTheme.typography.titleMedium,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.Transparent,
@@ -866,41 +864,30 @@ fun TopPlaylistScreen(
                     }
                 }
             },
-            navigationIcon = {
-                IconButton(
-                    onClick = {
-                        when {
-                            isSearching -> {
-                                isSearching = false
-                                query = TextFieldValue()
-                                focusManager.clearFocus()
-                            }
-                            selection -> {
-                                selection = false
-                            }
-                            else -> {
-                                navController.navigateUp()
-                            }
-                        }
-                    },
-                    onLongClick = {
-                        if (!isSearching && !selection) {
-                            navController.backToMain()
-                        }
+            onBack = {
+                when {
+                    isSearching -> {
+                        isSearching = false
+                        query = TextFieldValue()
+                        focusManager.clearFocus()
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (selection) R.drawable.close else R.drawable.arrow_back
-                        ),
-                        contentDescription = null
-                    )
+                    selection -> {
+                        selection = false
+                    }
+                    else -> {
+                        navController.navigateUp()
+                    }
                 }
             },
+            overImage = transparentAppBar,
             actions = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
-                    androidx.compose.material3.IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(
+                            if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all
+                        ),
+                        contentDescription = "Seleccionar",
                         onClick = {
                             if (count == wrappedSongs.size) {
                                 wrappedSongs.forEach { it.isSelected = false }
@@ -908,16 +895,12 @@ fun TopPlaylistScreen(
                                 wrappedSongs.forEach { it.isSelected = true }
                             }
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (count == wrappedSongs.size) R.drawable.deselect else R.drawable.select_all
-                            ),
-                            contentDescription = null
-                        )
-                    }
+                        overImage = transparentAppBar
+                    )
 
-                    androidx.compose.material3.IconButton(
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.more_vert),
+                        contentDescription = "Más",
                         onClick = {
                             menuState.show {
                                 SelectionSongMenu(
@@ -928,21 +911,15 @@ fun TopPlaylistScreen(
                                 )
                             }
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null
-                        )
-                    }
+                        overImage = transparentAppBar
+                    )
                 } else if (!isSearching) {
-                    androidx.compose.material3.IconButton(
-                        onClick = { isSearching = true }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.search),
-                            contentDescription = null
-                        )
-                    }
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.search),
+                        contentDescription = "Buscar",
+                        onClick = { isSearching = true },
+                        overImage = transparentAppBar
+                    )
                 }
             }
         )
