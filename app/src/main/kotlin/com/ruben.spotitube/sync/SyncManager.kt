@@ -113,7 +113,7 @@ class SyncManager @Inject constructor(
                 if (refetched != null && refetched.duration > 0) {
                     duration = refetched.duration
                     database.insert(refetched)
-                    database.insertSavedSong(s.copy(duration = duration))
+                    database.upsertSongPreservingUsage(s.copy(duration = duration))
                 }
             }
             val songWithArtists = database.getSongById(s.id)
@@ -261,6 +261,7 @@ class SyncManager @Inject constructor(
                         albumId = sDto.albumId,
                         albumName = sDto.albumName,
                         savedAt = LocalDateTime.ofEpochSecond(sDto.savedAt, 0, ZoneOffset.UTC),
+                        isLiked = true,
                     ),
                 )
             }
@@ -699,6 +700,7 @@ class SyncManager @Inject constructor(
                     albumId = sDto.albumId,
                     albumName = sDto.albumName,
                     savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
+                    isLiked = true,
                 )
             )
         }
@@ -745,6 +747,7 @@ class SyncManager @Inject constructor(
                         id = sDto.id,
                         title = sDto.title,
                         thumbnailUrl = sDto.thumbnailUrl,
+                        isLiked = true,
                     )
                 )
                 if (database.checkInPlaylist(pDto.id, sDto.id) == 0) {
@@ -839,7 +842,7 @@ class SyncManager @Inject constructor(
     suspend fun toggleLike(song: SavedSongEntity) = withContext(Dispatchers.IO) {
         val existingSaved = database.getSavedSong(song.id)
         if (existingSaved != null) {
-            database.deleteSavedSong(song.id)
+            database.updateIsLiked(song.id, !existingSaved.isLiked)
         } else {
             val songWithArtists = database.getSongById(song.id)
             val artist = songWithArtists?.artists?.firstOrNull() ?: database.songArtistMap(song.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
@@ -854,6 +857,7 @@ class SyncManager @Inject constructor(
                     albumId = song.albumId,
                     albumName = song.albumName,
                     explicit = song.explicit,
+                    isLiked = true,
                 ),
             )
         }

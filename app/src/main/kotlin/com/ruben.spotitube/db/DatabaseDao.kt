@@ -29,7 +29,6 @@ import com.ruben.spotitube.db.entities.AlbumArtistMap
 import com.ruben.spotitube.db.entities.AlbumWithSongs
 import com.ruben.spotitube.db.entities.Artist
 import com.ruben.spotitube.db.entities.Event
-import com.ruben.spotitube.db.entities.EventWithSong
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
@@ -680,9 +679,7 @@ interface DatabaseDao {
         previewSize: Int = Int.MAX_VALUE,
     ): Flow<List<Playlist>> = playlistsWithMetadata().map { list -> list.filter { it.playlist.name.contains(query, ignoreCase = true) }.take(previewSize) }
 
-    fun events(): Flow<List<EventWithSong>> = historySongsWithMetadata()
-
-    fun firstEvent(): Flow<EventWithSong?> = historySongsWithMetadata().map { it.lastOrNull() }
+    fun firstEvent(): Flow<HistorySongEntity?> = allHistorySongs().map { it.lastOrNull() }
 
     fun clearListenHistory() {}
 
@@ -743,11 +740,91 @@ interface DatabaseDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(playCountEntity: PlayCountEntity): Long
 
+    @Query("""
+        UPDATE savedsong 
+        SET title = :title,
+            artistId = COALESCE(:artistId, artistId),
+            artistName = COALESCE(:artistName, artistName),
+            duration = CASE WHEN :duration > 0 THEN :duration ELSE duration END,
+            thumbnailUrl = COALESCE(:thumbnailUrl, thumbnailUrl),
+            albumId = COALESCE(:albumId, albumId),
+            albumName = COALESCE(:albumName, albumName),
+            explicit = :explicit,
+            year = COALESCE(:year, year)
+        WHERE id = :id
+    """)
+    fun updateSongMetadataOnly(
+        id: String,
+        title: String,
+        artistId: String?,
+        artistName: String?,
+        duration: Int,
+        thumbnailUrl: String?,
+        albumId: String?,
+        albumName: String?,
+        explicit: Boolean,
+        year: Int?
+    )
+
+    @Query("SELECT * FROM savedsong WHERE id = :songId")
+    fun getSavedSongDirect(songId: String): SavedSongEntity?
+
+    @Query("UPDATE savedsong SET isLiked = :isLiked WHERE id = :id")
+    fun updateIsLiked(id: String, isLiked: Boolean)
+
+    @Transaction
+    fun insertOrUpdateDownload(
+        mediaId: String,
+        title: String,
+        artistName: String?,
+        duration: Int,
+        thumbnailUrl: String?,
+        downloadDate: LocalDateTime = LocalDateTime.now()
+    ) {
+        val existing = getSavedSongDirect(mediaId)
+        if (existing != null) {
+            updateDownloadDate(mediaId, downloadDate)
+        } else {
+            insertSavedSong(
+                SavedSongEntity(
+                    id = mediaId,
+                    title = title,
+                    artistName = artistName,
+                    duration = duration,
+                    thumbnailUrl = thumbnailUrl,
+                    dateDownload = downloadDate,
+                    isLiked = false
+                )
+            )
+        }
+    }
+
+    @Transaction
+    fun upsertSongPreservingUsage(song: SavedSongEntity) {
+        val existing = getSavedSongDirect(song.id)
+        if (existing == null) {
+            insertSavedSong(song)
+        } else {
+            updateSongMetadataOnly(
+                id = song.id,
+                title = song.title,
+                artistId = song.artistId,
+                artistName = song.artistName,
+                duration = song.duration,
+                thumbnailUrl = song.thumbnailUrl,
+                albumId = song.albumId,
+                albumName = song.albumName,
+                explicit = song.explicit,
+                year = song.year
+            )
+        }
+    }
+
     @Transaction
     fun insert(
         mediaMetadata: MediaMetadata,
     ) {
-        insertSavedSong(mediaMetadata.toSavedSongEntity())
+        upsertSongPreservingUsage(mediaMetadata.toSavedSongEntity())
 
         if (mediaMetadata.setVideoId != null) {
             insert(
@@ -951,6 +1028,9 @@ interface DatabaseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSavedSong(song: SavedSongEntity)
 
+    @Query("UPDATE savedsong SET dateDownload = :downloadDate WHERE id = :songId")
+    fun updateDownloadDate(songId: String, downloadDate: LocalDateTime = LocalDateTime.now())
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSavedSongs(songs: List<SavedSongEntity>)
 
@@ -1023,28 +1103,6 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
     fun allHistorySongs(): Flow<List<HistorySongEntity>>
-
-    fun historySongsWithMetadata(): Flow<List<EventWithSong>> = allHistorySongs().map { historyList ->
-        historyList.mapNotNull { historySong ->
-            val savedSong = getSavedSong(historySong.songId)
-            val songObj = savedSong?.toSong() ?: getSongById(historySong.songId)
-            if (songObj != null) {
-                val timestamp = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(historySong.playedAt),
-                    ZoneId.systemDefault()
-                )
-                EventWithSong(
-                    event = Event(
-                        id = historySong.playedAt,
-                        songId = historySong.songId,
-                        timestamp = timestamp,
-                        playTime = historySong.playTimeMs
-                    ),
-                    song = songObj
-                )
-            } else null
-        }
-    }.flowOn(Dispatchers.IO)
 
     @Query("SELECT * FROM historialartist ORDER BY playedAt DESC")
     fun allHistoryArtists(): Flow<List<HistoryArtistEntity>>

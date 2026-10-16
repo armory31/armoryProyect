@@ -60,6 +60,7 @@ import com.ruben.spotitube.utils.get
 import com.ruben.spotitube.utils.reportException
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -94,7 +95,10 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             .setWorkerFactory(workerFactory)
             .build()
 
-    internal val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val appExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Timber.e(throwable, "Unhandled exception in applicationScope")
+    }
+    internal val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main + appExceptionHandler)
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized = _isInitialized.asStateFlow()
     private val didRunImageCacheTrim = AtomicBoolean(false)

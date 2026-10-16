@@ -1,25 +1,3 @@
-/*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
- * Licensed Under GPL-3.0 | see git history for contributors
- */
-
-
-
 package com.ruben.spotitube.db.entities
 
-import androidx.compose.runtime.Immutable
-import androidx.room.Embedded
-import androidx.room.Relation
-
-@Immutable
-data class EventWithSong(
-    @Embedded
-    val event: Event,
-    @Relation(
-        entity = SavedSongEntity::class,
-        parentColumn = "songId",
-        entityColumn = "id",
-    )
-    val song: Song,
-)
+// EventWithSong removed as part of Phase 2 History Decoupling

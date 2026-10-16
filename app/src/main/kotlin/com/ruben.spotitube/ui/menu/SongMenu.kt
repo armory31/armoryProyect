@@ -232,7 +232,7 @@ fun SongMenu(
 
                 coroutineScope.launch {
                     database.query {
-                        insertSavedSong(song.toSavedSongEntity().copy(title = newTitle))
+                        upsertSongPreservingUsage(song.toSavedSongEntity().copy(title = newTitle))
                         val artist = song.artists.firstOrNull()
                         if (artist != null) {
                             insertSavedArtist(

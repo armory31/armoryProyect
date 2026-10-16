@@ -27,7 +27,7 @@ data class SavedSongEntity(
     @ColumnInfo(name = "isLocal", defaultValue = "0")
     val isLocal: Boolean = false,
     @ColumnInfo(name = "isLiked", defaultValue = "1")
-    val isLiked: Boolean = true,
+    val isLiked: Boolean = false,
     val bookmarkedAt: LocalDateTime? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {

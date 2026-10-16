@@ -370,7 +370,7 @@ fun SelectionSongMenu(
                         } else {
                             songSelection.forEach { song ->
                                 // Asegurarse de que esté en la DB local antes de sincronizar
-                                database.insertSavedSong(song.toMediaMetadata().toSavedSongEntity())
+                                database.upsertSongPreservingUsage(song.toMediaMetadata().toSavedSongEntity())
                                 if (song.id !in libraryStateHolder.savedSongIds.first()) {
                                     syncManager.toggleLike(song.song)
                                 }
@@ -545,7 +545,7 @@ fun SelectionMediaMetadataMenu(
         isVisible = showChoosePlaylistDialog,
         onGetSong = {
             songSelection.map {
-                database.insertSavedSong(it.toSavedSongEntity())
+                database.upsertSongPreservingUsage(it.toSavedSongEntity())
                 it.id
             }
         },

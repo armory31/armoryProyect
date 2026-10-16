@@ -21,6 +21,7 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
+import com.ruben.spotitube.App
 import com.ruben.spotitube.constants.AudioQuality
 import com.ruben.spotitube.constants.AudioQualityKey
 import com.ruben.spotitube.constants.NetworkMeteredKey
@@ -117,7 +118,7 @@ constructor(
             val mediaId = dataSpec.key ?: error("No media id")
             val length = if (dataSpec.length >= 0) dataSpec.length else 1
             if (playerCache.cacheSpace > 500 * 1024 * 1024L) {
-                kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+                App.instance.applicationScope.launch(Dispatchers.IO) {
                     playerCache.keys.shuffled().take(10).forEach { key ->
                         playerCache.getCachedSpans(key).sumOf { it.length }
                     }
@@ -158,29 +159,16 @@ constructor(
                     ),
                 )
 
-                val existingSong = runBlocking { getSavedSong(mediaId) }
-                val preIsLiked = existingSong?.isLiked ?: false
-                val titleToSave = existingSong?.title?.takeIf { it != "Unknown" && it.isNotBlank() }
-                    ?: playbackData.videoDetails?.title
-                    ?: "Unknown"
-                val durationToSave = existingSong?.duration?.takeIf { it > 0 }
-                    ?: playbackData.videoDetails?.lengthSeconds?.toIntOrNull()
-                    ?: 0
-                val thumbnailToSave = existingSong?.thumbnailUrl?.takeIf { it.isNotBlank() }
-                    ?: playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url
-                val artistToSave = existingSong?.artistName
-                val albumToSave = existingSong?.albumName
+                val titleToSave = playbackData.videoDetails?.title ?: "Unknown"
+                val durationToSave = playbackData.videoDetails?.lengthSeconds?.toIntOrNull() ?: 0
+                val thumbnailToSave = playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url
 
-                insertSavedSong(
-                    SavedSongEntity(
-                        id = mediaId,
-                        title = titleToSave,
-                        artistName = artistToSave,
-                        albumName = albumToSave,
-                        duration = durationToSave,
-                        thumbnailUrl = thumbnailToSave,
-                        isLiked = preIsLiked
-                    )
+                insertOrUpdateDownload(
+                    mediaId = mediaId,
+                    title = titleToSave,
+                    artistName = playbackData.videoDetails?.author,
+                    duration = durationToSave,
+                    thumbnailUrl = thumbnailToSave
                 )
             }
 
@@ -220,7 +208,7 @@ constructor(
         }
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
+        App.instance.applicationScope.launch(Dispatchers.IO) {
             val result = mutableMapOf<String, Download>()
             downloadManager.downloadIndex.getDownloads().use { cursor ->
                 while (cursor.moveToNext()) {

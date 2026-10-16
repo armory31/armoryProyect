@@ -358,7 +358,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun songLoad() {
-        val song = database.historySongsWithMetadata().first().firstOrNull()?.song
+        val lastHistory = database.allHistorySongs().first().firstOrNull()
+        val song = lastHistory?.let { database.getSavedSong(it.songId)?.toSong() }
         if (song != null) {
             if (database.hasRelatedSongs(song.id).first()) {
                 val relatedSongs = database.getRelatedSongs(song.id).first().shuffled().take(20)
@@ -415,10 +416,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             database.firstEvent().collect { firstEvent ->
                 if (firstEvent != null) {
-                    val firstEventMs = firstEvent.event.timestamp
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()
+                    val firstEventMs = firstEvent.playedAt
                     val daysElapsed = ((System.currentTimeMillis() - firstEventMs) / (1000L * 60 * 60 * 24)).toInt()
                     forgottenFavoritesDaysRemaining.value = (30 - daysElapsed).coerceAtLeast(0)
                 } else {

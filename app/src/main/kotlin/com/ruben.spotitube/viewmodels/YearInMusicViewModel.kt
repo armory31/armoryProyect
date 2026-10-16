@@ -44,7 +44,7 @@ constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val availableYears = firstEvent.map { event ->
-        val startYear = event?.event?.timestamp?.year ?: LocalDateTime.now().year
+        val startYear = event?.playedAt?.let { LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(it), java.time.ZoneId.systemDefault()).year } ?: LocalDateTime.now().year
         val currentYear = LocalDateTime.now().year
         (currentYear downTo startYear).toList()
     }.stateIn(viewModelScope, SharingStarted.Lazily, listOf(LocalDateTime.now().year))

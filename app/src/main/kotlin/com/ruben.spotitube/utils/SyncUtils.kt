@@ -196,11 +196,12 @@ class SyncUtils @Inject constructor(
                     if (!isSyncStillEnabled(gen)) return@launch
                     dbWriteSemaphore.withPermit {
                         if (!isSyncStillEnabled(gen)) return@withPermit
-                        val dbSong = database.song(song.id).firstOrNull()
                         database.withTransaction {
                             if (!isSyncStillEnabled(gen)) return@withTransaction
+                            val dbSong = database.getSavedSong(song.id)
                             if (dbSong == null) {
                                 insert(song.toMediaMetadata())
+                                database.updateIsLiked(song.id, true)
                             }
                         }
                     }
@@ -539,7 +540,7 @@ class SyncUtils @Inject constructor(
                     database.clearPlaylist(playlistId)
                     songs.forEachIndexed { idx, song ->
                         if (!isSyncStillEnabled(gen)) return@withTransaction
-                        database.insertSavedSong(
+                        database.upsertSongPreservingUsage(
                             SavedSongEntity(
                                 id = song.id,
                                 title = song.title,

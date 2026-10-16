@@ -44,6 +44,7 @@ import com.ruben.spotitube.ArmoryIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -121,6 +122,9 @@ fun StatsScreen(
     val mostPlayedArtists by viewModel.mostPlayedArtists.collectAsState()
     val mostPlayedAlbums by viewModel.mostPlayedAlbums.collectAsState()
     val firstEvent by viewModel.firstEvent.collectAsState()
+    val firstEventTime = remember(firstEvent) {
+        firstEvent?.playedAt?.let { LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(it), java.time.ZoneId.systemDefault()) }
+    }
     val currentDate = LocalDateTime.now()
 
     val coroutineScope = rememberCoroutineScope()
@@ -128,9 +132,9 @@ fun StatsScreen(
     val selectedOption by viewModel.selectedOption.collectAsState()
 
     val weeklyDates =
-        if (currentDate != null && firstEvent != null) {
+        if (currentDate != null && firstEventTime != null) {
             generateSequence(currentDate) { it.minusWeeks(1) }
-                .takeWhile { it.isAfter(firstEvent?.event?.timestamp?.minusWeeks(1)) }
+                .takeWhile { it.isAfter(firstEventTime.minusWeeks(1)) }
                 .mapIndexed { index, date ->
                     val endDate = date.plusWeeks(1).minusDays(1).coerceAtMost(currentDate)
                     val formatter = DateTimeFormatter.ofPattern("dd MMM")
@@ -156,16 +160,14 @@ fun StatsScreen(
         }
 
     val monthlyDates =
-        if (currentDate != null && firstEvent != null) {
+        if (currentDate != null && firstEventTime != null) {
             generateSequence(
                 currentDate.plusMonths(1).withDayOfMonth(1).minusDays(1)
             ) { it.minusMonths(1) }
                 .takeWhile {
                     it.isAfter(
-                        firstEvent
-                            ?.event
-                            ?.timestamp
-                            ?.withDayOfMonth(1),
+                        firstEventTime
+                            .withDayOfMonth(1),
                     )
                 }.mapIndexed { index, date ->
                     val formatter = DateTimeFormatter.ofPattern("MMM")
@@ -183,7 +185,7 @@ fun StatsScreen(
         }
 
     val yearlyDates =
-        if (currentDate != null && firstEvent != null) {
+        if (currentDate != null && firstEventTime != null) {
             generateSequence(
                 currentDate
                     .plusYears(1)
@@ -192,9 +194,7 @@ fun StatsScreen(
             ) { it.minusYears(1) }
                 .takeWhile {
                     it.isAfter(
-                        firstEvent
-                            ?.event
-                            ?.timestamp,
+                        firstEventTime,
                     )
                 }.mapIndexed { index, date ->
                     Pair(index, "${date.year}")

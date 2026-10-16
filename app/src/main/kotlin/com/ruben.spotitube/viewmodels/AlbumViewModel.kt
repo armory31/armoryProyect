@@ -142,7 +142,7 @@ constructor(
                             )
                         )
                         current?.songs?.forEach { song ->
-                            database.insertSavedSong(song.toSavedSongEntity())
+                            database.upsertSongPreservingUsage(song.toSavedSongEntity())
                         }
                     } else {
                         database.deleteSavedAlbum(album.id)

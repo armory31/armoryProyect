@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -45,22 +46,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ArmoryIconButton
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.constants.HistorySource
 import com.ruben.spotitube.constants.InnerTubeCookieKey
-import com.ruben.spotitube.db.entities.EventWithSong
+import com.ruben.spotitube.db.entities.Event
+import com.ruben.spotitube.db.entities.HistorySongEntity
+import com.ruben.spotitube.db.entities.SavedArtistEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
+import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.metadata
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
+import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.utils.parseCookieString
+import com.ruben.spotitube.models.DateAgo
 import com.ruben.spotitube.models.toMediaMetadata
+import com.ruben.spotitube.models.toSavedSongEntity
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.ChipsRow
@@ -71,10 +77,18 @@ import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.menu.SelectionMediaMetadataMenu
 import com.ruben.spotitube.ui.menu.SongMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
+import com.ruben.spotitube.utils.HistoryItemMemoryCache
 import com.ruben.spotitube.utils.rememberPreference
-import com.ruben.spotitube.viewmodels.DateAgo
 import com.ruben.spotitube.viewmodels.HistoryViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
@@ -83,7 +97,6 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val database = LocalDatabase.current
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -112,7 +125,7 @@ fun HistoryScreen(
     }
 
     val historySource by viewModel.historySource.collectAsState()
-    val events by viewModel.events.collectAsState()
+    val rawHistory by viewModel.rawHistory.collectAsState()
     val historyPage by viewModel.historyPage
 
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
@@ -130,22 +143,81 @@ fun HistoryScreen(
         }
     }
 
-    class WrappedHistoryItem(val item: EventWithSong) {
+    class WrappedHistoryItem(val historyEntity: HistorySongEntity) {
         var isSelected by mutableStateOf(false)
+        val songItem: SongItem?
+            get() = HistoryItemMemoryCache.get(historyEntity.songId)
     }
 
-    val filteredEvents = remember(events, query) {
-        if (query.text.isEmpty()) {
-            events
+    val today = LocalDate.now()
+    val thisMonday = today.with(DayOfWeek.MONDAY)
+    val lastMonday = thisMonday.minusDays(7)
+
+    val groupedHistory = remember(rawHistory, query) {
+        val filtered = if (query.text.isEmpty()) {
+            rawHistory
         } else {
-            events.mapValues { (_, songs) ->
-                songs.filter { event ->
-                    event.song.song.title.contains(query.text, ignoreCase = true) ||
-                            event.song.artists.any {
-                                it.name.contains(query.text, ignoreCase = true)
-                            }
+            rawHistory.filter { historyEntity ->
+                val songItem = HistoryItemMemoryCache.get(historyEntity.songId)
+                songItem?.title?.contains(query.text, ignoreCase = true) == true ||
+                        songItem?.artists?.any { it.name.contains(query.text, ignoreCase = true) } == true ||
+                        historyEntity.songId.contains(query.text, ignoreCase = true)
+            }
+        }
+
+        filtered.groupBy { historyEntity ->
+            val date = Instant.ofEpochMilli(historyEntity.playedAt).atZone(ZoneId.systemDefault()).toLocalDate()
+            val daysAgo = ChronoUnit.DAYS.between(date, today).toInt()
+            when {
+                daysAgo == 0 -> DateAgo.Today
+                daysAgo == 1 -> DateAgo.Yesterday
+                date >= thisMonday -> DateAgo.ThisWeek
+                date >= lastMonday -> DateAgo.LastWeek
+                else -> DateAgo.Other(date.withDayOfMonth(1))
+            }
+        }.toSortedMap(compareBy { dateAgo ->
+            when (dateAgo) {
+                DateAgo.Today -> 0L
+                DateAgo.Yesterday -> 1L
+                DateAgo.ThisWeek -> 2L
+                DateAgo.LastWeek -> 3L
+                is DateAgo.Other -> ChronoUnit.DAYS.between(dateAgo.date, today)
+            }
+        })
+    }
+
+    val wrappedItemsMap = remember(groupedHistory) {
+        groupedHistory.mapValues { (_, historyList) ->
+            historyList.map { WrappedHistoryItem(it) }.toMutableStateList()
+        }
+    }
+
+    val allWrappedItems = remember(wrappedItemsMap) {
+        wrappedItemsMap.values.flatten()
+    }
+
+    val lazyListState = rememberLazyListState()
+
+    // Load visible items with margin of 20 above and below, debounced
+    LaunchedEffect(lazyListState, rawHistory, query) {
+        if (query.text.isNotEmpty()) {
+            val recentIds = rawHistory.take(300).map { it.songId }.distinct()
+            viewModel.loadMetadataForIds(recentIds)
+        } else {
+            snapshotFlow { lazyListState.layoutInfo }
+                .debounce(300.milliseconds)
+                .collectLatest { layoutInfo ->
+                    val visibleIndices = layoutInfo.visibleItemsInfo.map { it.index }
+                    if (visibleIndices.isNotEmpty()) {
+                        val allItems = allWrappedItems
+                        val minIdx = (visibleIndices.minOrNull() ?: 0) - 20
+                        val maxIdx = (visibleIndices.maxOrNull() ?: 0) + 20
+                        val visibleIds = allItems.indices
+                            .filter { it in minIdx..maxIdx }
+                            .mapNotNull { allItems.getOrNull(it)?.historyEntity?.songId }
+                        viewModel.loadMetadataForIds(visibleIds)
+                    }
                 }
-            }.filterValues { it.isNotEmpty() }
         }
     }
 
@@ -163,18 +235,6 @@ fun HistoryScreen(
             }?.filter { it.songs.isNotEmpty() }
         }
     }
-
-    val wrappedItemsMap = remember(filteredEvents) {
-        filteredEvents.mapValues { (_, events) ->
-            events.map { WrappedHistoryItem(it) }.toMutableStateList()
-        }
-    }
-
-    val allWrappedItems = remember(wrappedItemsMap) {
-        wrappedItemsMap.values.flatten()
-    }
-
-    val lazyListState = rememberLazyListState()
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -216,7 +276,7 @@ fun HistoryScreen(
 
                     items(
                         items = section.songs,
-                        key = { "${section.title}_${it.id}_${section.songs.indexOf(it)}" }
+                        key = { it.id }
                     ) { song ->
                         YouTubeListItem(
                             item = song,
@@ -264,7 +324,7 @@ fun HistoryScreen(
                     }
                 }
             } else {
-                filteredEvents.forEach { (dateAgo, events) ->
+                groupedHistory.forEach { (dateAgo, historyList) ->
                     stickyHeader {
                         SectionHeader(
                             text = dateAgoToString(dateAgo),
@@ -278,25 +338,49 @@ fun HistoryScreen(
 
                     itemsIndexed(
                         items = currentDateWrappedItems,
-                        key = { index, wrappedItem -> "${dateAgo}_${wrappedItem.item.event.id}_$index" }
+                        key = { index, wrappedItem -> "${dateAgo}_${wrappedItem.historyEntity.playedAt}_${wrappedItem.historyEntity.songId}_$index" }
                     ) { index, wrappedItem ->
-                        val event = wrappedItem.item
+                        val historyEntity = wrappedItem.historyEntity
+                        val songItem = wrappedItem.songItem
+                        val songObj = songItem?.let { item ->
+                            Song(
+                                song = item.toSavedSongEntity(),
+                                artists = item.artists.map { SavedArtistEntity(id = it.id ?: "", name = it.name) }
+                            )
+                        } ?: Song(
+                            song = SavedSongEntity(
+                                id = historyEntity.songId,
+                                title = "ID: ${historyEntity.songId}"
+                            ),
+                            artists = emptyList()
+                        )
+                        val timestamp = java.time.LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(historyEntity.playedAt),
+                            ZoneId.systemDefault()
+                        )
+                        val eventObj = Event(
+                            id = historyEntity.playedAt,
+                            songId = historyEntity.songId,
+                            timestamp = timestamp,
+                            playTime = historyEntity.playTimeMs
+                        )
+
                         SongListItem(
-                            song = event.song,
-                            isActive = event.song.id == mediaMetadata?.id,
+                            song = songObj,
+                            isActive = historyEntity.songId == mediaMetadata?.id,
                             isPlaying = isPlaying,
                             showInLibraryIcon = true,
                             isSelected = wrappedItem.isSelected && selection,
                             trailingContent = {
-                                if (!selection) {
+                                if (!selection && songItem != null) {
                                     ArmoryIconButton(
                                         icon = Icons.Rounded.MoreVert,
                                         contentDescription = "Opciones",
                                         onClick = {
                                             menuState.show {
                                                 SongMenu(
-                                                    originalSong = event.song,
-                                                    event = event.event,
+                                                    originalSong = songObj,
+                                                    event = eventObj,
                                                     navController = navController,
                                                     onDismiss = menuState::dismiss
                                                 )
@@ -308,15 +392,17 @@ fun HistoryScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .combinedClickable(
+                                    enabled = songItem != null,
                                     onClick = {
+                                        if (songItem == null) return@combinedClickable
                                         if (!selection) {
-                                            if (event.song.id == mediaMetadata?.id) {
+                                            if (historyEntity.songId == mediaMetadata?.id) {
                                                 playerConnection.player.togglePlayPause()
                                             } else {
                                                 playerConnection.playQueue(
                                                     ListQueue(
                                                         title = dateAgoToString(dateAgo),
-                                                        items = currentDateWrappedItems.map { it.item.song.toMediaItem() },
+                                                        items = currentDateWrappedItems.mapNotNull { it.songItem?.toMediaItem() },
                                                         startIndex = index
                                                     )
                                                 )
@@ -326,11 +412,13 @@ fun HistoryScreen(
                                         }
                                     },
                                     onLongClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        if (!selection) {
-                                            selection = true
-                                            allWrappedItems.forEach { it.isSelected = false }
-                                            wrappedItem.isSelected = true
+                                        if (songItem != null) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            if (!selection) {
+                                                selection = true
+                                                allWrappedItems.forEach { it.isSelected = false }
+                                                wrappedItem.isSelected = true
+                                            }
                                         }
                                     }
                                 )
@@ -361,12 +449,15 @@ fun HistoryScreen(
                         )
                     }
                 } else {
-                    playerConnection.playQueue(
-                        ListQueue(
-                            title = context.getString(R.string.history),
-                            items = allWrappedItems.map { it.item.song.toMediaItem() }.shuffled()
+                    val validSongs = allWrappedItems.mapNotNull { it.songItem?.toMediaItem() }
+                    if (validSongs.isNotEmpty()) {
+                        playerConnection.playQueue(
+                            ListQueue(
+                                title = context.getString(R.string.history),
+                                items = validSongs.shuffled()
+                            )
                         )
-                    )
+                    }
                 }
             }
         )
@@ -377,7 +468,7 @@ fun HistoryScreen(
             val count = allWrappedItems.count { it.isSelected }
             pluralStringResource(R.plurals.n_song, count, count)
         }
-        isSearching -> if (query.text.isNotEmpty()) query.text else stringResource(R.string.search)
+        isSearching -> query.text.ifEmpty { stringResource(R.string.search) }
         else -> stringResource(R.string.history)
     }
 
@@ -415,8 +506,8 @@ fun HistoryScreen(
                         menuState.show {
                             SelectionMediaMetadataMenu(
                                 songSelection = allWrappedItems
-                                    .filter { it.isSelected }
-                                    .map { it.item.song.toMediaItem().metadata!! },
+                                    .filter { it.isSelected && it.songItem != null }
+                                    .map { it.songItem!!.toMediaItem().metadata!! },
                                 onDismiss = menuState::dismiss,
                                 clearAction = { selection = false },
                                 currentItems = emptyList()

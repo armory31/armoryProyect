@@ -36,7 +36,6 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
-import android.os.PowerManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
@@ -119,7 +118,6 @@ import com.ruben.spotitube.constants.ShowLyricsKey
 import com.ruben.spotitube.constants.SkipSilenceKey
 import com.ruben.spotitube.constants.SmartTrimmerKey
 import com.ruben.spotitube.constants.TogetherClientIdKey
-import com.ruben.spotitube.constants.WakelockKey
 import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
@@ -169,11 +167,13 @@ import com.ruben.spotitube.utils.get
 import com.ruben.spotitube.utils.getAsync
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -241,12 +241,13 @@ class MusicService :
     private var hasAudioFocus = false
     private var autoStartOnBluetoothEnabled = false
     private var bluetoothReceiverRegistered = false
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var wakelockEnabled = false
 
-    private var scopeJob = Job()
-    private var scope = CoroutineScope(Dispatchers.Main + scopeJob)
-    private var ioScope = CoroutineScope(Dispatchers.IO + scopeJob)
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Timber.e(throwable, "Unhandled exception in MusicService coroutine scope")
+    }
+    private var scopeJob = SupervisorJob()
+    private var scope = CoroutineScope(Dispatchers.Main + scopeJob + coroutineExceptionHandler)
+    private var ioScope = CoroutineScope(Dispatchers.IO + scopeJob + coroutineExceptionHandler)
     private val binder = MusicBinder()
     private var hasBoundClients = false
     private var idleStopJob: Job? = null
@@ -632,9 +633,6 @@ class MusicService :
                 }
 
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        wakeLock = (getSystemService(POWER_SERVICE) as PowerManager)
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ARMORY:Playback")
-            .also { it.setReferenceCounted(false) }
         setupAudioFocusRequest()
 
         mediaLibrarySessionCallback.apply {
@@ -787,14 +785,6 @@ class MusicService :
             .distinctUntilChanged()
             .collectLatest(scope) {
                 crossfadeDurationMs.value = it
-            }
-
-        dataStore.data
-            .map { it[WakelockKey] ?: false }
-            .distinctUntilChanged()
-            .collectLatest(scope) { enabled ->
-                wakelockEnabled = enabled
-                updateWakeLock()
             }
 
         crossfadeAudio =
@@ -960,13 +950,13 @@ class MusicService :
 
     private fun ensureScopesActive() {
         if (!scopeJob.isActive) {
-            scopeJob = Job()
+            scopeJob = SupervisorJob()
         }
         if (!scope.isActive) {
-            scope = CoroutineScope(Dispatchers.Main + scopeJob)
+            scope = CoroutineScope(Dispatchers.Main + scopeJob + coroutineExceptionHandler)
         }
         if (!ioScope.isActive) {
-            ioScope = CoroutineScope(Dispatchers.IO + scopeJob)
+            ioScope = CoroutineScope(Dispatchers.IO + scopeJob + coroutineExceptionHandler)
         }
     }
 
@@ -1359,7 +1349,7 @@ class MusicService :
         if (song != null && song.song.duration == -1) {
             database.getSavedSong(mediaId)?.let { saved ->
                 database.query {
-                    database.insertSavedSong(saved.copy(duration = duration))
+                    database.upsertSongPreservingUsage(saved.copy(duration = duration))
                 }
             }
         }
@@ -3638,7 +3628,6 @@ class MusicService :
         } else {
             closeAudioEffectSession()
         }
-        updateWakeLock()
         if (player.playWhenReady && keepAudioEffectSessionOpen) {
             cancelIdleStop()
             promoteToStartedService()
@@ -4107,16 +4096,6 @@ class MusicService :
         player.setOffloadEnabled(enabled)
     }
 
-    private fun updateWakeLock() {
-        val wl = wakeLock ?: return
-        val shouldHold = wakelockEnabled && player.isPlaying
-        if (shouldHold && !wl.isHeld) {
-            wl.acquire(10*60*1000L)
-        } else if (!shouldHold && wl.isHeld) {
-            wl.release()
-        }
-    }
-
     private fun createRenderersFactory() =
         object : DefaultRenderersFactory(this) {
             override fun buildAudioSink(
@@ -4449,9 +4428,6 @@ class MusicService :
         try {
             crossfadeAudio?.release()
             crossfadeAudio = null
-        } catch (_: Exception) {}
-        try {
-            if (wakeLock?.isHeld == true) wakeLock?.release()
         } catch (_: Exception) {}
         try {
             player.removeListener(this)
