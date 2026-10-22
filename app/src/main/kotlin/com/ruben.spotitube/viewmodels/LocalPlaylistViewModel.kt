@@ -18,7 +18,7 @@ import com.ruben.spotitube.constants.PlaylistSongSortDescendingKey
 import com.ruben.spotitube.constants.PlaylistSongSortType
 import com.ruben.spotitube.constants.PlaylistSongSortTypeKey
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.PlaylistSong
+import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.reversed
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.innertube.YouTube
@@ -80,7 +80,7 @@ constructor(
     val isLiked = libraryStateHolder.isSavedPlaylist(playlistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
-    val playlistSongs: StateFlow<List<PlaylistSong>> =
+    val playlistSongs: StateFlow<List<Song>> =
         combine(
             database.playlistSongs(playlistId),
             context.dataStore.data
@@ -91,22 +91,14 @@ constructor(
         ) { songs, (sortType, sortDescending) ->
             when (sortType) {
                 PlaylistSongSortType.CUSTOM -> songs
-                PlaylistSongSortType.CREATE_DATE -> songs.sortedBy { it.map.id }
-                PlaylistSongSortType.NAME -> songs.sortedBy { it.song.song.title }
+                PlaylistSongSortType.CREATE_DATE -> songs
+                PlaylistSongSortType.NAME -> songs.sortedBy { it.song.title }
                 PlaylistSongSortType.ARTIST -> {
                     val collator = Collator.getInstance(Locale.getDefault())
                     collator.strength = Collator.PRIMARY
-                    songs
-                        .sortedWith(compareBy(collator) { song -> song.song.artists.joinToString("") { artist -> artist.name } })
-                        .groupBy { it.song.album?.title }
-                        .flatMap { (_, songsByAlbum) ->
-                            songsByAlbum.sortedBy { playlistSong ->
-                                playlistSong.song.artists.joinToString("") { artist -> artist.name }
-                            }
-                        }
+                    songs.sortedWith(compareBy(collator) { song -> song.artists.joinToString("") { artist -> artist.name } })
                 }
-
-                PlaylistSongSortType.PLAY_TIME -> songs.sortedBy { it.song.song.totalPlayTime }
+                PlaylistSongSortType.PLAY_TIME -> songs
             }.reversed(sortDescending && sortType != PlaylistSongSortType.CUSTOM)
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     
@@ -120,7 +112,7 @@ constructor(
     // Playlist Suggestions State
     private val _playlistSuggestions = MutableStateFlow<PlaylistSuggestion?>(null)
     val playlistSuggestions = combine(_playlistSuggestions, playlistSongs) { suggestions, songs ->
-        val songIds = songs.map { it.song.id }.toSet()
+        val songIds = songs.map { it.id }.toSet()
         val filteredItems = suggestions?.items?.filter { it.id !in songIds } ?: emptyList()
         suggestions?.copy(
             items = filteredItems.take(10)
@@ -146,24 +138,11 @@ constructor(
 
     init {
         viewModelScope.launch {
-            val sortedSongs =
-                playlistSongs.first().sortedWith(compareBy({ it.map.position }, { it.map.id }))
-            database.withTransaction {
-                sortedSongs.forEachIndexed { index, playlistSong ->
-                    if (playlistSong.map.position != index) {
-                        update(playlistSong.map.copy(position = index))
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch {
             playlistSongs.collect { songs ->
                 prefetchViewCounts(
                     songs
                         .asSequence()
-                        .filter { !it.song.song.isLocal }
-                        .map { it.song.id }
+                        .map { it.id }
                         .toList()
                 )
             }
@@ -272,7 +251,7 @@ constructor(
                 currentSuggestionQueryIndex.value = 0
                 // Keep previously suggested IDs to avoid showing them again on refresh
                 // but ensure songs already in playlist are always included in the filter
-                suggestedSongIds.value += currentSongs.map { it.song.id }.toSet()
+                suggestedSongIds.value += currentSongs.map { it.id }.toSet()
                 suggestionsCacheTimestamp.value = 0L
                 currentSuggestionPage = null
                 
@@ -407,20 +386,18 @@ constructor(
                     }
                 }
 
-                // First, ensure the song and its artists are in the database
-                insert(song.toMediaMetadata())
-                
                 // Add to local playlist
-                val maxPosition = maxPlaylistSongPosition(playlistId)
-                val position = (maxPosition ?: -1) + 1
-                insert(
-                    com.ruben.spotitube.db.entities.PlaylistSongMap(
-                        songId = song.id,
-                        playlistId = playlistId,
-                        position = position,
-                        setVideoId = null
-                    )
+                val item = com.ruben.spotitube.db.entities.PlaylistSongItem(
+                    id = song.id,
+                    title = song.title,
+                    artistName = song.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                    thumbnailUrl = song.thumbnail,
+                    duration = song.duration ?: -1,
+                    albumId = song.album?.id,
+                    albumName = song.album?.name,
+                    explicit = song.explicit
                 )
+                addSongsToPlaylist(playlistId, listOf(item))
                 true
             }
             

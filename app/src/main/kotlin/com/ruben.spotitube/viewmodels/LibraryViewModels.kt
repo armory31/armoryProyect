@@ -46,9 +46,6 @@ import com.ruben.spotitube.constants.SongSortTypeKey
 import com.ruben.spotitube.constants.TopSize
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
-import com.ruben.spotitube.db.entities.SavedArtistEntity
-import com.ruben.spotitube.ui.utils.resize
-import com.ruben.spotitube.extensions.reversed
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.playback.DownloadUtil
@@ -63,19 +60,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.text.Collator
-import java.time.Duration
-import java.time.LocalDateTime
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -113,34 +104,24 @@ constructor(
                             SongSortType.CREATE_DATE -> songs
                             SongSortType.NAME -> songs.sortedBy { it.song.title }
                             SongSortType.ARTIST -> songs.sortedBy { it.artists.joinToString { a -> a.name } }
-                            SongSortType.PLAY_TIME -> songs.sortedBy { it.song.totalPlayTime }
+                            SongSortType.PLAY_TIME -> songs
                         }.let { if (descending) it.reversed() else it }
                     }
                     SongFilter.DOWNLOADED ->
-                        combine(
-                            database.allSongs().flowOn(Dispatchers.IO),
-                            downloadUtil.downloads
-                        ) { songs, downloads ->
-                            songs.filter {
-                                downloads[it.id]?.state == Download.STATE_COMPLETED
-                            }.let { filteredSongs ->
-                                when (sortType) {
-                                    SongSortType.CREATE_DATE -> filteredSongs.sortedBy {
-                                        downloads[it.id]?.updateTimeMs ?: 0L
-                                    }
-                                    SongSortType.NAME -> filteredSongs.sortedBy { it.song.title }
-                                    SongSortType.ARTIST -> {
-                                        val collator = Collator.getInstance(Locale.getDefault())
-                                        collator.strength = Collator.PRIMARY
-                                        filteredSongs.sortedWith(
-                                            compareBy(collator) { song ->
-                                                song.artists.joinToString("") { it.name }
-                                            }
-                                        )
-                                    }
-                                    SongSortType.PLAY_TIME -> filteredSongs.sortedBy { it.song.totalPlayTime }
-                                }.reversed(descending)
-                            }
+                        downloadUtil.downloads.map { downloadsMap ->
+                            val downloadedSongs = downloadsMap.values
+                                .filter { it.state == Download.STATE_COMPLETED }
+                                .mapNotNull { download ->
+                                    com.ruben.spotitube.models.DownloadedSongMetadata.fromDownload(download)?.toSong()
+                                }
+                            when (sortType) {
+                                SongSortType.CREATE_DATE -> downloadedSongs
+                                SongSortType.NAME -> downloadedSongs.sortedBy { it.song.title }
+                                SongSortType.ARTIST -> downloadedSongs.sortedBy { song ->
+                                    song.artists.joinToString("") { it.name }
+                                }
+                                SongSortType.PLAY_TIME -> downloadedSongs
+                            }.let { if (descending) it.reversed() else it }
                         }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -151,8 +132,7 @@ constructor(
             _isRefreshing.value = true
             try {
                 when (filter) {
-                    SongFilter.LIKED -> syncUtils.syncLikedSongs()
-                    SongFilter.LIBRARY -> syncUtils.syncLibrarySongs()
+                    SongFilter.LIKED, SongFilter.LIBRARY -> syncUtils.syncLikedSongs()
                     SongFilter.DOWNLOADED -> Unit
                 }
             } catch (e: Exception) {
@@ -165,10 +145,6 @@ constructor(
 
     fun syncLikedSongs() {
         refresh(SongFilter.LIKED)
-    }
-
-    fun syncLibrarySongs() {
-        refresh(SongFilter.LIBRARY)
     }
 }
 
@@ -198,7 +174,7 @@ constructor(
                     ArtistFilter.LIBRARY,
                     ArtistFilter.LIKED -> libraryStateHolder.getLibraryArtists().map { artists ->
                         when (sortType) {
-                            ArtistSortType.CREATE_DATE -> artists.sortedBy { it.artist.bookmarkedAt }
+                            ArtistSortType.CREATE_DATE -> artists.sortedBy { it.artist.savedAt }
                             ArtistSortType.NAME -> artists.sortedBy { it.artist.name }
                             ArtistSortType.SONG_COUNT -> artists.sortedBy { it.songCount }
                             ArtistSortType.PLAY_TIME -> artists.sortedBy { it.timeListened ?: 0 }
@@ -224,35 +200,6 @@ constructor(
 
     fun sync() {
         refresh(ArtistFilter.LIKED)
-    }
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            allArtists.collect { artists ->
-                artists
-                    .map { it.artist }
-                    .filter {
-                        it.thumbnailUrl == null || Duration.between(
-                            it.lastUpdateTime,
-                            LocalDateTime.now()
-                        ) > Duration.ofDays(10)
-                    }.forEach { artist ->
-                        YouTube.artist(artist.id).onSuccess { artistPage ->
-                            database.query {
-                                database.insertSavedArtist(
-                                    SavedArtistEntity(
-                                        id = artist.id,
-                                        name = artistPage.artist.title,
-                                        thumbnailUrl = artistPage.artist.thumbnail?.resize(544, 544),
-                                        channelId = artist.channelId,
-                                        savedAt = artist.bookmarkedAt ?: LocalDateTime.now()
-                                    )
-                                )
-                            }
-                        }
-                    }
-            }
-        }
     }
 }
 
@@ -285,26 +232,25 @@ constructor(
                 val (filter, sortType, descending) = filterSort
                 when (filter) {
                     AlbumFilter.DOWNLOADED ->
-                        combine(
-                            database.allSongs().flowOn(Dispatchers.IO),
-                            downloadUtil.downloads
-                        ) { songs, downloads ->
-                            songs.filter { downloads[it.id]?.state == Download.STATE_COMPLETED }
-                                .mapNotNull { it.song.albumId }.toSet()
-                        }.flatMapLatest { downloadedAlbumIds ->
+                        downloadUtil.downloads.flatMapLatest { downloadsMap ->
+                            val downloadedAlbumIds = downloadsMap.values
+                                .filter { it.state == Download.STATE_COMPLETED }
+                                .mapNotNull { download ->
+                                    com.ruben.spotitube.models.DownloadedSongMetadata.fromDownload(download)?.albumId
+                                }
+                                .toSet()
                             database.albumsByIds(downloadedAlbumIds, sortType, descending)
                         }
                     
-                        AlbumFilter.DOWNLOADED_FULL ->
-                        combine(
-                            database.allSongs().flowOn(Dispatchers.IO),
-                            downloadUtil.downloads
-                        ) { songs, downloads ->
-                            songs.filter { downloads[it.id]?.state == Download.STATE_COMPLETED }
-                                .mapNotNull { song -> song.song.albumId?.let { it to song } }
-                                .groupBy({ it.first }, { it.second })
+                    AlbumFilter.DOWNLOADED_FULL ->
+                        downloadUtil.downloads.flatMapLatest { downloadsMap ->
+                            val downloadedCountByAlbum = downloadsMap.values
+                                .filter { it.state == Download.STATE_COMPLETED }
+                                .mapNotNull { download ->
+                                    com.ruben.spotitube.models.DownloadedSongMetadata.fromDownload(download)?.albumId
+                                }
+                                .groupBy { it }
                                 .mapValues { it.value.size }
-                        }.flatMapLatest { downloadedCountByAlbum ->
                             database.albumsByIds(downloadedCountByAlbum.keys, sortType, descending)
                                 .map { albums ->
                                     albums.filter { album ->
@@ -489,68 +435,6 @@ constructor(
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            albums.collect { albums ->
-                albums
-                    .filter {
-                        it.album.songCount == 0
-                    }.forEach { album ->
-                        YouTube
-                            .album(album.id)
-                            .onSuccess { albumPage ->
-                                database.query {
-                                    val albumArtist = album.artists.firstOrNull()
-                                    database.insertSavedAlbum(
-                                        SavedAlbumEntity(
-                                            id = albumPage.album.browseId,
-                                            title = albumPage.album.title,
-                                            artistId = albumArtist?.id,
-                                            artistName = albumArtist?.name,
-                                            songCount = albumPage.songs.size,
-                                            duration = albumPage.songs.sumOf { song -> song.duration ?: 0 },
-                                            thumbnailUrl = albumPage.album.thumbnail,
-                                            year = albumPage.album.year
-                                        )
-                                    )
-                                }
-                            }.onFailure {
-                                reportException(it)
-                                if (it.message?.contains("NOT_FOUND") == true) {
-                                    database.query {
-                                        database.deleteSavedAlbum(album.album.id)
-                                    }
-                                }
-                            }
-                    }
-            }
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            artists.collect { artists ->
-                artists
-                    .map { it.artist }
-                    .filter {
-                        it.thumbnailUrl == null ||
-                                Duration.between(
-                                    it.lastUpdateTime,
-                                    LocalDateTime.now(),
-                                ) > Duration.ofDays(10)
-                    }.forEach { artist ->
-                        YouTube.artist(artist.id).onSuccess { artistPage ->
-                            database.query {
-                                database.insertSavedArtist(
-                                    SavedArtistEntity(
-                                        id = artist.id,
-                                        name = artistPage.artist.title,
-                                        thumbnailUrl = artistPage.artist.thumbnail?.resize(544, 544),
-                                        channelId = artist.channelId,
-                                        savedAt = artist.bookmarkedAt ?: LocalDateTime.now()
-                                    )
-                                )
-                            }
-                        }
-                    }
-            }
-        }
     }
 }
 

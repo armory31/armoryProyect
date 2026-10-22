@@ -61,7 +61,7 @@ import com.ruben.spotitube.ArmoryTopBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -152,7 +152,7 @@ fun MusicTogetherScreen(
     val sessionStateFlow = remember(playerConnection) {
         playerConnection?.service?.togetherSessionState ?: MutableStateFlow(TogetherSessionState.Idle)
     }
-    val sessionState by sessionStateFlow.collectAsState()
+    val sessionState by sessionStateFlow.collectAsStateWithLifecycle()
 
     val isHosting = sessionState is TogetherSessionState.Hosting
     val isJoining = sessionState is TogetherSessionState.Joining

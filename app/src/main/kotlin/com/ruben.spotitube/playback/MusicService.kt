@@ -23,7 +23,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.database.SQLException
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaCodecList
@@ -122,7 +121,6 @@ import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
-import com.ruben.spotitube.db.entities.Event
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.RelatedSongMap
@@ -200,7 +198,6 @@ import java.io.Serializable
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.math.min
@@ -1263,11 +1260,9 @@ class MusicService :
         scope.launch {
             try {
                 val song = currentSong.value
-                val isLiked = if (song != null) {
-                    withContext(Dispatchers.IO) {
-                        libraryStateHolder.isSavedSong(song.song.id).first()
-                    }
-                } else false
+                val isLiked = song != null && withContext(Dispatchers.IO) {
+                    libraryStateHolder.isSavedSong(song.song.id).first()
+                }
 
                 val customLayout = listOf(
                     CommandButton
@@ -3124,11 +3119,7 @@ class MusicService :
 
             val isLiked = libraryStateHolder.isSavedSong(song.id).first()
             if (dataStore.get(AutoDownloadOnLikeKey, false) && isLiked) {
-                val downloadRequest = androidx.media3.exoplayer.offline.DownloadRequest
-                    .Builder(song.id, song.id.toUri())
-                    .setCustomCacheKey(song.id)
-                    .setData(song.title.toByteArray())
-                    .build()
+                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                 androidx.media3.exoplayer.offline.DownloadService.sendAddDownload(
                     this@MusicService,
                     ExoDownloadService::class.java,
@@ -4139,11 +4130,11 @@ class MusicService :
                         playTimeMs = playbackStats.totalPlayTimeMs,
                     )
                     database.query {
-                        incrementTotalPlayTime(mediaItem.mediaId, playbackStats.totalPlayTimeMs)
                         insertHistorySong(historyEntity)
                     }
                     database.incrementPlayCount(mediaItem.mediaId)
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    Timber.tag("MusicService").e(e, "Failed to record listening history or play count")
                 }
                 runCatching { registerRemoteListeningHistory(mediaItem.mediaId) }
             }

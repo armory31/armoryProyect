@@ -9,7 +9,6 @@
 package com.ruben.spotitube.ui.screens.artist
 
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.foundation.BorderStroke
 
 import android.content.ClipData
@@ -20,7 +19,6 @@ import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,12 +52,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -139,7 +135,6 @@ import com.ruben.spotitube.ui.menu.YouTubeArtistMenu
 import com.ruben.spotitube.ui.menu.YouTubePlaylistMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
 import com.ruben.spotitube.ui.theme.PlayerColorExtractor
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.ui.utils.resize
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.ArtistViewModel
@@ -159,13 +154,13 @@ fun ArtistScreen(
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val artistPage = viewModel.artistPage
-    val libraryArtist by viewModel.libraryArtist.collectAsState()
-    val isSubscribed by viewModel.isBookmarked.collectAsState()
-    val librarySongs by viewModel.librarySongs.collectAsState()
-    val libraryAlbums by viewModel.libraryAlbums.collectAsState()
+    val libraryArtist by viewModel.libraryArtist.collectAsStateWithLifecycle()
+    val isSubscribed by viewModel.isBookmarked.collectAsStateWithLifecycle()
+    val librarySongs by viewModel.librarySongs.collectAsStateWithLifecycle()
+    val libraryAlbums by viewModel.libraryAlbums.collectAsStateWithLifecycle()
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
@@ -257,7 +252,7 @@ fun ArtistScreen(
     )
 
     LaunchedEffect(libraryArtist) {
-        showLocal = libraryArtist?.artist?.isLocal == true
+        showLocal = false
     }
 
     Scaffold(

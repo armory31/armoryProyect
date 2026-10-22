@@ -111,7 +111,6 @@ class ArtistViewModel @Inject constructor(
                 name = it.title,
                 thumbnailUrl = it.thumbnail,
                 channelId = it.channelId,
-                isBookmarked = false
             )
         } ?: return
 

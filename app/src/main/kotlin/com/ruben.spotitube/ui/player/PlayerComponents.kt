@@ -4,14 +4,10 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.ui.player
-
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.PlayerSliderColors
 import com.ruben.spotitube.ArmoryGradients
-
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -60,7 +56,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +68,7 @@ import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import com.ruben.spotitube.LocalLibraryStateHolder
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -111,7 +108,6 @@ import com.ruben.spotitube.playback.PlayerConnection
 import com.ruben.spotitube.ui.component.BottomSheetPageState
 import com.ruben.spotitube.ui.component.BottomSheetState
 import com.ruben.spotitube.ui.component.MenuState
-
 import com.ruben.spotitube.ui.component.PlayerSliderTrack
 import com.ruben.spotitube.ui.component.ResizableIconButton
 import com.ruben.spotitube.ui.menu.PlayerMenu
@@ -887,7 +883,7 @@ fun PlayerPlaybackControls(
     playerConnection: PlayerConnection,
     currentSongLiked: Boolean
 ) {
-    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isCompact = windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.COMPACT
     val horizontalPadding = if (isCompact) 16.dp else PlayerHorizontalPadding
@@ -1726,8 +1722,8 @@ fun PlayerControlsContent(
     currentFormat: FormatEntity? = null,
     onResetTimer: () -> Unit = {},
 ) {
-    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
-    val currentSongLiked = currentSong?.song?.isLiked == true
+    val libraryStateHolder = LocalLibraryStateHolder.current
+    val currentSongLiked by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isCompact = windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.COMPACT

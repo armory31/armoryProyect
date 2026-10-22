@@ -4,71 +4,40 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.viewmodels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.datasource.cache.Cache
-import com.ruben.spotitube.constants.HideExplicitKey
-import com.ruben.spotitube.db.MusicDatabase
+import androidx.media3.exoplayer.offline.Download
 import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.di.DownloadCache
-import com.ruben.spotitube.di.PlayerCache
-import com.ruben.spotitube.utils.dataStore
-import com.ruben.spotitube.utils.get
+import com.ruben.spotitube.models.DownloadedSongMetadata
+import com.ruben.spotitube.playback.DownloadUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class CachePlaylistViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val database: MusicDatabase,
-    @PlayerCache private val playerCache: Cache,
-    @DownloadCache private val downloadCache: Cache
+    val downloadUtil: DownloadUtil
 ) : ViewModel() {
 
-    private val _cachedSongs = MutableStateFlow<List<Song>>(emptyList())
-    val cachedSongs: StateFlow<List<Song>> = _cachedSongs
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
-                val hideExplicit = context.dataStore.get(HideExplicitKey, false)
-                val cachedIds = playerCache.keys.toSet()
-                val downloadedIds = downloadCache.keys.toSet()
-                val pureCacheIds = cachedIds.subtract(downloadedIds)
-
-                val songs = if (pureCacheIds.isNotEmpty()) {
-                    database.getSongsByIds(pureCacheIds.toList())
-                } else {
-                    emptyList()
+    val cachedSongs: StateFlow<List<Song>> = downloadUtil.downloads
+        .map { downloadsMap ->
+            downloadsMap.values
+                .filter { it.state == Download.STATE_COMPLETED }
+                .mapNotNull { download ->
+                    DownloadedSongMetadata.fromDownload(download)?.toSong()
                 }
-
-                val completeSongs = songs.filter {
-                    val contentLength = it.format?.contentLength
-                    contentLength != null && playerCache.isCached(it.song.id, 0, contentLength)
-                }
-
-                _cachedSongs.value = completeSongs
-                    .filter { it.song.dateDownload != null }
-                    .sortedByDescending { it.song.dateDownload }
-
-                delay(1000.milliseconds)
-            }
-        }
-    }
+                .sortedBy { it.song.title }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun removeSongFromCache(songId: String) {
-        playerCache.removeResource(songId)
+        downloadUtil.downloadManager.removeDownload(songId)
     }
 }

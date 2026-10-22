@@ -4,19 +4,13 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.db.entities
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class PlaylistSong(
-    @Embedded val map: PlaylistSongMap,
-    @Relation(
-        parentColumn = "songId",
-        entityColumn = "id",
-        entity = SavedSongEntity::class,
-    )
+    val playlistId: String,
     val song: Song,
+    val position: Int = 0
 )

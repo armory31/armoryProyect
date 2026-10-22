@@ -41,11 +41,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
@@ -67,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -121,10 +119,10 @@ fun SongMenu(
     val context = LocalContext.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val songState = database.song(originalSong.id).collectAsState(initial = originalSong)
+    val songState = database.song(originalSong.id).collectAsStateWithLifecycle(initialValue = originalSong)
     val song = songState.value ?: originalSong
     val download by LocalDownloadUtil.current.getDownload(originalSong.id)
-        .collectAsState(initial = null)
+        .collectAsStateWithLifecycle(initialValue = null)
     val downloadState = metadata?.downloadState ?: download?.state
     val coroutineScope = rememberCoroutineScope()
     val libraryStateHolder = LocalLibraryStateHolder.current
@@ -154,15 +152,7 @@ fun SongMenu(
     }
     val isInSpeedDial = remember(speedDialSongs, song.id) { song.id in speedDialSongs }
 
-    val orderedArtists by produceState(initialValue = emptyList(), song) {
-        withContext(Dispatchers.IO) {
-            val artistMaps = database.songArtistMap(song.id).sortedBy { it.position }
-            val sorted = artistMaps.mapNotNull { map ->
-                song.artists.firstOrNull { it.id == map.artistId }
-            }
-            value = sorted
-        }
-    }
+    val orderedArtists = remember(song) { song.artists }
 
     // Split artists by configured separators
     data class SplitArtist(
@@ -230,25 +220,24 @@ fun SongMenu(
                 val newTitle = values[0]
                 val newArtist = values[1]
 
-                coroutineScope.launch {
-                    database.query {
-                        upsertSongPreservingUsage(song.toSavedSongEntity().copy(title = newTitle))
-                        val artist = song.artists.firstOrNull()
-                        if (artist != null) {
-                            insertSavedArtist(
-                                SavedArtistEntity(
-                                    id = artist.id,
-                                    name = newArtist,
-                                    thumbnailUrl = artist.thumbnailUrl,
-                                    channelId = artist.channelId,
-                                    savedAt = artist.bookmarkedAt ?: java.time.LocalDateTime.now()
-                                )
-                            )
-                        }
-                    }
+                coroutineScope.launch(Dispatchers.IO) {
+                    database.updateSongMetadataOnly(
+                        id = song.id,
+                        title = newTitle,
+                        artistId = song.song.artistId,
+                        artistName = newArtist,
+                        duration = song.song.duration,
+                        thumbnailUrl = song.song.thumbnailUrl,
+                        albumId = song.song.albumId,
+                        albumName = song.song.albumName,
+                        year = song.song.year,
+                        explicit = song.song.explicit
+                    )
 
-                    showEditDialog = false
-                    onDismiss()
+                    withContext(Dispatchers.Main) {
+                        showEditDialog = false
+                        onDismiss()
+                    }
                 }
             },
             onDismiss = { showEditDialog = false }
@@ -354,8 +343,8 @@ fun SongMenu(
         }
     }
 
-    val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsState(initial = false)
-    val isInLibrary by libraryStateHolder.isSavedSong(song.id).collectAsState(initial = false)
+    val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
+    val isInLibrary by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
 
     Surface(
         shape = RoundedCornerShape(28.dp),
@@ -400,6 +389,7 @@ fun SongMenu(
 
     val primaryActions = remember(
         song,
+        isLiked,
         startRadioText,
         playNextText,
         addToQueueText,
@@ -409,7 +399,7 @@ fun SongMenu(
         onDismiss,
         playerConnection,
     ) {
-        listOf(
+        val actions = mutableListOf(
             NewAction(
                 icon = {
                     Icon(
@@ -487,20 +477,25 @@ fun SongMenu(
                         }
                     context.startActivity(Intent.createChooser(intent, null))
                 },
-            ),
-            NewAction(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.edit),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                text = editText,
-                onClick = { showEditDialog = true },
-            ),
+            )
         )
+        if (isLiked) {
+            actions.add(
+                NewAction(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.edit),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    text = editText,
+                    onClick = { showEditDialog = true },
+                )
+            )
+        }
+        actions
     }
 
     LazyColumn(
@@ -656,21 +651,8 @@ fun SongMenu(
                             },
                             modifier =
                                 Modifier.clickable {
-                                    val map = playlistSong.map
                                     coroutineScope.launch(Dispatchers.IO) {
-                                        database.withTransaction {
-                                            val maxPosition = maxPlaylistSongPosition(map.playlistId) ?: map.position
-                                            if (map.position < maxPosition) {
-                                                move(map.playlistId, map.position, maxPosition)
-                                            }
-                                            delete(map)
-                                        }
-                                        if (playlistBrowseId != null) {
-                                            val setVideoId = map.setVideoId ?: database.getSetVideoId(map.songId)?.setVideoId
-                                            if (setVideoId != null) {
-                                                YouTube.removeFromPlaylist(playlistBrowseId, map.songId, setVideoId)
-                                            }
-                                        }
+                                        database.removeSongFromPlaylist(playlistSong.playlistId, playlistSong.position)
                                         withContext(Dispatchers.Main) {
                                             onDismiss()
                                         }
@@ -774,19 +756,7 @@ fun SongMenu(
                                 },
                                 modifier =
                                     Modifier.clickable {
-                                        coroutineScope.launch(Dispatchers.IO) {
-                                            val existing = database.getSavedSong(song.id)
-                                            val isLiked = existing?.isLiked ?: false
-                                            database.insertSavedSong(
-                                                song.toSavedSongEntity().copy(isLiked = isLiked)
-                                            )
-                                        }
-                                        val downloadRequest =
-                                            DownloadRequest
-                                                .Builder(song.id, song.id.toUri())
-                                                .setCustomCacheKey(song.id)
-                                                .setData(song.song.title.toByteArray())
-                                                .build()
+                                        val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                                         DownloadService.sendAddDownload(
                                             context,
                                             ExoDownloadService::class.java,

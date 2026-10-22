@@ -414,9 +414,7 @@ constructor(
                                     }
 
                                     else ->
-                                        database.playlistSongs(playlistId).map { list ->
-                                            list.map { it.song }
-                                        }
+                                        database.playlistSongs(playlistId)
                                 }.first().map {
                                     it.toMediaItem(parentId)
                                 }
@@ -635,9 +633,7 @@ constructor(
                             }
 
                             else ->
-                                database.playlistSongs(playlistId).map { list ->
-                                    list.map { it.song }
-                                }
+                                database.playlistSongs(playlistId)
                         }.first()
                     MediaSession.MediaItemsWithStartPosition(
                         songs.map { it.toMediaItem() },

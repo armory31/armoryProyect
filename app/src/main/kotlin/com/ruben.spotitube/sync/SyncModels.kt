@@ -66,8 +66,13 @@ data class PlaylistDto(
 data class PlaylistSongDto(
     val id: String = "",
     val title: String = "",
-    val artistName: String = "",
+    val artistName: String? = null,
     val thumbnailUrl: String? = null,
+    val duration: Int = -1,
+    val albumId: String? = null,
+    val albumName: String? = null,
+    val explicit: Boolean = false,
+    val setVideoId: String? = null,
     val position: Int = 0
 )
 

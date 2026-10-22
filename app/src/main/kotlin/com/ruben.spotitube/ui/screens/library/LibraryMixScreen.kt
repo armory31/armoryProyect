@@ -29,7 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -94,8 +94,8 @@ fun LibraryMixScreen(
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val database = LocalDatabase.current
 
@@ -112,9 +112,9 @@ fun LibraryMixScreen(
     }
     val filteredPlaylistIds by database.playlistIdsByTags(
         if (selectedTagIds.isEmpty()) emptyList() else selectedTagIds.toList(),
-    ).collectAsState(initial = emptyList())
+    ).collectAsStateWithLifecycle(initialValue = emptyList())
 
-    val topSize by viewModel.topValue.collectAsState(initial = "50")
+    val topSize by viewModel.topValue.collectAsStateWithLifecycle(initialValue = "50")
     val likedTitle = stringResource(R.string.liked)
     val downloadedTitle = stringResource(R.string.offline)
     val cachedTitle = stringResource(R.string.cached_playlist)
@@ -154,9 +154,9 @@ fun LibraryMixScreen(
     val (showTop) = rememberPreference(ShowTopPlaylistKey, true)
     val (showCached) = rememberPreference(ShowCachedPlaylistKey, true)
 
-    val albums by viewModel.albums.collectAsState()
-    val artists by viewModel.artists.collectAsState()
-    val playlists by viewModel.playlists.collectAsState()
+    val albums by viewModel.albums.collectAsStateWithLifecycle()
+    val artists by viewModel.artists.collectAsStateWithLifecycle()
+    val playlists by viewModel.playlists.collectAsStateWithLifecycle()
 
     val collator = remember {
         Collator.getInstance(Locale.getDefault()).apply {
@@ -173,7 +173,7 @@ fun LibraryMixScreen(
     }
     val sortedAlbums = remember(albums, sortType, sortDescending, collator) {
         val sorted = when (sortType) {
-            MixSortType.CREATE_DATE -> albums.sortedBy { it.album.bookmarkedAt }
+            MixSortType.CREATE_DATE -> albums.sortedBy { it.album.savedAt }
             MixSortType.NAME -> albums.sortedWith(compareBy(collator) { it.album.title })
             MixSortType.LAST_UPDATED -> albums.sortedBy { it.album.lastUpdateTime }
         }
@@ -181,7 +181,7 @@ fun LibraryMixScreen(
     }
     val sortedArtists = remember(artists, sortType, sortDescending, collator) {
         val sorted = when (sortType) {
-            MixSortType.CREATE_DATE -> artists.sortedBy { it.artist.bookmarkedAt }
+            MixSortType.CREATE_DATE -> artists.sortedBy { it.artist.savedAt }
             MixSortType.NAME -> artists.sortedWith(compareBy(collator) { it.artist.name })
             MixSortType.LAST_UPDATED -> artists.sortedBy { it.artist.lastUpdateTime }
         }
@@ -294,7 +294,7 @@ fun LibraryMixScreen(
     }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
+    val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsStateWithLifecycle()
 
     LaunchedEffect(scrollToTop?.value) {
         if (scrollToTop?.value == true) {
@@ -303,11 +303,7 @@ fun LibraryMixScreen(
         }
     }
 
-    LaunchedEffect(ytmSync) {
-        if (ytmSync) {
-            viewModel.syncAllLibrary()
-        }
-    }
+
 
     LazyColumn(
         state = lazyListState,

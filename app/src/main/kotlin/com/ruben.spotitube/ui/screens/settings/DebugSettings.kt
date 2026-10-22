@@ -59,7 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -230,7 +230,7 @@ private fun DebugTimestampItem(
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 private fun LogViewerPanel() {
-    val allLogs by GlobalLog.logs.collectAsState()
+    val allLogs by GlobalLog.logs.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
@@ -637,8 +637,8 @@ private fun LogLevelBadge(level: Int, compact: Boolean = false) {
 private fun NerdStatsSection(playerConnection: com.ruben.spotitube.playback.PlayerConnection?) {
     if (playerConnection == null) return
 
-    val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val currentFormat by playerConnection.currentFormat.collectAsStateWithLifecycle(initialValue = null)
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val player = playerConnection.player
 
     var bufferPercentage by remember { mutableIntStateOf(0) }

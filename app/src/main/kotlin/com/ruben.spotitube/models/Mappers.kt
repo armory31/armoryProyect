@@ -107,7 +107,7 @@ fun SavedSongEntity.toHistorySongEntity(timestamp: Long = System.currentTimeMill
     playedAt = timestamp,
     songId = id,
     duration = duration,
-    playTimeMs = totalPlayTime,
+    playTimeMs = 0L,
 )
 
 fun MediaMetadata.toHistorySongEntity(timestamp: Long = System.currentTimeMillis()): HistorySongEntity = HistorySongEntity(

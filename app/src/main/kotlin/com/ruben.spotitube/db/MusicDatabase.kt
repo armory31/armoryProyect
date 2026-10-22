@@ -35,8 +35,6 @@ import com.ruben.spotitube.db.entities.HistorySongEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
 import com.ruben.spotitube.db.entities.PlaylistEntity
-import com.ruben.spotitube.db.entities.PlaylistSongMap
-import com.ruben.spotitube.db.entities.PlaylistSongMapPreview
 import com.ruben.spotitube.db.entities.PlaylistTagMap
 import com.ruben.spotitube.db.entities.RelatedSongMap
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
@@ -61,7 +59,7 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MusicDatabase"
-private const val CURRENT_VERSION = 31
+private const val CURRENT_VERSION = 32
 
 class MusicDatabase(
     internal var delegate: InternalDatabase,
@@ -188,7 +186,6 @@ class MusicDatabase(
 
 @Database(
     entities = [
-        PlaylistSongMap::class,
         PlaylistEntity::class,
         SearchHistory::class,
         FormatEntity::class,
@@ -207,9 +204,7 @@ class MusicDatabase(
         HistoryAlbumEntity::class,
         HistoryPlaylistEntity::class,
     ],
-    views = [
-        PlaylistSongMapPreview::class,
-    ],
+    views = [],
     version = CURRENT_VERSION,
     exportSchema = true,
     autoMigrations = [
@@ -268,43 +263,14 @@ private class DatabaseCallback : RoomDatabase.Callback() {
     private fun cleanupDuplicatePlaylistsOnOpen(db: SupportSQLiteDatabase) {
         try {
             db.execSQL("""
-                DELETE FROM playlist_song_map WHERE playlistId IN (
-                    SELECT p1.id FROM playlist p1
+                DELETE FROM savedplaylist WHERE id IN (
+                    SELECT p1.id FROM savedplaylist p1
                     WHERE p1.browseId IS NOT NULL
                     AND EXISTS (
-                        SELECT 1 FROM playlist p2 
+                        SELECT 1 FROM savedplaylist p2 
                         WHERE p2.browseId = p1.browseId 
                         AND p2.id != p1.id
-                        AND (
-                            (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p2.id) >
-                            (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p1.id)
-                            OR (
-                                (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p2.id) =
-                                (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p1.id)
-                                AND p2.rowid < p1.rowid
-                            )
-                        )
-                    )
-                )
-            """)
-            
-            db.execSQL("""
-                DELETE FROM playlist WHERE id IN (
-                    SELECT p1.id FROM playlist p1
-                    WHERE p1.browseId IS NOT NULL
-                    AND EXISTS (
-                        SELECT 1 FROM playlist p2 
-                        WHERE p2.browseId = p1.browseId 
-                        AND p2.id != p1.id
-                        AND (
-                            (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p2.id) >
-                            (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p1.id)
-                            OR (
-                                (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p2.id) =
-                                (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = p1.id)
-                                AND p2.rowid < p1.rowid
-                            )
-                        )
+                        AND p2.rowid < p1.rowid
                     )
                 )
             """)
@@ -633,87 +599,10 @@ private val MIGRATION_1_2 = object : Migration(1, 2) {
             }
         }
         
-        val playlistSongMaps = mutableListOf<PlaylistSongMap>()
-        db.query("SELECT * FROM playlist_song".toSQLiteQuery()).use { cursor ->
-            while (cursor.moveToNext()) {
-                playlistSongMaps.add(PlaylistSongMap(
-                    playlistId = playlistMap[cursor.getInt(1)]!!,
-                    songId = cursor.getString(2),
-                    position = cursor.getInt(3),
-                ))
-            }
-        }
-        playlistSongMaps.sortBy { it.position }
-        
-        val songs = mutableListOf<OldSong>()
-        val songArtistMaps = mutableListOf<SongArtistMap>()
-        db.query("SELECT * FROM song".toSQLiteQuery()).use { cursor ->
-            while (cursor.moveToNext()) {
-                val songId = cursor.getString(0)
-                songs.add(OldSong(
-                    id = songId,
-                    title = cursor.getString(1),
-                    duration = cursor.getInt(3),
-                    liked = cursor.getInt(4) == 1,
-                    totalPlayTime = 0,
-                    downloadState = 0,
-                    createDate = Instant.ofEpochMilli(Date(cursor.getLong(8)).time).atZone(ZoneOffset.UTC).toLocalDateTime(),
-                    modifyDate = Instant.ofEpochMilli(Date(cursor.getLong(9)).time).atZone(ZoneOffset.UTC).toLocalDateTime(),
-                ))
-                songArtistMaps.add(SongArtistMap(songId = songId, artistId = artistMap[cursor.getInt(2)]!!, position = 0))
-            }
-        }
-        
-        // Drop old tables and create new schema
-        db.execSQL("DROP TABLE IF EXISTS song")
-        db.execSQL("DROP TABLE IF EXISTS artist")
-        db.execSQL("DROP TABLE IF EXISTS playlist")
-        db.execSQL("DROP TABLE IF EXISTS playlist_song")
-        
-        db.execSQL("CREATE TABLE IF NOT EXISTS `song` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `duration` INTEGER NOT NULL, `thumbnailUrl` TEXT, `albumId` TEXT, `albumName` TEXT, `liked` INTEGER NOT NULL, `totalPlayTime` INTEGER NOT NULL, `isTrash` INTEGER NOT NULL, `download_state` INTEGER NOT NULL, `create_date` INTEGER NOT NULL, `modify_date` INTEGER NOT NULL, PRIMARY KEY(`id`))")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `artist` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `thumbnailUrl` TEXT, `bannerUrl` TEXT, `description` TEXT, `createDate` INTEGER NOT NULL, `lastUpdateTime` INTEGER NOT NULL, PRIMARY KEY(`id`))")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `album` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `year` INTEGER, `thumbnailUrl` TEXT, `songCount` INTEGER NOT NULL, `duration` INTEGER NOT NULL, `createDate` INTEGER NOT NULL, `lastUpdateTime` INTEGER NOT NULL, PRIMARY KEY(`id`))")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `playlist` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `author` TEXT, `authorId` TEXT, `year` INTEGER, `thumbnailUrl` TEXT, `createDate` INTEGER NOT NULL, `lastUpdateTime` INTEGER NOT NULL, PRIMARY KEY(`id`))")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `song_artist_map` (`songId` TEXT NOT NULL, `artistId` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`songId`, `artistId`), FOREIGN KEY(`songId`) REFERENCES `song`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY(`artistId`) REFERENCES `artist`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_song_artist_map_songId` ON `song_artist_map` (`songId`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_song_artist_map_artistId` ON `song_artist_map` (`artistId`)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `song_album_map` (`songId` TEXT NOT NULL, `albumId` TEXT NOT NULL, `index` INTEGER, PRIMARY KEY(`songId`, `albumId`), FOREIGN KEY(`songId`) REFERENCES `song`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY(`albumId`) REFERENCES `album`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_song_album_map_songId` ON `song_album_map` (`songId`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_song_album_map_albumId` ON `song_album_map` (`albumId`)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `album_artist_map` (`albumId` TEXT NOT NULL, `artistId` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`albumId`, `artistId`), FOREIGN KEY(`albumId`) REFERENCES `album`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY(`artistId`) REFERENCES `artist`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_album_artist_map_albumId` ON `album_artist_map` (`albumId`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_album_artist_map_artistId` ON `album_artist_map` (`artistId`)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `playlist_song_map` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `playlistId` TEXT NOT NULL, `songId` TEXT NOT NULL, `position` INTEGER NOT NULL, FOREIGN KEY(`playlistId`) REFERENCES `playlist`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY(`songId`) REFERENCES `song`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_playlist_song_map_playlistId` ON `playlist_song_map` (`playlistId`)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_playlist_song_map_songId` ON `playlist_song_map` (`songId`)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `download` (`id` INTEGER NOT NULL, `songId` TEXT NOT NULL, PRIMARY KEY(`id`))")
-        db.execSQL("CREATE TABLE IF NOT EXISTS `search_history` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `query` TEXT NOT NULL)")
-        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_search_history_query` ON `search_history` (`query`)")
-        db.execSQL("CREATE VIEW `sorted_song_artist_map` AS SELECT * FROM song_artist_map ORDER BY position")
-        db.execSQL("CREATE VIEW `playlist_song_map_preview` AS SELECT * FROM playlist_song_map WHERE position <= 3 ORDER BY position")
-        
-        // Insert data
-        artists.forEach { db.insert("artist", SQLiteDatabase.CONFLICT_ABORT, contentValuesOf(
-            "id" to it.id, "name" to it.name,
-            "createDate" to converters.dateToTimestamp(it.lastUpdateTime),
-            "lastUpdateTime" to converters.dateToTimestamp(it.lastUpdateTime))) }
-        
-        songs.forEach { db.insert("song", SQLiteDatabase.CONFLICT_ABORT, contentValuesOf(
-            "id" to it.id, "title" to it.title, "duration" to it.duration, "liked" to it.liked,
-            "totalPlayTime" to it.totalPlayTime, "isTrash" to false, "download_state" to it.downloadState,
-            "create_date" to converters.dateToTimestamp(it.createDate),
-            "modify_date" to converters.dateToTimestamp(it.modifyDate))) }
-        
-        songArtistMaps.forEach { db.insert("song_artist_map", SQLiteDatabase.CONFLICT_ABORT, contentValuesOf(
-            "songId" to it.songId, "artistId" to it.artistId, "position" to it.position)) }
-        
         playlists.forEach { db.insert("playlist", SQLiteDatabase.CONFLICT_ABORT, contentValuesOf(
             "id" to it.id, "name" to it.name,
             "createDate" to converters.dateToTimestamp(LocalDateTime.now()),
             "lastUpdateTime" to converters.dateToTimestamp(LocalDateTime.now()))) }
-        
-        playlistSongMaps.forEach { db.insert("playlist_song_map", SQLiteDatabase.CONFLICT_ABORT, contentValuesOf(
-            "playlistId" to it.playlistId, "songId" to it.songId, "position" to it.position)) }
     }
 }
 

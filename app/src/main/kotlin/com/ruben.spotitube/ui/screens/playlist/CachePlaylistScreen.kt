@@ -8,7 +8,6 @@
 
 package com.ruben.spotitube.ui.screens.playlist
 
-import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.ArmoryGradients
 import androidx.compose.material3.ButtonDefaults
 
@@ -45,12 +44,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
-import com.ruben.spotitube.SectionHeader
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -103,7 +100,6 @@ import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.DraggableScrollbar
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.SortHeader
@@ -111,13 +107,11 @@ import com.ruben.spotitube.ui.menu.SelectionSongMenu
 import com.ruben.spotitube.ui.menu.SongMenu
 import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.CachePlaylistViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
 
 @Composable
 fun CachePlaylistScreen(
@@ -131,9 +125,9 @@ fun CachePlaylistScreen(
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
 
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val cachedSongs by viewModel.cachedSongs.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val cachedSongs by viewModel.cachedSongs.collectAsStateWithLifecycle()
 
     val (sortType, onSortTypeChange) = rememberEnumPreference(
         SongSortTypeKey,
@@ -145,12 +139,12 @@ fun CachePlaylistScreen(
 
     val wrappedSongs = remember(cachedSongs, sortType, sortDescending) {
         val sortedSongs = when (sortType) {
-            SongSortType.CREATE_DATE -> cachedSongs.sortedBy { it.song.dateDownload ?: LocalDateTime.MIN }
+            SongSortType.CREATE_DATE -> cachedSongs
             SongSortType.NAME -> cachedSongs.sortedBy { it.song.title }
             SongSortType.ARTIST -> cachedSongs.sortedBy { song ->
                 song.artists.joinToString(separator = "") { artist -> artist.name }
             }
-            SongSortType.PLAY_TIME -> cachedSongs.sortedBy { it.song.totalPlayTime }
+            SongSortType.PLAY_TIME -> cachedSongs
         }.let { if (sortDescending) it.reversed() else it }
 
         sortedSongs.map { song -> ItemWrapper(song) }

@@ -319,6 +319,22 @@ constructor(
                     }
             }
 
+            if (items.isEmpty()) {
+                val existingIds = items.map { it.mediaId }.toSet()
+                val ytSongs = runCatching {
+                    kotlinx.coroutines.withTimeoutOrNull(3000L) {
+                        com.ruben.spotitube.innertube.YouTube.search(q, com.ruben.spotitube.innertube.YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items
+                            ?.filterIsInstance<com.ruben.spotitube.innertube.models.SongItem>()
+                            ?.map { it.toMediaItem() }
+                            ?.filterNot { existingIds.contains(it.mediaId) }
+                            ?.take(requested)
+                    }
+                }.getOrNull()
+                if (!ytSongs.isNullOrEmpty()) {
+                    items.addAll(ytSongs)
+                }
+            }
+
             val from = page * pageSize
             if (from >= items.size) return@future LibraryResult.ofItemList(emptyList(), params)
             val to = min(from + pageSize, items.size)
@@ -501,9 +517,7 @@ constructor(
                                     }
 
                                     else ->
-                                        database.playlistSongs(playlistId).map { list ->
-                                            list.map { it.song }
-                                        }
+                                        database.playlistSongs(playlistId)
                                 }.first().map {
                                     it.toMediaItem(parentId)
                                 }
@@ -723,9 +737,7 @@ constructor(
                             }
 
                             else ->
-                                database.playlistSongs(playlistId).map { list ->
-                                    list.map { it.song }
-                                }
+                                database.playlistSongs(playlistId)
                         }.first()
                     MediaSession.MediaItemsWithStartPosition(
                         songs.map { it.toMediaItem() },

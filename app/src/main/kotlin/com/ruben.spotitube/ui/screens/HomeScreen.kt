@@ -32,7 +32,7 @@ import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,7 +55,6 @@ import com.ruben.spotitube.ArmoryHeader
 import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.constants.InnerTubeCookieKey
 import com.ruben.spotitube.innertube.utils.parseCookieString
-import com.google.firebase.auth.FirebaseAuth
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
@@ -76,19 +75,19 @@ fun HomeScreen(
     val playerConnection = LocalPlayerConnection.current ?: return
     val haptic = LocalHapticFeedback.current
 
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
-    val quickPicks by viewModel.quickPicks.collectAsState()
-    val speedDialItems by viewModel.speedDialItems.collectAsState()
-    val forgottenFavorites by viewModel.forgottenFavorites.collectAsState()
-    val forgottenFavoritesDaysRemaining by viewModel.forgottenFavoritesDaysRemaining.collectAsState()
-    val keepListening by viewModel.keepListening.collectAsState()
-    val homePage by viewModel.homePage.collectAsState()
-    val allItemsMetadata by viewModel.allItemsMetadata.collectAsState()
+    val quickPicks by viewModel.quickPicks.collectAsStateWithLifecycle()
+    val speedDialItems by viewModel.speedDialItems.collectAsStateWithLifecycle()
+    val forgottenFavorites by viewModel.forgottenFavorites.collectAsStateWithLifecycle()
+    val forgottenFavoritesDaysRemaining by viewModel.forgottenFavoritesDaysRemaining.collectAsStateWithLifecycle()
+    val keepListening by viewModel.keepListening.collectAsStateWithLifecycle()
+    val homePage by viewModel.homePage.collectAsStateWithLifecycle()
+    val allItemsMetadata by viewModel.allItemsMetadata.collectAsStateWithLifecycle()
 
-    val isInitialLoadComplete by viewModel.isInitialLoadComplete.collectAsState()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isInitialLoadComplete by viewModel.isInitialLoadComplete.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(isInitialLoadComplete) {
@@ -99,7 +98,7 @@ fun HomeScreen(
 
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
-    val accountImageUrl by viewModel.accountImageUrl.collectAsState()
+    val accountImageUrl by viewModel.accountImageUrl.collectAsStateWithLifecycle()
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
@@ -111,7 +110,7 @@ fun HomeScreen(
     val lazylistState = rememberLazyListState()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val scrollToTop =
-        backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
+        backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsStateWithLifecycle()
 
     LaunchedEffect(scrollToTop?.value) {
         if (scrollToTop?.value == true) {
@@ -175,7 +174,10 @@ fun HomeScreen(
                     contentPadding = PaddingValues(bottom = 90.dp)
                 ) {
                     // 1. Selecciones rápidas (Quick Picks)
-                    item {
+                    item(
+                        key = "quick_picks",
+                        contentType = "section"
+                    ) {
                         NavigationTitle(
                             title = "Selecciones rápidas",
                             modifier = Modifier.padding(top = 8.dp)
@@ -197,7 +199,10 @@ fun HomeScreen(
                     }
 
                     // 2. Marcado rápido (Speed Dial)
-                    item {
+                    item(
+                        key = "speed_dial",
+                        contentType = "section"
+                    ) {
                         NavigationTitle(
                             title = "Marcado rápido",
                             modifier = Modifier.padding(top = 24.dp)
@@ -235,7 +240,10 @@ fun HomeScreen(
                     }
 
                     // 3. Sigue escuchando (Keep Listening)
-                    item {
+                    item(
+                        key = "keep_listening",
+                        contentType = "section"
+                    ) {
                         NavigationTitle(
                             title = "Sigue escuchando",
                             modifier = Modifier.padding(top = 24.dp)
@@ -258,7 +266,10 @@ fun HomeScreen(
                     }
 
                     // 4. Tus favoritos del pasado (Forgotten Favorites)
-                    item {
+                    item(
+                        key = "forgotten_favorites",
+                        contentType = "section"
+                    ) {
                         NavigationTitle(
                             title = "Tus favoritos del pasado",
                             modifier = Modifier.padding(top = 24.dp)

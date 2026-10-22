@@ -14,11 +14,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.AlbumWithSongs
-import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.models.toAlbumWithSongs
-import com.ruben.spotitube.models.toSavedSongEntity
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.sync.SyncManager
 import com.ruben.spotitube.utils.reportException
@@ -27,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -125,29 +122,6 @@ constructor(
                 ?: database.getSavedAlbum(albumId)?.toAlbum()?.album
 
             if (album != null) {
-                database.withTransaction {
-                    if (database.getSavedAlbum(album.id) == null) {
-                        database.insertSavedAlbum(
-                            SavedAlbumEntity(
-                                id = album.id,
-                                playlistId = playlistId.value.ifEmpty { album.playlistId },
-                                title = album.title,
-                                artistId = album.artistId,
-                                artistName = album.artistName,
-                                songCount = album.songCount,
-                                duration = album.duration,
-                                thumbnailUrl = album.thumbnailUrl,
-                                year = album.year,
-                                explicit = album.explicit
-                            )
-                        )
-                        current?.songs?.forEach { song ->
-                            database.upsertSongPreservingUsage(song.toSavedSongEntity())
-                        }
-                    } else {
-                        database.deleteSavedAlbum(album.id)
-                    }
-                }
                 syncManager.toggleAlbumLike(album)
             } else {
                 syncManager.toggleAlbumLike(

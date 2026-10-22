@@ -7,7 +7,7 @@
 
 package com.ruben.spotitube.utils
 
-import com.ruben.spotitube.db.entities.PlaylistSong
+import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.models.PlaylistSuggestionQuery
 import java.time.LocalDateTime
 import java.time.Year
@@ -32,7 +32,7 @@ object PlaylistSuggestionQueryBuilder {
     
     fun buildSuggestionQueries(
         playlistName: String,
-        playlistSongs: List<PlaylistSong>
+        playlistSongs: List<Song>
     ): List<PlaylistSuggestionQuery> {
         val queries = mutableListOf<PlaylistSuggestionQuery>()
         
@@ -100,9 +100,9 @@ object PlaylistSuggestionQueryBuilder {
         }
     }
     
-    private fun extractArtists(playlistSongs: List<PlaylistSong>): List<String> {
+    private fun extractArtists(playlistSongs: List<Song>): List<String> {
         return playlistSongs
-            .flatMap { it.song.artists }
+            .flatMap { it.artists }
             .map { it.name }
             .groupBy { it }
             .mapValues { it.value.size }

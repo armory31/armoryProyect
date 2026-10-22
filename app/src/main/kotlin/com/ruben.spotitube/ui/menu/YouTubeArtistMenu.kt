@@ -26,7 +26,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -56,7 +56,7 @@ fun YouTubeArtistMenu(
     val syncManager = LocalSyncManager.current
     val scope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsState(initial = false)
+    val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
 
     YouTubeListItem(
         item = artist,

@@ -16,11 +16,16 @@ data class SavedPlaylistEntity(
     @ColumnInfo(defaultValue = "1")
     val isEditable: Boolean = true,
     val thumbnailUrl: String? = null,
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val songs: List<PlaylistSongItem> = emptyList()
 ) {
     fun toPlaylist(
-        songCount: Int = 0,
-        songThumbnails: List<String?> = if (thumbnailUrl != null) listOf(thumbnailUrl) else emptyList()
+        songCount: Int = songs.size,
+        songThumbnails: List<String?> = if (thumbnailUrl != null) {
+            listOf(thumbnailUrl)
+        } else {
+            songs.take(4).map { it.thumbnailUrl }
+        }
     ): Playlist {
         val playlistEntity = PlaylistEntity(
             id = id,
@@ -41,4 +46,3 @@ data class SavedPlaylistEntity(
         fun generatePlaylistId() = "LP" + RandomStringUtils.insecure().next(8, true, false)
     }
 }
-

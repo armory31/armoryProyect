@@ -22,13 +22,6 @@ data class SavedSongEntity(
     val year: Int? = null,
     val date: LocalDateTime? = null,
     val dateModified: LocalDateTime? = null,
-    val totalPlayTime: Long = 0,
-    val dateDownload: LocalDateTime? = LocalDateTime.now(),
-    @ColumnInfo(name = "isLocal", defaultValue = "0")
-    val isLocal: Boolean = false,
-    @ColumnInfo(name = "isLiked", defaultValue = "1")
-    val isLiked: Boolean = false,
-    val bookmarkedAt: LocalDateTime? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {
     fun toSong(): Song {

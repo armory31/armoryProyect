@@ -37,7 +37,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -109,9 +108,9 @@ fun YouTubeSongMenu(
     
     val isLiked by remember(song.id, libraryStateHolder) {
         libraryStateHolder.savedSongIds.map { song.id in it }
-    }.collectAsState(initial = false)
+    }.collectAsStateWithLifecycle(initialValue = false)
     
-    val download by LocalDownloadUtil.current.getDownload(song.id).collectAsState(initial = null)
+    val download by LocalDownloadUtil.current.getDownload(song.id).collectAsStateWithLifecycle(initialValue = null)
     val coroutineScope = rememberCoroutineScope()
     val artists = remember {
         song.artists.mapNotNull {
@@ -157,11 +156,8 @@ fun YouTubeSongMenu(
     AddToPlaylistDialog(  
         isVisible = showChoosePlaylistDialog,  
         onGetSong = { playlist ->  
-            coroutineScope.launch(Dispatchers.IO) {
-                database.withTransaction {
-                    insert(song.toMediaMetadata())
-                }
-                playlist.playlist.browseId?.let { browseId ->
+            playlist.playlist.browseId?.let { browseId ->
+                coroutineScope.launch(Dispatchers.IO) {
                     YouTube.addToPlaylist(browseId, song.id)
                 }
             }
@@ -455,18 +451,7 @@ fun YouTubeSongMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                val existing = database.getSavedSong(song.id)
-                                val isLiked = existing?.isLiked ?: false
-                                database.insertSavedSong(
-                                    song.toSavedSongEntity().copy(isLiked = isLiked)
-                                )
-                            }
-                            val downloadRequest = DownloadRequest
-                                .Builder(song.id, song.id.toUri())
-                                .setCustomCacheKey(song.id)
-                                .setData(song.title.toByteArray())
-                                .build()
+                            val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                             DownloadService.sendAddDownload(
                                 context,
                                 ExoDownloadService::class.java,

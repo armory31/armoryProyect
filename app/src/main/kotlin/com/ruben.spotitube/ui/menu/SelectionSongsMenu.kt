@@ -42,11 +42,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalDownloadUtil
@@ -54,11 +52,9 @@ import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
-import com.ruben.spotitube.db.entities.PlaylistSongMap
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.models.MediaMetadata
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.DefaultDialog
@@ -75,7 +71,7 @@ fun SelectionSongMenu(
     songSelection: List<Song>,
     onDismiss: () -> Unit,
     clearAction: () -> Unit,
-    songPosition: List<PlaylistSongMap>? = emptyList(),
+    songPosition: List<com.ruben.spotitube.db.entities.PlaylistSong>? = emptyList(),
 ) {
     val context = LocalContext.current
     val database = LocalDatabase.current
@@ -361,22 +357,22 @@ fun SelectionSongMenu(
                     )
                 },
                 modifier = Modifier.clickable {
-                    onDismiss()
-                    coroutineScope.launch {
-                        if (allInLibrary) {
-                            songSelection.forEach { song ->
-                                syncManager.toggleLike(song.song)
-                            }
-                        } else {
-                            songSelection.forEach { song ->
-                                // Asegurarse de que esté en la DB local antes de sincronizar
-                                database.upsertSongPreservingUsage(song.toMediaMetadata().toSavedSongEntity())
-                                if (song.id !in libraryStateHolder.savedSongIds.first()) {
-                                    syncManager.toggleLike(song.song)
+                    val appScope = (context.applicationContext as? com.ruben.spotitube.App)?.applicationScope ?: coroutineScope
+                    appScope.launch(Dispatchers.IO) {
+                        val savedIds = database.getSavedSongIds().first().toSet()
+                        val allSaved = songSelection.all { it.id in savedIds }
+                        database.query {
+                            if (allSaved) {
+                                songSelection.forEach { song ->
+                                    deleteSavedSong(song.id)
                                 }
+                            } else {
+                                val missing = songSelection.filter { it.id !in savedIds }
+                                insertSavedSongs(missing.map { it.song })
                             }
                         }
                     }
+                    onDismiss()
                     clearAction()
                 }
             )
@@ -427,12 +423,7 @@ fun SelectionSongMenu(
                         },
                         modifier = Modifier.clickable {
                             songSelection.forEach { song ->
-                                val downloadRequest =
-                                    DownloadRequest
-                                        .Builder(song.id, song.id.toUri())
-                                        .setCustomCacheKey(song.id)
-                                        .setData(song.song.title.toByteArray())
-                                        .build()
+                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                                 DownloadService.sendAddDownload(
                                     context,
                                     ExoDownloadService::class.java,
@@ -463,16 +454,23 @@ fun SelectionSongMenu(
                     )
                 },
                 modifier = Modifier.clickable {
-                    coroutineScope.launch {
-                        val likedIds = libraryStateHolder.savedSongIds.first()
-                        val allLikedLocally = songSelection.all { it.id in likedIds }
-                        onDismiss()
-                        songSelection.forEach { song ->
-                            if ((!allLikedLocally && song.id !in likedIds) || allLikedLocally) {
-                                syncManager.toggleLike(song.song)
+                    val appScope = (context.applicationContext as? com.ruben.spotitube.App)?.applicationScope ?: coroutineScope
+                    appScope.launch(Dispatchers.IO) {
+                        val savedIds = database.getSavedSongIds().first().toSet()
+                        val allSaved = songSelection.all { it.id in savedIds }
+                        database.query {
+                            if (allSaved) {
+                                songSelection.forEach { song ->
+                                    deleteSavedSong(song.id)
+                                }
+                            } else {
+                                val missing = songSelection.filter { it.id !in savedIds }
+                                insertSavedSongs(missing.map { it.song })
                             }
                         }
                     }
+                    onDismiss()
+                    clearAction()
                 }
             )
         }
@@ -488,13 +486,10 @@ fun SelectionSongMenu(
                     },
                     modifier = Modifier.clickable {
                         coroutineScope.launch(Dispatchers.IO) {
-                            database.withTransaction {
-                                var i = 0
-                                songPosition?.forEach { cur ->
-                                    move(cur.playlistId, cur.position - i, Int.MAX_VALUE)
-                                    delete(cur.copy(position = Int.MAX_VALUE))
-                                    i++
-                                }
+                            val playlistId = songPosition?.firstOrNull()?.playlistId
+                            val indices = songPosition?.map { it.position } ?: emptyList()
+                            if (playlistId != null && indices.isNotEmpty()) {
+                                database.removeSongsFromPlaylist(playlistId, indices)
                             }
                             withContext(Dispatchers.Main) {
                                 onDismiss()
@@ -733,7 +728,9 @@ fun SelectionMediaMetadataMenu(
             ListItem(
                 headlineContent = {
                     Text(
-                        text = stringResource(R.string.like_all)
+                        text = stringResource(
+                            if (allLiked) R.string.dislike_all else R.string.like_all
+                        )
                     )
                 },
                 leadingContent = {
@@ -745,19 +742,23 @@ fun SelectionMediaMetadataMenu(
                     )
                 },
                 modifier = Modifier.clickable {
-                    coroutineScope.launch {
-                        val likedIds = libraryStateHolder.savedSongIds.first()
-                        if (allLiked) {
-                            songSelection.forEach { song ->
-                                syncManager.toggleLike(song.toSavedSongEntity())
-                            }
-                        } else {
-                            songSelection.filter { it.id !in likedIds }.forEach { song ->
-                                database.insertSavedSong(song.toSavedSongEntity())
-                                syncManager.toggleLike(song.toSavedSongEntity())
+                    val appScope = (context.applicationContext as? com.ruben.spotitube.App)?.applicationScope ?: coroutineScope
+                    appScope.launch(Dispatchers.IO) {
+                        val savedIds = database.getSavedSongIds().first().toSet()
+                        val allSaved = songSelection.all { it.id in savedIds }
+                        database.query {
+                            if (allSaved) {
+                                songSelection.forEach { media ->
+                                    deleteSavedSong(media.id)
+                                }
+                            } else {
+                                val missing = songSelection.filter { it.id !in savedIds }
+                                insertSavedSongs(missing.map { it.toSavedSongEntity() })
                             }
                         }
                     }
+                    onDismiss()
+                    clearAction()
                 }
             )
         }
@@ -806,13 +807,8 @@ fun SelectionMediaMetadataMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            songSelection.forEach { song ->
-                                val downloadRequest =
-                                    DownloadRequest
-                                        .Builder(song.id, song.id.toUri())
-                                        .setCustomCacheKey(song.id)
-                                        .setData(song.title.toByteArray())
-                                        .build()
+                            songSelection.forEach { media ->
+                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(media)
                                 DownloadService.sendAddDownload(
                                     context,
                                     ExoDownloadService::class.java,

@@ -33,7 +33,7 @@ import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -104,14 +104,14 @@ fun LibraryPlaylistsScreen(
     val database = LocalDatabase.current
 
     val playerConnection = LocalPlayerConnection.current
-    val isPlaying by playerConnection?.isPlaying?.collectAsState(initial = false) ?: remember { mutableStateOf(false) }
-    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsState(initial = null) ?: remember { mutableStateOf(null) }
+    val isPlaying by playerConnection?.isPlaying?.collectAsStateWithLifecycle(initialValue = false) ?: remember { mutableStateOf(false) }
+    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsStateWithLifecycle(initialValue = null) ?: remember { mutableStateOf(null) }
 
     var albumViewType by rememberEnumPreference(AlbumViewTypeKey, LibraryViewType.LIST)
     var artistViewType by rememberEnumPreference(ArtistViewTypeKey, LibraryViewType.LIST)
 
-    val albums by albumsViewModel.allAlbums.collectAsState()
-    val artists by artistsViewModel.allArtists.collectAsState()
+    val albums by albumsViewModel.allAlbums.collectAsStateWithLifecycle()
+    val artists by artistsViewModel.allArtists.collectAsStateWithLifecycle()
 
     val (sortType, onSortTypeChange) = rememberEnumPreference(
         PlaylistSortTypeKey,
@@ -127,9 +127,9 @@ fun LibraryPlaylistsScreen(
     }
     val filteredPlaylistIds by database.playlistIdsByTags(
         if (selectedTagIds.isEmpty()) emptyList() else selectedTagIds.toList(),
-    ).collectAsState(initial = emptyList())
+    ).collectAsStateWithLifecycle(initialValue = emptyList())
 
-    val playlists by viewModel.allPlaylists.collectAsState()
+    val playlists by viewModel.allPlaylists.collectAsStateWithLifecycle()
     val visiblePlaylists = remember(playlists, selectedTagIds, filteredPlaylistIds) {
         playlists.filter { playlist ->
             val name = playlist.playlist.name
@@ -139,7 +139,7 @@ fun LibraryPlaylistsScreen(
         }
     }
 
-    val topSize by viewModel.topValue.collectAsState(initial = "50")
+    val topSize by viewModel.topValue.collectAsStateWithLifecycle(initialValue = "50")
     val likedTitle = stringResource(R.string.liked)
     val downloadedTitle = stringResource(R.string.offline)
     val cachedTitle = stringResource(R.string.cached_playlist)
@@ -285,7 +285,7 @@ fun LibraryPlaylistsScreen(
     }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
+    val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsStateWithLifecycle()
 
     LaunchedEffect(scrollToTop?.value) {
         if (scrollToTop?.value == true) {
@@ -294,13 +294,9 @@ fun LibraryPlaylistsScreen(
         }
     }
 
-    LaunchedEffect(ytmSync, allowSyncing) {
-        if (ytmSync && allowSyncing) {
-            viewModel.sync()
-        }
-    }
 
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
     val summary = pluralStringResource(R.plurals.n_playlist, visiblePlaylists.size, visiblePlaylists.size)
 

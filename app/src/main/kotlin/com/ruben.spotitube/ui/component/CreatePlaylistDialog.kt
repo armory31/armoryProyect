@@ -255,7 +255,22 @@ suspend fun importCsvPlaylistAndFetchMetadata(
 
         if (songId.isNotBlank()) {
             if (database.checkInPlaylist(playlistId, songId) == 0) {
-                database.addSongsToPlaylist(playlistId, listOf(songId))
+                val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(listOf(songId), timeoutMs = 5000L)
+                val item = resolvedMap[songId]?.let { songItem ->
+                    com.ruben.spotitube.db.entities.PlaylistSongItem(
+                        id = songItem.id,
+                        title = songItem.title,
+                        artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                        thumbnailUrl = songItem.thumbnail,
+                        duration = songItem.duration ?: -1,
+                        albumId = songItem.album?.id,
+                        albumName = songItem.album?.name,
+                        explicit = songItem.explicit
+                    )
+                }
+                if (item != null) {
+                    database.addSongsToPlaylist(playlistId, listOf(item))
+                }
             }
         }
         onProgress?.invoke(index + 1, total)

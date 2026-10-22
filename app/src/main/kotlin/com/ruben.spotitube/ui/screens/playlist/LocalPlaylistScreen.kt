@@ -54,15 +54,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
-import com.ruben.spotitube.SectionHeader
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -70,7 +68,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
@@ -102,11 +99,9 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastSumBy
 import androidx.compose.ui.zIndex
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
@@ -128,15 +123,12 @@ import com.ruben.spotitube.constants.PlaylistSongSortType
 import com.ruben.spotitube.constants.PlaylistSongSortTypeKey
 import com.ruben.spotitube.constants.SwipeToSongKey
 import com.ruben.spotitube.db.entities.PlaylistSong
-import com.ruben.spotitube.db.entities.PlaylistSongMap
-import com.ruben.spotitube.db.entities.SavedPlaylistEntity
+import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.move
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.innertube.YouTube
-import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.utils.completed
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.LocalMixQueue
@@ -153,7 +145,6 @@ import com.ruben.spotitube.ui.menu.SelectionSongMenu
 import com.ruben.spotitube.ui.menu.SongMenu
 import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.ui.utils.formatCompactCount
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberEnumPreference
@@ -164,9 +155,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import java.time.LocalDateTime
 
 @SuppressLint("RememberReturnType", "LocalContextGetResourceValueCall")
+data class PlaylistSongWrapper(
+    val song: Song,
+    val entryKey: String
+)
+
 @Composable
 fun LocalPlaylistScreen(
     navController: NavController,
@@ -178,17 +173,17 @@ fun LocalPlaylistScreen(
     val database = LocalDatabase.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
-    val playlist by viewModel.playlist.collectAsState()
-    val isLiked by viewModel.isLiked.collectAsState()
-    val songs by viewModel.playlistSongs.collectAsState()
-    val viewCounts by viewModel.viewCounts.collectAsState()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val mutableSongs = remember { mutableStateListOf<PlaylistSong>() }
+    val playlist by viewModel.playlist.collectAsStateWithLifecycle()
+    val isLiked by viewModel.isLiked.collectAsStateWithLifecycle()
+    val songs by viewModel.playlistSongs.collectAsStateWithLifecycle()
+    val viewCounts by viewModel.viewCounts.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val mutableSongs = remember { mutableStateListOf<PlaylistSongWrapper>() }
     val playlistLength = remember(songs) {
-        songs.fastSumBy { it.song.song.duration }
+        songs.fastSumBy { it.song.duration }
     }
     val (sortType, onSortTypeChange) = rememberEnumPreference(
         PlaylistSongSortTypeKey,
@@ -228,8 +223,8 @@ fun LocalPlaylistScreen(
             songs
         } else {
             songs.filter { song ->
-                song.song.song.title.contains(query.text, ignoreCase = true) ||
-                        song.song.artists.fastAny { it.name.contains(query.text, ignoreCase = true) }
+                song.song.title.contains(query.text, ignoreCase = true) ||
+                        song.artists.fastAny { it.name.contains(query.text, ignoreCase = true) }
             }
         }
     }
@@ -246,6 +241,19 @@ fun LocalPlaylistScreen(
     val wrappedSongs = remember(filteredSongs) {
         filteredSongs.map { item -> ItemWrapper(item) }
     }.toMutableStateList()
+
+    val displayItems = remember(isSearching, filteredSongs, mutableSongs) {
+        if (isSearching) {
+            val counts = mutableMapOf<String, Int>()
+            filteredSongs.map { song ->
+                val count = counts.getOrDefault(song.id, 0)
+                counts[song.id] = count + 1
+                PlaylistSongWrapper(song = song, entryKey = "${song.id}#$count")
+            }
+        } else {
+            mutableSongs
+        }
+    }
 
     if (isSearching) {
         BackHandler {
@@ -264,11 +272,16 @@ fun LocalPlaylistScreen(
     val editable: Boolean = playlist?.playlist?.isEditable == true
 
     LaunchedEffect(songs) {
+        val counts = mutableMapOf<String, Int>()
+        val wrapped = songs.map { song ->
+            val count = counts.getOrDefault(song.id, 0)
+            counts[song.id] = count + 1
+            PlaylistSongWrapper(song = song, entryKey = "${song.id}#$count")
+        }
         mutableSongs.apply {
             clear()
-            addAll(songs)
+            addAll(wrapped)
         }
-        if (songs.isEmpty()) return@LaunchedEffect
         downloadUtil.downloads.collect { downloads ->
             downloadState =
                 if (songs.all { downloads[it.song.id]?.state == Download.STATE_COMPLETED }) {
@@ -296,25 +309,19 @@ fun LocalPlaylistScreen(
                 fallbackThumbnails = playlistData.songThumbnails.filterNotNull(),
                 onDismiss = { showEditDialog = false },
                 onSave = { name, thumbnailUrl ->
-                    database.query {
-                        val updated = playlistData.playlist.copy(
-                            name = name,
-                            thumbnailUrl = thumbnailUrl,
-                            lastUpdateTime = LocalDateTime.now(),
-                        )
-                        database.insertSavedPlaylist(
-                            SavedPlaylistEntity(
-                                id = updated.id,
-                                name = updated.name,
-                                browseId = updated.browseId,
-                                isEditable = updated.isEditable,
-                                thumbnailUrl = updated.thumbnailUrl,
-                                createdAt = updated.createdAt ?: LocalDateTime.now()
-                            )
-                        )
-                        update(updated)
-                    }
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
+                        val existing = database.getSavedPlaylist(playlistData.playlist.id)
+                        if (existing != null) {
+                            database.insertSavedPlaylist(
+                                existing.copy(
+                                    name = name,
+                                    thumbnailUrl = thumbnailUrl
+                                )
+                            )
+                        } else {
+                            database.updatePlaylistTitle(playlistData.playlist.id, name)
+                            database.updatePlaylistThumbnail(playlistData.playlist.id, thumbnailUrl)
+                        }
                         playlistData.playlist.browseId?.let { YouTube.renamePlaylist(it, name) }
                     }
                 },
@@ -436,17 +443,15 @@ fun LocalPlaylistScreen(
     LaunchedEffect(reorderableState.isAnyItemDragging) {
         if (!reorderableState.isAnyItemDragging) {
             dragInfo?.let { (from, to) ->
-                database.withTransaction {
-                    move(viewModel.playlistId, from, to)
-                }
+                database.moveSongInPlaylist(viewModel.playlistId, from, to)
 
                 if (viewModel.playlist.value?.playlist?.browseId != null) {
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
-                        val playlistSongMap = database.playlistSongMaps(viewModel.playlistId, 0)
+                        val playlistSongs = database.getSavedPlaylist(viewModel.playlistId)?.songs ?: emptyList()
                         val successorIndex = if (from > to) to else to + 1
-                        val successorSetVideoId = playlistSongMap.getOrNull(successorIndex)?.setVideoId
+                        val successorSetVideoId = playlistSongs.getOrNull(successorIndex)?.setVideoId
 
-                        playlistSongMap.getOrNull(from)?.setVideoId?.let { setVideoId ->
+                        playlistSongs.getOrNull(from)?.setVideoId?.let { setVideoId ->
                             YouTube.moveSongPlaylist(
                                 viewModel.playlist.value?.playlist?.browseId!!,
                                 setVideoId,
@@ -854,7 +859,7 @@ fun LocalPlaylistScreen(
                                             playerConnection.playQueue(
                                                 ListQueue(
                                                     title = playlist.playlist.name,
-                                                    items = songs.map { it.song.toMediaItem() },
+                                                    items = songs.map { it.toMediaItem() },
                                                 ),
                                             )
                                         },
@@ -883,7 +888,7 @@ fun LocalPlaylistScreen(
                                             playerConnection.playQueue(
                                                 ListQueue(
                                                     title = playlist.playlist.name,
-                                                    items = songs.shuffled().map { it.song.toMediaItem() },
+                                                    items = songs.shuffled().map { it.toMediaItem() },
                                                 ),
                                             )
                                         },
@@ -925,11 +930,7 @@ fun LocalPlaylistScreen(
                                                 }
                                                 else -> {
                                                     songs.forEach { song ->
-                                                        val downloadRequest = DownloadRequest
-                                                            .Builder(song.song.id, song.song.id.toUri())
-                                                            .setCustomCacheKey(song.song.id)
-                                                            .setData(song.song.song.title.toByteArray())
-                                                            .build()
+                                                        val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                                                         DownloadService.sendAddDownload(
                                                             context,
                                                             ExoDownloadService::class.java,
@@ -979,6 +980,7 @@ fun LocalPlaylistScreen(
                                     }
 
                                     // More Options Button (Bronce Metálico - El de al lado)
+                                    val syncedMessage = stringResource(R.string.playlist_synced)
                                     Surface(
                                         onClick = {
                                             // Show more options (edit, sync, queue)
@@ -989,24 +991,27 @@ fun LocalPlaylistScreen(
                                                     val playlistPage = YouTube.playlist(playlist.playlist.browseId)
                                                         .completed()
                                                         .getOrNull() ?: return@launch
+                                                    val songItems = playlistPage.songs.map { song ->
+                                                        com.ruben.spotitube.db.entities.PlaylistSongItem(
+                                                            id = song.id,
+                                                            title = song.title,
+                                                            artistName = song.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                                                            thumbnailUrl = song.thumbnail,
+                                                            duration = song.duration ?: -1,
+                                                            albumId = song.album?.id,
+                                                            albumName = song.album?.name,
+                                                            explicit = song.explicit
+                                                        )
+                                                    }
                                                     database.withTransaction {
-                                                        clearPlaylist(playlist.id)
-                                                        playlistPage.songs
-                                                            .map(SongItem::toMediaMetadata)
-                                                            .onEach(::insert)
-                                                            .mapIndexed { position, song ->
-                                                                PlaylistSongMap(
-                                                                    songId = song.id,
-                                                                    playlistId = playlist.id,
-                                                                    position = position,
-                                                                    setVideoId = song.setVideoId
-                                                                )
-                                                            }
-                                                            .forEach(::insert)
+                                                        val existing = database.getSavedPlaylist(playlist.id)
+                                                        if (existing != null) {
+                                                            database.insertSavedPlaylist(existing.copy(songs = songItems))
+                                                        }
                                                     }
                                                 }
                                                 coroutineScope.launch(Dispatchers.Main) {
-                                                    snackbarHostState.showSnackbar(context.getString(R.string.playlist_synced))
+                                                    snackbarHostState.showSnackbar(syncedMessage)
                                                 }
                                             }
                                         },
@@ -1108,32 +1113,21 @@ fun LocalPlaylistScreen(
             // Songs List
             if (!selection) {
                 itemsIndexed(
-                    items = if (isSearching) filteredSongs else mutableSongs,
-                    key = { _, song -> song.map.id },
-                ) { index, song ->
+                    items = displayItems,
+                    key = { _, wrapper -> wrapper.entryKey },
+                    contentType = { _, _ -> "playlist_song_item" },
+                ) { index, wrapper ->
+                    val song = wrapper.song
                     ReorderableItem(
                         state = reorderableState,
-                        key = song.map.id,
+                        key = wrapper.entryKey,
                         modifier = Modifier.graphicsLayer {
                             compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                         }
                     ) {
-                        val currentItem by rememberUpdatedState(song)
-
                         fun deleteFromPlaylist() {
-                            val map = currentItem.map
-                            val browseId = playlist?.playlist?.browseId
                             coroutineScope.launch(Dispatchers.IO) {
-                                database.withTransaction {
-                                    move(map.playlistId, map.position, Int.MAX_VALUE)
-                                    delete(map.copy(position = Int.MAX_VALUE))
-                                }
-                                if (browseId != null) {
-                                    val setVideoId = map.setVideoId ?: database.getSetVideoId(map.songId)?.setVideoId
-                                    if (setVideoId != null) {
-                                        YouTube.removeFromPlaylist(browseId, map.songId, setVideoId)
-                                    }
-                                }
+                                database.removeSongFromPlaylist(viewModel.playlistId, index)
                             }
                         }
 
@@ -1161,18 +1155,18 @@ fun LocalPlaylistScreen(
 
                         val content: @Composable () -> Unit = {
                             SongListItem(
-                                song = song.song,
+                                song = song,
                                 viewCountText =
-                                    viewCounts[song.song.id]?.let { count -> formatCompactCount(count.toLong()) },
-                                isActive = song.song.id == mediaMetadata?.id,
+                                    viewCounts[song.id]?.let { count -> formatCompactCount(count.toLong()) },
+                                isActive = song.id == mediaMetadata?.id,
                                 isPlaying = isPlaying,
                                 trailingContent = {
                                     IconButton(
                                         onClick = {
                                             menuState.show {
                                                 SongMenu(
-                                                    originalSong = song.song,
-                                                    playlistSong = song,
+                                                    originalSong = song,
+                                                    playlistSong = PlaylistSong(viewModel.playlistId, song, index),
                                                     playlistBrowseId = playlist?.playlist?.browseId,
                                                     navController = navController,
                                                     onDismiss = menuState::dismiss,
@@ -1206,14 +1200,14 @@ fun LocalPlaylistScreen(
                                     .fillMaxWidth()
                                     .combinedClickable(
                                         onClick = {
-                                            if (song.song.id == mediaMetadata?.id) {
+                                            if (song.id == mediaMetadata?.id) {
                                                 playerConnection.player.togglePlayPause()
                                             } else {
                                                 playerConnection.playQueue(
                                                     ListQueue(
                                                         title = playlist!!.playlist.name,
-                                                        items = songs.map { it.song.toMediaItem() },
-                                                        startIndex = songs.indexOfFirst { it.map.id == song.map.id },
+                                                        items = songs.map { it.toMediaItem() },
+                                                        startIndex = index,
                                                     ),
                                                 )
                                             }
@@ -1224,7 +1218,7 @@ fun LocalPlaylistScreen(
                                                 selection = true
                                             }
                                             wrappedSongs.forEach { it.isSelected = false }
-                                            wrappedSongs.find { it.item.map.id == song.map.id }?.isSelected = true
+                                            wrappedSongs.getOrNull(index)?.isSelected = true
                                         },
                                     ),
                             )
@@ -1245,24 +1239,19 @@ fun LocalPlaylistScreen(
             } else {
                 itemsIndexed(
                     items = wrappedSongs,
-                    key = { _, song -> song.item.map.id },
+                    key = { index, song -> "${song.item.id}_$index" },
+                    contentType = { _, _ -> "playlist_song_item" },
                 ) { index, songWrapper ->
                     ReorderableItem(
                         state = reorderableState,
-                        key = songWrapper.item.map.id,
+                        key = "${songWrapper.item.id}_$index",
                         modifier = Modifier.graphicsLayer {
                             compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                         }
                     ) {
-                        val currentItem by rememberUpdatedState(songWrapper.item)
-
                         fun deleteFromPlaylist() {
-                            val map = currentItem.map
                             coroutineScope.launch(Dispatchers.IO) {
-                                database.withTransaction {
-                                    move(map.playlistId, map.position, Int.MAX_VALUE)
-                                    delete(map.copy(position = Int.MAX_VALUE))
-                                }
+                                database.removeSongFromPlaylist(viewModel.playlistId, index)
                             }
                         }
 
@@ -1290,17 +1279,17 @@ fun LocalPlaylistScreen(
 
                         val content: @Composable () -> Unit = {
                             SongListItem(
-                                song = songWrapper.item.song,
+                                song = songWrapper.item,
                                 viewCountText =
-                                    viewCounts[songWrapper.item.song.id]?.let { count -> formatCompactCount(count.toLong()) },
-                                isActive = songWrapper.item.song.id == mediaMetadata?.id,
+                                    viewCounts[songWrapper.item.id]?.let { count -> formatCompactCount(count.toLong()) },
+                                isActive = songWrapper.item.id == mediaMetadata?.id,
                                 isPlaying = isPlaying,
                                 trailingContent = {
                                     IconButton(
                                         onClick = {
                                             menuState.show {
                                                 SongMenu(
-                                                    originalSong = songWrapper.item.song,
+                                                    originalSong = songWrapper.item,
                                                     playlistBrowseId = playlist?.playlist?.browseId,
                                                     navController = navController,
                                                     onDismiss = menuState::dismiss,
@@ -1341,7 +1330,7 @@ fun LocalPlaylistScreen(
                                                     playerConnection.playQueue(
                                                         ListQueue(
                                                             title = playlist!!.playlist.name,
-                                                            items = songs.map { it.song.toMediaItem() },
+                                                            items = songs.map { it.toMediaItem() },
                                                             startIndex = index,
                                                         ),
                                                     )
@@ -1473,9 +1462,10 @@ fun LocalPlaylistScreen(
                             menuState.show {
                                 SelectionSongMenu(
                                     songSelection = wrappedSongs.filter { it.isSelected }
-                                        .map { it.item.song },
-                                    songPosition = wrappedSongs.filter { it.isSelected }
-                                        .map { it.item.map },
+                                        .map { it.item },
+                                    songPosition = wrappedSongs.mapIndexedNotNull { idx, item ->
+                                        if (item.isSelected) PlaylistSong(viewModel.playlistId, item.item, idx) else null
+                                    },
                                     onDismiss = menuState::dismiss,
                                     clearAction = {
                                         selection = false

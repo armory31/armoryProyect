@@ -12,7 +12,7 @@ import android.content.Context
 import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
@@ -120,13 +120,16 @@ fun <T> rememberPreference(
     defaultValue: T,
 ): MutableState<T> {
     val context = LocalContext.current
+    val initialValue = remember {
+        PreferenceStore.get(key) ?: defaultValue
+    }
 
     val state =
         remember {
             context.dataStore.data
                 .map { it[key] ?: defaultValue }
                 .distinctUntilChanged()
-        }.collectAsState(defaultValue)
+        }.collectAsStateWithLifecycle(initialValue)
 
     return remember {
         object : MutableState<T> {
@@ -151,13 +154,16 @@ inline fun <reified T : Enum<T>> rememberEnumPreference(
     defaultValue: T,
 ): MutableState<T> {
     val context = LocalContext.current
+    val initialValue = remember {
+        PreferenceStore.get(key)?.toEnum(defaultValue = defaultValue) ?: defaultValue
+    }
 
     val state =
         remember {
             context.dataStore.data
                 .map { it[key].toEnum(defaultValue = defaultValue) }
                 .distinctUntilChanged()
-        }.collectAsState(defaultValue)
+        }.collectAsStateWithLifecycle(initialValue)
 
     return remember {
         object : MutableState<T> {

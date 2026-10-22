@@ -36,7 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,9 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalDownloadUtil
@@ -62,8 +60,6 @@ import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.db.entities.Playlist
-import com.ruben.spotitube.db.entities.PlaylistSong
-import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.playback.ExoDownloadService
@@ -81,7 +77,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
 
 @Composable
 fun PlaylistMenu(
@@ -98,11 +93,11 @@ fun PlaylistMenu(
     val syncManager = LocalSyncManager.current
     val downloadUtil = LocalDownloadUtil.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val dbPlaylist by database.playlist(playlist.id).collectAsState(initial = playlist)
+    val dbPlaylist by database.playlist(playlist.id).collectAsStateWithLifecycle(initialValue = playlist)
     val isLiked by remember(playlist.id, playlist.playlist.browseId) {
         val targetId = playlist.playlist.browseId ?: playlist.id
         libraryStateHolder.savedPlaylistIds.map { it.contains(targetId) }
-    }.collectAsState(initial = false)
+    }.collectAsStateWithLifecycle(initialValue = false)
     var songs by remember {
         mutableStateOf(emptyList<Song>())
     }
@@ -110,7 +105,7 @@ fun PlaylistMenu(
     LaunchedEffect(Unit) {
         if (autoPlaylist == false) {
             database.playlistSongs(playlist.id).collect {
-                songs = it.map(PlaylistSong::song)
+                songs = it
             }
         } else {
             if (songList != null) {
@@ -157,16 +152,18 @@ fun PlaylistMenu(
             onSave = { name, thumbnailUrl ->
                 onDismiss()
                 coroutineScope.launch(Dispatchers.IO) {
-                    database.insertSavedPlaylist(
-                        SavedPlaylistEntity(
-                            id = playlist.playlist.id,
-                            name = name,
-                            browseId = playlist.playlist.browseId,
-                            thumbnailUrl = thumbnailUrl,
-                            isEditable = playlist.playlist.isEditable,
-                            createdAt = playlist.playlist.createdAt ?: LocalDateTime.now()
+                    val existing = database.getSavedPlaylist(playlist.playlist.id)
+                    if (existing != null) {
+                        database.insertSavedPlaylist(
+                            existing.copy(
+                                name = name,
+                                thumbnailUrl = thumbnailUrl
+                            )
                         )
-                    )
+                    } else {
+                        database.updatePlaylistTitle(playlist.playlist.id, name)
+                        database.updatePlaylistThumbnail(playlist.playlist.id, thumbnailUrl)
+                    }
                     playlist.playlist.browseId?.let { com.ruben.spotitube.innertube.YouTube.renamePlaylist(it, name) }
                 }
             },
@@ -593,12 +590,7 @@ fun PlaylistMenu(
                                 },
                                 modifier = Modifier.clickable {
                                     songs.forEach { song ->
-                                        val downloadRequest =
-                                            DownloadRequest
-                                                .Builder(song.id, song.id.toUri())
-                                                .setCustomCacheKey(song.id)
-                                                .setData(song.song.title.toByteArray())
-                                                .build()
+                                        val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                                         DownloadService.sendAddDownload(
                                             context,
                                             ExoDownloadService::class.java,

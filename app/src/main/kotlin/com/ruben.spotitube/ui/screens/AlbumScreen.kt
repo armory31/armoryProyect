@@ -52,12 +52,10 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -94,10 +92,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
@@ -124,7 +120,6 @@ import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.shimmer.ButtonPlaceholder
@@ -137,7 +132,6 @@ import com.ruben.spotitube.ui.menu.SongMenu
 import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
 import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.AlbumUiState
@@ -365,14 +359,14 @@ fun AlbumScreen(
 
     val scope = rememberCoroutineScope()
 
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
-    val playlistId by viewModel.playlistId.collectAsState()
-    val albumWithSongs by viewModel.albumWithSongs.collectAsState()
-    val isLiked by viewModel.isLiked.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
-    val otherVersions by viewModel.otherVersions.collectAsState()
+    val playlistId by viewModel.playlistId.collectAsStateWithLifecycle()
+    val albumWithSongs by viewModel.albumWithSongs.collectAsStateWithLifecycle()
+    val isLiked by viewModel.isLiked.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val otherVersions by viewModel.otherVersions.collectAsStateWithLifecycle()
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
@@ -616,7 +610,10 @@ fun AlbumScreen(
             val hasSongs = albumWithSongs?.songs?.isNotEmpty() == true
             if (hasSongs) {
                 // Hero Header
-                item(key = "header") {
+                item(
+                    key = "header",
+                    contentType = "header"
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -896,12 +893,7 @@ fun AlbumScreen(
                                         }
                                         else -> {
                                             albumWithSongs.songs.forEach { song ->
-                                                val downloadRequest =
-                                                    DownloadRequest
-                                                        .Builder(song.id, song.id.toUri())
-                                                        .setCustomCacheKey(song.id)
-                                                        .setData(song.song.title.toByteArray())
-                                                        .build()
+                                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                                                 DownloadService.sendAddDownload(
                                                     context,
                                                     ExoDownloadService::class.java,
@@ -989,7 +981,10 @@ fun AlbumScreen(
                 }
 
                 // Songs Section Header
-                item(key = "songs_header") {
+                item(
+                    key = "songs_header",
+                    contentType = "section_header"
+                ) {
                     SectionHeader(
                         text = stringResource(R.string.songs),
                     )
@@ -998,7 +993,8 @@ fun AlbumScreen(
                 // Songs List
                 itemsIndexed(
                     items = wrappedSongs,
-                    key = { _, song -> song.item.id },
+                    key = { index, song -> "${index}_${song.item.id}" },
+                    contentType = { _, _ -> "song_item" },
                 ) { index, songWrapper ->
                     SongListItem(
                         song = songWrapper.item,
@@ -1057,16 +1053,23 @@ fun AlbumScreen(
 
                 // Other Versions Section
                 if (otherVersions.isNotEmpty()) {
-                    item(key = "other_versions_header") {
+                    item(
+                        key = "other_versions_header",
+                        contentType = "section_header"
+                    ) {
                         SectionHeader(
                             text = stringResource(R.string.other_versions),
                         )
                     }
-                    item(key = "other_versions_list") {
+                    item(
+                        key = "other_versions_list",
+                        contentType = "row"
+                    ) {
                         LazyRow {
                             items(
                                 items = otherVersions.distinctBy { it.id },
                                 key = { it.id },
+                                contentType = { "album_card" },
                             ) { item ->
                                 YouTubeGridItem(
                                     item = item,

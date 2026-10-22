@@ -29,7 +29,6 @@ import com.ruben.spotitube.constants.PlayerStreamClient
 import com.ruben.spotitube.constants.PlayerStreamClientKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.FormatEntity
-import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.di.DownloadCache
 import com.ruben.spotitube.di.PlayerCache
 import com.ruben.spotitube.innertube.YouTube
@@ -39,7 +38,6 @@ import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.enumPreference
 import com.ruben.spotitube.utils.get
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +47,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.time.LocalDateTime
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -159,17 +156,6 @@ constructor(
                     ),
                 )
 
-                val titleToSave = playbackData.videoDetails?.title ?: "Unknown"
-                val durationToSave = playbackData.videoDetails?.lengthSeconds?.toIntOrNull() ?: 0
-                val thumbnailToSave = playbackData.videoDetails?.thumbnail?.thumbnails?.lastOrNull()?.url
-
-                insertOrUpdateDownload(
-                    mediaId = mediaId,
-                    title = titleToSave,
-                    artistName = playbackData.videoDetails?.author,
-                    duration = durationToSave,
-                    thumbnailUrl = thumbnailToSave
-                )
             }
 
             val streamUrl = playbackData.streamUrl

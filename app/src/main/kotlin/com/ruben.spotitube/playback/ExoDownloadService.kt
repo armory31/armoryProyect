@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.playback
 
 import android.app.Notification
@@ -22,9 +20,9 @@ import androidx.media3.exoplayer.offline.DownloadService
 import androidx.media3.exoplayer.scheduler.PlatformScheduler
 import androidx.media3.exoplayer.scheduler.Scheduler
 import com.ruben.spotitube.R
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-
 
 @AndroidEntryPoint
 class ExoDownloadService : DownloadService(
@@ -53,14 +51,19 @@ class ExoDownloadService : DownloadService(
     override fun getForegroundNotification(
         downloads: MutableList<Download>,
         notMetRequirements: Int
-    ): Notification =
-        Notification.Builder.recoverBuilder(
+    ): Notification {
+        val titleText = if (downloads.size == 1) {
+            DownloadedSongMetadata.fromDownload(downloads[0])?.title
+                ?: Util.fromUtf8Bytes(downloads[0].request.data)
+        } else {
+            resources.getQuantityString(R.plurals.n_song, downloads.size, downloads.size)
+        }
+        return Notification.Builder.recoverBuilder(
             this, downloadUtil.downloadNotificationHelper.buildProgressNotification(
                 this,
                 R.drawable.download,
                 null,
-                if (downloads.size == 1) Util.fromUtf8Bytes(downloads[0].request.data)
-                else resources.getQuantityString(R.plurals.n_song, downloads.size, downloads.size),
+                titleText,
                 downloads,
                 notMetRequirements
             )
@@ -78,7 +81,7 @@ class ExoDownloadService : DownloadService(
                 )
             ).build()
         ).build()
-
+    }
 
     /**
      * This helper will outlive the lifespan of a single instance of [ExoDownloadService]
@@ -94,11 +97,13 @@ class ExoDownloadService : DownloadService(
             finalException: Exception?,
         ) {
             if (download.state == Download.STATE_FAILED) {
+                val titleText = DownloadedSongMetadata.fromDownload(download)?.title
+                    ?: Util.fromUtf8Bytes(download.request.data)
                 val notification = notificationHelper.buildDownloadFailedNotification(
                     context,
                     R.drawable.error,
                     null,
-                    Util.fromUtf8Bytes(download.request.data)
+                    titleText
                 )
                 NotificationUtil.setNotification(context, nextNotificationId++, notification)
             }

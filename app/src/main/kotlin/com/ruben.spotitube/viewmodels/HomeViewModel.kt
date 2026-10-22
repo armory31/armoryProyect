@@ -46,15 +46,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import timber.log.Timber
-import java.time.ZoneId
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -174,12 +175,23 @@ class HomeViewModel @Inject constructor(
         when (quickPicksEnum.first()) {
             QuickPicks.QUICK_PICKS -> {
                 val fromTimeStamp = System.currentTimeMillis() - 86400000L * 30
-                val mostPlayed: List<Song> = runCatching {
+                var mostPlayedRows = runCatching {
                     database.mostPlayedSongs(fromTimeStamp, limit = 20, offset = 0).first()
                 }.getOrDefault(emptyList())
 
+                if (mostPlayedRows.size < 10) {
+                    mostPlayedRows = runCatching {
+                        database.mostPlayedSongStatsAllTime(limit = 20, offset = 0).first()
+                    }.getOrDefault(emptyList())
+                }
+
+                val metadataMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(mostPlayedRows.map { it.id }, timeoutMs = 5000L)
+                val mostPlayed: List<Song> = mostPlayedRows.mapNotNull { row ->
+                    metadataMap[row.id]?.toSong()
+                }
+
                 val savedSongs: List<Song> = runCatching {
-                    database.allSongs().first().shuffled()
+                    database.getRandomSavedSongs(20).map { it.toSong() }
                 }.getOrDefault(emptyList())
 
                 val localList: List<Song> = (mostPlayed + savedSongs).distinctBy { it.id }
@@ -205,6 +217,27 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 }
+
+                if (combined.size < 20) {
+                    val lastSongId = runCatching { database.getLastHistorySongId() }.getOrNull()
+                    if (!lastSongId.isNullOrBlank()) {
+                        val nextSongs = runCatching {
+                            YouTube.next(WatchEndpoint(videoId = lastSongId)).getOrNull()
+                                ?.items
+                                ?.filterIsInstance<SongItem>()
+                                ?.map { it.toSong() }
+                                .orEmpty()
+                        }.getOrDefault(emptyList())
+
+                        for (song in nextSongs) {
+                            if (combined.size >= 20) break
+                            if (combined.none { it.id == song.id }) {
+                                combined.add(song)
+                            }
+                        }
+                    }
+                }
+
                 quickPicks.value = combined.ifEmpty { null }
             }
             QuickPicks.LAST_LISTEN -> songLoad()
@@ -283,14 +316,51 @@ class HomeViewModel @Inject constructor(
                 launch { forgottenFavorites.value = database.forgottenFavorites().first().shuffled().take(20) }
                 
                 launch {
-                    val keepListeningSongs = database.mostPlayedSongs(fromTimeStamp, limit = 15, offset = 5)
+                    val keepListeningRows = database.mostPlayedSongs(fromTimeStamp, limit = 15, offset = 5)
                         .first().shuffled().take(10)
-                    val keepListeningAlbums = database.mostPlayedAlbums(fromTimeStamp, limit = 8, offset = 2)
-                        .first().filter { it.album.thumbnailUrl != null }.shuffled().take(5)
-                    val keepListeningArtists = database.mostPlayedArtists(fromTimeStamp)
-                        .first().filter { it.artist.isYouTubeArtist && it.artist.thumbnailUrl != null }
-                        .shuffled().take(5)
-                    keepListening.value = (keepListeningSongs + keepListeningAlbums + keepListeningArtists).shuffled()
+                    val keepListeningMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(keepListeningRows.map { it.id }, timeoutMs = 5000L)
+                    val keepListeningSongs: List<Song> = keepListeningRows.mapNotNull { row -> keepListeningMap[row.id]?.toSong() }
+                    val rawAlbums = database.mostPlayedAlbums(fromTimeStamp, limit = 8, offset = 2).first()
+                    val albumsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveAlbums(rawAlbums.map { it.id }, timeoutMs = 5000L)
+                    val keepListeningAlbums = rawAlbums.mapNotNull { albumObj ->
+                        albumsMap[albumObj.id]?.let { meta ->
+                            com.ruben.spotitube.db.entities.Album(
+                                album = com.ruben.spotitube.db.entities.SavedAlbumEntity(
+                                    id = albumObj.id,
+                                    title = meta.title,
+                                    artistName = meta.artistName,
+                                    songCount = meta.songCount,
+                                    thumbnailUrl = meta.thumbnailUrl
+                                ),
+                                artists = emptyList()
+                            )
+                        }
+                    }.filter { it.album.thumbnailUrl != null }.shuffled().take(5)
+
+                    val rawArtists = database.mostPlayedArtists(fromTimeStamp).first()
+                    val artistsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtists.map { it.id }, timeoutMs = 5000L)
+                    val keepListeningArtists = rawArtists.mapNotNull { artistObj ->
+                        artistsMap[artistObj.id]?.let { meta ->
+                            com.ruben.spotitube.db.entities.Artist(
+                                artist = com.ruben.spotitube.db.entities.SavedArtistEntity(
+                                    id = artistObj.id,
+                                    name = meta.name,
+                                    thumbnailUrl = meta.thumbnailUrl
+                                ),
+                                songCount = artistObj.songCount
+                            )
+                        }
+                    }.filter { it.artist.isYouTubeArtist && it.artist.thumbnailUrl != null }.shuffled().take(5)
+                    keepListening.value = (keepListeningSongs + keepListeningAlbums + keepListeningArtists)
+                        .distinctBy { item ->
+                            when (item) {
+                                is Song -> "song_${item.id}"
+                                is com.ruben.spotitube.db.entities.Album -> "album_${item.id}"
+                                is com.ruben.spotitube.db.entities.Artist -> "artist_${item.id}"
+                                is com.ruben.spotitube.db.entities.Playlist -> "playlist_${item.id}"
+                            }
+                        }
+                        .shuffled()
                 }
 
                 launch {
@@ -320,8 +390,20 @@ class HomeViewModel @Inject constructor(
         val hideVideo = context.dataStore.get(HideVideoKey, false)
         val fromTimeStamp = System.currentTimeMillis() - 86400000 * 7 * 2
         
-        val artistRecommendations = database.mostPlayedArtists(fromTimeStamp, limit = 10).first()
-            .filter { it.artist.isYouTubeArtist }
+        val rawArtistRecs = database.mostPlayedArtists(fromTimeStamp, limit = 10).first()
+        val artistRecsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtistRecs.map { it.id }, timeoutMs = 5000L)
+        val artistRecommendations = rawArtistRecs.mapNotNull { artistObj ->
+            artistRecsMap[artistObj.id]?.let { meta ->
+                com.ruben.spotitube.db.entities.Artist(
+                    artist = com.ruben.spotitube.db.entities.SavedArtistEntity(
+                        id = artistObj.id,
+                        name = meta.name,
+                        thumbnailUrl = meta.thumbnailUrl
+                    ),
+                    songCount = artistObj.songCount
+                )
+            }
+        }.filter { it.artist.isYouTubeArtist }
             .shuffled().take(3)
             .mapNotNull {
                 val items = mutableListOf<YTItem>()
@@ -335,7 +417,9 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-        val songRecommendations = database.mostPlayedSongs(fromTimeStamp, limit = 10).first()
+        val songRows = database.mostPlayedSongs(fromTimeStamp, limit = 10).first()
+        val songMetadataMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(songRows.map { it.id }, timeoutMs = 5000L)
+        val songRecommendations = songRows.mapNotNull { row -> songMetadataMap[row.id]?.toSong() }
             .filter { it.album != null }
             .shuffled().take(2)
             .mapNotNull { song ->
@@ -359,10 +443,10 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun songLoad() {
         val lastHistory = database.allHistorySongs().first().firstOrNull()
-        val song = lastHistory?.let { database.getSavedSong(it.songId)?.toSong() }
-        if (song != null) {
-            if (database.hasRelatedSongs(song.id).first()) {
-                val relatedSongs = database.getRelatedSongs(song.id).first().shuffled().take(20)
+        if (lastHistory != null) {
+            val songId = lastHistory.songId
+            if (database.hasRelatedSongs(songId).first()) {
+                val relatedSongs = database.getRelatedSongs(songId).first().shuffled().take(20)
                 quickPicks.value = relatedSongs
             }
         }
@@ -400,6 +484,12 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
+        viewModelScope.launch(Dispatchers.IO) {
+            homePage.drop(1).collectLatest {
+                getQuickPicks()
+            }
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             load()
         }

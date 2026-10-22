@@ -26,8 +26,8 @@ class LocalMixQueue(
     override val preloadItem: MediaMetadata? = null
 
     override suspend fun getInitialStatus(): Queue.Status = withContext(Dispatchers.IO) {
-        val playlistSongEntities = database.playlistSongs(playlistId).first()
-        val playlistSongIds = playlistSongEntities.map { it.map.songId }
+        val songs = database.playlistSongs(playlistId).first()
+        val playlistSongIds = songs.map { it.id }
 
         val relatedSongs = playlistSongIds.flatMap { songId ->
             database.relatedSongs(songId)

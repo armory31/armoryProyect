@@ -103,30 +103,47 @@ fun AddToPlaylistDialog(
     ): Int {
         if (requestedSongIds.isEmpty()) return 0
 
+        val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(requestedSongIds, timeoutMs = 5000L)
+        val items = requestedSongIds.mapNotNull { id ->
+            resolvedMap[id]?.let { songItem ->
+                com.ruben.spotitube.db.entities.PlaylistSongItem(
+                    id = songItem.id,
+                    title = songItem.title,
+                    artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                    thumbnailUrl = songItem.thumbnail,
+                    duration = songItem.duration ?: -1,
+                    albumId = songItem.album?.id,
+                    albumName = songItem.album?.name,
+                    explicit = songItem.explicit
+                )
+            }
+        }
+        if (items.isEmpty()) return 0
+
         val browseId = playlist.playlist.browseId
         if (isLoggedIn && browseId != null) {
-            val acceptedSongIds = mutableListOf<String>()
-            requestedSongIds.forEach { songId ->
+            val acceptedItems = mutableListOf<com.ruben.spotitube.db.entities.PlaylistSongItem>()
+            items.forEach { item ->
                 var wasAdded = false
                 for (attempt in 0 until 3) {
-                    if (YouTube.addToPlaylist(browseId, songId).isSuccess) {
+                    if (YouTube.addToPlaylist(browseId, item.id).isSuccess) {
                         wasAdded = true
                         break
                     }
                     if (attempt < 2) delay(250.milliseconds)
                 }
                 if (wasAdded) {
-                    acceptedSongIds += songId
+                    acceptedItems += item
                 }
             }
-            if (acceptedSongIds.isNotEmpty()) {
-                database.addSongsToPlaylist(playlist.id, acceptedSongIds)
+            if (acceptedItems.isNotEmpty()) {
+                database.addSongsToPlaylist(playlist.id, acceptedItems)
             }
-            return acceptedSongIds.size
+            return acceptedItems.size
         }
 
-        database.addSongsToPlaylist(playlist.id, requestedSongIds)
-        return requestedSongIds.size
+        database.addSongsToPlaylist(playlist.id, items)
+        return items.size
     }
 
     LaunchedEffect(Unit) {

@@ -51,7 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -170,7 +170,7 @@ fun LyricsV2(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     // ── Preferences ──
     val (lyricsClick) = rememberPreference(LyricsClickKey, defaultValue = true)
@@ -208,19 +208,19 @@ fun LyricsV2(
 
     var showShareDialog by remember { mutableStateOf(false) }
     // ── Lyrics data ──
-    val currentLyrics by playerConnection.currentLyrics.collectAsState(initial = null)
+    val currentLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
     val lyrics = currentLyrics?.lyrics
 
     // ── Parse lyrics into entries ──
-    val isSynced = remember(lyrics) { lyrics != null && (lyrics!!.startsWith("[") || isTtml(lyrics!!)) }
-    val isTtmlFormat = remember(lyrics) { lyrics != null && isTtml(lyrics!!) }
+    val isSynced = remember(lyrics) { lyrics != null && (lyrics.startsWith("[") || isTtml(lyrics)) }
+    val isTtmlFormat = remember(lyrics) { lyrics != null && isTtml(lyrics) }
 
     val lyricsEntries: List<LyricsEntry> = remember(lyrics) {
         if (lyrics == null || lyrics == LYRICS_NOT_FOUND) return@remember emptyList()
         val parsed = when {
-            isTtml(lyrics!!) -> parseTtml(lyrics!!)
-            lyrics!!.startsWith("[") -> parseLyrics(lyrics!!)
-            else -> lyrics!!.lines()
+            isTtml(lyrics) -> parseTtml(lyrics)
+            lyrics.startsWith("[") -> parseLyrics(lyrics)
+            else -> lyrics.lines()
                 .filter { it.isNotBlank() }
                 .mapIndexed { index, line ->
                     LyricsEntry(time = -1L, text = line.trim())
@@ -470,7 +470,8 @@ fun LyricsV2(
         ) {
             itemsIndexed(
                 items = entriesWithWords,
-                key = { index, entry -> "${index}_${entry.time}" }
+                key = { index, entry -> "${index}_${entry.time}" },
+                contentType = { _, _ -> "lyric_entry" },
             ) { index, item ->
                 if (item == HEAD_LYRICS_ENTRY) {
                     Spacer(modifier = Modifier.height(120.dp))

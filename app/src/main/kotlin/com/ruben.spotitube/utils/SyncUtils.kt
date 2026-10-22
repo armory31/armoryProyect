@@ -14,11 +14,10 @@ import android.content.Context
 import com.ruben.spotitube.constants.SelectedYtmPlaylistsKey
 import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.PlaylistSongMap
+import com.ruben.spotitube.db.entities.PlaylistSongItem
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
-import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.innertube.models.ArtistItem
@@ -26,6 +25,7 @@ import com.ruben.spotitube.innertube.models.PlaylistItem
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.utils.completed
 import com.ruben.spotitube.models.toMediaMetadata
+import com.ruben.spotitube.models.toSavedSongEntity
 import com.ruben.spotitube.sync.FavoriteAlbumDto
 import com.ruben.spotitube.sync.FavoriteArtistDto
 import com.ruben.spotitube.sync.FavoriteSongDto
@@ -100,7 +100,6 @@ class SyncUtils @Inject constructor(
                 
                 supervisorScope {
                     syncLikedSongs()
-                    syncLibrarySongs()
 
                     listOf(
                         async { syncLikedAlbums() },
@@ -200,8 +199,7 @@ class SyncUtils @Inject constructor(
                             if (!isSyncStillEnabled(gen)) return@withTransaction
                             val dbSong = database.getSavedSong(song.id)
                             if (dbSong == null) {
-                                insert(song.toMediaMetadata())
-                                database.updateIsLiked(song.id, true)
+                                database.insertSavedSong(song.toSavedSongEntity())
                             }
                         }
                     }
@@ -209,44 +207,6 @@ class SyncUtils @Inject constructor(
             }
         }.onFailure { e ->
             Timber.e(e, "syncLikedSongs: Failed to sync liked songs")
-        }
-    }
-
-    suspend fun syncLibrarySongs() = coroutineScope {
-        /**if (!isLoggedIn()) {
-            Timber.w("Skipping syncLibrarySongs - user not logged in")
-            return@coroutineScope
-        }*/
-        /*if (!isYtmSyncEnabled()) {
-            Timber.w("Skipping syncLibrarySongs - sync disabled")
-            return@coroutineScope
-        }*/
-        val gen = syncGeneration.get()
-        YouTube.library("FEmusic_liked_videos").completed().onSuccess { page ->
-            if (!isSyncStillEnabled(gen)) return@onSuccess
-            val remoteSongs = page.items.filterIsInstance<SongItem>().reversed()
-            if (remoteSongs.isEmpty()) {
-                Timber.w("syncLibrarySongs: Remote library is empty")
-                return@onSuccess
-            }
-
-            remoteSongs.forEach { song ->
-                launch {
-                    if (!isSyncStillEnabled(gen)) return@launch
-                    dbWriteSemaphore.withPermit {
-                        if (!isSyncStillEnabled(gen)) return@withPermit
-                        val dbSong = database.song(song.id).firstOrNull()
-                        database.withTransaction {
-                            if (!isSyncStillEnabled(gen)) return@withTransaction
-                            if (dbSong == null) {
-                                insert(song.toMediaMetadata())
-                            }
-                        }
-                    }
-                }
-            }
-        }.onFailure { e ->
-            Timber.e(e, "syncLibrarySongs: Failed to sync library songs")
         }
     }
 
@@ -520,8 +480,7 @@ class SyncUtils @Inject constructor(
 
             val localIds = try {
                 database.playlistSongs(playlistId).first()
-                    .sortedBy { it.map.position }
-                    .map { it.song.id }
+                    .map { it.id }
             } catch (e: Exception) {
                 Timber.w(e, "syncPlaylist: Failed to fetch local songs")
                 emptyList()
@@ -537,29 +496,22 @@ class SyncUtils @Inject constructor(
             try {
                 database.withTransaction {
                     if (!isSyncStillEnabled(gen)) return@withTransaction
-                    database.clearPlaylist(playlistId)
-                    songs.forEachIndexed { idx, song ->
-                        if (!isSyncStillEnabled(gen)) return@withTransaction
-                        database.upsertSongPreservingUsage(
-                            SavedSongEntity(
-                                id = song.id,
-                                title = song.title,
-                                artistId = song.artists.firstOrNull()?.id,
-                                artistName = song.artists.firstOrNull()?.name,
-                                duration = song.duration,
-                                thumbnailUrl = song.thumbnailUrl,
-                                albumId = song.album?.id,
-                                albumName = song.album?.title
-                            )
+                    val songItems = songs.map { song ->
+                        PlaylistSongItem(
+                            id = song.id,
+                            title = song.title,
+                            artistName = song.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                            thumbnailUrl = song.thumbnailUrl,
+                            duration = song.duration,
+                            albumId = song.album?.id,
+                            albumName = song.album?.title,
+                            explicit = song.explicit,
+                            setVideoId = song.setVideoId
                         )
-                        database.insert(
-                            PlaylistSongMap(
-                                songId = song.id,
-                                playlistId = playlistId,
-                                position = idx,
-                                setVideoId = song.setVideoId
-                            )
-                        )
+                    }
+                    val playlist = database.getSavedPlaylist(playlistId)
+                    if (playlist != null) {
+                        database.insertSavedPlaylist(playlist.copy(songs = songItems))
                     }
                 }
                 Timber.d("syncPlaylist: Successfully synced playlist")

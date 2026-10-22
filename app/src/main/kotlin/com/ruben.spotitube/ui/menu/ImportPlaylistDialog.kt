@@ -158,7 +158,24 @@ fun ImportPlaylistDialog(
 
                         val playlist = database.playlist(playlistId).firstOrNull()
                         if (playlist != null) {
-                            database.addSongsToPlaylist(playlistId, ids)
+                            val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(ids, timeoutMs = 5000L)
+                            val items = ids.mapNotNull { id ->
+                                resolvedMap[id]?.let { songItem ->
+                                    com.ruben.spotitube.db.entities.PlaylistSongItem(
+                                        id = songItem.id,
+                                        title = songItem.title,
+                                        artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                                        thumbnailUrl = songItem.thumbnail,
+                                        duration = songItem.duration ?: -1,
+                                        albumId = songItem.album?.id,
+                                        albumName = songItem.album?.name,
+                                        explicit = songItem.explicit
+                                    )
+                                }
+                            }
+                            if (items.isNotEmpty()) {
+                                database.addSongsToPlaylist(playlistId, items)
+                            }
                         }
 
                         showMessage(context.getString(R.string.playlist_synced))
@@ -230,7 +247,24 @@ fun ImportPlaylistDialog(
                                     if (newSongIds.isEmpty()) {
                                         showMessage(context.getString(R.string.playlist_synced))
                                     } else {
-                                        database.addSongsToPlaylist(playlist.playlist.id, newSongIds)
+                                        val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(newSongIds, timeoutMs = 5000L)
+                                        val items = newSongIds.mapNotNull { id ->
+                                            resolvedMap[id]?.let { songItem ->
+                                                com.ruben.spotitube.db.entities.PlaylistSongItem(
+                                                    id = songItem.id,
+                                                    title = songItem.title,
+                                                    artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                                                    thumbnailUrl = songItem.thumbnail,
+                                                    duration = songItem.duration ?: -1,
+                                                    albumId = songItem.album?.id,
+                                                    albumName = songItem.album?.name,
+                                                    explicit = songItem.explicit
+                                                )
+                                            }
+                                        }
+                                        if (items.isNotEmpty()) {
+                                            database.addSongsToPlaylist(playlist.playlist.id, items)
+                                        }
                                         showMessage(context.getString(R.string.playlist_synced))
                                     }
                                 } else {
@@ -279,7 +313,24 @@ fun ImportPlaylistDialog(
 
                                 val playlist = database.playlist(playlistId).firstOrNull()
                                 if (playlist != null) {
-                                    database.addSongsToPlaylist(playlistId, ids)
+                                    val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(ids, timeoutMs = 5000L)
+                                    val items = ids.mapNotNull { id ->
+                                        resolvedMap[id]?.let { songItem ->
+                                            com.ruben.spotitube.db.entities.PlaylistSongItem(
+                                                id = songItem.id,
+                                                title = songItem.title,
+                                                artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                                                thumbnailUrl = songItem.thumbnail,
+                                                duration = songItem.duration ?: -1,
+                                                albumId = songItem.album?.id,
+                                                albumName = songItem.album?.name,
+                                                explicit = songItem.explicit
+                                            )
+                                        }
+                                    }
+                                    if (items.isNotEmpty()) {
+                                        database.addSongsToPlaylist(playlistId, items)
+                                    }
                                     showMessage(context.getString(R.string.playlist_synced))
                                 } else {
                                     showMessage(context.getString(R.string.import_failed))

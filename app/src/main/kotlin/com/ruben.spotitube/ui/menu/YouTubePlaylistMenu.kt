@@ -43,7 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,9 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.LocalDownloadUtil
@@ -76,7 +74,6 @@ import com.ruben.spotitube.constants.ThumbnailCornerRadius
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.db.entities.PlaylistEntity
-import com.ruben.spotitube.db.entities.PlaylistSongMap
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
@@ -121,8 +118,8 @@ fun YouTubePlaylistMenu(
     val syncUtils = LocalSyncUtils.current
     val isLiked by remember(playlist.id) {
         libraryStateHolder.savedPlaylistIds.map { it.contains(playlist.id) }
-    }.collectAsState(initial = false)
-    val dbPlaylist by database.playlistByBrowseId(playlist.id).collectAsState(initial = null)
+    }.collectAsStateWithLifecycle(initialValue = false)
+    val dbPlaylist by database.playlistByBrowseId(playlist.id).collectAsStateWithLifecycle(initialValue = null)
 
     var showChoosePlaylistDialog by rememberSaveable { mutableStateOf(false) }
     var showImportPlaylistDialog by rememberSaveable { mutableStateOf(false) }
@@ -138,14 +135,7 @@ fun YouTubePlaylistMenu(
             val allSongs = songs
                 .ifEmpty {
                     YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
-                }.map {
-                    it.toMediaMetadata()
                 }
-            coroutineScope.launch(Dispatchers.IO) {
-                database.withTransaction {
-                    allSongs.forEach(::insert)
-                }
-            }
             allSongs.map { it.id }
         },
         onDismiss = { showChoosePlaylistDialog = false },
@@ -272,14 +262,7 @@ fun YouTubePlaylistMenu(
             val allSongs = songs
                 .ifEmpty {
                     YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
-                }.map {
-                    it.toMediaMetadata()
                 }
-            coroutineScope.launch(Dispatchers.IO) {
-                database.withTransaction {
-                    allSongs.forEach(::insert)
-                }
-            }
             allSongs.map { it.id }
         },
         playlistTitle = playlist.title,
@@ -591,6 +574,18 @@ fun YouTubePlaylistMenu(
                                                             shuffleEndpointParams = playlist.shuffleEndpoint?.params,
                                                             radioEndpointParams = playlist.radioEndpoint?.params,
                                                         )
+                                                    val songItems = fetchedSongs.map { song ->
+                                                        com.ruben.spotitube.db.entities.PlaylistSongItem(
+                                                            id = song.id,
+                                                            title = song.title,
+                                                            artistName = song.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                                                            thumbnailUrl = song.thumbnailUrl,
+                                                            duration = song.duration,
+                                                            albumId = song.album?.id,
+                                                            albumName = song.album?.title,
+                                                            explicit = song.explicit
+                                                        )
+                                                    }
                                                     database.insertSavedPlaylist(
                                                         SavedPlaylistEntity(
                                                             id = playlistEntity.id,
@@ -598,18 +593,11 @@ fun YouTubePlaylistMenu(
                                                             browseId = playlistEntity.browseId,
                                                             isEditable = playlistEntity.isEditable,
                                                             thumbnailUrl = playlistEntity.thumbnailUrl,
-                                                            createdAt = playlistEntity.createdAt ?: java.time.LocalDateTime.now()
+                                                            createdAt = playlistEntity.createdAt ?: java.time.LocalDateTime.now(),
+                                                            songs = songItems
                                                         )
                                                     )
                                                     update(playlistEntity)
-                                                    fetchedSongs.forEach(::insert)
-                                                    fetchedSongs.mapIndexed { index, song ->
-                                                        PlaylistSongMap(
-                                                            songId = song.id,
-                                                            playlistId = playlistEntity.id,
-                                                            position = index,
-                                                        )
-                                                    }.forEach(::insert)
                                                 }
 
                                                 if (newValue) {
@@ -712,11 +700,7 @@ fun YouTubePlaylistMenu(
                                                 YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
                                             }
                                         }.forEach { song ->
-                                            val downloadRequest =
-                                                DownloadRequest.Builder(song.id, song.id.toUri())
-                                                    .setCustomCacheKey(song.id)
-                                                    .setData(song.title.toByteArray())
-                                                    .build()
+                                            val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                                             DownloadService.sendAddDownload(
                                                 context,
                                                 ExoDownloadService::class.java,

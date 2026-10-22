@@ -114,14 +114,27 @@ class OnlinePlaylistViewModel @Inject constructor(
         val currentPlaylist = playlist.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val entity = database.withTransaction {
-                var local = getPlaylistById(currentPlaylist.id)?.playlist
+                val local = getPlaylistById(currentPlaylist.id)?.playlist
                 if (local == null) {
+                    val songItems = playlistSongs.value.map { song ->
+                        com.ruben.spotitube.db.entities.PlaylistSongItem(
+                            id = song.id,
+                            title = song.title,
+                            artistName = song.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                            thumbnailUrl = song.thumbnail,
+                            duration = song.duration ?: -1,
+                            albumId = song.album?.id,
+                            albumName = song.album?.name,
+                            explicit = song.explicit
+                        )
+                    }
                     val savedEntity = com.ruben.spotitube.db.entities.SavedPlaylistEntity(
                         id = currentPlaylist.id,
                         name = currentPlaylist.title,
                         browseId = currentPlaylist.id,
                         thumbnailUrl = currentPlaylist.thumbnail,
-                        isEditable = true
+                        isEditable = true,
+                        songs = songItems
                     )
                     insertSavedPlaylist(savedEntity)
                     val newEntity = com.ruben.spotitube.db.entities.PlaylistEntity(

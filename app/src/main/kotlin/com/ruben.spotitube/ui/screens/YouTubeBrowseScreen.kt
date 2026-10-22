@@ -38,7 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -92,11 +92,11 @@ fun YouTubeBrowseScreen(
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
-    val browseResult by viewModel.result.collectAsState()
-    val isError by viewModel.error.collectAsState()
+    val browseResult by viewModel.result.collectAsStateWithLifecycle()
+    val isError by viewModel.error.collectAsStateWithLifecycle()
 
     val passedTitle = viewModel.passedTitle.orEmpty()
     val displayTitle = browseResult?.title.takeUnless { it.isNullOrBlank() } ?: passedTitle

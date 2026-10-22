@@ -13,13 +13,11 @@ import com.ruben.spotitube.db.entities.HistoryArtistEntity
 import com.ruben.spotitube.db.entities.HistoryPlaylistEntity
 import com.ruben.spotitube.db.entities.HistorySongEntity
 import com.ruben.spotitube.db.entities.PlaylistEntity
-import com.ruben.spotitube.db.entities.PlaylistSongMap
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.innertube.YouTube
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.sync.worker.SyncWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -109,11 +107,9 @@ class SyncManager @Inject constructor(
         val savedSongs = database.allSavedSongs().first().map { s ->
             var duration = s.duration
             if (duration <= 0) {
-                val refetched = YouTube.queue(listOf(s.id)).getOrNull()?.firstOrNull()?.toMediaMetadata()
-                if (refetched != null && refetched.duration > 0) {
-                    duration = refetched.duration
-                    database.insert(refetched)
-                    database.upsertSongPreservingUsage(s.copy(duration = duration))
+                val refetched = YouTube.queue(listOf(s.id)).getOrNull()?.firstOrNull()
+                if (refetched != null && (refetched.duration ?: 0) > 0) {
+                    duration = refetched.duration!!
                 }
             }
             val songWithArtists = database.getSongById(s.id)
@@ -158,13 +154,18 @@ class SyncManager @Inject constructor(
         }
 
         val savedPlaylists = database.allSavedPlaylists().first().map { p ->
-            val songs = database.playlistSongs(p.id).first().map { ps ->
+            val songs = p.songs.mapIndexed { index, item ->
                 PlaylistSongDto(
-                    id = ps.song.song.id,
-                    title = ps.song.song.title,
-                    artistName = ps.song.artists.firstOrNull()?.name ?: "Unknown",
-                    thumbnailUrl = ps.song.song.thumbnailUrl,
-                    position = ps.map.position,
+                    id = item.id,
+                    title = item.title,
+                    artistName = item.artistName ?: "Unknown",
+                    thumbnailUrl = item.thumbnailUrl,
+                    duration = item.duration,
+                    albumId = item.albumId,
+                    albumName = item.albumName,
+                    explicit = item.explicit,
+                    setVideoId = item.setVideoId,
+                    position = index,
                 )
             }
             PlaylistDto(
@@ -261,7 +262,6 @@ class SyncManager @Inject constructor(
                         albumId = sDto.albumId,
                         albumName = sDto.albumName,
                         savedAt = LocalDateTime.ofEpochSecond(sDto.savedAt, 0, ZoneOffset.UTC),
-                        isLiked = true,
                     ),
                 )
             }
@@ -291,6 +291,13 @@ class SyncManager @Inject constructor(
                 )
             }
             payload.savedPlaylists.forEach { pDto ->
+                val songItems = pDto.songs.map { sDto ->
+                    com.ruben.spotitube.db.entities.PlaylistSongItem(
+                        id = sDto.id,
+                        title = sDto.title,
+                        thumbnailUrl = sDto.thumbnailUrl
+                    )
+                }
                 database.insertSavedPlaylist(
                     SavedPlaylistEntity(
                         id = pDto.id,
@@ -298,13 +305,9 @@ class SyncManager @Inject constructor(
                         browseId = pDto.browseId,
                         isEditable = pDto.isEditable,
                         thumbnailUrl = pDto.thumbnailUrl,
-                    ),
+                        songs = songItems
+                    )
                 )
-                pDto.songs.forEach { sDto ->
-                    if (database.checkInPlaylist(pDto.id, sDto.id) == 0) {
-                        database.insert(PlaylistSongMap(playlistId = pDto.id, songId = sDto.id, position = sDto.position))
-                    }
-                }
             }
 
             payload.historySongs.forEach { hDto ->
@@ -545,8 +548,13 @@ class SyncManager @Inject constructor(
                             PlaylistSongDto(
                                 id = sObj.optString("id"),
                                 title = sObj.optString("title"),
-                                artistName = sObj.optString("artistName"),
+                                artistName = sObj.optString("artistName").ifEmpty { null },
                                 thumbnailUrl = sObj.optString("thumbnailUrl").ifEmpty { null },
+                                duration = sObj.optInt("duration", -1),
+                                albumId = sObj.optString("albumId").ifEmpty { null },
+                                albumName = sObj.optString("albumName").ifEmpty { null },
+                                explicit = sObj.optBoolean("explicit", false),
+                                setVideoId = sObj.optString("setVideoId").ifEmpty { null },
                                 position = sObj.optInt("position"),
                             ),
                         )
@@ -700,7 +708,6 @@ class SyncManager @Inject constructor(
                     albumId = sDto.albumId,
                     albumName = sDto.albumName,
                     savedAt = LocalDateTime.ofEpochSecond(savedAtSec, 0, ZoneOffset.UTC),
-                    isLiked = true,
                 )
             )
         }
@@ -732,6 +739,13 @@ class SyncManager @Inject constructor(
             )
         }
         library.playlists.forEach { pDto ->
+            val songItems = pDto.songs.map { sDto ->
+                com.ruben.spotitube.db.entities.PlaylistSongItem(
+                    id = sDto.id,
+                    title = sDto.title,
+                    thumbnailUrl = sDto.thumbnailUrl
+                )
+            }
             database.insertSavedPlaylist(
                 SavedPlaylistEntity(
                     id = pDto.id,
@@ -739,21 +753,9 @@ class SyncManager @Inject constructor(
                     browseId = pDto.browseId,
                     isEditable = pDto.isEditable,
                     thumbnailUrl = pDto.thumbnailUrl,
+                    songs = songItems
                 )
             )
-            pDto.songs.forEach { sDto ->
-                database.insertSavedSong(
-                    SavedSongEntity(
-                        id = sDto.id,
-                        title = sDto.title,
-                        thumbnailUrl = sDto.thumbnailUrl,
-                        isLiked = true,
-                    )
-                )
-                if (database.checkInPlaylist(pDto.id, sDto.id) == 0) {
-                    database.insert(PlaylistSongMap(playlistId = pDto.id, songId = sDto.id, position = sDto.position))
-                }
-            }
         }
     }
 
@@ -842,23 +844,21 @@ class SyncManager @Inject constructor(
     suspend fun toggleLike(song: SavedSongEntity) = withContext(Dispatchers.IO) {
         val existingSaved = database.getSavedSong(song.id)
         if (existingSaved != null) {
-            database.updateIsLiked(song.id, !existingSaved.isLiked)
+            database.deleteSavedSong(song.id)
         } else {
-            val songWithArtists = database.getSongById(song.id)
-            val artist = songWithArtists?.artists?.firstOrNull() ?: database.songArtistMap(song.id).firstOrNull()?.let { database.getArtistById(it.artistId) }
             database.insertSavedSong(
                 SavedSongEntity(
                     id = song.id,
                     title = song.title,
-                    artistId = artist?.id ?: song.artistId,
-                    artistName = artist?.name ?: song.artistName,
+                    artistId = song.artistId,
+                    artistName = song.artistName,
                     duration = song.duration,
                     thumbnailUrl = song.thumbnailUrl,
                     albumId = song.albumId,
                     albumName = song.albumName,
                     explicit = song.explicit,
-                    isLiked = true,
-                ),
+                    year = song.year
+                )
             )
         }
     }
@@ -939,22 +939,6 @@ class SyncManager @Inject constructor(
         }
     }
 
-    private fun ensureArtistExists(name: String): String {
-        val existing = database.artistByName(name)
-        if (existing != null) return existing.id
-        val newId = SavedArtistEntity.generateArtistId()
-        database.insertSavedArtist(SavedArtistEntity(id = newId, name = name))
-        return newId
-    }
-
-    @Suppress("unused")
-    private suspend fun ensureSongExists(sDto: PlaylistSongDto) {
-        if (database.getSavedSong(sDto.id) == null) {
-            val artistId = ensureArtistExists(sDto.artistName)
-            database.insertSavedSong(SavedSongEntity(id = sDto.id, title = sDto.title, artistId = artistId, artistName = sDto.artistName, thumbnailUrl = sDto.thumbnailUrl))
-        }
-    }
-
     suspend fun createPlaylist(name: String, browseId: String? = null): String {
         val id = SavedPlaylistEntity.generatePlaylistId()
         val playlist = SavedPlaylistEntity(
@@ -974,18 +958,44 @@ class SyncManager @Inject constructor(
     @Suppress("unused")
     suspend fun addSongToPlaylist(playlistId: String, songId: String) {
         withContext(Dispatchers.IO) {
-            database.addSongsToPlaylist(playlistId, listOf(songId))
-            Timber.d("[LOCAL_SAVE_DEBUG] Song $songId added to local playlist $playlistId")
+            val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(listOf(songId), timeoutMs = 5000L)
+            val item = resolvedMap[songId]?.let { songItem ->
+                com.ruben.spotitube.db.entities.PlaylistSongItem(
+                    id = songItem.id,
+                    title = songItem.title,
+                    artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                    thumbnailUrl = songItem.thumbnail,
+                    duration = songItem.duration ?: -1,
+                    albumId = songItem.album?.id,
+                    albumName = songItem.album?.name,
+                    explicit = songItem.explicit
+                )
+            }
+            if (item != null) {
+                database.addSongsToPlaylist(playlistId, listOf(item))
+                Timber.d("[LOCAL_SAVE_DEBUG] Song $songId added to local playlist $playlistId")
+            }
         }
     }
 
     suspend fun addAlbumSongsToPlaylist(playlistId: String, albumId: String) {
         withContext(Dispatchers.IO) {
-            val songs = database.albumSongs(albumId).first()
-            val songIds = songs.map { it.song.id }
-            if (songIds.isNotEmpty()) {
-                database.addSongsToPlaylist(playlistId, songIds)
-                Timber.d("[LOCAL_SAVE_DEBUG] Added ${songIds.size} songs from album $albumId to playlist $playlistId")
+            val albumPage = com.ruben.spotitube.innertube.YouTube.album(albumId).getOrNull() ?: return@withContext
+            val items = albumPage.songs.map { song ->
+                com.ruben.spotitube.db.entities.PlaylistSongItem(
+                    id = song.id,
+                    title = song.title,
+                    artistName = song.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                    thumbnailUrl = song.thumbnail,
+                    duration = song.duration ?: -1,
+                    albumId = song.album?.id ?: albumId,
+                    albumName = song.album?.name ?: albumPage.album.title,
+                    explicit = song.explicit
+                )
+            }
+            if (items.isNotEmpty()) {
+                database.addSongsToPlaylist(playlistId, items)
+                Timber.d("[LOCAL_SAVE_DEBUG] Added ${items.size} songs from album $albumId to playlist $playlistId")
             }
         }
     }

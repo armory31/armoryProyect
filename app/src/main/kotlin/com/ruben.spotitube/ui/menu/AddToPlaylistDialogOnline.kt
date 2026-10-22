@@ -46,7 +46,7 @@ import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.SongItem
-import com.ruben.spotitube.models.toMediaMetadata
+import com.ruben.spotitube.models.toSavedSongEntity
 import com.ruben.spotitube.ui.component.CreatePlaylistDialog
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.ListDialog
@@ -141,7 +141,7 @@ fun AddToPlaylistDialogOnline(
                                         .joinToString(" ") { artist ->
                                             try {
                                                 URLDecoder.decode(artist.name, StandardCharsets.UTF_8.toString())
-                                            } catch (e: Exception) {
+                                            } catch (_: Exception) {
                                                 artist.name
                                             }
                                         }.trim()
@@ -159,15 +159,22 @@ fun AddToPlaylistDialogOnline(
                                     result.onSuccess { search ->
                                         val firstSong = search.items.distinctBy { it.id }.firstOrNull() as? SongItem
                                         if (firstSong != null) {
-                                            val media = firstSong.toMediaMetadata()
-                                            val ids = listOf(firstSong.id)
+                                            val item = com.ruben.spotitube.db.entities.PlaylistSongItem(
+                                                id = firstSong.id,
+                                                title = firstSong.title,
+                                                artistName = firstSong.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                                                thumbnailUrl = firstSong.thumbnail,
+                                                duration = firstSong.duration ?: -1,
+                                                albumId = firstSong.album?.id,
+                                                albumName = firstSong.album?.name,
+                                                explicit = firstSong.explicit
+                                            )
                                             try {
-                                                database.upsertSongPreservingUsage(media.toSavedSongEntity())
                                                 if (targetPlaylist != null) {
-                                                    database.addSongsToPlaylist(targetPlaylist.playlist.id, ids)
+                                                    database.addSongsToPlaylist(targetPlaylist.playlist.id, listOf(item))
                                                 }
                                                 if (addToLiked) {
-                                                    database.updateIsLiked(firstSong.id, true)
+                                                    database.insertSavedSong(firstSong.toSavedSongEntity())
                                                 }
                                                 success = true
                                             } catch (e: Exception) {

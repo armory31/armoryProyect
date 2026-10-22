@@ -28,7 +28,8 @@ import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -100,8 +101,8 @@ fun HistoryScreen(
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     var selection by remember { mutableStateOf(false) }
     var isSearching by rememberSaveable { mutableStateOf(false) }
@@ -124,8 +125,8 @@ fun HistoryScreen(
         }
     }
 
-    val historySource by viewModel.historySource.collectAsState()
-    val rawHistory by viewModel.rawHistory.collectAsState()
+    val historySource by viewModel.historySource.collectAsStateWithLifecycle()
+    val rawHistory by viewModel.rawHistory.collectAsStateWithLifecycle()
     val historyPage by viewModel.historyPage
 
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
@@ -153,37 +154,40 @@ fun HistoryScreen(
     val thisMonday = today.with(DayOfWeek.MONDAY)
     val lastMonday = thisMonday.minusDays(7)
 
-    val groupedHistory = remember(rawHistory, query) {
-        val filtered = if (query.text.isEmpty()) {
-            rawHistory
-        } else {
-            rawHistory.filter { historyEntity ->
-                val songItem = HistoryItemMemoryCache.get(historyEntity.songId)
-                songItem?.title?.contains(query.text, ignoreCase = true) == true ||
-                        songItem?.artists?.any { it.name.contains(query.text, ignoreCase = true) } == true ||
-                        historyEntity.songId.contains(query.text, ignoreCase = true)
+    // Reactive search & grouping using derivedStateOf with remember(rawHistory, query.text)
+    val groupedHistory by remember(rawHistory, query.text) {
+        derivedStateOf {
+            val filtered = if (query.text.isEmpty()) {
+                rawHistory
+            } else {
+                val recent300 = rawHistory.take(300)
+                recent300.filter { historyEntity ->
+                    val songItem = HistoryItemMemoryCache.get(historyEntity.songId)
+                    songItem?.title?.contains(query.text, ignoreCase = true) == true ||
+                            songItem?.artists?.any { it.name.contains(query.text, ignoreCase = true) } == true
+                }
             }
-        }
 
-        filtered.groupBy { historyEntity ->
-            val date = Instant.ofEpochMilli(historyEntity.playedAt).atZone(ZoneId.systemDefault()).toLocalDate()
-            val daysAgo = ChronoUnit.DAYS.between(date, today).toInt()
-            when {
-                daysAgo == 0 -> DateAgo.Today
-                daysAgo == 1 -> DateAgo.Yesterday
-                date >= thisMonday -> DateAgo.ThisWeek
-                date >= lastMonday -> DateAgo.LastWeek
-                else -> DateAgo.Other(date.withDayOfMonth(1))
-            }
-        }.toSortedMap(compareBy { dateAgo ->
-            when (dateAgo) {
-                DateAgo.Today -> 0L
-                DateAgo.Yesterday -> 1L
-                DateAgo.ThisWeek -> 2L
-                DateAgo.LastWeek -> 3L
-                is DateAgo.Other -> ChronoUnit.DAYS.between(dateAgo.date, today)
-            }
-        })
+            filtered.groupBy { historyEntity ->
+                val date = Instant.ofEpochMilli(historyEntity.playedAt).atZone(ZoneId.systemDefault()).toLocalDate()
+                val daysAgo = ChronoUnit.DAYS.between(date, today).toInt()
+                when {
+                    daysAgo == 0 -> DateAgo.Today
+                    daysAgo == 1 -> DateAgo.Yesterday
+                    date >= thisMonday -> DateAgo.ThisWeek
+                    date >= lastMonday -> DateAgo.LastWeek
+                    else -> DateAgo.Other(date.withDayOfMonth(1))
+                }
+            }.toSortedMap(compareBy { dateAgo ->
+                when (dateAgo) {
+                    DateAgo.Today -> 0L
+                    DateAgo.Yesterday -> 1L
+                    DateAgo.ThisWeek -> 2L
+                    DateAgo.LastWeek -> 3L
+                    is DateAgo.Other -> ChronoUnit.DAYS.between(dateAgo.date, today)
+                }
+            })
+        }
     }
 
     val wrappedItemsMap = remember(groupedHistory) {
@@ -196,10 +200,22 @@ fun HistoryScreen(
         wrappedItemsMap.values.flatten()
     }
 
+    val allItemKeys = remember(allWrappedItems) {
+        allWrappedItems.map { "${it.historyEntity.playedAt}_${it.historyEntity.songId}" }
+    }
+
+    val keyToPositionMap = remember(allItemKeys) {
+        val map = HashMap<String, Int>()
+        allItemKeys.forEachIndexed { idx, key ->
+            map[key] = idx
+        }
+        map
+    }
+
     val lazyListState = rememberLazyListState()
 
-    // Load visible items with margin of 20 above and below, debounced
-    LaunchedEffect(lazyListState, rawHistory, query) {
+    // Load visible items with margin of 20 above and below using HashMap lookup, debounced, query.text key
+    LaunchedEffect(lazyListState, rawHistory, query.text) {
         if (query.text.isNotEmpty()) {
             val recentIds = rawHistory.take(300).map { it.songId }.distinct()
             viewModel.loadMetadataForIds(recentIds)
@@ -207,15 +223,19 @@ fun HistoryScreen(
             snapshotFlow { lazyListState.layoutInfo }
                 .debounce(300.milliseconds)
                 .collectLatest { layoutInfo ->
-                    val visibleIndices = layoutInfo.visibleItemsInfo.map { it.index }
-                    if (visibleIndices.isNotEmpty()) {
-                        val allItems = allWrappedItems
-                        val minIdx = (visibleIndices.minOrNull() ?: 0) - 20
-                        val maxIdx = (visibleIndices.maxOrNull() ?: 0) + 20
-                        val visibleIds = allItems.indices
-                            .filter { it in minIdx..maxIdx }
-                            .mapNotNull { allItems.getOrNull(it)?.historyEntity?.songId }
-                        viewModel.loadMetadataForIds(visibleIds)
+                    val visibleKeys = layoutInfo.visibleItemsInfo.mapNotNull { it.key as? String }
+                    if (visibleKeys.isNotEmpty() && keyToPositionMap.isNotEmpty()) {
+                        val visiblePositions = visibleKeys.mapNotNull { key ->
+                            keyToPositionMap[key]
+                        }
+                        if (visiblePositions.isNotEmpty()) {
+                            val minPos = (visiblePositions.minOrNull() ?: 0) - 20
+                            val maxPos = (visiblePositions.maxOrNull() ?: 0) + 20
+                            val visibleIds = allItemKeys.indices
+                                .filter { it in minPos..maxPos }
+                                .mapNotNull { allWrappedItems.getOrNull(it)?.historyEntity?.songId }
+                            viewModel.loadMetadataForIds(visibleIds)
+                        }
                     }
                 }
         }
@@ -325,7 +345,10 @@ fun HistoryScreen(
                 }
             } else {
                 groupedHistory.forEach { (dateAgo, historyList) ->
-                    stickyHeader {
+                    stickyHeader(
+                        key = "header_${dateAgo.hashCode()}",
+                        contentType = "section_header"
+                    ) {
                         SectionHeader(
                             text = dateAgoToString(dateAgo),
                             modifier = Modifier
@@ -338,8 +361,9 @@ fun HistoryScreen(
 
                     itemsIndexed(
                         items = currentDateWrappedItems,
-                        key = { index, wrappedItem -> "${dateAgo}_${wrappedItem.historyEntity.playedAt}_${wrappedItem.historyEntity.songId}_$index" }
-                    ) { index, wrappedItem ->
+                        key = { _, wrappedItem -> "${wrappedItem.historyEntity.playedAt}_${wrappedItem.historyEntity.songId}" },
+                        contentType = { _, _ -> "history_item" }
+                    ) { _, wrappedItem ->
                         val historyEntity = wrappedItem.historyEntity
                         val songItem = wrappedItem.songItem
                         val songObj = songItem?.let { item ->
@@ -399,11 +423,18 @@ fun HistoryScreen(
                                             if (historyEntity.songId == mediaMetadata?.id) {
                                                 playerConnection.player.togglePlayPause()
                                             } else {
+                                                val validHistoryItems = currentDateWrappedItems.mapNotNull { item ->
+                                                    item.songItem?.let { item.historyEntity to it }
+                                                }
+                                                val startIndex = validHistoryItems.indexOfFirst { 
+                                                    it.first.playedAt == historyEntity.playedAt && it.first.songId == historyEntity.songId 
+                                                }.coerceAtLeast(0)
+
                                                 playerConnection.playQueue(
                                                     ListQueue(
                                                         title = dateAgoToString(dateAgo),
-                                                        items = currentDateWrappedItems.mapNotNull { it.songItem?.toMediaItem() },
-                                                        startIndex = index
+                                                        items = validHistoryItems.map { it.second.toMediaItem() },
+                                                        startIndex = startIndex
                                                     )
                                                 )
                                             }
@@ -506,8 +537,9 @@ fun HistoryScreen(
                         menuState.show {
                             SelectionMediaMetadataMenu(
                                 songSelection = allWrappedItems
-                                    .filter { it.isSelected && it.songItem != null }
-                                    .map { it.songItem!!.toMediaItem().metadata!! },
+                                    .mapNotNull { wrapped ->
+                                        if (wrapped.isSelected) wrapped.songItem?.toMediaItem()?.metadata else null
+                                    },
                                 onDismiss = menuState::dismiss,
                                 clearAction = { selection = false },
                                 currentItems = emptyList()

@@ -22,11 +22,6 @@ data class SavedAlbumEntity(
     @ColumnInfo(defaultValue = "0")
     val explicit: Boolean = false,
     val lastUpdateTime: LocalDateTime = LocalDateTime.now(),
-    @ColumnInfo(name = "isLocal", defaultValue = "0")
-    val isLocal: Boolean = false,
-    @ColumnInfo(name = "isLiked", defaultValue = "1")
-    val isLiked: Boolean = true,
-    val bookmarkedAt: LocalDateTime? = null,
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {
     fun toAlbum(): Album {

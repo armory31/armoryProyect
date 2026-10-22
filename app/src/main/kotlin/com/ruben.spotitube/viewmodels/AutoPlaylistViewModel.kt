@@ -98,7 +98,7 @@ constructor(
                                 SongSortType.ARTIST -> filteredSongs.sortedBy { song ->
                                     song.artists.joinToString(separator = "") { it.name }
                                 }
-                                SongSortType.PLAY_TIME -> filteredSongs.sortedBy { it.song.totalPlayTime }
+                                SongSortType.PLAY_TIME -> filteredSongs
                             }.reversed(descending)
                         }
                     }

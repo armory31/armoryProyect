@@ -62,7 +62,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -86,9 +86,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -146,14 +144,14 @@ fun ColumnScope.PlayerMenu(
     val context = LocalContext.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val playerVolume = playerConnection.service.playerVolume.collectAsState()
-    val librarySong by database.song(mediaMetadata.id).collectAsState(initial = null)
+    val playerVolume = playerConnection.service.playerVolume.collectAsStateWithLifecycle()
+    val librarySong by database.song(mediaMetadata.id).collectAsStateWithLifecycle(initialValue = null)
     val coroutineScope = rememberCoroutineScope()
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
 
     val download by LocalDownloadUtil.current.getDownload(mediaMetadata.id)
-        .collectAsState(initial = null)
+        .collectAsStateWithLifecycle(initialValue = null)
 
     val artists =
         remember(mediaMetadata.artists) {
@@ -572,14 +570,7 @@ fun ColumnScope.PlayerMenu(
                                 Icon(painter = painterResource(R.drawable.download), contentDescription = null)
                             },
                             modifier = Modifier.clickable {
-                                coroutineScope.launch(Dispatchers.IO) {
-                                    database.withTransaction { insert(mediaMetadata) }
-                                }
-                                val downloadRequest = DownloadRequest
-                                    .Builder(mediaMetadata.id, mediaMetadata.id.toUri())
-                                    .setCustomCacheKey(mediaMetadata.id)
-                                    .setData(mediaMetadata.title.toByteArray())
-                                    .build()
+                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(mediaMetadata)
                                 DownloadService.sendAddDownload(context, ExoDownloadService::class.java, downloadRequest, false)
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -728,7 +719,7 @@ private fun VolumeSliderL(value: Float, onValueChange: (Float) -> Unit, modifier
 fun EqualizerDialog(onDismiss: () -> Unit, openSystemEqualizer: () -> Unit) {
     val context = LocalContext.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val eqCapabilities by playerConnection.service.eqCapabilities.collectAsState()
+    val eqCapabilities by playerConnection.service.eqCapabilities.collectAsStateWithLifecycle()
 
     val (eqEnabled, setEqEnabled) = rememberPreference(EqualizerEnabledKey, defaultValue = false)
     val (selectedProfileId, setSelectedProfileId) = rememberPreference(EqualizerSelectedProfileIdKey, defaultValue = "flat")

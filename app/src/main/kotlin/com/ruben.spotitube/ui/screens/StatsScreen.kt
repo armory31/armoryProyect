@@ -33,16 +33,14 @@ import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
+import com.ruben.spotitube.models.toSavedSongEntity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,7 +55,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,7 +70,6 @@ import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.DisableBlurKey
 import com.ruben.spotitube.constants.StatPeriod
 import com.ruben.spotitube.db.entities.Artist
-import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.db.entities.SongWithStats
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
@@ -83,7 +79,6 @@ import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.ChoiceChipsRow
 import com.ruben.spotitube.ui.component.HideOnScrollFAB
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.ItemThumbnail
 import com.ruben.spotitube.ui.component.ListItem
 import com.ruben.spotitube.ui.component.LocalAlbumsGrid
@@ -93,7 +88,6 @@ import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.menu.AlbumMenu
 import com.ruben.spotitube.ui.menu.ArtistMenu
 import com.ruben.spotitube.ui.menu.SongMenu
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.joinByBullet
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberPreference
@@ -112,16 +106,15 @@ fun StatsScreen(
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    val indexChips by viewModel.indexChips.collectAsState()
-    val mostPlayedSongs by viewModel.mostPlayedSongs.collectAsState()
-    val mostPlayedSongsStats by viewModel.mostPlayedSongsStats.collectAsState()
-    val mostPlayedArtists by viewModel.mostPlayedArtists.collectAsState()
-    val mostPlayedAlbums by viewModel.mostPlayedAlbums.collectAsState()
-    val firstEvent by viewModel.firstEvent.collectAsState()
+    val indexChips by viewModel.indexChips.collectAsStateWithLifecycle()
+    val mostPlayedSongsStats by viewModel.mostPlayedSongsStats.collectAsStateWithLifecycle()
+    val mostPlayedArtists by viewModel.mostPlayedArtists.collectAsStateWithLifecycle()
+    val mostPlayedAlbums by viewModel.mostPlayedAlbums.collectAsStateWithLifecycle()
+    val firstEvent by viewModel.firstEvent.collectAsStateWithLifecycle()
     val firstEventTime = remember(firstEvent) {
         firstEvent?.playedAt?.let { LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(it), java.time.ZoneId.systemDefault()) }
     }
@@ -129,7 +122,7 @@ fun StatsScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val selectedOption by viewModel.selectedOption.collectAsState()
+    val selectedOption by viewModel.selectedOption.collectAsStateWithLifecycle()
 
     val weeklyDates =
         if (currentDate != null && firstEventTime != null) {
@@ -375,7 +368,6 @@ fun StatsScreen(
                 StatsHighlightsSection(
                     topArtist = mostPlayedArtists.firstOrNull(),
                     topSong = mostPlayedSongsStats.firstOrNull(),
-                    topSongEntity = mostPlayedSongs.firstOrNull(),
                     navController = navController,
                 )
             }
@@ -396,7 +388,7 @@ fun StatsScreen(
 
             item(key = "mostPlayedSongsHeader") {
                 NavigationTitle(
-                    title = "${mostPlayedSongsStats.size} ${stringResource(id = R.string.songs)}",
+                    title = "Top ${mostPlayedSongsStats.size}",
                     modifier = Modifier.animateItem(),
                 )
             }
@@ -405,6 +397,7 @@ fun StatsScreen(
                 items = mostPlayedSongsStats,
                 key = { _, song -> song.id },
             ) { index, song ->
+                val songItem = song.songItem
                 ListItem(
                     title = "${index + 1}. ${song.title}",
                     subtitle = joinByBullet(
@@ -420,33 +413,37 @@ fun StatsScreen(
                             thumbnailUrl = song.thumbnailUrl,
                             isActive = song.id == mediaMetadata?.id,
                             isPlaying = isPlaying,
-                            shape = RoundedCornerShape(8.dp), // Using a constant or the one from Items.kt
-                            modifier = Modifier.size(56.dp) // ListThumbnailSize
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.size(56.dp)
                         )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .combinedClickable(
+                            enabled = songItem != null,
                             onClick = {
+                                if (songItem == null) return@combinedClickable
                                 if (song.id == mediaMetadata?.id) {
                                     playerConnection.player.togglePlayPause()
                                 } else {
                                     playerConnection.playQueue(
                                         YouTubeQueue(
                                             endpoint = WatchEndpoint(song.id),
-                                            preloadItem = mostPlayedSongs[index].toMediaMetadata(),
+                                            preloadItem = songItem.toMediaMetadata(),
                                         ),
                                     )
                                 }
                             },
                             onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                menuState.show {
-                                    SongMenu(
-                                        originalSong = mostPlayedSongs[index],
-                                        navController = navController,
-                                        onDismiss = menuState::dismiss,
-                                    )
+                                if (songItem != null) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    menuState.show {
+                                        SongMenu(
+                                            originalSong = songItem.toSavedSongEntity().toSong(),
+                                            navController = navController,
+                                            onDismiss = menuState::dismiss,
+                                        )
+                                    }
                                 }
                             },
                         )
@@ -565,18 +562,21 @@ fun StatsScreen(
         }
 
         // FAB to shuffle most played songs
-        if (mostPlayedSongs.isNotEmpty()) {
+        if (mostPlayedSongsStats.isNotEmpty()) {
             HideOnScrollFAB(
                 visible = true,
                 lazyListState = lazyListState,
                 icon = R.drawable.shuffle,
                 onClick = {
-                    playerConnection.playQueue(
-                        ListQueue(
-                            title = context.getString(R.string.most_played_songs),
-                            items = mostPlayedSongs.map { it.toMediaMetadata().toMediaItem() }.shuffled()
+                    val validItems = mostPlayedSongsStats.mapNotNull { it.songItem?.toMediaItem() }.shuffled()
+                    if (validItems.isNotEmpty()) {
+                        playerConnection.playQueue(
+                            ListQueue(
+                                title = context.getString(R.string.most_played_songs),
+                                items = validItems
+                            )
                         )
-                    )
+                    }
                 }
             )
         }
@@ -690,7 +690,6 @@ fun pieSliceShape(startAngle: Float, sweepAngle: Float): GenericShape {
 fun StatsHighlightsSection(
     topArtist: Artist?,
     topSong: SongWithStats?,
-    topSongEntity: Song?,
     navController: NavController
 ) {
     if (topArtist == null && topSong == null) return
@@ -711,13 +710,13 @@ fun StatsHighlightsSection(
             )
         }
 
-        if (topSong != null && topSongEntity != null) {
+        if (topSong != null) {
             StatsHighlightCard(
                 title = "Your Favourite Song",
                 mainText = topSong.title,
                 subText = "${topSong.songCountListened} plays • ${makeTimeString(topSong.timeListened)}",
                 imageUrl = topSong.thumbnailUrl,
-                onClick = { /* Navigate to player or something? For now just no-op or maybe play? */ }
+                onClick = { }
             )
         }
     }

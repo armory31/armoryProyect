@@ -28,14 +28,12 @@ import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.AlbumArtistMap
 import com.ruben.spotitube.db.entities.AlbumWithSongs
 import com.ruben.spotitube.db.entities.Artist
-import com.ruben.spotitube.db.entities.Event
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistEntity
-import com.ruben.spotitube.db.entities.PlaylistSong
-import com.ruben.spotitube.db.entities.PlaylistSongMap
+import com.ruben.spotitube.db.entities.PlaylistSongItem
 import com.ruben.spotitube.db.entities.PlaylistTagMap
 import com.ruben.spotitube.db.entities.RelatedSongMap
 import com.ruben.spotitube.db.entities.SearchHistory
@@ -50,7 +48,10 @@ import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.SongArtistMap
-import com.ruben.spotitube.db.entities.SongWithStats
+import com.ruben.spotitube.db.entities.AlbumStatRow
+import com.ruben.spotitube.db.entities.ArtistStatRow
+import com.ruben.spotitube.db.entities.HistoryRangeTotals
+import com.ruben.spotitube.db.entities.SongStatRow
 import com.ruben.spotitube.db.entities.TagEntity
 import com.ruben.spotitube.extensions.reversed
 import com.ruben.spotitube.extensions.toSQLiteQuery
@@ -61,16 +62,16 @@ import com.ruben.spotitube.sync.LibrarySummary
 import com.ruben.spotitube.ui.utils.resize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.text.Collator
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Locale
+
+internal fun String.escapeSqlLike(): String =
+    this.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 @Dao
 @RewriteQueriesToDropUnusedColumns
@@ -94,8 +95,10 @@ interface DatabaseDao {
 
     fun editablePlaylistsByCreateDateAsc(): Flow<List<Playlist>> = playlistsWithMetadata().map { list -> list.filter { it.playlist.isEditable } }
 
-    @Query("SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = :playlistId AND songId = :songId")
-    suspend fun checkInPlaylist(playlistId: String, songId: String): Int
+    suspend fun checkInPlaylist(playlistId: String, songId: String): Int {
+        val playlist = getSavedPlaylist(playlistId) ?: return 0
+        return if (playlist.songs.any { it.id == songId }) 1 else 0
+    }
 
     fun songs(
         sortType: SongSortType,
@@ -163,7 +166,7 @@ interface DatabaseDao {
         when (sortType) {
             ArtistSongSortType.CREATE_DATE -> savedMatching
             ArtistSongSortType.NAME -> savedMatching.sortedWith(compareBy(collator) { it.song.title })
-            ArtistSongSortType.PLAY_TIME -> savedMatching.sortedBy { it.song.totalPlayTime }
+            ArtistSongSortType.PLAY_TIME -> savedMatching.sortedBy { it.song.duration }
         }.let { if (descending) it.reversed() else it }
     }.flowOn(Dispatchers.IO)
 
@@ -182,113 +185,152 @@ interface DatabaseDao {
         offset: Int = 0,
     ): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() }.take(limit) }
 
+    @Query("""
+        SELECT songId AS id, 
+               COUNT(*) AS songCountListened, 
+               COALESCE(SUM(playTimeMs), 0) AS timeListened 
+        FROM historialsong 
+        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp 
+        GROUP BY songId 
+        ORDER BY timeListened DESC 
+        LIMIT :limit OFFSET :offset
+    """)
+    fun mostPlayedSongStatsRaw(
+        fromTimeStamp: Long,
+        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
+        limit: Int = 20,
+        offset: Int = 0
+    ): Flow<List<SongStatRow>>
+
+    @Query("""
+        SELECT songId AS id, 
+               COUNT(*) AS songCountListened, 
+               COALESCE(SUM(playTimeMs), 0) AS timeListened 
+        FROM historialsong 
+        GROUP BY songId 
+        ORDER BY songCountListened DESC 
+        LIMIT :limit OFFSET :offset
+    """)
+    fun mostPlayedSongStatsAllTime(
+        limit: Int = 20,
+        offset: Int = 0
+    ): Flow<List<SongStatRow>>
+
+    @Query("SELECT songId FROM historialsong ORDER BY playedAt DESC LIMIT 1")
+    suspend fun getLastHistorySongId(): String?
+
+    @Query("""
+        SELECT COALESCE(SUM(playTimeMs), 0) AS totalTimeListened, 
+               COUNT(*) AS totalSongsPlayed 
+        FROM historialsong 
+        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp
+    """)
+    fun historyRangeTotals(
+        fromTimeStamp: Long,
+        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+    ): Flow<HistoryRangeTotals>
+
     fun mostPlayedSongsStats(
         fromTimeStamp: Long,
-        limit: Int = 6,
+        limit: Int = 20,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<SongWithStats>> = allHistorySongs().map { historyList ->
-        val toTime = toTimeStamp ?: Long.MAX_VALUE
-        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
-        val grouped = filtered.groupBy { it.songId }
-        val sorted = grouped.map { (songId, items) ->
-            val totalTime = items.sumOf { it.playTimeMs }
-            val playCount = items.size
-            songId to Pair(playCount, totalTime)
-        }.sortedByDescending { it.second.second }
-            .drop(offset)
-            .let { if (limit >= 0) it.take(limit) else it }
-
-        sorted.mapNotNull { (songId, stats) ->
-            val savedSong = getSavedSong(songId)
-            val songObj = savedSong?.toSong()
-                ?: getSongById(songId)
-                ?: Song(song = SavedSongEntity(id = songId, title = songId), artists = emptyList())
-
-            SongWithStats(
-                id = songObj.id,
-                title = songObj.title,
-                thumbnailUrl = songObj.thumbnailUrl ?: "",
-                songCountListened = stats.first,
-                timeListened = stats.second
-            )
-        }
-    }.flowOn(Dispatchers.IO)
+    ): Flow<List<SongStatRow>> {
+        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+        return mostPlayedSongStatsRaw(
+            fromTimeStamp = fromTimeStamp,
+            toTimeStamp = toTime,
+            limit = if (limit >= 0) limit else Int.MAX_VALUE,
+            offset = offset
+        )
+    }
 
     fun mostPlayedSongs(
         fromTimeStamp: Long,
-        limit: Int = 6,
+        limit: Int = 20,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Song>> = allHistorySongs().map { historyList ->
-        val toTime = toTimeStamp ?: Long.MAX_VALUE
-        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
-        val grouped = filtered.groupBy { it.songId }
-        val sorted = grouped.map { (songId, items) ->
-            val totalTime = items.sumOf { it.playTimeMs }
-            val playCount = items.size
-            songId to Pair(playCount, totalTime)
-        }.sortedByDescending { it.second.second }
-            .drop(offset)
-            .let { if (limit >= 0) it.take(limit) else it }
+    ): Flow<List<SongStatRow>> {
+        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+        return mostPlayedSongStatsRaw(
+            fromTimeStamp = fromTimeStamp,
+            toTimeStamp = toTime,
+            limit = if (limit >= 0) limit else Int.MAX_VALUE,
+            offset = offset
+        )
+    }
 
-        sorted.mapNotNull { (songId, _) ->
-            val savedSong = getSavedSong(songId)
-            savedSong?.toSong()
-                ?: getSongById(songId)
-                ?: Song(song = SavedSongEntity(id = songId, title = songId), artists = emptyList())
-        }
-    }.flowOn(Dispatchers.IO)
+    @Query("""
+        SELECT artistId, COUNT(*) AS playCount 
+        FROM historialartist 
+        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp 
+        GROUP BY artistId 
+        ORDER BY playCount DESC 
+        LIMIT :limit OFFSET :offset
+    """)
+    fun mostPlayedArtistStatsRaw(
+        fromTimeStamp: Long,
+        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
+        limit: Int = 20,
+        offset: Int = 0
+    ): Flow<List<ArtistStatRow>>
+
+    @Query("""
+        SELECT albumId, COUNT(*) AS playCount 
+        FROM historialalbum 
+        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp 
+        GROUP BY albumId 
+        ORDER BY playCount DESC 
+        LIMIT :limit OFFSET :offset
+    """)
+    fun mostPlayedAlbumStatsRaw(
+        fromTimeStamp: Long,
+        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
+        limit: Int = 20,
+        offset: Int = 0
+    ): Flow<List<AlbumStatRow>>
 
     fun mostPlayedArtists(
         fromTimeStamp: Long,
-        limit: Int = 6,
+        limit: Int = 20,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Artist>> = allHistoryArtists().map { historyList ->
-        val toTime = toTimeStamp ?: Long.MAX_VALUE
-        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
-        val grouped = filtered.groupBy { it.artistId }
-        val sorted = grouped.map { (artistId, items) ->
-            artistId to items.size
-        }.sortedByDescending { it.second }
-            .drop(offset)
-            .let { if (limit >= 0) it.take(limit) else it }
-
-        sorted.mapNotNull { (artistId, count) ->
-            val savedArtist = getSavedArtist(artistId)
-            val artistObj = savedArtist?.toArtist()
-                ?: getArtistById(artistId)?.let { Artist(artist = it, songCount = count) }
-                ?: Artist(artist = SavedArtistEntity(id = artistId, name = artistId), songCount = count)
-
-            artistObj.copy(songCount = count)
-        }
-    }.flowOn(Dispatchers.IO)
+    ): Flow<List<Artist>> {
+        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+        return mostPlayedArtistStatsRaw(
+            fromTimeStamp = fromTimeStamp,
+            toTimeStamp = toTime,
+            limit = if (limit >= 0) limit else Int.MAX_VALUE,
+            offset = offset
+        ).map { rows ->
+            rows.map { row ->
+                Artist(artist = SavedArtistEntity(id = row.artistId, name = row.artistId), songCount = row.playCount)
+            }
+        }.flowOn(Dispatchers.IO)
+    }
 
     fun mostPlayedAlbums(
         fromTimeStamp: Long,
-        limit: Int = 6,
+        limit: Int = 20,
         offset: Int = 0,
         toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Album>> = allHistoryAlbums().map { historyList ->
-        val toTime = toTimeStamp ?: Long.MAX_VALUE
-        val filtered = historyList.filter { it.playedAt in fromTimeStamp..toTime }
-        val grouped = filtered.groupBy { it.albumId }
-        val sorted = grouped.map { (albumId, items) ->
-            albumId to items.size
-        }.sortedByDescending { it.second }
-            .drop(offset)
-            .let { if (limit >= 0) it.take(limit) else it }
-
-        sorted.mapNotNull { (albumId, count) ->
-            val savedAlbum = getSavedAlbum(albumId)
-            val albumObj = savedAlbum?.toAlbum()
-                ?: getAlbumById(albumId)?.let { Album(album = it, artists = emptyList(), songCountListened = count) }
-                ?: Album(album = SavedAlbumEntity(id = albumId, title = albumId, songCount = count, duration = 0), artists = emptyList(), songCountListened = count)
-
-            albumObj.copy(songCountListened = count)
-        }
-    }.flowOn(Dispatchers.IO)
+    ): Flow<List<Album>> {
+        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+        return mostPlayedAlbumStatsRaw(
+            fromTimeStamp = fromTimeStamp,
+            toTimeStamp = toTime,
+            limit = if (limit >= 0) limit else Int.MAX_VALUE,
+            offset = offset
+        ).map { rows ->
+            rows.map { row ->
+                Album(
+                    album = SavedAlbumEntity(id = row.albumId, title = row.albumId, songCount = row.playCount, duration = 0),
+                    artists = emptyList(),
+                    songCountListened = row.playCount
+                )
+            }
+        }.flowOn(Dispatchers.IO)
+    }
 
     fun artistAlbumsPreview(artistId: String, previewSize: Int = 6): Flow<List<Album>> = allSavedAlbums().map { savedList ->
         savedList.filter { it.artistId == artistId }.map { it.toAlbum() }.take(previewSize)
@@ -317,8 +359,6 @@ interface DatabaseDao {
     suspend fun getSongById(songId: String): Song? = getSavedSong(songId)?.toSong()
 
     fun getSongByIdBlocking(songId: String): Song? = kotlinx.coroutines.runBlocking { getSavedSong(songId)?.toSong() }
-
-    suspend fun getSongsByIds(songIds: List<String>): List<Song> = allSavedSongs().first().filter { it.id in songIds }.map { it.toSong() }
 
     fun songArtistMap(songId: String): List<SongArtistMap> = emptyList()
 
@@ -408,34 +448,9 @@ interface DatabaseDao {
 
     fun albumArtistMaps(albumId: String): List<AlbumArtistMap> = emptyList()
 
-    @Query("SELECT * FROM playlist_song_map ORDER BY position ASC")
-    fun allPlaylistSongMaps(): Flow<List<PlaylistSongMap>>
-
-    fun playlistsWithMetadata(): Flow<List<Playlist>> = combine(
-        allSavedPlaylists(),
-        allPlaylistSongMaps(),
-        allSavedSongs()
-    ) { savedPlaylists, songMaps, savedSongs ->
-        val mapsByPlaylistId = songMaps.groupBy { it.playlistId }
-        val songMap = savedSongs.associateBy { it.id }
-
+    fun playlistsWithMetadata(): Flow<List<Playlist>> = allSavedPlaylists().map { savedPlaylists ->
         savedPlaylists.map { saved ->
-            val matchingMaps = mapsByPlaylistId[saved.id]
-                ?: (saved.browseId?.let { mapsByPlaylistId[it] })
-                ?: (mapsByPlaylistId[saved.id.removePrefix("VL")])
-                ?: (mapsByPlaylistId["VL" + saved.id.removePrefix("VL")])
-                ?: emptyList()
-
-            val count = matchingMaps.size
-            val thumbnails = matchingMaps
-                .mapNotNull { songMap[it.songId]?.thumbnailUrl }
-                .distinct()
-                .take(4)
-
-            saved.toPlaylist(
-                songCount = count,
-                songThumbnails = if (saved.thumbnailUrl != null) listOf(saved.thumbnailUrl) else thumbnails
-            )
+            saved.toPlaylist()
         }
     }
 
@@ -444,17 +459,56 @@ interface DatabaseDao {
     fun playlistsByNameAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
     fun playlistsByCustomOrderAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
 
-    @Query("SELECT songId FROM playlist_song_map WHERE playlistId = :playlistId AND songId IN (:songIds)")
-    suspend fun playlistDuplicates(playlistId: String, songIds: List<String>): List<String>
+    @Query("UPDATE savedplaylist SET name = :name WHERE id = :playlistId OR browseId = :playlistId")
+    suspend fun updatePlaylistTitle(playlistId: String, name: String)
 
-    @Query("SELECT MAX(position) FROM playlist_song_map WHERE playlistId = :playlistId")
-    suspend fun maxPlaylistSongPosition(playlistId: String): Int?
+    @Query("UPDATE savedplaylist SET thumbnailUrl = :thumbnailUrl WHERE id = :playlistId OR browseId = :playlistId")
+    suspend fun updatePlaylistThumbnail(playlistId: String, thumbnailUrl: String?)
+
+    suspend fun playlistDuplicates(playlistId: String, songIds: List<String>): List<String> {
+        val playlist = getSavedPlaylist(playlistId) ?: return emptyList()
+        val existingIds = playlist.songs.map { it.id }.toSet()
+        return songIds.filter { it in existingIds }
+    }
 
     @Transaction
-    suspend fun addSongsToPlaylist(playlistId: String, songIds: List<String>) {
-        val maxPosition = maxPlaylistSongPosition(playlistId) ?: -1
-        songIds.forEachIndexed { index, songId ->
-            insert(PlaylistSongMap(playlistId = playlistId, songId = songId, position = maxPosition + 1 + index))
+    suspend fun addSongsToPlaylist(playlistId: String, items: List<PlaylistSongItem>) {
+        val playlist = getSavedPlaylist(playlistId) ?: return
+        val updatedSongs = playlist.songs + items
+        insertSavedPlaylist(playlist.copy(songs = updatedSongs))
+    }
+
+    @Transaction
+    suspend fun removeSongFromPlaylist(playlistId: String, index: Int) {
+        val playlist = getSavedPlaylist(playlistId) ?: return
+        if (index in playlist.songs.indices) {
+            val updatedSongs = playlist.songs.toMutableList().apply { removeAt(index) }
+            insertSavedPlaylist(playlist.copy(songs = updatedSongs))
+        }
+    }
+
+    @Transaction
+    suspend fun removeSongsFromPlaylist(playlistId: String, indices: List<Int>) {
+        val playlist = getSavedPlaylist(playlistId) ?: return
+        val sortedIndices = indices.distinct().sortedDescending()
+        val updatedSongs = playlist.songs.toMutableList()
+        sortedIndices.forEach { idx ->
+            if (idx in updatedSongs.indices) {
+                updatedSongs.removeAt(idx)
+            }
+        }
+        insertSavedPlaylist(playlist.copy(songs = updatedSongs))
+    }
+
+    @Transaction
+    suspend fun moveSongInPlaylist(playlistId: String, fromIndex: Int, toIndex: Int) {
+        val playlist = getSavedPlaylist(playlistId) ?: return
+        if (fromIndex in playlist.songs.indices && toIndex in playlist.songs.indices) {
+            val updatedSongs = playlist.songs.toMutableList().apply {
+                val item = removeAt(fromIndex)
+                add(toIndex, item)
+            }
+            insertSavedPlaylist(playlist.copy(songs = updatedSongs))
         }
     }
 
@@ -479,7 +533,7 @@ interface DatabaseDao {
         if (descending && sortType != PlaylistSortType.CUSTOM) list.asReversed() else list
     }
 
-    fun likedSongsByRowIdAsc(): Flow<List<Song>> = allSavedSongs().map { list -> list.filter { it.isLiked }.map { it.toSong() } }
+    fun likedSongsByRowIdAsc(): Flow<List<Song>> = allSongs()
 
     fun albumsLikedInternal(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() } }
 
@@ -518,7 +572,7 @@ interface DatabaseDao {
     @Query("SELECT id FROM savedalbum")
     fun getSavedAlbumIds(): Flow<List<String>>
 
-    @Query("SELECT id FROM savedsong WHERE isLiked = 1 UNION SELECT videoId FROM set_video_id")
+    @Query("SELECT id FROM savedsong")
     fun getSavedSongIds(): Flow<List<String>>
 
     @Query("SELECT id FROM savedplaylist UNION SELECT browseId FROM savedplaylist WHERE browseId IS NOT NULL")
@@ -534,22 +588,30 @@ interface DatabaseDao {
     """)
     fun getLibrarySummary(): Flow<LibrarySummary>
 
-    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId OR playlistId = (SELECT browseId FROM savedplaylist WHERE id = :playlistId) OR playlistId = (SELECT id FROM savedplaylist WHERE browseId = :playlistId) OR playlistId = REPLACE(:playlistId, 'VL', '') OR playlistId = 'VL' || REPLACE(:playlistId, 'VL', '') ORDER BY position ASC")
-    fun rawPlaylistSongMaps(playlistId: String): Flow<List<PlaylistSongMap>>
+    fun playlistSongItems(playlistId: String): Flow<List<PlaylistSongItem>> = allSavedPlaylists().map { list ->
+        list.firstOrNull { it.id == playlistId || it.browseId == playlistId }?.songs ?: emptyList()
+    }
 
-    fun playlistSongs(playlistId: String): Flow<List<PlaylistSong>> = rawPlaylistSongMaps(playlistId).map { mapList ->
-        mapList.mapNotNull { pMap ->
-            val savedSong = getSavedSong(pMap.songId)
-            val songObj = savedSong?.toSong()
-                ?: getSongById(pMap.songId)
-                ?: Song(song = SavedSongEntity(id = pMap.songId, title = pMap.songId), artists = emptyList())
-
-            PlaylistSong(
-                map = pMap,
-                song = songObj
+    fun playlistSongs(playlistId: String): Flow<List<Song>> = playlistSongItems(playlistId).map { items ->
+        items.map { item ->
+            Song(
+                song = SavedSongEntity(
+                    id = item.id,
+                    title = item.title,
+                    artistId = null,
+                    artistName = item.artistName,
+                    duration = item.duration,
+                    thumbnailUrl = item.thumbnailUrl,
+                    albumId = item.albumId,
+                    albumName = item.albumName,
+                    explicit = item.explicit
+                ),
+                artists = item.artistName?.let { name ->
+                    listOf(SavedArtistEntity(id = "", name = name))
+                } ?: emptyList()
             )
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
     fun playlist(id: String): Flow<Playlist?> = playlistsWithMetadata().map { list -> list.firstOrNull { it.id == id || it.playlist.browseId == id } }
 
@@ -559,127 +621,66 @@ interface DatabaseDao {
 
     fun playlistByBrowseId(browseId: String): Flow<Playlist?> = playlistsWithMetadata().map { list -> list.firstOrNull { it.playlist.browseId == browseId } }
 
-    fun rawSearchSongs(
-        query: String,
-        previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Song>> = allSavedSongs().map { list -> list.filter { it.title.contains(query, ignoreCase = true) }.map { it.toSong() }.take(previewSize) }
+    @Query("""
+        SELECT * FROM savedsong 
+        WHERE title LIKE '%' || :query || '%' ESCAPE '\' 
+           OR artistName LIKE '%' || :query || '%' ESCAPE '\' 
+        LIMIT :limit
+    """)
+    fun searchSongsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedSongEntity>>
 
     fun searchSongs(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Song>> = allSavedSongs().map { savedList ->
-        val matchingSaved = savedList.filter {
-            it.title.contains(query, ignoreCase = true) || (it.artistName?.contains(query, ignoreCase = true) == true)
-        }.map { it.toSong() }.take(previewSize)
-
-        if (matchingSaved.size < previewSize) {
-            val remaining = previewSize - matchingSaved.size
-            val ytSongs = runCatching {
-                com.ruben.spotitube.innertube.YouTube.search(query, com.ruben.spotitube.innertube.YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items
-                    ?.filterIsInstance<com.ruben.spotitube.innertube.models.SongItem>()
-                    ?.map { item ->
-                        Song(
-                            song = SavedSongEntity(
-                                id = item.id,
-                                title = item.title,
-                                duration = item.duration ?: -1,
-                                thumbnailUrl = item.thumbnail
-                            ),
-                            artists = item.artists.map { a -> SavedArtistEntity(id = a.id ?: "", name = a.name) }
-                        )
-                    }?.take(remaining)
-            }.getOrNull().orEmpty()
-
-            (matchingSaved + ytSongs).distinctBy { it.id }.take(previewSize)
-        } else {
-            matchingSaved
-        }
+    ): Flow<List<Song>> = searchSongsRaw(query.escapeSqlLike(), previewSize).map { list ->
+        list.map { it.toSong() }
     }.flowOn(Dispatchers.IO)
 
-    fun rawSearchArtists(
-        query: String,
-        previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Artist>> = allSavedArtists().map { list -> list.filter { it.name.contains(query, ignoreCase = true) }.map { it.toArtist() }.take(previewSize) }
+    @Query("""
+        SELECT * FROM savedartist 
+        WHERE name LIKE '%' || :query || '%' ESCAPE '\' 
+        LIMIT :limit
+    """)
+    fun searchArtistsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedArtistEntity>>
 
     fun searchArtists(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Artist>> = allSavedArtists().map { savedList ->
-        val matchingSaved = savedList.filter {
-            it.name.contains(query, ignoreCase = true)
-        }.map { it.toArtist() }.take(previewSize)
-
-        if (matchingSaved.size < previewSize) {
-            val remaining = previewSize - matchingSaved.size
-            val ytArtists = runCatching {
-                com.ruben.spotitube.innertube.YouTube.search(query, com.ruben.spotitube.innertube.YouTube.SearchFilter.FILTER_ARTIST).getOrNull()?.items
-                    ?.filterIsInstance<com.ruben.spotitube.innertube.models.ArtistItem>()
-                    ?.map { item ->
-                        Artist(
-                            artist = SavedArtistEntity(
-                                id = item.id,
-                                name = item.title,
-                                thumbnailUrl = item.thumbnail
-                            ),
-                            songCount = 0
-                        )
-                    }?.take(remaining)
-            }.getOrNull().orEmpty()
-
-            (matchingSaved + ytArtists).distinctBy { it.id }.take(previewSize)
-        } else {
-            matchingSaved
-        }
+    ): Flow<List<Artist>> = searchArtistsRaw(query.escapeSqlLike(), previewSize).map { list ->
+        list.map { it.toArtist() }
     }.flowOn(Dispatchers.IO)
 
-    fun rawSearchAlbums(
-        query: String,
-        previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.title.contains(query, ignoreCase = true) }.map { it.toAlbum() }.take(previewSize) }
+    @Query("""
+        SELECT * FROM savedalbum 
+        WHERE title LIKE '%' || :query || '%' ESCAPE '\' 
+           OR artistName LIKE '%' || :query || '%' ESCAPE '\' 
+        LIMIT :limit
+    """)
+    fun searchAlbumsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedAlbumEntity>>
 
     fun searchAlbums(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Album>> = allSavedAlbums().map { savedList ->
-        val matchingSaved = savedList.filter {
-            it.title.contains(query, ignoreCase = true) || (it.artistName?.contains(query, ignoreCase = true) == true)
-        }.map { it.toAlbum() }.take(previewSize)
-
-        if (matchingSaved.size < previewSize) {
-            val remaining = previewSize - matchingSaved.size
-            val ytAlbums = runCatching {
-                com.ruben.spotitube.innertube.YouTube.search(query, com.ruben.spotitube.innertube.YouTube.SearchFilter.FILTER_ALBUM).getOrNull()?.items
-                    ?.filterIsInstance<com.ruben.spotitube.innertube.models.AlbumItem>()
-                    ?.map { item ->
-                        val artistEntity = item.artists?.firstOrNull()?.let { a ->
-                            SavedArtistEntity(id = a.id ?: "", name = a.name)
-                        }
-                        Album(
-                            album = SavedAlbumEntity(
-                                id = item.id,
-                                title = item.title,
-                                thumbnailUrl = item.thumbnail,
-                                year = item.year,
-                                songCount = 0,
-                                duration = 0
-                            ),
-                            artists = if (artistEntity != null) listOf(artistEntity) else emptyList()
-                        )
-                    }?.take(remaining)
-            }.getOrNull().orEmpty()
-
-            (matchingSaved + ytAlbums).distinctBy { it.id }.take(previewSize)
-        } else {
-            matchingSaved
-        }
+    ): Flow<List<Album>> = searchAlbumsRaw(query.escapeSqlLike(), previewSize).map { list ->
+        list.map { it.toAlbum() }
     }.flowOn(Dispatchers.IO)
+
+    @Query("""
+        SELECT * FROM savedplaylist 
+        WHERE name LIKE '%' || :query || '%' ESCAPE '\' 
+        LIMIT :limit
+    """)
+    fun searchPlaylistsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedPlaylistEntity>>
 
     fun searchPlaylists(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Playlist>> = playlistsWithMetadata().map { list -> list.filter { it.playlist.name.contains(query, ignoreCase = true) }.take(previewSize) }
+    ): Flow<List<Playlist>> = searchPlaylistsRaw(query.escapeSqlLike(), previewSize).map { list ->
+        list.map { it.toPlaylist() }
+    }.flowOn(Dispatchers.IO)
 
-    fun firstEvent(): Flow<HistorySongEntity?> = allHistorySongs().map { it.lastOrNull() }
+    @Query("SELECT * FROM historialsong ORDER BY playedAt ASC LIMIT 1")
+    fun firstEvent(): Flow<HistorySongEntity?>
 
     fun clearListenHistory() {}
 
@@ -768,36 +769,6 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM savedsong WHERE id = :songId")
     fun getSavedSongDirect(songId: String): SavedSongEntity?
-
-    @Query("UPDATE savedsong SET isLiked = :isLiked WHERE id = :id")
-    fun updateIsLiked(id: String, isLiked: Boolean)
-
-    @Transaction
-    fun insertOrUpdateDownload(
-        mediaId: String,
-        title: String,
-        artistName: String?,
-        duration: Int,
-        thumbnailUrl: String?,
-        downloadDate: LocalDateTime = LocalDateTime.now()
-    ) {
-        val existing = getSavedSongDirect(mediaId)
-        if (existing != null) {
-            updateDownloadDate(mediaId, downloadDate)
-        } else {
-            insertSavedSong(
-                SavedSongEntity(
-                    id = mediaId,
-                    title = title,
-                    artistName = artistName,
-                    duration = duration,
-                    thumbnailUrl = thumbnailUrl,
-                    dateDownload = downloadDate,
-                    isLiked = false
-                )
-            )
-        }
-    }
 
     @Transaction
     fun upsertSongPreservingUsage(song: SavedSongEntity) {
@@ -990,46 +961,15 @@ interface DatabaseDao {
         }
     }
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(map: PlaylistSongMap): Long
-
-    @Update
-    fun update(map: PlaylistSongMap)
-
-    @Delete
-    fun delete(map: PlaylistSongMap)
-
-    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId AND position >= :minPosition ORDER BY position")
-    fun playlistSongMaps(playlistId: String, minPosition: Int = 0): List<PlaylistSongMap>
-
-    @Query("DELETE FROM playlist_song_map WHERE playlistId = :playlistId")
-    fun clearPlaylist(playlistId: String)
-
     @Transaction
-    fun move(playlistId: String, from: Int, to: Int) {
-        if (from == to) return
-        val start = minOf(from, to)
-        val items = playlistSongMaps(playlistId, start).toMutableList()
-        val moving = items.firstOrNull { it.position == from } ?: return
-
-        if (from < to) {
-            items.filter { it.position in (from + 1)..to }.forEach {
-                update(it.copy(position = it.position - 1))
-            }
-        } else {
-            items.filter { it.position in to until from }.forEach {
-                update(it.copy(position = it.position + 1))
-            }
-        }
-        update(moving.copy(position = to))
+    suspend fun clearPlaylist(playlistId: String) {
+        val playlist = getSavedPlaylist(playlistId) ?: return
+        insertSavedPlaylist(playlist.copy(songs = emptyList()))
     }
 
     // --- Saved (Biblioteca) ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSavedSong(song: SavedSongEntity)
-
-    @Query("UPDATE savedsong SET dateDownload = :downloadDate WHERE id = :songId")
-    fun updateDownloadDate(songId: String, downloadDate: LocalDateTime = LocalDateTime.now())
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSavedSongs(songs: List<SavedSongEntity>)
@@ -1039,6 +979,9 @@ interface DatabaseDao {
 
     @Query("SELECT * FROM savedsong WHERE id = :songId")
     suspend fun getSavedSong(songId: String): SavedSongEntity?
+
+    @Query("SELECT * FROM savedsong ORDER BY RANDOM() LIMIT :limit")
+    suspend fun getRandomSavedSongs(limit: Int = 20): List<SavedSongEntity>
 
     @Query("SELECT * FROM savedsong ORDER BY savedAt DESC")
     fun allSavedSongs(): Flow<List<SavedSongEntity>>

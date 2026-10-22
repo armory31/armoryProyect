@@ -55,7 +55,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -536,7 +536,8 @@ fun KeepListeningSection(
                     is Artist -> "artist_${item.id}"
                     is Playlist -> "playlist_${item.id}"
                 }
-            }
+            },
+            contentType = { "keep_listening_item" }
         ) { item ->
             val itemId = when (item) {
                 is Song -> item.id
@@ -593,7 +594,8 @@ fun ForgottenFavoritesSection(
     ) {
         items(
             items = distinctForgottenFavorites,
-            key = { it.id }
+            key = { it.id },
+            contentType = { "song_item" }
         ) { song ->
             SongListItem(
                 song = song,
@@ -674,8 +676,9 @@ fun SimilarRecommendationsSection(
         modifier = modifier
     ) {
         items(
-            items = recommendation.items.take(4),
-            key = { it.id }
+            items = recommendation.items.distinctBy { it.id }.take(4),
+            key = { it.id },
+            contentType = { "recommendation_card" }
         ) { item ->
             YouTubeGridItemWrapper(
                 item = item,
@@ -935,9 +938,12 @@ fun LazyListScope.similarRecommendationsContainer(
     haptic: HapticFeedback,
     scope: CoroutineScope
 ) {
-     item {
-        val similarRecommendations by viewModel.similarRecommendations.collectAsState()
-        val allItemsMetadata by viewModel.allItemsMetadata.collectAsState()
+     item(
+         key = "similar_recommendations",
+         contentType = "section"
+     ) {
+        val similarRecommendations by viewModel.similarRecommendations.collectAsStateWithLifecycle()
+        val allItemsMetadata by viewModel.allItemsMetadata.collectAsStateWithLifecycle()
         
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)

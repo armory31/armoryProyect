@@ -67,7 +67,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -588,7 +588,7 @@ class MainActivity : ComponentActivity() {
                                     navBackStackEntry?.destination?.route?.startsWith("search/") == true
                         }
 
-                    val nowPlaying by (playerConnection?.mediaMetadata ?: MutableStateFlow(null)).collectAsState()
+                    val nowPlaying by (playerConnection?.mediaMetadata ?: MutableStateFlow(null)).collectAsStateWithLifecycle()
 
                     val route = navBackStackEntry?.destination?.route
                     val canShowNav = (route == null ||

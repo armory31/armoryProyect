@@ -4,33 +4,17 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.db.entities
 
 import androidx.compose.runtime.Immutable
 import androidx.room.Embedded
-import androidx.room.Junction
-import androidx.room.Relation
 
 @Immutable
 data class Playlist(
     @Embedded
     val playlist: PlaylistEntity,
-    val songCount: Int,
-    @Relation(
-        entity = SavedSongEntity::class,
-        entityColumn = "id",
-        parentColumn = "id",
-        projection = ["thumbnailUrl"],
-        associateBy =
-        Junction(
-            value = PlaylistSongMapPreview::class,
-            parentColumn = "playlistId",
-            entityColumn = "songId",
-        ),
-    )
-    val songThumbnails: List<String?>,
+    val songCount: Int = 0,
+    val songThumbnails: List<String?> = emptyList(),
 ) : LocalItem() {
     override val id: String
         get() = playlist.id

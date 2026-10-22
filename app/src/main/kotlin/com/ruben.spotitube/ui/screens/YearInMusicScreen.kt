@@ -57,7 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -109,12 +109,10 @@ import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.db.entities.SongWithStats
 import com.ruben.spotitube.ArmoryIconButton
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.menu.ArtistMenu
 import com.ruben.spotitube.ui.menu.SongMenu
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.ComposeToImage
 import com.ruben.spotitube.utils.joinByBullet
 import com.ruben.spotitube.utils.makeTimeString
@@ -265,14 +263,14 @@ fun YearInMusicScreen(
     val coroutineScope    = rememberCoroutineScope()
     val view              = LocalView.current
 
-    val availableYears      by viewModel.availableYears.collectAsState()
-    val selectedYear        by viewModel.selectedYear.collectAsState()
-    val topSongsStats       by viewModel.topSongsStats.collectAsState()
-    val topSongs            by viewModel.topSongs.collectAsState()
-    val topArtists          by viewModel.topArtists.collectAsState()
-    val topAlbums           by viewModel.topAlbums.collectAsState()
-    val totalListeningTime  by viewModel.totalListeningTime.collectAsState()
-    val totalSongsPlayed    by viewModel.totalSongsPlayed.collectAsState()
+    val availableYears      by viewModel.availableYears.collectAsStateWithLifecycle()
+    val selectedYear        by viewModel.selectedYear.collectAsStateWithLifecycle()
+    val topSongsStats       by viewModel.topSongsStats.collectAsStateWithLifecycle()
+    val topSongs            by viewModel.topSongs.collectAsStateWithLifecycle()
+    val topArtists          by viewModel.topArtists.collectAsStateWithLifecycle()
+    val topAlbums           by viewModel.topAlbums.collectAsStateWithLifecycle()
+    val totalListeningTime  by viewModel.totalListeningTime.collectAsStateWithLifecycle()
+    val totalSongsPlayed    by viewModel.totalSongsPlayed.collectAsStateWithLifecycle()
 
     var isGeneratingImage   by remember { mutableStateOf(false) }
     var isShareCaptureMode  by remember { mutableStateOf(false) }
