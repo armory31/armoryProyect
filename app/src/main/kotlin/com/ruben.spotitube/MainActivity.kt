@@ -12,7 +12,6 @@ import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
-import android.util.Log
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -1162,7 +1161,6 @@ class MainActivity : ComponentActivity() {
         }
 
         val uri = intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri()
-        Log.d("DeepLinkDebug", "Intent received: action=${intent.action}, data=$uri")
         if (uri == null) return
 
         val coroutineScope = lifecycleScope
@@ -1171,12 +1169,10 @@ class MainActivity : ComponentActivity() {
         val host = uri.host?.lowercase()
         val pathSegments = uri.pathSegments.filter(String::isNotBlank)
 
-        Log.d("DeepLinkDebug", "Parsed URI: scheme=$scheme, authority/host=${authority ?: host}, pathSegments=$pathSegments")
 
         // 1. Manejo especial de Together
         val isSupportedScheme = scheme == "armory" || scheme == "opentune"
         if (isSupportedScheme && authority == "together") {
-            Log.d("DeepLinkDebug", "Handling Together deep link: $uri")
             pendingTogetherJoinLink = uri.toString()
             startMusicServiceSafely()
             joinPendingTogetherIfReady()
@@ -1186,18 +1182,15 @@ class MainActivity : ComponentActivity() {
         // Helper para popBackStack si la pantalla actual coincide con el tipo de pantalla a navegar
         fun navigateWithPop(targetRoute: String, routePrefix: String) {
             val currentRoute = navController.currentDestination?.route.orEmpty()
-            Log.d("DeepLinkDebug", "Navigating to $targetRoute. Current route: $currentRoute")
 
             // Fix: Si la pantalla actual coincide con el mismo tipo (p. ej. "album", "artist" u "online_playlist"),
             // hacemos popBackStack antes para forzar a Jetpack Compose Navigation a recrear y actualizar la vista con el nuevo ID.
             if (currentRoute.startsWith(routePrefix)) {
-                Log.d("DeepLinkDebug", "Popping backstack for same route type prefix: $routePrefix")
                 navController.popBackStack()
             }
             navController.navigate(targetRoute) {
                 launchSingleTop = true
             }
-            Log.d("DeepLinkDebug", "Navigation executed to $targetRoute")
         }
 
         // 2. Normalización del par (type, id)
@@ -1217,13 +1210,11 @@ class MainActivity : ComponentActivity() {
 
         if (normalizedDeepLinkPair != null) {
             val (type, id) = normalizedDeepLinkPair
-            Log.d("DeepLinkDebug", "Extracted deep link pair: type=$type, id=$id")
 
             when (type) {
                 "song" -> {
                     coroutineScope.launch {
                         try {
-                            Log.d("DeepLinkDebug", "Queueing deep link song id: $id")
                             val result = withContext(Dispatchers.IO) {
                                 YouTube.queue(listOf(id))
                             }
@@ -1240,13 +1231,10 @@ class MainActivity : ComponentActivity() {
                                 pendingDeepLinkSong = PendingDeepLinkSong(mediaItem = mediaItem)
                                 startMusicServiceSafely()
                                 playPendingDeepLinkSongIfReady()
-                                Log.d("DeepLinkDebug", "Deep link song queued and playing: $id")
                             }.onFailure {
-                                Log.w("DeepLinkDebug", "Failed to queue deep link song: $id", it)
                                 reportException(it)
                             }
                         } catch (e: Exception) {
-                            Log.w("DeepLinkDebug", "Error loading deep link song: $id", e)
                             reportException(e)
                         }
                     }
@@ -1266,8 +1254,6 @@ class MainActivity : ComponentActivity() {
                     return
                 }
             }
-        } else {
-            Log.w("DeepLinkDebug", "Unrecognized deep link URI format: $uri")
         }
 
         when (val path = uri.pathSegments.firstOrNull()) {

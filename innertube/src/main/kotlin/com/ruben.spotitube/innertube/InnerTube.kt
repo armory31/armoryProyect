@@ -98,7 +98,11 @@ class InnerTube {
         }
     }
 
-    private fun HttpRequestBuilder.ytClient(client: YouTubeClient, setLogin: Boolean = false) {
+    private fun HttpRequestBuilder.ytClient(
+        client: YouTubeClient,
+        setLogin: Boolean = false,
+        sendVisitorData: Boolean = true,
+    ) {
         contentType(ContentType.Application.Json)
         headers {
             append("X-Goog-Api-Format-Version", "1")
@@ -106,7 +110,9 @@ class InnerTube {
             append("X-YouTube-Client-Version", client.clientVersion)
             append("X-Origin", YouTubeClient.ORIGIN_YOUTUBE_MUSIC)
             append("Referer", YouTubeClient.REFERER_YOUTUBE_MUSIC)
-            visitorData?.let { append("X-Goog-Visitor-Id", it) }
+            if (sendVisitorData) {
+                visitorData?.let { append("X-Goog-Visitor-Id", it) }
+            }
             if (setLogin) {
                 cookie?.let { cookie ->
                     append("cookie", cookie)
@@ -234,14 +240,19 @@ class InnerTube {
         chartsCountry: String? = null,
     ) = withRetry {
         httpClient.post("browse") {
-            ytClient(client, setLogin = setLogin || useLoginForBrowse)
+            ytClient(
+                client,
+                setLogin = setLogin || useLoginForBrowse,
+                sendVisitorData = gl == null
+            )
             val effectiveLocale = if (gl != null) locale.copy(gl = gl) else locale
+            val effectiveVisitorData = if (gl != null) null else visitorData
             val formData = chartsCountry?.let { BrowseBody.FormData(selectedValues = listOf(it)) }
             setBody(
                 BrowseBody(
                     context = client.toContext(
                         effectiveLocale,
-                        visitorData,
+                        effectiveVisitorData,
                         if (setLogin || useLoginForBrowse) dataSyncId else null
                     ),
                     browseId = browseId,

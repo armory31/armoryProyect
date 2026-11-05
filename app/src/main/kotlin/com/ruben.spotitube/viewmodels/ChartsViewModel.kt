@@ -1,16 +1,32 @@
+/*
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
+ * Licensed Under GPL-3.0 | see git history for contributors
+ */
+
 package com.ruben.spotitube.viewmodels
 
+import android.content.Context
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ruben.spotitube.constants.ContentRegionGroupsKey
+import com.ruben.spotitube.constants.RegionGroup
+import com.ruben.spotitube.constants.parseRegionGroups
+import com.ruben.spotitube.constants.serializeRegionGroups
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.pages.ChartsPage
+import com.ruben.spotitube.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -22,7 +38,9 @@ enum class ChartsError {
 }
 
 @HiltViewModel
-class ChartsViewModel @Inject constructor() : ViewModel() {
+class ChartsViewModel @Inject constructor(
+    @ApplicationContext val context: Context,
+) : ViewModel() {
     private val _chartsPage = MutableStateFlow<ChartsPage?>(null)
     val chartsPage: StateFlow<ChartsPage?> = _chartsPage.asStateFlow()
 
@@ -32,78 +50,76 @@ class ChartsViewModel @Inject constructor() : ViewModel() {
     private val _error = MutableStateFlow<ChartsError?>(null)
     val error: StateFlow<ChartsError?> = _error.asStateFlow()
 
+    private val _groups = MutableStateFlow<List<RegionGroup>>(emptyList())
+    val groups: StateFlow<List<RegionGroup>> = _groups.asStateFlow()
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            context.dataStore.data
+                .map { parseRegionGroups(it[ContentRegionGroupsKey], context) }
+                .distinctUntilChanged()
+                .collect { newGroups ->
+                    _groups.value = newGroups
+                    loadCharts()
+                }
+        }
+    }
+
+    fun setGroups(list: List<RegionGroup>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            context.dataStore.edit { prefs ->
+                prefs[ContentRegionGroupsKey] = serializeRegionGroups(list)
+            }
+        }
+    }
+
     fun loadCharts() {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             _error.value = null
 
+            val currentGroups = _groups.value
+            if (currentGroups.isEmpty()) {
+                _error.value = ChartsError.NO_DATA
+                _isLoading.value = false
+                return@launch
+            }
+
             val sections = mutableListOf<ChartsPage.ChartSection>()
-
-            // 1. España (ES) primero
-            val spainResult = runCatching { YouTube.getChartsPage(country = "ES").getOrNull() }.getOrNull()
-            if (spainResult != null && spainResult.sections.isNotEmpty()) {
-                val spainItems = spainResult.sections.flatMap { it.items }.distinctBy { it.id }
-                if (spainItems.isNotEmpty()) {
-                    sections.add(
-                        ChartsPage.ChartSection(
-                            title = "ESPAÑA",
-                            items = spainItems,
-                            chartType = ChartsPage.ChartType.TOP
-                        )
-                    )
-                    _chartsPage.value = ChartsPage(sections = ArrayList(sections), continuation = null)
-                }
-            }
-
-            // 2. Europa y Latinoamérica en paralelo (concurrencia máx. 3)
             val semaphore = Semaphore(3)
-            val europeCountries = listOf("GB", "DE", "FR", "IT", "NL", "PL")
-            val latamCountries = listOf("MX", "AR", "CO", "CL", "PE", "BR")
+            var anySuccessfulRequest = false
 
-            val europeDeferreds = europeCountries.map { code ->
-                async {
-                    semaphore.withPermit {
-                        runCatching { YouTube.getChartsPage(country = code).getOrNull() }.getOrNull()
+            currentGroups.forEach { group ->
+                if (group.codes.isNotEmpty()) {
+                    val deferreds = group.codes.map { code ->
+                        async {
+                            semaphore.withPermit {
+                                runCatching { YouTube.getChartsPage(country = code).getOrNull() }.getOrNull()
+                            }
+                        }
+                    }
+                    val results = deferreds.awaitAll().filterNotNull()
+                    if (results.isNotEmpty()) {
+                        anySuccessfulRequest = true
+                    }
+                    val groupItems = results.flatMap { page -> page.sections.flatMap { it.items } }
+                        .distinctBy { it.id }
+
+                    if (groupItems.isNotEmpty()) {
+                        sections.add(
+                            ChartsPage.ChartSection(
+                                title = group.name,
+                                items = groupItems,
+                                chartType = ChartsPage.ChartType.TOP
+                            )
+                        )
+                        _chartsPage.value = ChartsPage(sections = ArrayList(sections), continuation = null)
                     }
                 }
-            }
-
-            val latamDeferreds = latamCountries.map { code ->
-                async {
-                    semaphore.withPermit {
-                        runCatching { YouTube.getChartsPage(country = code).getOrNull() }.getOrNull()
-                    }
-                }
-            }
-
-            val europeResults = europeDeferreds.awaitAll().filterNotNull()
-            val europeItems = europeResults.flatMap { page -> page.sections.flatMap { it.items } }.distinctBy { it.id }
-            if (europeItems.isNotEmpty()) {
-                sections.add(
-                    ChartsPage.ChartSection(
-                        title = "EUROPA",
-                        items = europeItems,
-                        chartType = ChartsPage.ChartType.TOP
-                    )
-                )
-                _chartsPage.value = ChartsPage(sections = ArrayList(sections), continuation = null)
-            }
-
-            val latamResults = latamDeferreds.awaitAll().filterNotNull()
-            val latamItems = latamResults.flatMap { page -> page.sections.flatMap { it.items } }.distinctBy { it.id }
-            if (latamItems.isNotEmpty()) {
-                sections.add(
-                    ChartsPage.ChartSection(
-                        title = "LATINOAMÉRICA",
-                        items = latamItems,
-                        chartType = ChartsPage.ChartType.TOP
-                    )
-                )
-                _chartsPage.value = ChartsPage(sections = ArrayList(sections), continuation = null)
             }
 
             if (sections.isEmpty()) {
-                _error.value = if (spainResult == null && europeResults.isEmpty() && latamResults.isEmpty()) {
+                _error.value = if (!anySuccessfulRequest) {
                     ChartsError.NETWORK_ERROR
                 } else {
                     ChartsError.NO_DATA

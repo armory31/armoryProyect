@@ -41,6 +41,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,12 +50,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -69,6 +73,7 @@ import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.constants.ListItemHeight
+import com.ruben.spotitube.constants.getGroupsSummaryText
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.innertube.models.ArtistItem
@@ -79,6 +84,7 @@ import com.ruben.spotitube.innertube.pages.ChartsPage
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.LocalMenuState
+import com.ruben.spotitube.ui.component.RegionGroupsEditorDialog
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.component.shimmer.GridItemPlaceHolder
@@ -105,6 +111,10 @@ fun ChartsScreen(
     val chartsPage by viewModel.chartsPage.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val chartsError by viewModel.error.collectAsStateWithLifecycle()
+    val groups by viewModel.groups.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    var showGroupsDialog by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -116,6 +126,17 @@ fun ChartsScreen(
         }
     }
 
+    if (showGroupsDialog) {
+        RegionGroupsEditorDialog(
+            groups = groups,
+            onConfirm = { newGroups ->
+                viewModel.setGroups(newGroups)
+                showGroupsDialog = false
+            },
+            onDismiss = { showGroupsDialog = false }
+        )
+    }
+
     Scaffold(
         topBar = {
             ArmoryTopBar(
@@ -124,277 +145,311 @@ fun ChartsScreen(
             )
         }
     ) { paddingValues ->
-        BoxWithConstraints(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            if (isLoading && chartsPage == null) {
-                ShimmerHost(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val summaryText = remember(groups, context) {
+                    getGroupsSummaryText(context, groups)
+                }
+                FilterChip(
+                    selected = true,
+                    onClick = { showGroupsDialog = true },
+                    label = {
+                        Text(
+                            text = summaryText,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.language),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.expand_more),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+            }
+
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            ) {
+                if (isLoading && chartsPage == null) {
+                    ShimmerHost(
+                        modifier = Modifier.fillMaxSize(),
                     ) {
-                        TextPlaceholder(
-                            height = 36.dp,
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .fillMaxWidth(0.5f),
-                        )
-                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
-                            val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-
-                            LazyHorizontalGrid(
-                                rows = GridCells.Fixed(4),
-                                contentPadding = PaddingValues(start = 4.dp),
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            TextPlaceholder(
+                                height = 36.dp,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(ListItemHeight * 4),
-                            ) {
-                                items(4) {
-                                    Row(
-                                        modifier = Modifier
-                                            .width(horizontalLazyGridItemWidth)
-                                            .padding(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(ListItemHeight - 16.dp)
-                                                .clip(RoundedCornerShape(4.dp))
-                                                .background(MaterialTheme.colorScheme.onSurface),
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Column(
-                                            modifier = Modifier.fillMaxHeight(),
-                                            verticalArrangement = Arrangement.Center,
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .height(16.dp)
-                                                    .width(120.dp)
-                                                    .background(MaterialTheme.colorScheme.onSurface),
-                                            )
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Box(
-                                                modifier = Modifier
-                                                    .height(12.dp)
-                                                    .width(80.dp)
-                                                    .background(MaterialTheme.colorScheme.onSurface),
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        TextPlaceholder(
-                            height = 36.dp,
-                            modifier = Modifier
-                                .padding(vertical = 12.dp, horizontal = 12.dp)
-                                .width(250.dp),
-                        )
-                        Row {
-                            repeat(2) {
-                                GridItemPlaceHolder()
-                            }
-                        }
-                    }
-                }
-            } else if (chartsError != null && (chartsPage == null || chartsPage?.sections.orEmpty().isEmpty())) {
-                val errorMsg = when (chartsError) {
-                    ChartsError.NO_DATA -> stringResource(R.string.no_data_for_country)
-                    else -> stringResource(R.string.charts_load_error)
-                }
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = errorMsg,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (chartsError == ChartsError.NETWORK_ERROR) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.loadCharts() }) {
-                            Text(stringResource(R.string.retry))
-                        }
-                    }
-                }
-            } else if (chartsPage == null || chartsPage?.sections.orEmpty().isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_data_for_country),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                LazyColumn(
-                    state = lazyListState,
-                    contentPadding = LocalPlayerAwareWindowInsets.current
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-                        .asPaddingValues(),
-                ) {
-                    chartsPage?.sections?.forEach { section ->
-                        item {
-                            SectionHeader(
-                                text = when (section.title) {
-                                    "ESPAÑA" -> stringResource(R.string.region_spain)
-                                    "EUROPA" -> stringResource(R.string.region_europe)
-                                    "LATINOAMÉRICA" -> stringResource(R.string.region_latin_america)
-                                    "Trending" -> stringResource(R.string.trending)
-                                    "New releases", "Álbumes y singles nuevos" -> stringResource(R.string.new_releases)
-                                    else -> section.title ?: stringResource(R.string.charts)
-                                },
-                                modifier = Modifier.animateItem(),
+                                    .padding(12.dp)
+                                    .fillMaxWidth(0.5f),
                             )
-                        }
-                        item {
-                            val systemBarsInsets = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-                            val rowContentPadding = PaddingValues(
-                                start = 12.dp + systemBarsInsets.calculateStartPadding(layoutDirection),
-                                end = 12.dp + systemBarsInsets.calculateEndPadding(layoutDirection)
-                            )
-                            val hasAlbums = section.chartType == ChartsPage.ChartType.NEW_RELEASES || section.items.any { it is AlbumItem || it is PlaylistItem || it is ArtistItem }
-                            if (hasAlbums) {
-                                LazyRow(
-                                    contentPadding = rowContentPadding,
-                                    modifier = Modifier.animateItem(),
+                            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                                val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
+                                val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
+
+                                LazyHorizontalGrid(
+                                    rows = GridCells.Fixed(4),
+                                    contentPadding = PaddingValues(start = 4.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(ListItemHeight * 4),
                                 ) {
-                                    items(
-                                        items = section.items.distinctBy { it.id },
-                                        key = { it.id },
-                                    ) { item ->
-                                        YouTubeGridItem(
-                                            item = item,
-                                            isActive = (item as? SongItem)?.id == mediaMetadata?.id,
-                                            isPlaying = isPlaying,
-                                            coroutineScope = coroutineScope,
+                                    items(4) {
+                                        Row(
                                             modifier = Modifier
-                                                .combinedClickable(
-                                                    onClick = {
-                                                        when (item) {
-                                                            is SongItem -> {
-                                                                if (item.id == mediaMetadata?.id) {
-                                                                    playerConnection.player.togglePlayPause()
-                                                                } else {
-                                                                    playerConnection.playQueue(
-                                                                        YouTubeQueue(
-                                                                            endpoint = WatchEndpoint(videoId = item.id),
-                                                                            preloadItem = item.toMediaMetadata(),
-                                                                        ),
-                                                                    )
-                                                                }
-                                                            }
-                                                            is AlbumItem -> navController.navigate("album/${item.id}")
-                                                            is ArtistItem -> navController.navigate("artist/${item.id}")
-                                                            is PlaylistItem -> navController.navigate("online_playlist/${item.id.removePrefix("VL")}")
-                                                        }
-                                                    },
-                                                    onLongClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        menuState.show {
-                                                            when (item) {
-                                                                is SongItem -> YouTubeSongMenu(song = item, navController = navController, onDismiss = menuState::dismiss)
-                                                                is AlbumItem -> YouTubeAlbumMenu(albumItem = item, navController = navController, onDismiss = menuState::dismiss)
-                                                                else -> {}
-                                                            }
-                                                        }
-                                                    },
+                                                .width(horizontalLazyGridItemWidth)
+                                                .padding(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(ListItemHeight - 16.dp)
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(MaterialTheme.colorScheme.onSurface),
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column(
+                                                modifier = Modifier.fillMaxHeight(),
+                                                verticalArrangement = Arrangement.Center,
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .height(16.dp)
+                                                        .width(120.dp)
+                                                        .background(MaterialTheme.colorScheme.onSurface),
                                                 )
-                                                .animateItem(),
-                                        )
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Box(
+                                                    modifier = Modifier
+                                                        .height(12.dp)
+                                                        .width(80.dp)
+                                                        .background(MaterialTheme.colorScheme.onSurface),
+                                                )
+                                            }
+                                        }
                                     }
                                 }
-                            } else {
-                                val songs = section.items.filterIsInstance<SongItem>().distinctBy { it.id }
-                                if (songs.isNotEmpty()) {
-                                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                                        val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
-                                        val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-
-                                        val lazyGridState = rememberLazyGridState()
-                                        val snapLayoutInfoProvider = remember(lazyGridState) {
-                                            SnapLayoutInfoProvider(
-                                                lazyGridState = lazyGridState,
-                                                positionInLayout = { layoutSize, itemSize ->
-                                                    (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                                                },
+                            }
+                            TextPlaceholder(
+                                height = 36.dp,
+                                modifier = Modifier
+                                    .padding(vertical = 12.dp, horizontal = 12.dp)
+                                    .width(250.dp),
+                            )
+                            Row {
+                                repeat(2) {
+                                    GridItemPlaceHolder()
+                                }
+                            }
+                        }
+                    }
+                } else if (chartsError != null && (chartsPage == null || chartsPage?.sections.orEmpty().isEmpty())) {
+                    val errorMsg = when (chartsError) {
+                        ChartsError.NO_DATA -> stringResource(R.string.no_data_for_country)
+                        else -> stringResource(R.string.charts_load_error)
+                    }
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = errorMsg,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (chartsError == ChartsError.NETWORK_ERROR) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.loadCharts() }) {
+                                Text(stringResource(R.string.retry))
+                            }
+                        }
+                    }
+                } else if (chartsPage == null || chartsPage?.sections.orEmpty().isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_data_for_country),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        state = lazyListState,
+                        contentPadding = LocalPlayerAwareWindowInsets.current
+                            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+                            .asPaddingValues(),
+                    ) {
+                        chartsPage?.sections?.forEach { section ->
+                            item {
+                                SectionHeader(
+                                    text = section.title,
+                                    modifier = Modifier.animateItem(),
+                                )
+                            }
+                            item {
+                                val systemBarsInsets = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+                                val rowContentPadding = PaddingValues(
+                                    start = 12.dp + systemBarsInsets.calculateStartPadding(layoutDirection),
+                                    end = 12.dp + systemBarsInsets.calculateEndPadding(layoutDirection)
+                                )
+                                val hasAlbums = section.chartType == ChartsPage.ChartType.NEW_RELEASES || section.items.any { it is AlbumItem || it is PlaylistItem || it is ArtistItem }
+                                if (hasAlbums) {
+                                    LazyRow(
+                                        contentPadding = rowContentPadding,
+                                        modifier = Modifier.animateItem(),
+                                    ) {
+                                        items(
+                                            items = section.items.distinctBy { it.id },
+                                            key = { it.id },
+                                        ) { item ->
+                                            YouTubeGridItem(
+                                                item = item,
+                                                isActive = (item as? SongItem)?.id == mediaMetadata?.id,
+                                                isPlaying = isPlaying,
+                                                coroutineScope = coroutineScope,
+                                                modifier = Modifier
+                                                    .combinedClickable(
+                                                        onClick = {
+                                                            when (item) {
+                                                                is SongItem -> {
+                                                                    if (item.id == mediaMetadata?.id) {
+                                                                        playerConnection.player.togglePlayPause()
+                                                                    } else {
+                                                                        playerConnection.playQueue(
+                                                                            YouTubeQueue(
+                                                                                endpoint = WatchEndpoint(videoId = item.id),
+                                                                                preloadItem = item.toMediaMetadata(),
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                }
+                                                                is AlbumItem -> navController.navigate("album/${item.id}")
+                                                                is ArtistItem -> navController.navigate("artist/${item.id}")
+                                                                is PlaylistItem -> navController.navigate("online_playlist/${item.id.removePrefix("VL")}")
+                                                            }
+                                                        },
+                                                        onLongClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            menuState.show {
+                                                                when (item) {
+                                                                    is SongItem -> YouTubeSongMenu(song = item, navController = navController, onDismiss = menuState::dismiss)
+                                                                    is AlbumItem -> YouTubeAlbumMenu(albumItem = item, navController = navController, onDismiss = menuState::dismiss)
+                                                                    else -> {}
+                                                                }
+                                                            }
+                                                        },
+                                                    )
+                                                    .animateItem(),
                                             )
                                         }
+                                    }
+                                } else {
+                                    val songs = section.items.filterIsInstance<SongItem>().distinctBy { it.id }
+                                    if (songs.isNotEmpty()) {
+                                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                                            val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
+                                            val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
 
-                                        val rowCount = minOf(4, songs.size)
-                                        LazyHorizontalGrid(
-                                            state = lazyGridState,
-                                            rows = GridCells.Fixed(rowCount),
-                                            flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
-                                            contentPadding = rowContentPadding,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(ListItemHeight * rowCount)
-                                                .animateItem(),
-                                        ) {
-                                            items(
-                                                items = songs,
-                                                key = { it.id },
-                                            ) { song ->
-                                                YouTubeListItem(
-                                                    item = song,
-                                                    isActive = song.id == mediaMetadata?.id,
-                                                    isPlaying = isPlaying,
-                                                    trailingContent = {
-                                                        IconButton(
-                                                            onClick = {
-                                                                menuState.show {
-                                                                    YouTubeSongMenu(
-                                                                        song = song,
-                                                                        navController = navController,
-                                                                        onDismiss = menuState::dismiss,
-                                                                    )
-                                                                }
-                                                            },
-                                                        ) {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.more_vert),
-                                                                contentDescription = null,
-                                                            )
-                                                        }
+                                            val lazyGridState = rememberLazyGridState()
+                                            val snapLayoutInfoProvider = remember(lazyGridState) {
+                                                SnapLayoutInfoProvider(
+                                                    lazyGridState = lazyGridState,
+                                                    positionInLayout = { layoutSize, itemSize ->
+                                                        (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
                                                     },
-                                                    modifier = Modifier
-                                                        .width(horizontalLazyGridItemWidth)
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                if (song.id == mediaMetadata?.id) {
-                                                                    playerConnection.player.togglePlayPause()
-                                                                } else {
-                                                                    playerConnection.playQueue(
-                                                                        YouTubeQueue(
-                                                                            endpoint = WatchEndpoint(videoId = song.id),
-                                                                            preloadItem = song.toMediaMetadata(),
-                                                                        ),
-                                                                    )
-                                                                }
-                                                            },
-                                                            onLongClick = {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                menuState.show {
-                                                                    YouTubeSongMenu(
-                                                                        song = song,
-                                                                        navController = navController,
-                                                                        onDismiss = menuState::dismiss,
-                                                                    )
-                                                                }
-                                                            },
-                                                        )
-                                                        .animateItem(),
                                                 )
+                                            }
+
+                                            val rowCount = minOf(4, songs.size)
+                                            LazyHorizontalGrid(
+                                                state = lazyGridState,
+                                                rows = GridCells.Fixed(rowCount),
+                                                flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
+                                                contentPadding = rowContentPadding,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(ListItemHeight * rowCount)
+                                                    .animateItem(),
+                                            ) {
+                                                items(
+                                                    items = songs,
+                                                    key = { it.id },
+                                                ) { song ->
+                                                    YouTubeListItem(
+                                                        item = song,
+                                                        isActive = song.id == mediaMetadata?.id,
+                                                        isPlaying = isPlaying,
+                                                        trailingContent = {
+                                                            IconButton(
+                                                                onClick = {
+                                                                    menuState.show {
+                                                                        YouTubeSongMenu(
+                                                                            song = song,
+                                                                            navController = navController,
+                                                                            onDismiss = menuState::dismiss,
+                                                                        )
+                                                                    }
+                                                                },
+                                                            ) {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.more_vert),
+                                                                    contentDescription = null,
+                                                                )
+                                                            }
+                                                        },
+                                                        modifier = Modifier
+                                                            .width(horizontalLazyGridItemWidth)
+                                                            .combinedClickable(
+                                                                onClick = {
+                                                                    if (song.id == mediaMetadata?.id) {
+                                                                        playerConnection.player.togglePlayPause()
+                                                                    } else {
+                                                                        playerConnection.playQueue(
+                                                                            YouTubeQueue(
+                                                                                endpoint = WatchEndpoint(videoId = song.id),
+                                                                                preloadItem = song.toMediaMetadata(),
+                                                                            ),
+                                                                        )
+                                                                    }
+                                                                },
+                                                                onLongClick = {
+                                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                    menuState.show {
+                                                                        YouTubeSongMenu(
+                                                                            song = song,
+                                                                            navController = navController,
+                                                                            onDismiss = menuState::dismiss,
+                                                                        )
+                                                                    }
+                                                                },
+                                                            )
+                                                            .animateItem(),
+                                                    )
+                                                }
                                             }
                                         }
                                     }

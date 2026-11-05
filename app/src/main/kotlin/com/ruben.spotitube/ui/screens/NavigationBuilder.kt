@@ -22,8 +22,6 @@ import com.ruben.spotitube.ui.screens.artist.ArtistItemsScreen
 import com.ruben.spotitube.ui.screens.artist.ArtistScreen
 import com.ruben.spotitube.ui.screens.artist.ArtistSongsScreen
 import com.ruben.spotitube.ui.screens.library.LibraryScreen
-import com.ruben.spotitube.ui.screens.musicrecognition.MusicRecognitionRoute
-import com.ruben.spotitube.ui.screens.musicrecognition.MusicRecognitionScreen
 import com.ruben.spotitube.ui.screens.playlist.AutoPlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.CachePlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.LocalPlaylistScreen
@@ -63,9 +61,6 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("year_in_music") {
         YearInMusicScreen(navController)
-    }
-    composable(MusicRecognitionRoute) {
-        MusicRecognitionScreen(navController)
     }
     composable(Screens.MoodAndGenres.route) {
         MoodAndGenresScreen(navController)
@@ -192,7 +187,6 @@ fun NavGraphBuilder.navigationBuilder(
         val browseId = backStackEntry.arguments?.getString("browseId")
         val params = backStackEntry.arguments?.getString("params")
         val title = backStackEntry.arguments?.getString("title")
-        android.util.Log.d("ARMORY_DEBUG", "Navegando a ArtistItemsScreen: artistId=$artistId, browseId=$browseId, params=$params, title=$title")
         ArtistItemsScreen(navController, scrollBehavior)
     }
     composable(
@@ -272,6 +266,12 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings") {
         SettingsScreen(navController, scrollBehavior, latestVersionName)
+    }
+    composable(
+        route = "similar_artists/{index}",
+        arguments = listOf(navArgument("index") { type = NavType.IntType })
+    ) { backStackEntry ->
+        SimilarArtistsScreen(navController, backStackEntry.arguments?.getInt("index") ?: 0)
     }
 
     composable("settings/storage") {

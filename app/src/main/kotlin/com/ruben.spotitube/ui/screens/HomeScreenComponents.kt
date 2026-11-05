@@ -898,6 +898,7 @@ private fun LocalGridItem(
 @Composable
 fun SimilarRecommendationsTitle(
     recommendation: SimilarRecommendation,
+    index: Int,
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
@@ -917,12 +918,7 @@ fun SimilarRecommendationsTitle(
             }
         },
         onClick = {
-            when (recommendation.title) {
-                is Song -> navController.navigate("album/${recommendation.title.album!!.id}")
-                is Album -> navController.navigate("album/${recommendation.title.id}")
-                is Artist -> navController.navigate("artist/${recommendation.title.id}")
-                is Playlist -> {}
-            }
+            navController.navigateSafe("similar_artists/$index")
         },
         modifier = modifier
     )
@@ -944,7 +940,9 @@ fun LazyListScope.similarRecommendationsContainer(
      ) {
         val similarRecommendations by viewModel.similarRecommendations.collectAsStateWithLifecycle()
         val allItemsMetadata by viewModel.allItemsMetadata.collectAsStateWithLifecycle()
-        
+
+        if (similarRecommendations?.isEmpty() == true) return@item
+
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -960,9 +958,10 @@ fun LazyListScope.similarRecommendationsContainer(
                     modifier = Modifier.padding(top = 24.dp)
                 )
 
-                similarRecommendations?.take(2)?.forEach { recommendation ->
+                similarRecommendations?.take(2)?.forEachIndexed { index, recommendation ->
                     SimilarRecommendationsTitle(
                         recommendation = recommendation,
+                        index = index,
                         navController = navController,
                         modifier = Modifier.padding(top = 4.dp)
                     )

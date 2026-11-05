@@ -13,21 +13,28 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -35,41 +42,46 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ruben.spotitube.ArmoryIcon
+import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.ArmoryIcon
-import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.R
-import com.ruben.spotitube.constants.GridThumbnailHeight
+import com.ruben.spotitube.SectionHeader
+import com.ruben.spotitube.constants.getGroupsSummaryText
+import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.ui.component.LocalMenuState
+import com.ruben.spotitube.ui.component.RegionGroupsEditorDialog
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
 import com.ruben.spotitube.viewmodels.NewReleaseContent
@@ -89,10 +101,24 @@ fun NewReleaseScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val content by viewModel.content.collectAsStateWithLifecycle()
+    val groups by viewModel.groups.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val layoutDirection = LocalLayoutDirection.current
+    var showGroupsDialog by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    if (showGroupsDialog) {
+        RegionGroupsEditorDialog(
+            groups = groups,
+            onConfirm = { newGroups ->
+                viewModel.setGroups(newGroups)
+                showGroupsDialog = false
+            },
+            onDismiss = { showGroupsDialog = false }
+        )
+    }
 
     Scaffold(
         modifier = Modifier
@@ -108,209 +134,198 @@ fun NewReleaseScreen(
             )
         },
     ) { innerPadding ->
-        AnimatedContent(
-            targetState = uiState,
-            transitionSpec = {
-                fadeIn(tween(300)) togetherWith fadeOut(tween(150))
-            },
-            modifier = Modifier.fillMaxSize(),
-            label = "NewReleaseContent",
-        ) { state ->
-            when (state) {
-                NewReleaseUiState.Loading -> {
-                    NewReleaseLoadingState(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                    )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    end = innerPadding.calculateEndPadding(layoutDirection)
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val summaryText = remember(groups, context) {
+                    getGroupsSummaryText(context, groups)
                 }
+                FilterChip(
+                    selected = true,
+                    onClick = { showGroupsDialog = true },
+                    label = {
+                        Text(
+                            text = summaryText,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.language),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.expand_more),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+            }
 
-                is NewReleaseUiState.Error -> {
-                    NewReleaseErrorState(
-                        message = state.message,
-                        onRetry = viewModel::retry,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                    )
-                }
+            AnimatedContent(
+                targetState = uiState,
+                transitionSpec = {
+                    fadeIn(tween(300)) togetherWith fadeOut(tween(150))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                label = "NewReleaseContent",
+            ) { state ->
+                when (state) {
+                    NewReleaseUiState.Loading -> {
+                        NewReleaseLoadingState(
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
 
-                NewReleaseUiState.Empty -> {
-                    NewReleaseEmptyState(
-                        onRefresh = viewModel::retry,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                    )
-                }
+                    is NewReleaseUiState.Error -> {
+                        NewReleaseErrorState(
+                            message = state.message,
+                            onRetry = viewModel::retry,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
 
-                is NewReleaseUiState.Success -> {
-                    NewReleaseCategoriesContent(
-                        content = state.content,
-                        activeAlbumId = mediaMetadata?.album?.id,
-                        isPlaying = isPlaying,
-                        coroutineScope = coroutineScope,
-                        paddingValues = innerPadding,
-                        onAlbumClick = { album ->
-                            navController.navigate("album/${album.id}")
-                        },
-                        onAlbumLongClick = { album ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            menuState.show {
-                                YouTubeAlbumMenu(
-                                    albumItem = album,
-                                    navController = navController,
-                                    onDismiss = menuState::dismiss,
-                                )
-                            }
-                        },
-                    )
+                    NewReleaseUiState.Empty -> {
+                        NewReleaseEmptyState(
+                            onRefresh = viewModel::retry,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+
+                    is NewReleaseUiState.Success -> {
+                        NewReleaseGroupsContent(
+                            content = state.content,
+                            activeAlbumId = mediaMetadata?.album?.id,
+                            isPlaying = isPlaying,
+                            coroutineScope = coroutineScope,
+                            onAlbumClick = { album ->
+                                navController.navigate("album/${album.id}")
+                            },
+                            onAlbumLongClick = { album ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                menuState.show {
+                                    YouTubeAlbumMenu(
+                                        albumItem = album,
+                                        navController = navController,
+                                        onDismiss = menuState::dismiss,
+                                    )
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-@Immutable
-private enum class NewReleaseCategory(
-    val titleRes: Int,
-    val contentType: String,
-) {
-    Albums(
-        titleRes = R.string.albums,
-        contentType = "new_release_album_grid_item",
-    ),
-    Singles(
-        titleRes = R.string.singles,
-        contentType = "new_release_single_grid_item",
-    ),
-    Ep(
-        titleRes = R.string.ep,
-        contentType = "new_release_ep_grid_item",
-    ),
-}
-
-@Immutable
-private data class NewReleaseSection(
-    val category: NewReleaseCategory,
-    val releases: List<com.ruben.spotitube.innertube.models.AlbumItem>,
-)
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NewReleaseCategoriesContent(
+private fun NewReleaseGroupsContent(
     content: NewReleaseContent,
     activeAlbumId: String?,
     isPlaying: Boolean,
     coroutineScope: kotlinx.coroutines.CoroutineScope,
-    paddingValues: PaddingValues,
-    onAlbumClick: (com.ruben.spotitube.innertube.models.AlbumItem) -> Unit,
-    onAlbumLongClick: (com.ruben.spotitube.innertube.models.AlbumItem) -> Unit,
+    onAlbumClick: (AlbumItem) -> Unit,
+    onAlbumLongClick: (AlbumItem) -> Unit,
 ) {
-    val sections = remember(content) {
-        buildList {
-            if (content.albums.isNotEmpty()) {
-                add(NewReleaseSection(NewReleaseCategory.Albums, content.albums))
-            }
-            if (content.singles.isNotEmpty()) {
-                add(NewReleaseSection(NewReleaseCategory.Singles, content.singles))
-            }
-            if (content.eps.isNotEmpty()) {
-                add(NewReleaseSection(NewReleaseCategory.Ep, content.eps))
-            }
-        }
-    }
+    val layoutDirection = LocalLayoutDirection.current
+    val playerAwarePadding = LocalPlayerAwareWindowInsets.current
+        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+        .asPaddingValues()
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = GridThumbnailHeight + 24.dp),
-        contentPadding = paddingValues,
+    val contentPadding = PaddingValues(
+        start = playerAwarePadding.calculateStartPadding(layoutDirection),
+        top = playerAwarePadding.calculateTopPadding(),
+        end = playerAwarePadding.calculateEndPadding(layoutDirection),
+        bottom = playerAwarePadding.calculateBottomPadding() + 16.dp
+    )
+
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        contentPadding = contentPadding
     ) {
-        sections.forEach { section ->
-            item(
-                key = "new_release_section_header_${section.category.name}",
-                span = { GridItemSpan(maxLineSpan) },
-                contentType = "new_release_section_header",
+        items(
+            items = content.sections,
+            key = { it.group.id }
+        ) { section ->
+            Column(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                NewReleaseSectionHeader(
-                    title = stringResource(section.category.titleRes),
-                    count = section.releases.size,
+                SectionHeader(
+                    text = section.group.name,
+                    modifier = Modifier.padding(top = 12.dp)
                 )
-            }
 
-            item(
-                key = "new_release_section_${section.category.name}",
-                span = { GridItemSpan(maxLineSpan) },
-                contentType = "new_release_horizontal_section",
-            ) {
-                NewReleaseHorizontalSection(
-                    releases = section.releases,
-                    contentType = section.category.contentType,
-                    activeAlbumId = activeAlbumId,
-                    isPlaying = isPlaying,
-                    coroutineScope = coroutineScope,
-                    onAlbumClick = onAlbumClick,
-                    onAlbumLongClick = onAlbumLongClick,
-                )
+                val categories = remember(section) {
+                    buildList {
+                        if (section.albums.isNotEmpty()) {
+                            add(R.string.albums to section.albums)
+                        }
+                        if (section.singles.isNotEmpty()) {
+                            add(R.string.singles to section.singles)
+                        }
+                        if (section.eps.isNotEmpty()) {
+                            add(R.string.ep to section.eps)
+                        }
+                    }
+                }
+
+                categories.forEach { (titleRes, items) ->
+                    Text(
+                        text = stringResource(titleRes),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 4.dp)
+                    )
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    ) {
+                        items(
+                            items = items.distinctBy { it.id },
+                            key = { it.id }
+                        ) { album ->
+                            YouTubeGridItem(
+                                item = album,
+                                isActive = activeAlbumId == album.id,
+                                isPlaying = isPlaying,
+                                fillMaxWidth = false,
+                                coroutineScope = coroutineScope,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .combinedClickable(
+                                        onClick = { onAlbumClick(album) },
+                                        onLongClick = { onAlbumLongClick(album) },
+                                    ),
+                            )
+                        }
+                    }
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun NewReleaseSectionHeader(
-    title: String,
-    count: Int,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 4.dp),
-    ) {
-        SectionHeader(text = title)
-        Text(
-            text = stringResource(R.string.n_releases, count),
-            style = MaterialTheme.typography.labelLarge,
-        )
-    }
-}
-
-@Composable
-private fun NewReleaseHorizontalSection(
-    releases: List<com.ruben.spotitube.innertube.models.AlbumItem>,
-    contentType: String,
-    activeAlbumId: String?,
-    isPlaying: Boolean,
-    coroutineScope: kotlinx.coroutines.CoroutineScope,
-    onAlbumClick: (com.ruben.spotitube.innertube.models.AlbumItem) -> Unit,
-    onAlbumLongClick: (com.ruben.spotitube.innertube.models.AlbumItem) -> Unit,
-) {
-    // Siempre usar carrusel, incluso con 1 item
-    val carouselState = rememberCarouselState { releases.size }
-
-    HorizontalMultiBrowseCarousel(
-        state = carouselState,
-        preferredItemWidth = 180.dp,
-        itemSpacing = 12.dp,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(216.dp),
-    ) { index ->
-        val album = releases[index]
-        YouTubeGridItem(
-            item = album,
-            isActive = activeAlbumId == album.id,
-            isPlaying = isPlaying,
-            fillMaxWidth = false,  // Importante: false para que respete el ancho del carrusel
-            coroutineScope = coroutineScope,
-            modifier = Modifier
-                .fillMaxSize()  // fillMaxSize para que ocupe todo el espacio del carrusel
-                .clip(RoundedCornerShape(12.dp))
-                .combinedClickable(
-                    onClick = { onAlbumClick(album) },
-                    onLongClick = { onAlbumLongClick(album) },
-                ),
-        )
     }
 }
 

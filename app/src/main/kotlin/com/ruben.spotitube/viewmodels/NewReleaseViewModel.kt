@@ -2,21 +2,22 @@
  * ARMORY Project Original (2026)
  * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
- *
- * Actualizado para soportar categorías (Álbumes, Singles, EP)
- * Usando inferType() para clasificar por título
  */
 
 package com.ruben.spotitube.viewmodels
 
 import android.content.Context
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ruben.spotitube.constants.ContentRegionGroupsKey
 import com.ruben.spotitube.constants.HideVideoKey
+import com.ruben.spotitube.constants.RegionGroup
+import com.ruben.spotitube.constants.parseRegionGroups
+import com.ruben.spotitube.constants.serializeRegionGroups
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.AlbumItem
-import com.ruben.spotitube.innertube.models.AlbumType
 import com.ruben.spotitube.innertube.models.filterVideo
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.utils.dataStore
@@ -25,29 +26,35 @@ import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import javax.inject.Inject
 
-/**
- * Modelo de datos para el contenido de New Releases con categorías
- */
-data class NewReleaseContent(
+data class NewReleaseGroupSection(
+    val group: RegionGroup,
     val albums: List<AlbumItem>,
     val singles: List<AlbumItem>,
     val eps: List<AlbumItem>,
 ) {
-    val totalReleases: Int get() = albums.size + singles.size + eps.size
-
     val isEmpty: Boolean get() = albums.isEmpty() && singles.isEmpty() && eps.isEmpty()
 }
 
-/**
- * UI States para la pantalla de New Releases
- */
+data class NewReleaseContent(
+    val sections: List<NewReleaseGroupSection>,
+) {
+    val isEmpty: Boolean get() = sections.all { it.isEmpty }
+}
+
 sealed interface NewReleaseUiState {
     data object Loading : NewReleaseUiState
     data class Success(val content: NewReleaseContent) : NewReleaseUiState
@@ -65,15 +72,31 @@ constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<NewReleaseUiState>(NewReleaseUiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<NewReleaseUiState> = _uiState.asStateFlow()
 
-    private val _newReleaseAlbums = MutableStateFlow<List<AlbumItem>>(emptyList())
-    val newReleaseAlbums = _newReleaseAlbums.asStateFlow()
+    private val _groups = MutableStateFlow<List<RegionGroup>>(emptyList())
+    val groups: StateFlow<List<RegionGroup>> = _groups.asStateFlow()
 
-    val content = _uiState.asStateFlow()
+    val content: StateFlow<NewReleaseUiState> = _uiState.asStateFlow()
 
     init {
-        load()
+        viewModelScope.launch(Dispatchers.IO) {
+            context.dataStore.data
+                .map { parseRegionGroups(it[ContentRegionGroupsKey], context) }
+                .distinctUntilChanged()
+                .collect { newGroups ->
+                    _groups.value = newGroups
+                    load()
+                }
+        }
+    }
+
+    fun setGroups(list: List<RegionGroup>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            context.dataStore.edit { prefs ->
+                prefs[ContentRegionGroupsKey] = serializeRegionGroups(list)
+            }
+        }
     }
 
     fun retry() {
@@ -84,48 +107,78 @@ constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { NewReleaseUiState.Loading }
             try {
-                // Usar el nuevo método categorizado
-                val categorizedResponse = YouTube.newReleasesCategorized().getOrThrow()
+                val currentGroups = _groups.value
+                if (currentGroups.isEmpty()) {
+                    _uiState.update { NewReleaseUiState.Empty }
+                    return@launch
+                }
 
-                // Obtener ranking de artistas
                 val artistRanking = getArtistRanking()
                 val favouriteArtistIds = artistRanking.favourites
                 val allArtistRank = artistRanking.all
+                val hideVideo = context.dataStore.get(HideVideoKey, false)
 
-                // Aplicar ordenamiento y filtros
-                val filteredContent = NewReleaseContent(
-                    albums = sortByArtistRelevance(
-                        categorizedResponse.albums,
+                val semaphore = Semaphore(3)
+                val sections = mutableListOf<NewReleaseGroupSection>()
+                var anySuccessfulCall = false
+
+                currentGroups.forEach { group ->
+                    val deferreds = group.codes.map { code ->
+                        async {
+                            semaphore.withPermit {
+                                runCatching {
+                                    YouTube.newReleasesCategorized(gl = code).getOrNull()
+                                }.getOrNull()
+                            }
+                        }
+                    }
+                    val responses = deferreds.awaitAll().filterNotNull()
+                    if (responses.isNotEmpty()) {
+                        anySuccessfulCall = true
+                    }
+
+                    val mergedAlbums = sortByArtistRelevance(
+                        responses.flatMap { it.albums }.distinctBy { it.id },
                         favouriteArtistIds,
                         allArtistRank
-                    ),
-                    singles = sortByArtistRelevance(
-                        categorizedResponse.singles,
+                    ).filterVideo(hideVideo)
+
+                    val mergedSingles = sortByArtistRelevance(
+                        responses.flatMap { it.singles }.distinctBy { it.id },
                         favouriteArtistIds,
                         allArtistRank
-                    ),
-                    eps = sortByArtistRelevance(
-                        categorizedResponse.eps,
+                    ).filterVideo(hideVideo)
+
+                    val mergedEps = sortByArtistRelevance(
+                        responses.flatMap { it.eps }.distinctBy { it.id },
                         favouriteArtistIds,
                         allArtistRank
-                    ),
-                ).let { content ->
-                    applyContentFilters(content)
-                }
+                    ).filterVideo(hideVideo)
 
-                // Actualizar StateFlows
-                _newReleaseAlbums.update {
-                    filteredContent.albums + filteredContent.singles + filteredContent.eps
-                }
+                    val groupSection = NewReleaseGroupSection(
+                        group = group,
+                        albums = mergedAlbums,
+                        singles = mergedSingles,
+                        eps = mergedEps,
+                    )
 
-                _uiState.update {
-                    if (filteredContent.isEmpty) {
-                        NewReleaseUiState.Empty
-                    } else {
-                        NewReleaseUiState.Success(filteredContent)
+                    if (!groupSection.isEmpty) {
+                        sections.add(groupSection)
+                        _uiState.update {
+                            NewReleaseUiState.Success(NewReleaseContent(ArrayList(sections)))
+                        }
                     }
                 }
 
+                if (sections.isEmpty()) {
+                    _uiState.update {
+                        if (!anySuccessfulCall) {
+                            NewReleaseUiState.Error("Error al cargar novedades", null)
+                        } else {
+                            NewReleaseUiState.Empty
+                        }
+                    }
+                }
             } catch (t: Throwable) {
                 reportException(t)
                 _uiState.update {
@@ -161,31 +214,6 @@ constructor(
         )
     }
 
-    private fun categorizeAndSortReleases(
-        releases: List<AlbumItem>,
-        favouriteArtistIds: Set<String>,
-        allArtistRank: Map<Int, String>,
-    ): NewReleaseContent {
-        val allAlbums = mutableListOf<AlbumItem>()
-        val allSingles = mutableListOf<AlbumItem>()
-        val allEps = mutableListOf<AlbumItem>()
-
-        releases.forEach { album ->
-            // Usar inferType() para determinar la categoría basada en el título
-            when (album.inferType()) {
-                AlbumType.ALBUM -> allAlbums.add(album)
-                AlbumType.SINGLE -> allSingles.add(album)
-                AlbumType.EP -> allEps.add(album)
-            }
-        }
-
-        return NewReleaseContent(
-            albums = sortByArtistRelevance(allAlbums, favouriteArtistIds, allArtistRank),
-            singles = sortByArtistRelevance(allSingles, favouriteArtistIds, allArtistRank),
-            eps = sortByArtistRelevance(allEps, favouriteArtistIds, allArtistRank),
-        )
-    }
-
     private fun sortByArtistRelevance(
         albums: List<AlbumItem>,
         favouriteArtistIds: Set<String>,
@@ -203,19 +231,6 @@ constructor(
             }.thenBy { album ->
                 album.title.lowercase()
             }
-        )
-    }
-
-    private fun applyContentFilters(content: NewReleaseContent): NewReleaseContent {
-        val hideVideo = context.dataStore.get(HideVideoKey, false)
-
-        return NewReleaseContent(
-            albums = content.albums
-                .filterVideo(hideVideo),
-            singles = content.singles
-                .filterVideo(hideVideo),
-            eps = content.eps
-                .filterVideo(hideVideo),
         )
     }
 

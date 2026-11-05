@@ -20,7 +20,6 @@
 - [x] ui/screens/HistoryScreen.kt (1 TopAppBar, 5 Icon/IconButton, 2 manual color, 3 Text sin style)
 - [x] ui/screens/StatsScreen.kt (1 TopAppBar, 6 Icon/IconButton, 3 manual color, 4 Text sin style)
 - [x] ui/screens/YearInMusicScreen.kt (0 TopAppBar, 12 Icon/IconButton, 8 manual color, 15 Text sin style)
-- [x] ui/screens/musicrecognition/MusicRecognitionScreen.kt (1 TopAppBar, 6 Icon/IconButton, 2 manual color, 4 Text sin style)
 - [x] ui/screens/settings/SettingsScreen.kt (1 TopAppBar, 6 Icon/IconButton, 2 manual color, 3 Text sin style)
 - [x] ui/screens/settings/ChangelogScreen.kt (1 TopAppBar, 4 Icon/IconButton, 1 manual color, 2 Text sin style)
 - [x] ui/screens/settings/MusicTogetherScreen.kt (1 TopAppBar, 14 Icon/IconButton, 5 manual color, 8 Text sin style)

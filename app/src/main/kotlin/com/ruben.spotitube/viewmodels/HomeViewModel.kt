@@ -22,6 +22,7 @@ import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.innertube.YouTube
+import com.ruben.spotitube.innertube.models.ArtistItem
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.toSong
 import com.ruben.spotitube.models.toAlbum
@@ -40,6 +41,7 @@ import com.ruben.spotitube.utils.getAsync
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,7 +49,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -363,61 +364,94 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private suspend fun buildArtistRecommendation(
+        artist: com.ruben.spotitube.db.entities.Artist,
+        hideVideo: Boolean
+    ): SimilarRecommendation? {
+        val items = mutableListOf<YTItem>()
+        runCatching {
+            YouTube.artist(artist.id).onSuccess { page ->
+                items += page.sections.getOrNull(page.sections.size - 2)?.items.orEmpty()
+                items += page.sections.lastOrNull()?.items.orEmpty()
+            }
+        }
+        val filtered = items
+            .filterIsInstance<ArtistItem>()
+            .filter { it.id != artist.id }
+            .filterVideo(hideVideo)
+            .shuffled()
+        if (filtered.isEmpty()) return null
+        return SimilarRecommendation(
+            title = artist,
+            items = filtered
+        )
+    }
+
     private suspend fun loadSimilarRecommendations() {
-        HomeTiming.log("loadSimilarRecommendations start")
-        val hideVideo = context.dataStore.get(HideVideoKey, false)
-        val fromTimeStamp = System.currentTimeMillis() - 86400000 * 7 * 2
-        
-        val rawArtistRecs = database.mostPlayedArtists(fromTimeStamp, limit = 10).first()
-        val artistRecsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtistRecs.map { it.id }, timeoutMs = 5000L)
-        val artistRecommendations = rawArtistRecs.mapNotNull { artistObj ->
-            artistRecsMap[artistObj.id]?.let { meta ->
-                com.ruben.spotitube.db.entities.Artist(
-                    artist = com.ruben.spotitube.db.entities.SavedArtistEntity(
-                        id = artistObj.id,
-                        name = meta.name,
-                        thumbnailUrl = meta.thumbnailUrl
-                    ),
-                    songCount = artistObj.songCount
-                )
-            }
-        }.filter { it.artist.isYouTubeArtist }
-            .shuffled().take(3)
-            .mapNotNull {
-                val items = mutableListOf<YTItem>()
-                YouTube.artist(it.id).onSuccess { page ->
-                    items += page.sections.getOrNull(page.sections.size - 2)?.items.orEmpty()
-                    items += page.sections.lastOrNull()?.items.orEmpty()
+        try {
+            HomeTiming.log("loadSimilarRecommendations start")
+            val hideVideo = context.dataStore.get(HideVideoKey, false)
+            val fromTimeStamp = System.currentTimeMillis() - 86400000 * 7 * 2
+            
+            val rawArtistRecs = database.mostPlayedArtists(fromTimeStamp, limit = 10).first()
+            val artistRecsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtistRecs.map { it.id }, timeoutMs = 5000L)
+            var artistRecommendations = rawArtistRecs.mapNotNull { artistObj ->
+                artistRecsMap[artistObj.id]?.let { meta ->
+                    com.ruben.spotitube.db.entities.Artist(
+                        artist = com.ruben.spotitube.db.entities.SavedArtistEntity(
+                            id = artistObj.id,
+                            name = meta.name,
+                            thumbnailUrl = meta.thumbnailUrl
+                        ),
+                        songCount = artistObj.songCount
+                    )
                 }
-                SimilarRecommendation(
-                    title = it,
-                    items = items.filterVideo(hideVideo).shuffled().ifEmpty { return@mapNotNull null }
-                )
+            }.filter { it.artist.isYouTubeArtist }
+                .shuffled().take(3)
+                .mapNotNull { buildArtistRecommendation(it, hideVideo) }
+
+            if (artistRecommendations.isEmpty()) {
+                val savedArtists = database.allSavedArtists().first()
+                    .filter { it.isYouTubeArtist }
+                    .shuffled().take(3)
+                artistRecommendations = savedArtists.mapNotNull { savedArtist ->
+                    buildArtistRecommendation(savedArtist.toArtist(), hideVideo)
+                }
             }
 
-        val songRows = database.mostPlayedSongs(fromTimeStamp, limit = 10).first()
-        val songMetadataMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(songRows.map { it.id }, timeoutMs = 5000L)
-        val songRecommendations = songRows.mapNotNull { row -> songMetadataMap[row.id]?.toSong() }
-            .filter { it.album != null }
-            .shuffled().take(2)
-            .mapNotNull { song ->
-                val endpoint = YouTube.next(WatchEndpoint(videoId = song.id)).getOrNull()?.relatedEndpoint
-                    ?: return@mapNotNull null
-                val page = YouTube.related(endpoint).getOrNull() ?: return@mapNotNull null
-                SimilarRecommendation(
-                    title = song,
-                    items = (page.songs.shuffled().take(8) +
-                            page.albums.shuffled().take(4) +
-                            page.artists.shuffled().take(4) +
-                            page.playlists.shuffled().take(4))
-                        .filterVideo(hideVideo)
-                        .shuffled()
-                        .ifEmpty { return@mapNotNull null }
-                )
-            }
+            val songRows = database.mostPlayedSongs(fromTimeStamp, limit = 10).first()
+            val songMetadataMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(songRows.map { it.id }, timeoutMs = 5000L)
+            val songRecommendations = songRows.mapNotNull { row -> songMetadataMap[row.id]?.toSong() }
+                .filter { it.album != null }
+                .shuffled().take(2)
+                .mapNotNull { song ->
+                    val endpoint = runCatching {
+                        YouTube.next(WatchEndpoint(videoId = song.id)).getOrNull()?.relatedEndpoint
+                    }.getOrNull() ?: return@mapNotNull null
+                    val page = runCatching {
+                        YouTube.related(endpoint).getOrNull()
+                    }.getOrNull() ?: return@mapNotNull null
+                    SimilarRecommendation(
+                        title = song,
+                        items = page.artists.shuffled().take(12)
+                            .filterVideo(hideVideo)
+                            .shuffled()
+                            .ifEmpty { return@mapNotNull null }
+                    )
+                }
 
-        _similarRecommendations.value = (artistRecommendations + songRecommendations).shuffled()
-        HomeTiming.log("loadSimilarRecommendations end")
+            _similarRecommendations.value = (artistRecommendations + songRecommendations).shuffled()
+            HomeTiming.log("loadSimilarRecommendations end")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            reportException(e)
+            _similarRecommendations.value = emptyList()
+        } finally {
+            if (_similarRecommendations.value == null) {
+                _similarRecommendations.value = emptyList()
+            }
+        }
     }
 
     private suspend fun songLoad() {

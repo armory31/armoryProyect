@@ -122,9 +122,9 @@ object YouTube {
      * Obtiene todos los nuevos lanzamientos (Álbumes, Singles, EP) de forma categorizada
      * Usa el browseId "FEmusic_new_releases" que es la página completa
      */
-    suspend fun newReleasesCategorized(): Result<NewReleasesCategorizedResponse> = runCatching {
+    suspend fun newReleasesCategorized(gl: String? = null): Result<NewReleasesCategorizedResponse> = runCatching {
         val response =
-            innerTube.browse(WEB_REMIX, browseId = "FEmusic_new_releases").body<BrowseResponse>()
+            innerTube.browse(WEB_REMIX, browseId = "FEmusic_new_releases", gl = gl).body<BrowseResponse>()
 
         val albums = mutableListOf<AlbumItem>()
         val singles = mutableListOf<AlbumItem>()

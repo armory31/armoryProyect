@@ -377,7 +377,6 @@
     <string name="no_tags_available">No hay etiquetas disponibles</string>
     <string name="manage_tags">Gestionar etiquetas</string>
     <string name="assign_tags_to_playlists">Asignar etiquetas a playlists</string>
-    <string name="music_recognition">Reconocimiento de música</string>
     <string name="resume_autoscroll">Reanudar desplazamiento automático</string>
     <string name="history_duration">Duración del historial</string>
     <string name="audio_crossfade_dialog_title">Fundido cruzado de audio</string>
@@ -452,16 +451,6 @@
     <string name="no_listening_data">No hay datos de escucha suficientes</string>
     <string name="error_loading">Error al cargar</string>
     <string name="sort_by_last_updated">Última actualización</string>
-    <string name="music_recognition_no_match">No se encontró coincidencia</string>
-    <string name="music_recognition_tap_to_listen">Toca para escuchar</string>
-    <string name="music_recognition_listening">Escuchando…</string>
-    <string name="music_recognition_processing">Procesando…</string>
-    <string name="music_recognition_listen_again">Escuchar de nuevo</string>
-    <string name="music_recognition_error">Error de reconocimiento</string>
-    <string name="music_recognition_lyrics_preview">Vista previa de letras</string>
-    <string name="music_recognition_permission_title">Permiso de micrófono requerido</string>
-    <string name="music_recognition_permission_desc">Se necesita acceso al micrófono para reconocer la música que suena</string>
-    <string name="music_recognition_permission_action">Conceder permiso</string>
     <string name="empty_playlist">Playlist vacía</string>
     <string name="empty_playlist_desc">Esta playlist no tiene canciones</string>
     <string name="playlist_private_title">Playlist privada</string>
@@ -558,4 +547,8 @@
     <string name="clear_playback_history">Borrar historial de reproducción</string>
     <string name="clear_playback_history_dialog">¿Estás seguro de que deseas borrar el historial de reproducción?</string>
     <string name="empty_history">Sin historial de reproducción</string>
+    <string name="select_countries">Elegir países</string>
+    <string name="apply">Aplicar</string>
+    <string name="region_others">Otros</string>
+    <string name="ok">Aceptar</string>
 </resources>

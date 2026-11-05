@@ -44,8 +44,8 @@ android {
         applicationId = "com.ruben.spotitube"
         minSdk = 26
         targetSdk = 37
-        versionCode = 129
-        versionName = "0.9.2"
+        versionCode = 130
+        versionName = "0.9.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

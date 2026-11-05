@@ -1,5 +1,5 @@
 /*
- * OpenTune Project (2026)
+ * ARMORY Project Original (2026)
  * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
@@ -402,6 +402,7 @@ val AccountNameKey = stringPreferencesKey("accountName")
 val AccountAvatarUriKey = stringPreferencesKey("accountAvatarUri")
 val YouTubeClientScoresKey = stringPreferencesKey("youtubeClientScores")
 val ChartsCountryKey = stringPreferencesKey("charts_country")
+val ContentRegionGroupsKey = stringPreferencesKey("content_region_groups")
 
 // Armory Cloud Sync
 val ArmoryAccountEmailKey = stringPreferencesKey("armory_account_email")

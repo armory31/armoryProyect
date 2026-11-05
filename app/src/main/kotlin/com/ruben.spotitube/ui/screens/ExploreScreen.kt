@@ -51,7 +51,6 @@ import com.ruben.spotitube.ArmoryHeader
 import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.GlobalFont
 import com.ruben.spotitube.R
-import com.ruben.spotitube.ui.screens.musicrecognition.MusicRecognitionRoute
 import com.ruben.spotitube.ui.screens.search.OnlineSearchScreen
 
 @Composable
@@ -164,12 +163,6 @@ fun ExploreScreen(
                     iconRes = R.drawable.trending_up,
                     label = "Éxitos",
                     onClick = { navController.navigate("charts_screen") },
-                    modifier = Modifier.weight(1f)
-                )
-                ExploreShortcutChip(
-                    iconRes = R.drawable.music_note,
-                    label = "Identificar",
-                    onClick = { navController.navigate(MusicRecognitionRoute) },
                     modifier = Modifier.weight(1f)
                 )
             }
