@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -65,7 +65,7 @@ constructor(
     val downloadUtil: DownloadUtil,
 ) : MediaLibrarySession.Callback {
     private val scope = CoroutineScope(Dispatchers.Main) + Job()
-    var toggleLike: () -> Unit = {}
+    var toggleSongSaved: () -> Unit = {}
     var toggleStartRadio: () -> Unit = {}
     var toggleLibrary: () -> Unit = {}
     var onCustomCommandHandled: () -> Unit = {}
@@ -93,7 +93,7 @@ constructor(
         Timber.tag("MusicService").d("onConnect from package=${controller.packageName}, uid=${controller.uid}, isTrusted=${controller.isTrusted}")
         val connectionResult = super.onConnect(session, controller)
         val sessionCommands = connectionResult.availableSessionCommands.buildUpon()
-            .add(MediaSessionConstants.CommandToggleLike)
+            .add(MediaSessionConstants.CommandToggleSaved)
             .add(MediaSessionConstants.CommandToggleStartRadio)
             .add(MediaSessionConstants.CommandToggleLibrary)
             .add(MediaSessionConstants.CommandToggleShuffle)
@@ -137,7 +137,7 @@ constructor(
         args: Bundle,
     ): ListenableFuture<SessionResult> {
         when (customCommand.customAction) {
-            MediaSessionConstants.ACTION_TOGGLE_LIKE -> toggleLike()
+            MediaSessionConstants.ACTION_TOGGLE_SAVED -> toggleSongSaved()
             MediaSessionConstants.ACTION_TOGGLE_START_RADIO -> toggleStartRadio()
             MediaSessionConstants.ACTION_TOGGLE_LIBRARY -> toggleLibrary()
             MediaSessionConstants.ACTION_TOGGLE_SHUFFLE -> session.player.shuffleModeEnabled =
@@ -439,16 +439,16 @@ constructor(
                     }
 
                     MusicService.PLAYLIST -> {
-                        val likedSongCount = database.likedSongsByRowIdAsc().map { it.size }.first()
+                        val savedSongCount = database.allSongs().map { it.size }.first()
                         val downloadedSongCount = downloadUtil.downloads.value.size
                         listOf(
                             browsableMediaItem(
-                                "${MusicService.PLAYLIST}/${PlaylistEntity.LIKED_PLAYLIST_ID}",
+                                "${MusicService.PLAYLIST}/${PlaylistEntity.SAVED_PLAYLIST_ID}",
                                 context.getString(R.string.liked_songs),
                                 context.resources.getQuantityString(
                                     R.plurals.n_song,
-                                    likedSongCount,
-                                    likedSongCount
+                                    savedSongCount,
+                                    savedSongCount
                                 ),
                                 drawableUri(R.drawable.favorite),
                                 MediaMetadata.MEDIA_TYPE_PLAYLIST,
@@ -497,7 +497,7 @@ constructor(
                             parentId.startsWith("${MusicService.PLAYLIST}/") ->
                                 when (val playlistId =
                                     parentId.removePrefix("${MusicService.PLAYLIST}/")) {
-                                    PlaylistEntity.LIKED_PLAYLIST_ID -> database.likedSongsByRowIdAsc().map { it.asReversed() }
+                                    PlaylistEntity.SAVED_PLAYLIST_ID -> database.allSongs().map { it.asReversed() }
 
                                     PlaylistEntity.DOWNLOADED_PLAYLIST_ID -> {
                                         val downloads = downloadUtil.downloads.value
@@ -717,7 +717,7 @@ constructor(
                     val playlistId = path.getOrNull(1) ?: return@future defaultResult
                     val songs =
                         when (playlistId) {
-                            PlaylistEntity.LIKED_PLAYLIST_ID -> database.likedSongsByRowIdAsc().map { it.asReversed() }
+                            PlaylistEntity.SAVED_PLAYLIST_ID -> database.allSongs().map { it.asReversed() }
 
                             PlaylistEntity.DOWNLOADED_PLAYLIST_ID -> {
                                 val downloads = downloadUtil.downloads.value

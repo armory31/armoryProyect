@@ -17,6 +17,18 @@ data class UserLibraryDto(
     
     @get:PropertyName("playlists") @set:PropertyName("playlists") 
     var playlists: List<PlaylistDto> = emptyList(),
+
+    @get:PropertyName("historySongs") @set:PropertyName("historySongs")
+    var historySongs: List<HistorySongDto> = emptyList(),
+
+    @get:PropertyName("historyArtists") @set:PropertyName("historyArtists")
+    var historyArtists: List<HistoryArtistDto> = emptyList(),
+
+    @get:PropertyName("historyAlbums") @set:PropertyName("historyAlbums")
+    var historyAlbums: List<HistoryAlbumDto> = emptyList(),
+
+    @get:PropertyName("historyPlaylists") @set:PropertyName("historyPlaylists")
+    var historyPlaylists: List<HistoryPlaylistDto> = emptyList(),
     
     @get:PropertyName("metadata") @set:PropertyName("metadata") 
     var metadata: SyncMetadataDto = SyncMetadataDto()

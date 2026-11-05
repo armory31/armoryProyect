@@ -1,6 +1,6 @@
 /*
  * ARMORY Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -10,7 +10,6 @@ package com.ruben.spotitube
 
 import android.app.ActivityManager
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
@@ -26,14 +25,10 @@ import coil3.disk.directory
 import coil3.request.CachePolicy
 import coil3.request.allowHardware
 import coil3.request.crossfade
-import com.ruben.spotitube.constants.AccountChannelHandleKey
-import com.ruben.spotitube.constants.AccountEmailKey
-import com.ruben.spotitube.constants.AccountNameKey
+import com.google.firebase.FirebaseApp
 import com.ruben.spotitube.constants.ContentCountryKey
 import com.ruben.spotitube.constants.ContentLanguageKey
 import com.ruben.spotitube.constants.CountryCodeToName
-import com.ruben.spotitube.constants.DataSyncIdKey
-import com.ruben.spotitube.constants.InnerTubeCookieKey
 import com.ruben.spotitube.constants.LanguageCodeToName
 import com.ruben.spotitube.constants.MaxImageCacheSizeKey
 import com.ruben.spotitube.constants.ProxyEnabledKey
@@ -42,7 +37,6 @@ import com.ruben.spotitube.constants.ProxyUrlKey
 import com.ruben.spotitube.constants.SYSTEM_DEFAULT
 import com.ruben.spotitube.constants.SmartTrimmerKey
 import com.ruben.spotitube.constants.StreamBypassProxyKey
-import com.ruben.spotitube.constants.UseLoginForBrowse
 import com.ruben.spotitube.constants.VisitorDataKey
 import com.ruben.spotitube.constants.YouTubeClientScoresKey
 import com.ruben.spotitube.db.MusicDatabase
@@ -56,9 +50,7 @@ import com.ruben.spotitube.ui.player.CanvasArtworkPlaybackCache
 import com.ruben.spotitube.utils.PreferenceStore
 import com.ruben.spotitube.utils.YTPlayerUtils
 import com.ruben.spotitube.utils.dataStore
-import com.ruben.spotitube.utils.get
 import com.ruben.spotitube.utils.reportException
-import com.google.firebase.FirebaseApp
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -78,6 +70,14 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.system.exitProcess
+
+object HomeTiming {
+    var startTimeMs: Long = 0L
+    fun log(event: String) {
+        val elapsed = android.os.SystemClock.elapsedRealtime() - startTimeMs
+        Timber.tag("HomeTiming").i("$event +${elapsed}ms")
+    }
+}
 
 @HiltAndroidApp
 class App : Application(), SingletonImageLoader.Factory, Configuration.Provider {
@@ -102,6 +102,8 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized = _isInitialized.asStateFlow()
     private val didRunImageCacheTrim = AtomicBoolean(false)
+    private val isFirstVisitorDataRead = AtomicBoolean(false)
+    private val isFirstInitializedLogged = AtomicBoolean(false)
 
     private fun currentProcessName(): String? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -118,6 +120,8 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
 
     
     override fun onCreate() {
+        HomeTiming.startTimeMs = android.os.SystemClock.elapsedRealtime()
+        HomeTiming.log("App.onCreate start")
         super.onCreate()
         instance = this
         if (currentProcessName()?.endsWith(":crash") == true) {
@@ -134,7 +138,9 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
 
         applicationScope.launch(Dispatchers.IO) {
             PreferenceStore.start(this@App)
+            HomeTiming.log("PreferenceStore.start end")
             MusicDatabase.warmUp(this@App, database)
+            HomeTiming.log("MusicDatabase.warmUp end")
             initializeCriticalSync()
         }
         initializeDeferredAsync()
@@ -154,6 +160,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
         if (languageTag == "zh-TW") {
             KuGou.useTraditionalChinese = true
         }
+        HomeTiming.log("initializeCriticalSync end gl=${YouTube.locale.gl}")
     }
 
     private fun initializeDeferredAsync() {
@@ -193,22 +200,41 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
                         YouTube.proxy = null
                     }
 
-                    // YT Settings
-                    YouTube.useLoginForBrowse = prefs[UseLoginForBrowse] != false
-                    YouTube.visitorData = prefs[VisitorDataKey]?.takeIf { it.isNotBlank() && it != "null" } ?: YouTube.visitorData
-                    YouTube.dataSyncId = prefs[DataSyncIdKey]?.let {
-                        it.takeIf { !it.contains("||") }
-                            ?: it.takeIf { it.endsWith("||") }?.substringBefore("||")
-                            ?: it.substringAfter("||")
+                    val rawVisitorData = prefs[VisitorDataKey]
+                    if (isFirstVisitorDataRead.compareAndSet(false, true)) {
+                        HomeTiming.log("VisitorDataKey read (wasEmpty=${rawVisitorData.isNullOrBlank() || rawVisitorData == "null"})")
                     }
-                    YouTube.cookie = prefs[InnerTubeCookieKey]
-                    
+                    YouTube.visitorData = rawVisitorData?.takeIf { it.isNotBlank() && it != "null" } ?: YouTube.visitorData
+
                     val scoresJson = prefs[YouTubeClientScoresKey]
                     if (scoresJson != null) {
                         YTPlayerUtils.initScores(scoresJson)
                     }
 
+                    val smartTrimmer = prefs[SmartTrimmerKey] ?: false
+                    val maxCacheSizeMb = prefs[MaxImageCacheSizeKey]
+                    val sp = getSharedPreferences("image_cache_prefs", MODE_PRIVATE)
+                    val editor = sp.edit().putBoolean("smart_trimmer", smartTrimmer)
+                    if (maxCacheSizeMb != null) {
+                        editor.putInt("max_image_cache_mb", maxCacheSizeMb)
+                    } else {
+                        editor.remove("max_image_cache_mb")
+                    }
+                    editor.apply()
+
+                    val imageCacheConfig = resolveImageDiskCacheConfig(maxCacheSizeMb)
+                    if (smartTrimmer && imageCacheConfig.policy == CachePolicy.ENABLED && didRunImageCacheTrim.compareAndSet(false, true)) {
+                        val diskCache = DiskCache.Builder()
+                            .directory(cacheDir.resolve("coil"))
+                            .maxSizeBytes(imageCacheConfig.maxSizeBytes)
+                            .build()
+                        trimImageDiskCache(diskCache)
+                    }
+
                     _isInitialized.value = true
+                    if (isFirstInitializedLogged.compareAndSet(false, true)) {
+                        HomeTiming.log("_isInitialized = true")
+                    }
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error during deferred initialization")
@@ -216,20 +242,23 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             }
         }
 
-        // Keep the visitor data update logic separate as it might trigger a network call/save
         applicationScope.launch(Dispatchers.IO) {
             dataStore.data
                 .map { it[VisitorDataKey] }
                 .distinctUntilChanged()
-                .collect { visitorData ->
-                    if (visitorData.isNullOrBlank() || visitorData == "null") {
-                        YouTube.visitorData().onSuccess { newVisitorData ->
-                            dataStore.edit { settings ->
-                                settings[VisitorDataKey] = newVisitorData
+                .collect { currentVisitorData ->
+                    if (currentVisitorData.isNullOrBlank() || currentVisitorData == "null") {
+                        YouTube.visitorData()
+                            .onSuccess { newVisitorData ->
+                                HomeTiming.log("YouTube.visitorData success")
+                                dataStore.edit { prefs ->
+                                    prefs[VisitorDataKey] = newVisitorData
+                                }
                             }
-                        }.onFailure {
-                            reportException(it)
-                        }
+                            .onFailure { exception ->
+                                HomeTiming.log("YouTube.visitorData failure: ${exception.message}")
+                                reportException(exception)
+                            }
                     }
                 }
         }
@@ -261,8 +290,10 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
-        val smartTrimmer = dataStore[SmartTrimmerKey] ?: false
-        val imageCacheConfig = resolveImageDiskCacheConfig(dataStore[MaxImageCacheSizeKey])
+        val sp = getSharedPreferences("image_cache_prefs", MODE_PRIVATE)
+        val smartTrimmer = sp.getBoolean("smart_trimmer", false)
+        val maxMb = if (sp.contains("max_image_cache_mb")) sp.getInt("max_image_cache_mb", 512) else null
+        val imageCacheConfig = resolveImageDiskCacheConfig(maxMb)
 
         val diskCache = DiskCache.Builder()
             .directory(cacheDir.resolve("coil"))
@@ -305,19 +336,6 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
     companion object {
         lateinit var instance: App
             private set
-
-        fun forgetAccount(context: Context) {
-            CoroutineScope(Dispatchers.IO).launch {
-                context.dataStore.edit { settings ->
-                    settings.remove(InnerTubeCookieKey)
-                    settings.remove(VisitorDataKey)
-                    settings.remove(DataSyncIdKey)
-                    settings.remove(AccountNameKey)
-                    settings.remove(AccountEmailKey)
-                    settings.remove(AccountChannelHandleKey)
-                }
-            }
-        }
     }
 }
 

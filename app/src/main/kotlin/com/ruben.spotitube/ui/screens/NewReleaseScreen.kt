@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -52,7 +52,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -66,16 +65,13 @@ import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.ArmoryIconButton
 import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.GridThumbnailHeight
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.viewmodels.NewReleaseContent
 import com.ruben.spotitube.viewmodels.NewReleaseUiState
 import com.ruben.spotitube.viewmodels.NewReleaseViewModel

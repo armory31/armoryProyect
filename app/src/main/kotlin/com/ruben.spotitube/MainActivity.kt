@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -9,10 +9,10 @@
 package com.ruben.spotitube
 
 import android.Manifest
-import com.ruben.spotitube.ArmoryGradients
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.util.Log
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -110,6 +110,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import com.ruben.spotitube.constants.AppBarHeight
 import com.ruben.spotitube.constants.AppLanguageKey
 import com.ruben.spotitube.constants.DefaultOpenTabKey
@@ -174,6 +176,8 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
+private val NavBarHeight = 74.dp
+
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -233,11 +237,20 @@ class MainActivity : ComponentActivity() {
         val mediaItem: MediaItem,
     )
 
+    private var expandPlayerBottomSheet: (() -> Unit)? = null
+    private var shouldExpandPlayerForDeepLink = false
+
     private fun playPendingDeepLinkSongIfReady() {
         val pending = pendingDeepLinkSong ?: return
         val connection = playerConnection ?: return
         pendingDeepLinkSong = null
         connection.playQueue(ListQueue(items = listOf(pending.mediaItem)))
+        val expandPlayer = expandPlayerBottomSheet
+        if (expandPlayer == null) {
+            shouldExpandPlayerForDeepLink = true
+        } else {
+            expandPlayer()
+        }
     }
 
     private fun joinPendingTogetherIfReady() {
@@ -299,13 +312,14 @@ class MainActivity : ComponentActivity() {
 
 
 
+    // <-- CAMBIO 1: onNewIntent mejorado
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        pendingIntent = intent
         if (::navController.isInitialized) {
             handleDeepLinkIntent(intent, navController)
-        } else {
-            pendingIntent = intent
+            pendingIntent = null
         }
     }
 
@@ -313,7 +327,7 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         startMusicServiceSafely()
         super.onCreate(savedInstanceState)
-        
+
         var isLoginChecked by mutableStateOf(false)
         var isRedirecting by mutableStateOf(false)
 
@@ -322,9 +336,9 @@ class MainActivity : ComponentActivity() {
         }
 
         session = SessionManager(this)
-        
+
         lifecycleScope.launch {
-            // Se confía en la sesión local para un inicio instantáneo. 
+            // Se confía en la sesión local para un inicio instantáneo.
             // El backup detectará si el token de Firebase ha caducado en segundo plano.
             val hasSession = session.isLoggedIn()
             if (!hasSession) {
@@ -398,7 +412,7 @@ class MainActivity : ComponentActivity() {
             val lastNotifiedVersion by rememberPreference(LastNotifiedVersionKey, defaultValue = "")
 
             LaunchedEffect(lastNotifiedVersion) {
-                if (lastNotifiedVersion.isNotBlank() && !Updater.isSameVersion(lastNotifiedVersion, BuildConfig.VERSION_NAME)) {
+                if (lastNotifiedVersion.isNotBlank() && Updater.isNewerVersion(lastNotifiedVersion, BuildConfig.VERSION_NAME)) {
                     latestVersionName = lastNotifiedVersion
                 }
             }
@@ -409,7 +423,7 @@ class MainActivity : ComponentActivity() {
                     if (!isUiReady) {
                         isUiReady = true
                         isMainActivityReady.value = true
-                        
+
                         lifecycleScope.launch(Dispatchers.IO) {
                             syncManager.schedulePeriodicSync(this@MainActivity)
                             UpdateNotificationManager.schedulePeriodicUpdateCheck(this@MainActivity)
@@ -496,7 +510,7 @@ class MainActivity : ComponentActivity() {
 
             // fetch release notes and show sheet when a new version is detected
             LaunchedEffect(latestVersionName) {
-                if (!Updater.isSameVersion(latestVersionName, BuildConfig.VERSION_NAME)) {
+                if (Updater.isNewerVersion(latestVersionName, BuildConfig.VERSION_NAME)) {
                     Updater.getLatestReleaseNotes().onSuccess {
                         releaseNotesState.value = it
                     }.onFailure {
@@ -525,6 +539,7 @@ class MainActivity : ComponentActivity() {
                     val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
                     val navController = rememberNavController()
+                    this@MainActivity.navController = navController // <-- CAMBIO 2: Inicializar la variable de la clase
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route
                     val isYearInMusicScreen = currentRoute == "year_in_music"
@@ -600,7 +615,7 @@ class MainActivity : ComponentActivity() {
                             !active
 
                     val systemNavPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                    val navBarHeight = if (canShowNav && !useRail) 88.dp else 0.dp
+                    val navBarHeight = if (canShowNav && !useRail) NavBarHeight else 0.dp
                     val dynamicCollapsedBound = 76.dp + navBarHeight + systemNavPadding
 
                     val playerBottomSheetState =
@@ -789,8 +804,13 @@ class MainActivity : ComponentActivity() {
                     }
 
                     DisposableEffect(playerConnection, playerBottomSheetState) {
+                        expandPlayerBottomSheet = { playerBottomSheetState.expandSoft() }
+                        if (shouldExpandPlayerForDeepLink) {
+                            shouldExpandPlayerForDeepLink = false
+                            expandPlayerBottomSheet?.invoke()
+                        }
                         val player =
-                            playerConnection?.player ?: return@DisposableEffect onDispose { }
+                            playerConnection?.player ?: return@DisposableEffect onDispose { expandPlayerBottomSheet = null }
                         val listener =
                             object : Player.Listener {
                                 override fun onMediaItemTransition(
@@ -809,6 +829,7 @@ class MainActivity : ComponentActivity() {
                         player.addListener(listener)
                         onDispose {
                             player.removeListener(listener)
+                            expandPlayerBottomSheet = null
                         }
                     }
 
@@ -891,7 +912,7 @@ class MainActivity : ComponentActivity() {
                                 .add(WindowInsets(top = AppBarHeight, bottom = bottomPadding))
                         }
 
-                     CompositionLocalProvider(
+                    CompositionLocalProvider(
                         LocalDatabase provides database,
                         LocalContentColor provides Color.White,
                         LocalPlayerConnection provides playerConnection,
@@ -1029,7 +1050,6 @@ class MainActivity : ComponentActivity() {
                                         }.route,
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(bottom = if (nowPlaying != null && !playerBottomSheetState.isDismissed) 72.dp else 0.dp)
                                             .nestedScroll(
                                                 if (navigationItems.fastAny { it.first == navBackStackEntry?.destination?.route } ||
                                                     navBackStackEntry?.destination?.route?.startsWith("search/") == true
@@ -1041,28 +1061,28 @@ class MainActivity : ComponentActivity() {
                                             ),
                                         enterTransition = {
                                             if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
-                                                fadeIn(tween(250))
+                                                EnterTransition.None
                                             } else {
                                                 fadeIn(tween(250)) + slideInHorizontally { it / 2 }
                                             }
                                         },
                                         exitTransition = {
                                             if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
-                                                fadeOut(tween(200))
+                                                ExitTransition.None
                                             } else {
                                                 fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
                                             }
                                         },
                                         popEnterTransition = {
-                                            if ((initialState.destination.route in topLevelScreens || initialState.destination.route?.startsWith("search/") == true) && targetState.destination.route in topLevelScreens) {
-                                                fadeIn(tween(250))
+                                            if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
+                                                EnterTransition.None
                                             } else {
                                                 fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
                                             }
                                         },
                                         popExitTransition = {
-                                            if ((initialState.destination.route in topLevelScreens || initialState.destination.route?.startsWith("search/") == true) && targetState.destination.route in topLevelScreens) {
-                                                fadeOut(tween(200))
+                                            if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
+                                                ExitTransition.None
                                             } else {
                                                 fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
                                             }
@@ -1079,40 +1099,40 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                            if (isUiReady) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .fillMaxWidth()
-                                ) {
-                                    BottomSheetPlayer(
-                                        state = playerBottomSheetState,
-                                        navController = navController,
-                                        navigationBarHeight = if (shouldShowNavigationBar && !useRail) 88.dp else 0.dp
-                                    )
-                                }
+                        if (isUiReady) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                            ) {
+                                BottomSheetPlayer(
+                                    state = playerBottomSheetState,
+                                    navController = navController,
+                                    navigationBarHeight = if (shouldShowNavigationBar && !useRail) NavBarHeight else 0.dp
+                                )
                             }
+                        }
 
-                            BottomSheetMenu(
-                                state = menuState,
-                            )
+                        BottomSheetMenu(
+                            state = menuState,
+                        )
 
-                            if (!isUiReady) {
-                                Box(
+                        if (!isUiReady) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.armory_logo),
+                                    contentDescription = "Logo",
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Black),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.armory_logo),
-                                        contentDescription = "Logo",
-                                        modifier = Modifier
-                                            .height(160.dp)
-                                            .fillMaxWidth(0.4f)
-                                    )
-                                }
+                                        .height(160.dp)
+                                        .fillMaxWidth(0.4f)
+                                )
                             }
+                        }
                     }
 
                     LaunchedEffect(shouldShowSearchBar, openSearchImmediately) {
@@ -1132,21 +1152,122 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleDeepLinkIntent(intent: Intent, navController: NavHostController) {
-        val uri = intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri() ?: return
-        val coroutineScope = lifecycleScope
+        val navigateTo = intent.getStringExtra("navigate_to")
+        if (navigateTo != null) {
+            navController.navigate(navigateTo) {
+                launchSingleTop = true
+            }
+            intent.removeExtra("navigate_to")
+            return
+        }
 
+        val uri = intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri()
+        Log.d("DeepLinkDebug", "Intent received: action=${intent.action}, data=$uri")
+        if (uri == null) return
+
+        val coroutineScope = lifecycleScope
         val authority = uri.authority?.lowercase()
-        val isSupportedScheme = uri.scheme.equals("armory", ignoreCase = true) || uri.scheme.equals("OpenTune", ignoreCase = true)
+        val scheme = uri.scheme?.lowercase()
+        val host = uri.host?.lowercase()
+        val pathSegments = uri.pathSegments.filter(String::isNotBlank)
+
+        Log.d("DeepLinkDebug", "Parsed URI: scheme=$scheme, authority/host=${authority ?: host}, pathSegments=$pathSegments")
+
+        // 1. Manejo especial de Together
+        val isSupportedScheme = scheme == "armory" || scheme == "opentune"
         if (isSupportedScheme && authority == "together") {
+            Log.d("DeepLinkDebug", "Handling Together deep link: $uri")
             pendingTogetherJoinLink = uri.toString()
             startMusicServiceSafely()
             joinPendingTogetherIfReady()
             return
         }
 
-        if (isSupportedScheme && authority == "login") {
-            // navController.navigate(buildLoginRoute(uri.getQueryParameter(LOGIN_URL_ARGUMENT)))
-            return
+        // Helper para popBackStack si la pantalla actual coincide con el tipo de pantalla a navegar
+        fun navigateWithPop(targetRoute: String, routePrefix: String) {
+            val currentRoute = navController.currentDestination?.route.orEmpty()
+            Log.d("DeepLinkDebug", "Navigating to $targetRoute. Current route: $currentRoute")
+
+            // Fix: Si la pantalla actual coincide con el mismo tipo (p. ej. "album", "artist" u "online_playlist"),
+            // hacemos popBackStack antes para forzar a Jetpack Compose Navigation a recrear y actualizar la vista con el nuevo ID.
+            if (currentRoute.startsWith(routePrefix)) {
+                Log.d("DeepLinkDebug", "Popping backstack for same route type prefix: $routePrefix")
+                navController.popBackStack()
+            }
+            navController.navigate(targetRoute) {
+                launchSingleTop = true
+            }
+            Log.d("DeepLinkDebug", "Navigation executed to $targetRoute")
+        }
+
+        // 2. Normalización del par (type, id)
+        val normalizedDeepLinkPair: Pair<String, String>? = when {
+            scheme == "armory" -> {
+                val type = authority
+                val id = pathSegments.firstOrNull()
+                if (!type.isNullOrBlank() && !id.isNullOrBlank()) type to id else null
+            }
+            scheme == "https" && host == BuildConfig.SHARE_HOST.lowercase() -> {
+                val type = pathSegments.firstOrNull()?.lowercase()
+                val id = pathSegments.getOrNull(1)
+                if (!type.isNullOrBlank() && !id.isNullOrBlank()) type to id else null
+            }
+            else -> null
+        }
+
+        if (normalizedDeepLinkPair != null) {
+            val (type, id) = normalizedDeepLinkPair
+            Log.d("DeepLinkDebug", "Extracted deep link pair: type=$type, id=$id")
+
+            when (type) {
+                "song" -> {
+                    coroutineScope.launch {
+                        try {
+                            Log.d("DeepLinkDebug", "Queueing deep link song id: $id")
+                            val result = withContext(Dispatchers.IO) {
+                                YouTube.queue(listOf(id))
+                            }
+                            result.onSuccess { queued ->
+                                val mediaItem =
+                                    queued.firstOrNull { it.id == id }?.toMediaItem()
+                                        ?: queued.firstOrNull()?.toMediaItem()
+                                        ?: MediaItem
+                                            .Builder()
+                                            .setMediaId(id)
+                                            .setUri(id)
+                                            .setCustomCacheKey(id)
+                                            .build()
+                                pendingDeepLinkSong = PendingDeepLinkSong(mediaItem = mediaItem)
+                                startMusicServiceSafely()
+                                playPendingDeepLinkSongIfReady()
+                                Log.d("DeepLinkDebug", "Deep link song queued and playing: $id")
+                            }.onFailure {
+                                Log.w("DeepLinkDebug", "Failed to queue deep link song: $id", it)
+                                reportException(it)
+                            }
+                        } catch (e: Exception) {
+                            Log.w("DeepLinkDebug", "Error loading deep link song: $id", e)
+                            reportException(e)
+                        }
+                    }
+                    return
+                }
+                "album" -> {
+                    navigateWithPop("album/$id", "album")
+                    return
+                }
+                "artist" -> {
+                    navigateWithPop("artist/$id", "artist")
+                    return
+                }
+                "playlist" -> {
+                    val cleanPlaylistId = id.removePrefix("VL")
+                    navigateWithPop("online_playlist/$cleanPlaylistId", "online_playlist")
+                    return
+                }
+            }
+        } else {
+            Log.w("DeepLinkDebug", "Unrecognized deep link URI format: $uri")
         }
 
         when (val path = uri.pathSegments.firstOrNull()) {
@@ -1155,21 +1276,21 @@ class MainActivity : ComponentActivity() {
                     coroutineScope.launch {
                         YouTube.albumSongs(playlistId).onSuccess { songs ->
                             songs.firstOrNull()?.album?.id?.let { browseId ->
-                                navController.navigate("album/$browseId")
+                                navigateWithPop("album/$browseId", "album")
                             }
                         }.onFailure { reportException(it) }
                     }
                 } else {
-                    navController.navigate("online_playlist/$playlistId")
+                    navigateWithPop("online_playlist/$playlistId", "online_playlist")
                 }
             }
 
             "browse" -> uri.lastPathSegment?.let { browseId ->
-                navController.navigate("album/$browseId")
+                navigateWithPop("album/$browseId", "album")
             }
 
             "channel", "c" -> uri.lastPathSegment?.let { artistId ->
-                navController.navigate("artist/$artistId")
+                navigateWithPop("artist/$artistId", "artist")
             }
 
             else -> {
@@ -1183,28 +1304,32 @@ class MainActivity : ComponentActivity() {
 
                 videoId?.let { vid ->
                     coroutineScope.launch {
-                        val result = withContext(Dispatchers.IO) {
-                            YouTube.queue(listOf(vid), playlistId)
-                        }
+                        try {
+                            val result = withContext(Dispatchers.IO) {
+                                YouTube.queue(listOf(vid), playlistId)
+                            }
 
-                        result.onSuccess { queued ->
-                            val mediaItem =
-                                queued.firstOrNull { it.id == vid }?.toMediaItem()
-                                    ?: queued.firstOrNull()?.toMediaItem()
-                                    ?: MediaItem
-                                        .Builder()
-                                        .setMediaId(vid)
-                                        .setUri(vid)
-                                        .setCustomCacheKey(vid)
-                                        .build()
-                            pendingDeepLinkSong =
-                                PendingDeepLinkSong(
-                                    mediaItem = mediaItem,
-                                )
-                            startMusicServiceSafely()
-                            playPendingDeepLinkSongIfReady()
-                        }.onFailure {
-                            reportException(it)
+                            result.onSuccess { queued ->
+                                val mediaItem =
+                                    queued.firstOrNull { it.id == vid }?.toMediaItem()
+                                        ?: queued.firstOrNull()?.toMediaItem()
+                                        ?: MediaItem
+                                            .Builder()
+                                            .setMediaId(vid)
+                                            .setUri(vid)
+                                            .setCustomCacheKey(vid)
+                                            .build()
+                                pendingDeepLinkSong =
+                                    PendingDeepLinkSong(
+                                        mediaItem = mediaItem,
+                                    )
+                                startMusicServiceSafely()
+                                playPendingDeepLinkSongIfReady()
+                            }.onFailure {
+                                reportException(it)
+                            }
+                        } catch (e: Exception) {
+                            reportException(e)
                         }
                     }
                 }

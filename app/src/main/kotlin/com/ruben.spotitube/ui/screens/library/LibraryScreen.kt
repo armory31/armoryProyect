@@ -1,6 +1,6 @@
 /*
  * OpenTune Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController

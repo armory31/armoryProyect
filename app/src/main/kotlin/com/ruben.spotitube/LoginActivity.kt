@@ -39,6 +39,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -161,6 +164,7 @@ class LoginActivity : ComponentActivity() {
                                 // Restauración única tras login
                                 try {
                                     if (isInternetAvailable(this@LoginActivity)) {
+                                        syncManager.restoreProfile()
                                         val library = syncManager.getUserLibrary()
                                         syncManager.applyLibraryToLocal(library)
                                     } else {
@@ -197,8 +201,22 @@ class LoginActivity : ComponentActivity() {
         
         var showVerificationDialog by remember { mutableStateOf(false) }
         var showNotVerifiedDialog by remember { mutableStateOf(false) }
+        var showResetPasswordDialog by remember { mutableStateOf(false) }
 
         val scrollState = rememberScrollState()
+
+        if (showResetPasswordDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetPasswordDialog = false },
+                title = { Text(stringResource(R.string.reset_password_dialog_title)) },
+                text = { Text(stringResource(R.string.reset_password_dialog_message)) },
+                confirmButton = {
+                    TextButton(onClick = { showResetPasswordDialog = false }) {
+                        Text(stringResource(R.string.ok_button))
+                    }
+                }
+            )
+        }
 
         if (showVerificationDialog) {
             AlertDialog(
@@ -321,6 +339,30 @@ class LoginActivity : ComponentActivity() {
                 singleLine = true
             )
 
+            if (!isRegisterMode) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.forgot_password),
+                    color = Color(0xFF6B6B6B),
+                    fontSize = 13.sp,
+                    modifier = Modifier.clickable {
+                        val cleanEmail = email.trim()
+                        if (cleanEmail.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(cleanEmail).matches()) {
+                            Toast.makeText(this@LoginActivity, getString(R.string.invalid_email_warning), Toast.LENGTH_SHORT).show()
+                        } else {
+                            auth.sendPasswordResetEmail(cleanEmail)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        showResetPasswordDialog = true
+                                    } else {
+                                        Toast.makeText(this@LoginActivity, task.exception?.message ?: "Error", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                        }
+                    }
+                )
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             if (isLoading) {
@@ -387,6 +429,79 @@ class LoginActivity : ComponentActivity() {
                         text = if (isRegisterMode) "CREAR CUENTA" else "ENTRAR",
                         fontWeight = FontWeight.Bold
                     )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.HorizontalDivider(modifier = Modifier.weight(1f), color = ArmoryColors.SurfaceBorder)
+                    Text(
+                        text = "  ${stringResource(R.string.divider_or)}  ",
+                        color = ArmoryColors.TextMuted,
+                        fontSize = 13.sp
+                    )
+                    androidx.compose.material3.HorizontalDivider(modifier = Modifier.weight(1f), color = ArmoryColors.SurfaceBorder)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        isLoading = true
+                        val credentialManager = androidx.credentials.CredentialManager.create(this@LoginActivity)
+                        val googleIdOption = GetGoogleIdOption.Builder()
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId(getString(R.string.default_web_client_id))
+                            .build()
+
+                        val request = androidx.credentials.GetCredentialRequest.Builder()
+                            .addCredentialOption(googleIdOption)
+                            .build()
+
+                        lifecycleScope.launch {
+                            try {
+                                val result = credentialManager.getCredential(request = request, context = this@LoginActivity)
+                                val credential = result.credential
+                                if (credential is androidx.credentials.CustomCredential &&
+                                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                                ) {
+                                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                    val idToken = googleIdTokenCredential.idToken
+                                    val authCredential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+                                    auth.signInWithCredential(authCredential).addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            val user = auth.currentUser
+                                            if (user != null) {
+                                                onLoginSuccess(user.email ?: "", user)
+                                            } else {
+                                                isLoading = false
+                                            }
+                                        } else {
+                                            isLoading = false
+                                            Toast.makeText(this@LoginActivity, task.exception?.message ?: getString(R.string.google_login_error), Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                } else {
+                                    isLoading = false
+                                    Toast.makeText(this@LoginActivity, getString(R.string.invalid_google_credential), Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+                                isLoading = false
+                            } catch (e: Exception) {
+                                isLoading = false
+                                Toast.makeText(this@LoginActivity, e.message ?: getString(R.string.google_login_error), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ArmoryColors.TextPrimary),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ArmoryColors.SurfaceBorder)
+                ) {
+                    Text(stringResource(R.string.continue_with_google), fontWeight = FontWeight.Bold)
                 }
             }
 

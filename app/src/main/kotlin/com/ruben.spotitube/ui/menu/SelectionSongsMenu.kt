@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -53,6 +53,7 @@ import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.Song
+import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.playback.ExoDownloadService
@@ -81,22 +82,6 @@ fun SelectionSongMenu(
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
 
-    var allInLibrary by remember {
-        mutableStateOf(false)
-    }
-
-    var allLiked by remember {
-        mutableStateOf(false)
-    }
-
-    LaunchedEffect(songSelection, libraryStateHolder) {
-        val inLibraryIds = libraryStateHolder.savedSongIds.first()
-        val likedIds = libraryStateHolder.savedSongIds.first() // En el nuevo modelo liked == inLibrary para canciones
-        
-        allInLibrary = songSelection.all { it.id in inLibraryIds }
-        allLiked = songSelection.isNotEmpty() && songSelection.all { it.id in likedIds }
-    }
-
     var downloadState by remember {
         mutableIntStateOf(Download.STATE_STOPPED)
     }
@@ -124,14 +109,10 @@ fun SelectionSongMenu(
         mutableStateOf(false)
     }
 
-    val notAddedList by remember {
-        mutableStateOf(mutableListOf<Song>())
-    }
-
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
         onGetSong = {
-            songSelection.map { it.id }
+            songSelection.map { it.toMediaMetadata() }
         },
         onDismiss = {
             showChoosePlaylistDialog = false
@@ -342,35 +323,20 @@ fun SelectionSongMenu(
         item {
             ListItem(
                 headlineContent = {
-                    Text(
-                        text = stringResource(
-                            if (allInLibrary) R.string.remove_from_library else R.string.add_to_library
-                        )
-                    )
+                    Text(text = stringResource(R.string.action_saved))
                 },
                 leadingContent = {
                     Icon(
-                        painter = painterResource(
-                            if (allInLibrary) R.drawable.library_add_check else R.drawable.library_add
-                        ),
+                        painter = painterResource(R.drawable.favorite),
                         contentDescription = null,
                     )
                 },
                 modifier = Modifier.clickable {
                     val appScope = (context.applicationContext as? com.ruben.spotitube.App)?.applicationScope ?: coroutineScope
                     appScope.launch(Dispatchers.IO) {
-                        val savedIds = database.getSavedSongIds().first().toSet()
+                        val savedIds = libraryStateHolder.savedSongIds.first()
                         val allSaved = songSelection.all { it.id in savedIds }
-                        database.query {
-                            if (allSaved) {
-                                songSelection.forEach { song ->
-                                    deleteSavedSong(song.id)
-                                }
-                            } else {
-                                val missing = songSelection.filter { it.id !in savedIds }
-                                insertSavedSongs(missing.map { it.song })
-                            }
-                        }
+                        syncManager.setSaved(songSelection.map { it.toSavedSongEntity() }, saved = !allSaved)
                     }
                     onDismiss()
                     clearAction()
@@ -436,44 +402,6 @@ fun SelectionSongMenu(
                 }
             }
         }
-        item {
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(
-                            if (allLiked) R.string.dislike_all else R.string.like_all
-                        )
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        painter = painterResource(
-                            if (allLiked) R.drawable.favorite else R.drawable.favorite_border
-                        ),
-                        contentDescription = null,
-                    )
-                },
-                modifier = Modifier.clickable {
-                    val appScope = (context.applicationContext as? com.ruben.spotitube.App)?.applicationScope ?: coroutineScope
-                    appScope.launch(Dispatchers.IO) {
-                        val savedIds = database.getSavedSongIds().first().toSet()
-                        val allSaved = songSelection.all { it.id in savedIds }
-                        database.query {
-                            if (allSaved) {
-                                songSelection.forEach { song ->
-                                    deleteSavedSong(song.id)
-                                }
-                            } else {
-                                val missing = songSelection.filter { it.id !in savedIds }
-                                insertSavedSongs(missing.map { it.song })
-                            }
-                        }
-                    }
-                    onDismiss()
-                    clearAction()
-                }
-            )
-        }
         if (songPosition?.size != 0) {
             item {
                 ListItem(
@@ -519,30 +447,16 @@ fun SelectionMediaMetadataMenu(
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
 
-    var allLiked by remember {
-        mutableStateOf(false)
-    }
 
-    LaunchedEffect(songSelection, libraryStateHolder) {
-        val likedIds = libraryStateHolder.savedSongIds.first()
-        allLiked = songSelection.isNotEmpty() && songSelection.all { it.id in likedIds }
-    }
 
     var showChoosePlaylistDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
-    val notAddedList by remember {
-        mutableStateOf(mutableListOf<Song>())
-    }
-
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
         onGetSong = {
-            songSelection.map {
-                database.upsertSongPreservingUsage(it.toSavedSongEntity())
-                it.id
-            }
+            songSelection
         },
         onDismiss = { showChoosePlaylistDialog = false },
         onAddComplete = { songCount, playlistNames ->
@@ -727,35 +641,20 @@ fun SelectionMediaMetadataMenu(
         item {
             ListItem(
                 headlineContent = {
-                    Text(
-                        text = stringResource(
-                            if (allLiked) R.string.dislike_all else R.string.like_all
-                        )
-                    )
+                    Text(text = stringResource(R.string.action_saved))
                 },
                 leadingContent = {
                     Icon(
-                        painter = painterResource(
-                            if (allLiked) R.drawable.favorite else R.drawable.favorite_border
-                        ),
+                        painter = painterResource(R.drawable.favorite),
                         contentDescription = null,
                     )
                 },
                 modifier = Modifier.clickable {
                     val appScope = (context.applicationContext as? com.ruben.spotitube.App)?.applicationScope ?: coroutineScope
                     appScope.launch(Dispatchers.IO) {
-                        val savedIds = database.getSavedSongIds().first().toSet()
+                        val savedIds = libraryStateHolder.savedSongIds.first()
                         val allSaved = songSelection.all { it.id in savedIds }
-                        database.query {
-                            if (allSaved) {
-                                songSelection.forEach { media ->
-                                    deleteSavedSong(media.id)
-                                }
-                            } else {
-                                val missing = songSelection.filter { it.id !in savedIds }
-                                insertSavedSongs(missing.map { it.toSavedSongEntity() })
-                            }
-                        }
+                        syncManager.setSaved(songSelection.map { it.toSavedSongEntity() }, saved = !allSaved)
                     }
                     onDismiss()
                     clearAction()

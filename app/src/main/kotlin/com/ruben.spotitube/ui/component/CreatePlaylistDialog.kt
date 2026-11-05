@@ -1,12 +1,13 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
 package com.ruben.spotitube.ui.component
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
@@ -33,7 +34,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +64,7 @@ import org.apache.commons.lang3.RandomStringUtils
 fun CreatePlaylistDialog(
     onDismiss: () -> Unit,
     initialTextFieldValue: String? = null,
+    onCreated: ((String) -> Unit)? = null,
 ) {
     val syncManager = LocalSyncManager.current
     val database = LocalDatabase.current
@@ -72,6 +77,7 @@ fun CreatePlaylistDialog(
     var totalCount by remember { mutableIntStateOf(0) }
     var selectedCsvUri by remember { mutableStateOf<Uri?>(null) }
     var textState by remember { mutableStateOf(TextFieldValue(initialTextFieldValue ?: "")) }
+    var waitingForCsv by rememberSaveable { mutableStateOf(false) }
 
     val csvLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -89,6 +95,13 @@ fun CreatePlaylistDialog(
             }
         }
         textState = TextFieldValue(fileName)
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (waitingForCsv) {
+            waitingForCsv = false
+            csvLauncher.launch("*/*")
+        }
     }
 
     DefaultDialog(
@@ -150,9 +163,12 @@ fun CreatePlaylistDialog(
                         } else {
                             coroutineScope.launch(Dispatchers.IO) {
                                 val browseId: String? = null
-                                syncManager.createPlaylist(playlistName, browseId)
+                                val playlistId = syncManager.createPlaylist(playlistName, browseId)
+                                withContext(Dispatchers.Main) {
+                                    onCreated?.invoke(playlistId)
+                                    onDismiss()
+                                }
                             }
-                            onDismiss()
                         }
                     }
                 ) {
@@ -208,6 +224,19 @@ fun CreatePlaylistDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = if (selectedCsvUri != null) "CSV Seleccionado (Cambiar)" else "Cargar desde CSV (.csv)")
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        waitingForCsv = true
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tunemymusic.com"))
+                        runCatching { context.startActivity(intent) }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(painter = painterResource(R.drawable.link), contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = stringResource(R.string.import_from_web))
+                }
             }
         }
     }
@@ -221,17 +250,20 @@ suspend fun importCsvPlaylistAndFetchMetadata(
     customName: String = "Playlist CSV",
     onProgress: ((processed: Int, total: Int) -> Unit)? = null
 ): String? {
-    val songs = viewModel.importPlaylistFromCsv(context, uri)
+    val csvResult = viewModel.importPlaylistFromCsv(context, uri)
+    val songs = csvResult.songs
     if (songs.isEmpty()) return null
 
     val total = songs.size
     onProgress?.invoke(0, total)
 
+    val finalPlaylistName = csvResult.playlistName?.takeIf { it.isNotBlank() } ?: customName.ifBlank { "Playlist CSV" }
+
     val playlistId = SavedPlaylistEntity.generatePlaylistId()
     database.insertSavedPlaylist(
         SavedPlaylistEntity(
             id = playlistId,
-            name = customName.ifBlank { "Playlist CSV" },
+            name = finalPlaylistName,
             isEditable = true
         )
     )

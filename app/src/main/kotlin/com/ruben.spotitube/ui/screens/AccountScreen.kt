@@ -1,6 +1,6 @@
 /*
  * ARMORY Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -8,8 +8,13 @@ package com.ruben.spotitube.ui.screens
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.widget.Toast
+import java.io.FileOutputStream
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.ruben.spotitube.ArmoryGradients
@@ -67,17 +72,17 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.BuildConfig
-import com.ruben.spotitube.App.Companion.forgetAccount
 import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
 import com.ruben.spotitube.R
+import com.ruben.spotitube.playback.MusicService
+import java.io.File
 import com.ruben.spotitube.constants.AccountAvatarUriKey
 import com.ruben.spotitube.constants.AccountNameKey
 import com.ruben.spotitube.ui.component.ActionPromptDialog
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.TextFieldDialog
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.isInternetAvailable
 import kotlinx.coroutines.Dispatchers
@@ -86,6 +91,7 @@ import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.rememberAvatarUrl
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AccountScreen(
@@ -94,6 +100,7 @@ fun AccountScreen(
     val context = LocalContext.current
     val syncManager = LocalSyncManager.current
     val database = LocalDatabase.current
+    val playerConnection = LocalPlayerConnection.current
     val session = remember { SessionManager(context) }
     val coroutineScope = rememberCoroutineScope()
     
@@ -116,23 +123,43 @@ fun AccountScreen(
     var isRestoreLoading by remember { mutableStateOf(false) }
     val backupRestoreViewModel: BackupRestoreViewModel = hiltViewModel()
 
+    val exportCsvLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri: Uri? ->
+        uri?.let {
+            backupRestoreViewModel.exportCsv(context, it)
+        }
+    }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { newUri ->
-            val uriString = newUri.toString()
-            onAccountAvatarUriChange(uriString)
-            session.saveAvatarUri(uriString)
-
-            currentUser?.let { user ->
-                coroutineScope.launch(Dispatchers.IO) {
-                    val profileUpdates = UserProfileChangeRequest.Builder()
-                        .setPhotoUri(newUri)
-                        .build()
-                    user.updateProfile(profileUpdates)
+        uri?.let { selectedUri ->
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, selectedUri))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        MediaStore.Images.Media.getBitmap(context.contentResolver, selectedUri)
+                    }
+                    val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 256, 256, true)
+                    val avatarFile = File(context.filesDir, "avatar.jpg")
+                    FileOutputStream(avatarFile).use { out ->
+                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                    }
+                    val savedUriStr = Uri.fromFile(avatarFile).toString()
+                    withContext(Dispatchers.Main) {
+                        onAccountAvatarUriChange(savedUriStr)
+                        session.saveAvatarUri(savedUriStr)
+                        Toast.makeText(context, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Error al guardar imagen", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
-            Toast.makeText(context, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -159,6 +186,48 @@ fun AccountScreen(
                 }
             },
             onDismiss = { showEditNameDialog = false }
+        )
+    }
+
+    if (isBackupLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { },
+            title = { Text(stringResource(R.string.saving_backup_title)) },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.saving_backup_message))
+                }
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        )
+    }
+
+    if (isRestoreLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { },
+            title = { Text(stringResource(R.string.restoring_backup_title)) },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.restoring_backup_message))
+                }
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
         )
     }
 
@@ -194,12 +263,15 @@ fun AccountScreen(
                     val success = syncManager.handleLogout(context)
                     showLogoutProgress = false
                     if (success) {
+                        playerConnection?.service?.stopAndClearPlayback()
+                        File(context.filesDir, MusicService.PERSISTENT_QUEUE_FILE).delete()
+                        File(context.filesDir, MusicService.PERSISTENT_AUTOMIX_FILE).delete()
+                        File(context.filesDir, MusicService.PERSISTENT_PLAYER_STATE_FILE).delete()
                         session.logout()
-                        forgetAccount(context)
                         (context as? Activity)?.finish()
                         context.startActivity(Intent(context, LoginActivity::class.java))
                     } else {
-                        Toast.makeText(context, "Error al guardar backup. Reintenta con internet.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, R.string.logout_no_connection_warning, Toast.LENGTH_LONG).show()
                     }
                 }
             },
@@ -372,6 +444,7 @@ fun AccountScreen(
                                 isRestoreLoading = true
                                 try {
                                     if (isInternetAvailable(context)) {
+                                        syncManager.restoreProfile()
                                         val lib = syncManager.getUserLibrary()
                                         syncManager.applyLibraryToLocal(lib)
                                         Toast.makeText(context, "Biblioteca restaurada con éxito", Toast.LENGTH_SHORT).show()
@@ -384,6 +457,13 @@ fun AccountScreen(
                                     isRestoreLoading = false
                                 }
                             }
+                        },
+                        AccountSettingItem(
+                            R.drawable.ic_download,
+                            stringResource(R.string.export_csv_title),
+                            stringResource(R.string.export_csv_subtitle)
+                        ) {
+                            exportCsvLauncher.launch("playlists_armory.csv")
                         },
                         AccountSettingItem(R.drawable.favorite, "Mi Año en Música", "Resumen anual de tus canciones y artistas") { navController.navigate("year_in_music") },
                         AccountSettingItem(R.drawable.equalizer, "Estadísticas", "Tus hábitos de reproducción y tiempos escuchados") { navController.navigate("stats") },

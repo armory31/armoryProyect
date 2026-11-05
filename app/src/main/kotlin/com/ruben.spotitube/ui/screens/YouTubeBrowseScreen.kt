@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -34,9 +34,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
@@ -47,7 +44,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -64,12 +60,10 @@ import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.component.shimmer.GridItemPlaceHolder
@@ -80,7 +74,6 @@ import com.ruben.spotitube.ui.menu.YouTubeArtistMenu
 import com.ruben.spotitube.ui.menu.YouTubePlaylistMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
 import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.viewmodels.YouTubeBrowseViewModel
 
 @OptIn(ExperimentalFoundationApi::class)

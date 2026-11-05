@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -364,7 +364,7 @@ fun AlbumScreen(
 
     val playlistId by viewModel.playlistId.collectAsStateWithLifecycle()
     val albumWithSongs by viewModel.albumWithSongs.collectAsStateWithLifecycle()
-    val isLiked by viewModel.isLiked.collectAsStateWithLifecycle()
+    val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val otherVersions by viewModel.otherVersions.collectAsStateWithLifecycle()
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
@@ -786,7 +786,7 @@ fun AlbumScreen(
                             // Like/Bookmark Button
                             Surface(
                                 onClick = {
-                                    viewModel.toggleLike()
+                                    viewModel.toggleSaved()
                                 },
                                 shape = CircleShape,
                                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -798,13 +798,13 @@ fun AlbumScreen(
                                 ) {
                                     Icon(
                                         painter = painterResource(
-                                            if (isLiked)
+                                            if (isSaved)
                                                 R.drawable.favorite
                                             else
                                                 R.drawable.favorite_border
                                         ),
                                         contentDescription = null,
-                                        tint = if (isLiked)
+                                        tint = if (isSaved)
                                             MaterialTheme.colorScheme.error
                                         else
                                             MaterialTheme.colorScheme.onSurfaceVariant,

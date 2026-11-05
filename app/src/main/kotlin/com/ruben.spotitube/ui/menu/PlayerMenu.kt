@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -108,7 +108,6 @@ import com.ruben.spotitube.constants.EqualizerVirtualizerStrengthKey
 import com.ruben.spotitube.constants.ExternalDownloaderEnabledKey
 import com.ruben.spotitube.constants.ExternalDownloaderPackageKey
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
-import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.playback.EqProfile
 import com.ruben.spotitube.playback.EqProfilesPayload
@@ -121,8 +120,6 @@ import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
 import com.ruben.spotitube.ui.component.TextFieldDialog
 import com.ruben.spotitube.utils.rememberPreference
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -145,7 +142,6 @@ fun ColumnScope.PlayerMenu(
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val playerVolume = playerConnection.service.playerVolume.collectAsStateWithLifecycle()
-    val librarySong by database.song(mediaMetadata.id).collectAsStateWithLifecycle(initialValue = null)
     val coroutineScope = rememberCoroutineScope()
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
@@ -199,12 +195,8 @@ fun ColumnScope.PlayerMenu(
 
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
-        onGetSong = { playlist ->
-            coroutineScope.launch(Dispatchers.IO) {
-                database.withTransaction { insert(mediaMetadata) }
-                playlist.playlist.browseId?.let { YouTube.addToPlaylist(it, mediaMetadata.id) }
-            }
-            listOf(mediaMetadata.id)
+        onGetSong = {
+            listOf(mediaMetadata)
         },
         onDismiss = { showChoosePlaylistDialog = false },
         onAddComplete = { songCount, playlistNames ->

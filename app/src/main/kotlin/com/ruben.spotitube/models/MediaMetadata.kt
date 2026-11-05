@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -14,7 +14,6 @@ import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.ui.utils.resize
 import java.io.Serializable
-import java.time.LocalDateTime
 
 @Immutable
 data class MediaMetadata(
@@ -26,9 +25,6 @@ data class MediaMetadata(
     val album: Album? = null,
     val setVideoId: String? = null,
     val explicit: Boolean = false,
-    val liked: Boolean = false,
-    val likedDate: LocalDateTime? = null,
-    val inLibrary: LocalDateTime? = null,
 ) : Serializable {
     companion object {
         private const val serialVersionUID = 1L

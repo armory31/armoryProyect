@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -40,7 +40,6 @@ import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSongSortDescendingKey
 import com.ruben.spotitube.constants.ArtistSongSortType
@@ -51,12 +50,10 @@ import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.HideOnScrollFAB
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.ui.menu.SongMenu
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.ArtistSongsViewModel

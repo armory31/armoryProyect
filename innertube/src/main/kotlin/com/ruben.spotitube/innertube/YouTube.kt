@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -899,12 +899,13 @@ object YouTube {
         )
     }
 
-    suspend fun getChartsPage(continuation: String? = null): Result<ChartsPage> = runCatching {
+    suspend fun getChartsPage(continuation: String? = null, country: String? = null): Result<ChartsPage> = runCatching {
         var response = innerTube.browse(
             client = WEB_REMIX,
             browseId = "FEmusic_charts",
-            params = if (continuation == null) "ggMGCgQIgAQ%3D" else null,
-            continuation = continuation
+            params = null,
+            continuation = continuation,
+            chartsCountry = country,
         ).body<BrowseResponse>()
 
         var parsed = parseChartsResponse(response)
@@ -913,16 +914,33 @@ object YouTube {
             response = innerTube.browse(
                 client = WEB_REMIX,
                 browseId = "FEmusic_charts",
+                chartsCountry = country,
             ).body<BrowseResponse>()
             parsed = parseChartsResponse(response)
         }
 
-        if (parsed.sections.isEmpty() && continuation == null) {
-            response = innerTube.browse(
-                client = WEB_REMIX,
-                browseId = "FEmusic_explore",
-            ).body<BrowseResponse>()
-            parsed = parseChartsResponse(response)
+        if (parsed.sections.isEmpty()) {
+            val contents = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
+                ?.tabRenderer?.content?.sectionListRenderer?.contents
+                ?: response.contents?.sectionListRenderer?.contents
+            val rendererNames = contents?.mapNotNull { c ->
+                when {
+                    c.musicCarouselShelfRenderer != null -> "musicCarouselShelfRenderer"
+                    c.musicShelfRenderer != null -> "musicShelfRenderer"
+                    c.musicCardShelfRenderer != null -> "musicCardShelfRenderer"
+                    c.musicPlaylistShelfRenderer != null -> "musicPlaylistShelfRenderer"
+                    c.musicDescriptionShelfRenderer != null -> "musicDescriptionShelfRenderer"
+                    c.musicResponsiveHeaderRenderer != null -> "musicResponsiveHeaderRenderer"
+                    c.musicEditablePlaylistDetailHeaderRenderer != null -> "musicEditablePlaylistDetailHeaderRenderer"
+                    c.gridRenderer != null -> "gridRenderer"
+                    c.itemSectionRenderer != null -> "itemSectionRenderer"
+                    else -> null
+                }
+            }.orEmpty()
+            runCatching {
+                System.out.println("ChartsDebug: Charts empty for country $country. Renderers: $rendererNames")
+            }
+            throw IllegalStateException("NO_DATA")
         }
 
         parsed
@@ -1017,41 +1035,63 @@ object YouTube {
     private fun convertToChartItem(renderer: MusicResponsiveListItemRenderer): YTItem? {
         return try {
             when {
-                renderer.flexColumns.size >= 3 && renderer.playlistItemData?.videoId != null -> {
+                renderer.isArtist -> {
+                    val id = renderer.navigationEndpoint?.browseEndpoint?.browseId ?: return null
+                    val title = renderer.flexColumns.firstOrNull()
+                        ?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.text ?: return null
+                    val thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: ""
+                    ArtistItem(
+                        id = id,
+                        title = title,
+                        thumbnail = thumbnail
+                    )
+                }
+                renderer.playlistItemData?.videoId != null -> {
                     val firstColumn = renderer.flexColumns.getOrNull(0)
                         ?.musicResponsiveListItemFlexColumnRenderer
                         ?.text ?: return null
-                
+
                     val secondColumn = renderer.flexColumns.getOrNull(1)
                         ?.musicResponsiveListItemFlexColumnRenderer
-                        ?.text ?: return null
+                        ?.text
 
-                    val titleRun = firstColumn.runs?.firstOrNull() ?: return null
-                    val title = titleRun.text.takeIf { it.isNotBlank() } ?: return null
+                    val title = firstColumn.runs?.firstOrNull()?.text?.takeIf { it.isNotBlank() } ?: return null
 
-                    val artists = secondColumn.runs?.mapNotNull { run ->
+                    val artists = secondColumn?.runs?.mapNotNull { run ->
                         run.text.takeIf { it.isNotBlank() }?.let { name ->
                             Artist(
                                 name = name,
                                 id = run.navigationEndpoint?.browseEndpoint?.browseId
                             )
                         }
-                    } ?: emptyList()
+                    }.orEmpty()
 
-                    val thirdColumn = renderer.flexColumns.getOrNull(2)
-                        ?.musicResponsiveListItemFlexColumnRenderer
-                        ?.text
+                    val position = renderer.customIndexColumn?.musicCustomIndexColumnRenderer
+                        ?.text?.runs?.firstOrNull()?.text?.toIntOrNull()
 
                     SongItem(
                         id = renderer.playlistItemData.videoId,
                         title = title,
                         artists = artists,
-                        thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: return null,
-                        explicit = renderer.badges?.any { 
-                            it.musicInlineBadgeRenderer?.icon?.iconType == "MUSIC_EXPLICIT_BADGE" 
+                        thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: "",
+                        explicit = renderer.badges?.any {
+                            it.musicInlineBadgeRenderer?.icon?.iconType == "MUSIC_EXPLICIT_BADGE"
                         } == true,
-                        chartPosition = thirdColumn?.runs?.firstOrNull()?.text?.toIntOrNull(),
-                        chartChange = thirdColumn?.runs?.getOrNull(1)?.text
+                        chartPosition = position
+                    )
+                }
+                renderer.isPlaylist -> {
+                    val id = renderer.navigationEndpoint?.browseEndpoint?.browseId ?: return null
+                    val title = renderer.flexColumns.firstOrNull()
+                        ?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.text ?: return null
+                    val thumbnail = renderer.thumbnail?.musicThumbnailRenderer?.getThumbnailUrl() ?: ""
+                    PlaylistItem(
+                        id = id.removePrefix("VL"),
+                        title = title,
+                        author = null,
+                        songCountText = null,
+                        thumbnail = thumbnail,
+                        playEndpoint = null
                     )
                 }
                 else -> null
@@ -1098,6 +1138,26 @@ object YouTube {
                         explicit = renderer.subtitleBadges?.any {
                             it.musicInlineBadgeRenderer?.icon?.iconType == "MUSIC_EXPLICIT_BADGE"
                         } == true
+                    )
+                }
+                renderer.isPlaylist || renderer.navigationEndpoint.browseEndpoint?.browseId?.startsWith("VL") == true || renderer.navigationEndpoint.browseEndpoint?.browseId?.startsWith("MPSP") == true -> {
+                    val browseId = renderer.navigationEndpoint.browseEndpoint?.browseId ?: return null
+                    PlaylistItem(
+                        id = browseId.removePrefix("VL"),
+                        title = renderer.title.runs?.firstOrNull()?.text ?: return null,
+                        author = renderer.subtitle?.runs?.firstOrNull()?.text?.let { Artist(name = it, id = null) },
+                        songCountText = null,
+                        thumbnail = renderer.thumbnailRenderer.musicThumbnailRenderer?.getThumbnailUrl() ?: return null,
+                        playEndpoint = renderer.thumbnailOverlay?.musicItemThumbnailOverlayRenderer?.content
+                            ?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchPlaylistEndpoint
+                    )
+                }
+                renderer.isArtist -> {
+                    val browseId = renderer.navigationEndpoint.browseEndpoint?.browseId ?: return null
+                    ArtistItem(
+                        id = browseId,
+                        title = renderer.title.runs?.firstOrNull()?.text ?: return null,
+                        thumbnail = renderer.thumbnailRenderer.musicThumbnailRenderer?.getThumbnailUrl() ?: return null
                     )
                 }
                 else -> null

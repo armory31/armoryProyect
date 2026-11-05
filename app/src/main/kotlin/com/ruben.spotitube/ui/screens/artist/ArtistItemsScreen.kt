@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -22,13 +22,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,19 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.R
-import com.ruben.spotitube.constants.GridThumbnailHeight
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.innertube.models.AlbumItem
@@ -66,7 +58,6 @@ import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.AlbumGridItem
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
@@ -77,7 +68,6 @@ import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
 import com.ruben.spotitube.ui.menu.YouTubeArtistMenu
 import com.ruben.spotitube.ui.menu.YouTubePlaylistMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.viewmodels.ArtistItemsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

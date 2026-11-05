@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -53,7 +56,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
 
@@ -569,7 +571,7 @@ fun ArmoryTopBar(
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {}
 ) = TopAppBar(
-    modifier = modifier,
+    modifier = modifier.wrapContentHeight(Alignment.Top),
     title = { Text(title, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
     navigationIcon = {
         if (onBack != null) IconButton(
@@ -592,7 +594,7 @@ fun ArmoryTopBar(
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {}
 ) = TopAppBar(
-    modifier = modifier,
+    modifier = modifier.wrapContentHeight(Alignment.Top),
     title = title,
     navigationIcon = {
         if (onBack != null) IconButton(
@@ -624,7 +626,13 @@ fun SectionHeader(
             onClick = onClick
         )
     } else {
-        Text(text, modifier, style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = text,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            style = MaterialTheme.typography.headlineMedium
+        )
     }
 }
 

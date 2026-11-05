@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +35,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,8 +46,6 @@ import com.ruben.spotitube.AppTypography
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.ArmoryHeader
 import com.ruben.spotitube.rememberAvatarUrl
-import com.ruben.spotitube.R
-import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.component.shimmer.ShimmerHost
 import com.ruben.spotitube.ui.component.shimmer.TextPlaceholder
 import com.ruben.spotitube.viewmodels.MoodAndGenresViewModel

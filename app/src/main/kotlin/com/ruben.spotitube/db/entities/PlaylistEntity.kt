@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -37,7 +37,7 @@ data class PlaylistEntity(
     val bookmarkedAt: LocalDateTime? = null
 ) {
     companion object {
-        const val LIKED_PLAYLIST_ID = "LP_LIKED"
+        const val SAVED_PLAYLIST_ID = "LP_LIKED"
         const val DOWNLOADED_PLAYLIST_ID = "LP_DOWNLOADED"
 
         fun generatePlaylistId() = "LP" + RandomStringUtils.insecure().next(8, true, false)

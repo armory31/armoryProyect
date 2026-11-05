@@ -1,6 +1,6 @@
 /*
  * ARMORY Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 // Test comment for git commit sync
@@ -2107,31 +2107,7 @@ class MusicService :
             stopTogetherInternal()
             togetherIsOnlineSession = true
 
-            val baseUrl = com.ruben.spotitube.together.TogetherOnlineEndpoint.baseUrlOrNull(dataStore)
-            if (baseUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_online_not_configured),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val togetherToken = com.ruben.spotitube.BuildConfig.TOGETHER_BEARER_TOKEN.trim().takeIf { it.isNotBlank() }
-            if (togetherToken == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_token_missing),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val api = com.ruben.spotitube.together.TogetherOnlineApi(baseUrl = baseUrl, bearerToken = togetherToken)
+            val api = com.ruben.spotitube.together.TogetherOnlineApi()
             val hostName = displayName.trim().ifBlank { getString(R.string.app_name) }
 
             val created =
@@ -2156,12 +2132,10 @@ class MusicService :
                 com.ruben.spotitube.together.TogetherOnlineHost(
                     externalScope = ioScope,
                     sessionId = created.sessionId,
-                    sessionKey = created.hostKey,
+                    code = created.code,
                     hostId = togetherHostId,
                     hostDisplayName = hostName,
                     initialSettings = created.settings,
-                    clientId = getOrCreateTogetherClientId(),
-                    bearerToken = togetherToken,
                 )
 
             onlineHost.onEvent = { event ->
@@ -2182,27 +2156,10 @@ class MusicService :
                     )
             }
 
-            val wsUrl =
-                com.ruben.spotitube.together.TogetherOnlineEndpoint.onlineWebSocketUrlOrNull(
-                    rawWsUrl = created.wsUrl,
-                    baseUrl = baseUrl,
-                )
-            if (wsUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = "Connection failed: Invalid server websocket URL",
-                            recoverable = true,
-                        )
-                }
-                ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                return@launch
-            }
-
             togetherOnlineConnectJob?.cancel()
             togetherOnlineConnectJob =
                 ioScope.launch(SilentHandler) {
-                    onlineHost.connect(wsUrl)
+                    onlineHost.connect()
                 }
 
             togetherBroadcastJob =
@@ -2442,31 +2399,7 @@ class MusicService :
             stopTogetherInternal()
             togetherIsOnlineSession = true
 
-            val baseUrl = com.ruben.spotitube.together.TogetherOnlineEndpoint.baseUrlOrNull(dataStore)
-            if (baseUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_online_not_configured),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val togetherToken = com.ruben.spotitube.BuildConfig.TOGETHER_BEARER_TOKEN.trim().takeIf { it.isNotBlank() }
-            if (togetherToken == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_token_missing),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val api = com.ruben.spotitube.together.TogetherOnlineApi(baseUrl = baseUrl, bearerToken = togetherToken)
+            val api = com.ruben.spotitube.together.TogetherOnlineApi()
             val resolved =
                 runCatching { api.resolveCode(trimmedCode) }
                     .getOrElse { t ->
@@ -2481,12 +2414,7 @@ class MusicService :
                         return@launch
                     }
 
-            val client =
-                com.ruben.spotitube.together.TogetherClient(
-                    ioScope,
-                    clientId = getOrCreateTogetherClientId(),
-                    bearerToken = togetherToken,
-                )
+            val client = com.ruben.spotitube.together.TogetherClient(ioScope)
             togetherClient = client
             togetherClock = com.ruben.spotitube.together.TogetherClock()
             togetherSelfParticipantId = null
@@ -2635,27 +2563,8 @@ class MusicService :
                     }
                 }
 
-            val wsUrl =
-                com.ruben.spotitube.together.TogetherOnlineEndpoint.onlineWebSocketUrlOrNull(
-                    rawWsUrl = resolved.wsUrl,
-                    baseUrl = baseUrl,
-                )
-            if (wsUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = "Connection failed: Invalid server websocket URL",
-                            recoverable = true,
-                        )
-                }
-                ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                return@launch
-            }
-
-            client.connect(
-                wsUrl = wsUrl,
+            client.connectOnline(
                 sessionId = resolved.sessionId,
-                sessionKey = resolved.guestKey,
                 displayName = displayName.trim().ifBlank { getString(R.string.together_role_guest) },
             )
         }

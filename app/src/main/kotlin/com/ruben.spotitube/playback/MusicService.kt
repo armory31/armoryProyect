@@ -1,6 +1,6 @@
 /*
  * ARMORY Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -79,7 +79,7 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
-import com.ruben.spotitube.constants.MediaSessionConstants.CommandToggleLike
+import com.ruben.spotitube.constants.MediaSessionConstants.CommandToggleSaved
 import com.ruben.spotitube.constants.MediaSessionConstants.CommandToggleStartRadio
 import com.ruben.spotitube.constants.MediaSessionConstants.CommandToggleRepeatMode
 import com.ruben.spotitube.constants.MediaSessionConstants.CommandToggleShuffle
@@ -89,7 +89,7 @@ import com.ruben.spotitube.constants.AudioCrossfadeDurationKey
 import com.ruben.spotitube.constants.AudioNormalizationKey
 import com.ruben.spotitube.constants.AudioOffload
 import com.ruben.spotitube.constants.AudioQualityKey
-import com.ruben.spotitube.constants.AutoDownloadOnLikeKey
+import com.ruben.spotitube.constants.AutoDownloadOnSavedKey
 import com.ruben.spotitube.constants.AutoLoadMoreKey
 import com.ruben.spotitube.constants.AutoSkipNextOnErrorKey
 import com.ruben.spotitube.constants.AutoStartOnBluetoothKey
@@ -103,7 +103,7 @@ import com.ruben.spotitube.constants.EqualizerSelectedProfileIdKey
 import com.ruben.spotitube.constants.EqualizerVirtualizerEnabledKey
 import com.ruben.spotitube.constants.EqualizerVirtualizerStrengthKey
 import com.ruben.spotitube.constants.HideVideoKey
-import com.ruben.spotitube.constants.InnerTubeCookieKey
+import com.ruben.spotitube.constants.HistoryDuration
 import com.ruben.spotitube.constants.MaxSongCacheSizeKey
 import com.ruben.spotitube.constants.PauseListenHistoryKey
 import com.ruben.spotitube.constants.PauseOnDeviceMuteKey
@@ -117,20 +117,16 @@ import com.ruben.spotitube.constants.ShowLyricsKey
 import com.ruben.spotitube.constants.SkipSilenceKey
 import com.ruben.spotitube.constants.SmartTrimmerKey
 import com.ruben.spotitube.constants.TogetherClientIdKey
-import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.MusicDatabase
-import com.ruben.spotitube.db.entities.SavedAlbumEntity
-import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
-import com.ruben.spotitube.db.entities.RelatedSongMap
-import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.di.DownloadCache
 import com.ruben.spotitube.di.PlayerCache
 import com.ruben.spotitube.extensions.SilentHandler
 import com.ruben.spotitube.extensions.collect
 import com.ruben.spotitube.extensions.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import com.ruben.spotitube.extensions.currentMetadata
 import com.ruben.spotitube.extensions.directorySizeBytes
 import com.ruben.spotitube.extensions.findNextMediaItemById
@@ -141,14 +137,12 @@ import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.toPersistQueue
 import com.ruben.spotitube.extensions.toQueue
 import com.ruben.spotitube.innertube.YouTube
-import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.models.WatchEndpoint
 import com.ruben.spotitube.lyrics.LyricsHelper
 import com.ruben.spotitube.lyrics.LyricsPreloadManager
 import com.ruben.spotitube.models.PersistPlayerState
 import com.ruben.spotitube.models.PersistQueue
 import com.ruben.spotitube.models.toHistorySongEntity
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.EmptyQueue
 import com.ruben.spotitube.playback.queues.Queue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
@@ -174,16 +168,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -248,12 +238,13 @@ class MusicService :
     private val binder = MusicBinder()
     private var hasBoundClients = false
     private var idleStopJob: Job? = null
-    private var historyJob: Job? = null
 
     private lateinit var connectivityManager: ConnectivityManager
     lateinit var connectivityObserver: NetworkConnectivityObserver
     val waitingForNetworkConnection = MutableStateFlow(false)
     private val isNetworkConnected = MutableStateFlow(false)
+    private var isCurrentSongSaved: Boolean = false
+    private val resolvedSongIdsSet = java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
     private val audioQuality by enumPreference(
         this,
@@ -311,12 +302,6 @@ class MusicService :
 
     val currentMediaMetadata = MutableStateFlow<com.ruben.spotitube.models.MediaMetadata?>(null)
     val queueRestoreCompleted = MutableStateFlow(false)
-    private val currentSong =
-        currentMediaMetadata
-            .flatMapLatest { mediaMetadata ->
-                database.song(mediaMetadata?.id)
-            }.flowOn(Dispatchers.IO)
-            .stateIn(scope, SharingStarted.Lazily, null)
     private val currentFormat =
         currentMediaMetadata.flatMapLatest { mediaMetadata ->
             database.format(mediaMetadata?.id)
@@ -331,36 +316,7 @@ class MusicService :
     private var crossfadeAudio: CrossfadeAudio? = null
     private var lyricsPreloadManager: LyricsPreloadManager? = null
 
-    private fun isAppInForeground(): Boolean {
-        val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val appProcesses = activityManager.runningAppProcesses ?: return false
-        return appProcesses.any { processInfo ->
-            processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
-                processInfo.processName == packageName
-        }
-    }
 
-    private fun promptLoginRecovery(mediaId: String, targetUrl: String) {
-        if (!isAppInForeground()) return
-
-        val now = System.currentTimeMillis()
-        val lastPrompt = lastLoginRecoveryPrompt
-        if (lastPrompt?.first == mediaId && now - lastPrompt.second < 10000L) return
-        lastLoginRecoveryPrompt = mediaId to now
-
-        val deepLink = "ARMORY://login?url=${Uri.encode(targetUrl)}".toUri()
-        val intent = Intent(Intent.ACTION_VIEW, deepLink, this, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        }
-
-        runCatching {
-            startActivity(intent)
-        }.onFailure {
-            Timber.e(it, "Failed to open login recovery for %s", mediaId)
-        }
-    }
 
     lateinit var sleepTimer: SleepTimer
 
@@ -448,7 +404,7 @@ class MusicService :
     private var lastTogetherNoticeAtElapsedMs: Long = 0L
     private var lastTogetherNoticeKey: String? = null
 
-    private var lastLoginRecoveryPrompt: Pair<String, Long>? = null
+
 
     private data class TogetherPendingGuestControl(
         val desiredIsPlaying: Boolean? = null,
@@ -499,9 +455,7 @@ class MusicService :
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
 
-                if (mediaSession != null) {
-                    builder.setStyle(MediaStyleNotificationHelper.MediaStyle(mediaSession!!))
-                }
+                mediaSession?.let { builder.setStyle(MediaStyleNotificationHelper.MediaStyle(it)) }
 
                 builder.build()
             } catch (e: Exception) {
@@ -633,9 +587,9 @@ class MusicService :
         setupAudioFocusRequest()
 
         mediaLibrarySessionCallback.apply {
-            toggleLike = ::toggleLike
-            toggleStartRadio = ::toggleStartRadio
-            toggleLibrary = ::toggleLibrary
+            toggleSongSaved = { toggleSongSaved() }
+            toggleStartRadio = { toggleStartRadio() }
+            toggleLibrary = { toggleSongSaved() }
             onCustomCommandHandled = {
                 updateNotification()
             }
@@ -664,6 +618,19 @@ class MusicService :
         
         updateNotification()
         player.repeatMode = REPEAT_MODE_OFF
+
+        scope.launch {
+            currentMediaMetadata
+                .flatMapLatest { metadata ->
+                    if (metadata == null) kotlinx.coroutines.flow.flowOf(false)
+                    else libraryStateHolder.isSavedSong(metadata.id)
+                }
+                .distinctUntilChanged()
+                .collectLatest(scope) { isSaved ->
+                    isCurrentSongSaved = isSaved
+                    updateNotification()
+                }
+        }
 
         scope.launch(Dispatchers.IO) {
             val prefs = dataStore.data.first()
@@ -1257,66 +1224,61 @@ class MusicService :
     }
 
     private fun updateNotification() {
-        scope.launch {
-            try {
-                val song = currentSong.value
-                val isLiked = song != null && withContext(Dispatchers.IO) {
-                    libraryStateHolder.isSavedSong(song.song.id).first()
-                }
-
-                val customLayout = listOf(
-                    CommandButton
-                        .Builder()
-                        .setDisplayName(
-                            getString(
-                                if (isLiked) {
-                                    R.string.action_remove_like
-                                } else {
-                                    R.string.action_like
-                                },
-                            ),
-                        )
-                        .setIconResId(if (isLiked) R.drawable.favorite else R.drawable.favorite_border)
-                        .setSessionCommand(CommandToggleLike)
-                        .setEnabled(song != null)
-                        .build(),
-                    CommandButton
-                        .Builder()
-                        .setDisplayName(
-                            getString(
-                                when (player.repeatMode) {
-                                    REPEAT_MODE_OFF -> R.string.repeat_mode_off
-                                    Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
-                                    Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
-                                    else -> R.string.repeat_mode_off
-                                },
-                            ),
-                        ).setIconResId(
-                            when (player.repeatMode) {
-                                REPEAT_MODE_OFF -> R.drawable.repeat
-                                Player.REPEAT_MODE_ONE -> R.drawable.repeat_one_on
-                                Player.REPEAT_MODE_ALL -> R.drawable.repeat_on
-                                else -> R.drawable.repeat
+        try {
+            val mediaMetadata = currentMediaMetadata.value
+            val isSaved = isCurrentSongSaved
+            val customLayout = listOf(
+                CommandButton
+                    .Builder()
+                    .setDisplayName(
+                        getString(
+                            if (isSaved) {
+                                R.string.action_remove_saved
+                            } else {
+                                R.string.action_saved
                             },
-                        ).setSessionCommand(CommandToggleRepeatMode)
-                        .build(),
-                    CommandButton
-                        .Builder()
-                        .setDisplayName(getString(if (player.shuffleModeEnabled) R.string.action_shuffle_off else R.string.action_shuffle_on))
-                        .setIconResId(if (player.shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle)
-                        .setSessionCommand(CommandToggleShuffle)
-                        .build(),
-                    CommandButton.Builder()
-                        .setDisplayName(getString(R.string.start_radio))
-                        .setIconResId(R.drawable.radio)
-                        .setSessionCommand(CommandToggleStartRadio)
-                        .setEnabled(song != null)
-                        .build(),
-                )
-                mediaSession?.setCustomLayout(customLayout)
-            } catch (e: Exception) {
-                reportException(e)
-            }
+                        ),
+                    )
+                    .setIconResId(if (isSaved) R.drawable.favorite else R.drawable.favorite_border)
+                    .setSessionCommand(CommandToggleSaved)
+                    .setEnabled(mediaMetadata != null)
+                    .build(),
+                CommandButton
+                    .Builder()
+                    .setDisplayName(
+                        getString(
+                            when (player.repeatMode) {
+                                REPEAT_MODE_OFF -> R.string.repeat_mode_off
+                                Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
+                                Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
+                                else -> R.string.repeat_mode_off
+                            },
+                        ),
+                    ).setIconResId(
+                        when (player.repeatMode) {
+                            REPEAT_MODE_OFF -> R.drawable.repeat
+                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one_on
+                            Player.REPEAT_MODE_ALL -> R.drawable.repeat_on
+                            else -> R.drawable.repeat
+                        },
+                    ).setSessionCommand(CommandToggleRepeatMode)
+                    .build(),
+                CommandButton
+                    .Builder()
+                    .setDisplayName(getString(if (player.shuffleModeEnabled) R.string.action_shuffle_off else R.string.action_shuffle_on))
+                    .setIconResId(if (player.shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle)
+                    .setSessionCommand(CommandToggleShuffle)
+                    .build(),
+                CommandButton.Builder()
+                    .setDisplayName(getString(R.string.start_radio))
+                    .setIconResId(R.drawable.radio)
+                    .setSessionCommand(CommandToggleStartRadio)
+                    .setEnabled(mediaMetadata != null)
+                    .build(),
+            )
+            mediaSession?.setCustomLayout(customLayout)
+        } catch (e: Exception) {
+            reportException(e)
         }
     }
 
@@ -1332,46 +1294,42 @@ class MusicService :
         mediaId: String,
         playbackData: YTPlayerUtils.PlaybackData? = null
     ) {
-        val song = database.song(mediaId).first()
+        if (resolvedSongIdsSet.contains(mediaId)) return
+        val song = database.getSavedSongDirect(mediaId)
+        if (song == null || song.duration != -1) {
+            if (resolvedSongIdsSet.size > 200) resolvedSongIdsSet.clear()
+            resolvedSongIdsSet.add(mediaId)
+            return
+        }
+
         val mediaMetadata = withContext(Dispatchers.Main) {
             player.findNextMediaItemById(mediaId)?.metadata
-        } ?: return
-        val duration = song?.song?.duration?.takeIf { it != -1 }
-            ?: mediaMetadata.duration.takeIf { it != -1 }
+        }
+        if (mediaMetadata == null) {
+            if (resolvedSongIdsSet.size > 200) resolvedSongIdsSet.clear()
+            resolvedSongIdsSet.add(mediaId)
+            return
+        }
+
+        val duration = mediaMetadata.duration.takeIf { it != -1 }
             ?: (playbackData?.videoDetails ?: YTPlayerUtils.playerResponseForMetadata(mediaId)
                 .getOrNull()?.videoDetails)?.lengthSeconds?.toInt()
             ?: -1
-        if (song != null && song.song.duration == -1) {
-            database.getSavedSong(mediaId)?.let { saved ->
-                database.query {
-                    database.upsertSongPreservingUsage(saved.copy(duration = duration))
-                }
-            }
-        }
-        if (!database.hasRelatedSongs(mediaId).first()) {
-            val relatedEndpoint =
-                YouTube.next(WatchEndpoint(videoId = mediaId)).getOrNull()?.relatedEndpoint
-                    ?: return
-            val relatedPage = YouTube.related(relatedEndpoint).getOrNull() ?: return
+
+        if (duration != -1) {
             database.query {
-                relatedPage.songs
-                    .map(SongItem::toMediaMetadata)
-                    .onEach(::insert)
-                    .map {
-                        RelatedSongMap(
-                            songId = mediaId,
-                            relatedSongId = it.id
-                        )
-                    }
-                    .forEach(::insert)
+                updateSongDuration(mediaId, duration)
             }
         }
+        if (resolvedSongIdsSet.size > 200) resolvedSongIdsSet.clear()
+        resolvedSongIdsSet.add(mediaId)
     }
 
     fun playQueue(
         queue: Queue,
         playWhenReady: Boolean = true,
     ) {
+        val preload = queue.preloadItem
         val joined = togetherSessionState.value as? com.ruben.spotitube.together.TogetherSessionState.Joined
         if (!isTogetherApplyingRemote() && joined?.role is com.ruben.spotitube.together.TogetherRole.Guest) {
             if (!joined.roomState.settings.allowGuestsToControlPlayback) {
@@ -1388,7 +1346,7 @@ class MusicService :
 
                 val targetItem =
                     initialStatus.items.getOrNull(initialStatus.mediaItemIndex)
-                        ?: queue.preloadItem?.toMediaItem()
+                        ?: preload?.toMediaItem()
 
                 val meta = targetItem?.metadata
                 val trackId =
@@ -1449,8 +1407,8 @@ class MusicService :
         clearAutomix()
         automixSeedMediaId = null
         autoAddedMediaIds.clear()
-        if (queue.preloadItem != null) {
-            player.setMediaItem(queue.preloadItem!!.toMediaItem())
+        if (preload != null) {
+            player.setMediaItem(preload.toMediaItem())
             player.prepare()
             player.playWhenReady = playWhenReady
             refreshPlaybackNotification()
@@ -1464,7 +1422,7 @@ class MusicService :
                 queueTitle = initialStatus.title
             }
             if (initialStatus.items.isEmpty()) return@launch
-            if (queue.preloadItem != null) {
+            if (preload != null) {
                 player.addMediaItems(
                     0,
                     initialStatus.items.subList(0, initialStatus.mediaItemIndex)
@@ -2095,31 +2053,7 @@ class MusicService :
             stopTogetherInternal()
             togetherIsOnlineSession = true
 
-            val baseUrl = com.ruben.spotitube.together.TogetherOnlineEndpoint.baseUrlOrNull(dataStore)
-            if (baseUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_online_not_configured),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val togetherToken = com.ruben.spotitube.BuildConfig.TOGETHER_BEARER_TOKEN.trim().takeIf { it.isNotBlank() }
-            if (togetherToken == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_token_missing),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val api = com.ruben.spotitube.together.TogetherOnlineApi(baseUrl = baseUrl, bearerToken = togetherToken)
+            val api = com.ruben.spotitube.together.TogetherOnlineApi()
             val hostName = displayName.trim().ifBlank { getString(R.string.app_name) }
 
             val created =
@@ -2144,12 +2078,10 @@ class MusicService :
                 com.ruben.spotitube.together.TogetherOnlineHost(
                     externalScope = ioScope,
                     sessionId = created.sessionId,
-                    sessionKey = created.hostKey,
+                    code = created.code,
                     hostId = togetherHostId,
                     hostDisplayName = hostName,
                     initialSettings = created.settings,
-                    clientId = getOrCreateTogetherClientId(),
-                    bearerToken = togetherToken,
                 )
 
             onlineHost.onEvent = { event ->
@@ -2170,27 +2102,10 @@ class MusicService :
                     )
             }
 
-            val wsUrl =
-                com.ruben.spotitube.together.TogetherOnlineEndpoint.onlineWebSocketUrlOrNull(
-                    rawWsUrl = created.wsUrl,
-                    baseUrl = baseUrl,
-                )
-            if (wsUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = "Connection failed: Invalid server websocket URL",
-                            recoverable = true,
-                        )
-                }
-                ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                return@launch
-            }
-
             togetherOnlineConnectJob?.cancel()
             togetherOnlineConnectJob =
                 ioScope.launch(SilentHandler) {
-                    onlineHost.connect(wsUrl)
+                    onlineHost.connect()
                 }
 
             togetherBroadcastJob =
@@ -2430,31 +2345,7 @@ class MusicService :
             stopTogetherInternal()
             togetherIsOnlineSession = true
 
-            val baseUrl = com.ruben.spotitube.together.TogetherOnlineEndpoint.baseUrlOrNull(dataStore)
-            if (baseUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_online_not_configured),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val togetherToken = com.ruben.spotitube.BuildConfig.TOGETHER_BEARER_TOKEN.trim().takeIf { it.isNotBlank() }
-            if (togetherToken == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = getString(R.string.together_token_missing),
-                            recoverable = true,
-                        )
-                }
-                return@launch
-            }
-
-            val api = com.ruben.spotitube.together.TogetherOnlineApi(baseUrl = baseUrl, bearerToken = togetherToken)
+            val api = com.ruben.spotitube.together.TogetherOnlineApi()
             val resolved =
                 runCatching { api.resolveCode(trimmedCode) }
                     .getOrElse { t ->
@@ -2469,12 +2360,7 @@ class MusicService :
                         return@launch
                     }
 
-            val client =
-                com.ruben.spotitube.together.TogetherClient(
-                    ioScope,
-                    clientId = getOrCreateTogetherClientId(),
-                    bearerToken = togetherToken,
-                )
+            val client = com.ruben.spotitube.together.TogetherClient(ioScope)
             togetherClient = client
             togetherClock = com.ruben.spotitube.together.TogetherClock()
             togetherSelfParticipantId = null
@@ -2623,27 +2509,8 @@ class MusicService :
                     }
                 }
 
-            val wsUrl =
-                com.ruben.spotitube.together.TogetherOnlineEndpoint.onlineWebSocketUrlOrNull(
-                    rawWsUrl = resolved.wsUrl,
-                    baseUrl = baseUrl,
-                )
-            if (wsUrl == null) {
-                scope.launch(SilentHandler) {
-                    togetherSessionState.value =
-                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                            message = "Connection failed: Invalid server websocket URL",
-                            recoverable = true,
-                        )
-                }
-                ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                return@launch
-            }
-
-            client.connect(
-                wsUrl = wsUrl,
+            client.connectOnline(
                 sessionId = resolved.sessionId,
-                sessionKey = resolved.guestKey,
                 displayName = displayName.trim().ifBlank { getString(R.string.together_role_guest) },
             )
         }
@@ -3087,9 +2954,6 @@ class MusicService :
             album = null,
             setVideoId = null,
             explicit = false,
-            liked = false,
-            likedDate = null,
-            inLibrary = null,
         )
     }
 
@@ -3105,20 +2969,15 @@ class MusicService :
         }.getOrNull()
     }
 
-    private fun toggleLibrary() {
-        // Obsolete with cloud sync, but let's keep it as an alias for liking for now or remove if not needed.
-        // For now, redirect to toggleLike if that's what was intended by the UI.
-        toggleLike()
-    }
-
-    fun toggleLike() {
+    fun toggleSongSaved() {
         scope.launch(Dispatchers.IO) {
             val metadata = currentMediaMetadata.value ?: return@launch
             val song = metadata.toSavedSongEntity()
-            syncManager.toggleLike(song)
+            val wasSaved = libraryStateHolder.isSavedSong(song.id).first()
+            syncManager.toggleSongSaved(song)
 
-            val isLiked = libraryStateHolder.isSavedSong(song.id).first()
-            if (dataStore.get(AutoDownloadOnLikeKey, false) && isLiked) {
+            val isNowSaved = !wasSaved
+            if (dataStore.get(AutoDownloadOnSavedKey, false) && isNowSaved) {
                 val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
                 androidx.media3.exoplayer.offline.DownloadService.sendAddDownload(
                     this@MusicService,
@@ -3397,23 +3256,6 @@ class MusicService :
     val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
     val currentMetadata = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
     currentMediaMetadata.value = currentMetadata
-
-    historyJob?.cancel()
-    if (mediaItem != null && currentMetadata != null && !dataStore.get(PauseListenHistoryKey, false)) {
-        val targetMediaId = mediaItem.mediaId
-        historyJob = ioScope.launch {
-            try {
-                delay(25_000L) // 25 seconds minimum listening threshold
-                if (isActive && player.currentMediaItem?.mediaId == targetMediaId) {
-                    database.query {
-                        insertHistorySong(currentMetadata.toHistorySongEntity())
-                    }
-                    database.incrementPlayCount(currentMetadata.id)
-                }
-            } catch (_: Exception) {
-            }
-        }
-    }
 
     if (!timelineEmpty &&
         dataStore.get(AutoLoadMoreKey, true) &&
@@ -3925,15 +3767,6 @@ class MusicService :
                 )
             }.getOrElse { throwable ->
                 when (throwable) {
-                    is YTPlayerUtils.LoginRequiredForPlaybackException -> {
-                        promptLoginRecovery(mediaId, throwable.targetUrl)
-                        throw PlaybackException(
-                            getString(R.string.playback_requires_youtube_music_confirmation),
-                            throwable,
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR
-                        )
-                    }
-
                     is PlaybackException -> throw throwable
 
                     is ConnectException, is UnknownHostException -> {
@@ -3975,11 +3808,11 @@ class MusicService :
                         FormatEntity(
                             id = mediaId,
                             itag = format.itag,
-                            mimeType = format.mimeType.split(";")[0],
-                            codecs = format.mimeType.split("codecs=")[1].removeSurrounding("\""),
+                            mimeType = format.mimeType.substringBefore(";"),
+                            codecs = format.mimeType.substringAfter("codecs=\"", "").substringBefore("\""),
                             bitrate = format.bitrate,
                             sampleRate = format.audioSampleRate,
-                            contentLength = format.contentLength!!,
+                            contentLength = format.contentLength ?: -1L,
                             loudnessDb = loudnessDb,
                             perceptualLoudnessDb = perceptualLoudnessDb,
                             playbackUrl = playbackData.playbackTracking?.videostatsPlaybackUrl?.baseUrl
@@ -4118,17 +3951,19 @@ class MusicService :
         val mediaItem = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window()).mediaItem
         val metadata = mediaItem.metadata
 
-        if (playbackStats.totalPlayTimeMs >= 25_000L &&
+        val minTimeMs = dataStore[HistoryDuration]?.times(1000f) ?: 25000f
+        if (playbackStats.totalPlayTimeMs >= minTimeMs &&
             !dataStore.get(PauseListenHistoryKey, false)
         ) {
             ioScope.launch {
                 try {
-                    val historyEntity = metadata?.toHistorySongEntity() ?: HistorySongEntity(
-                        playedAt = System.currentTimeMillis(),
-                        songId = mediaItem.mediaId,
-                        duration = (mediaItem.mediaMetadata.durationMs ?: -1L).toInt() / 1000,
-                        playTimeMs = playbackStats.totalPlayTimeMs,
-                    )
+                    val historyEntity = metadata?.toHistorySongEntity()?.copy(playTimeMs = playbackStats.totalPlayTimeMs)
+                        ?: HistorySongEntity(
+                            playedAt = System.currentTimeMillis(),
+                            songId = mediaItem.mediaId,
+                            duration = (mediaItem.mediaMetadata.durationMs ?: -1L).toInt() / 1000,
+                            playTimeMs = playbackStats.totalPlayTimeMs,
+                        )
                     database.query {
                         insertHistorySong(historyEntity)
                     }
@@ -4136,90 +3971,8 @@ class MusicService :
                 } catch (e: Exception) {
                     Timber.tag("MusicService").e(e, "Failed to record listening history or play count")
                 }
-                runCatching { registerRemoteListeningHistory(mediaItem.mediaId) }
             }
         }
-    }
-
-    private suspend fun registerRemoteListeningHistory(mediaId: String) {
-        if (!isRemoteHistorySyncAllowed()) return
-
-        val attemptedUrls = LinkedHashSet<String>()
-
-        suspend fun registerTrackingUrl(url: String): Boolean {
-            attemptedUrls += url
-            return YouTube.registerPlayback(playbackTracking = url)
-                .onFailure {
-                    reportException(it)
-                }.isSuccess
-        }
-
-        val cachedPlaybackUrl = database.format(mediaId).first()?.playbackUrl
-        val cachedSuccess = cachedPlaybackUrl?.let { registerTrackingUrl(it) } == true
-        if (cachedSuccess) return
-
-        val playbackTracking =
-            YTPlayerUtils.playerResponseForMetadata(mediaId, null)
-                .getOrNull()
-                ?.playbackTracking
-                ?: return
-
-        for (
-            trackingUrl in listOfNotNull(
-                playbackTracking.videostatsPlaybackUrl?.baseUrl,
-                playbackTracking.videostatsWatchtimeUrl?.baseUrl,
-            )
-        ) {
-            if (trackingUrl.isBlank() || trackingUrl in attemptedUrls) continue
-            registerTrackingUrl(trackingUrl)
-        }
-    }
-
-    private suspend fun isRemoteHistorySyncAllowed(): Boolean {
-        if (!dataStore.getAsync(YtmSyncKey, true)) return false
-        val cookie = dataStore.getAsync(InnerTubeCookieKey, "")
-        return cookie.isNotBlank() && cookie.contains("SAPISID")
-    }
-
-    // Create a transient Song object from current Player MediaMetadata when the DB doesn't have it.
-    private fun createTransientSongFromMedia(media: com.ruben.spotitube.models.MediaMetadata): Song {
-        val songEntity = SavedSongEntity(
-            id = media.id,
-            title = media.title,
-            duration = media.duration,
-            thumbnailUrl = media.thumbnailUrl,
-            albumId = media.album?.id,
-            albumName = media.album?.title,
-            explicit = media.explicit,
-        )
-
-        val artists = media.artists.map { artist ->
-            SavedArtistEntity(
-                id = artist.id ?: "LA_unknown_${artist.name}",
-                name = artist.name,
-                thumbnailUrl = if (!artist.thumbnailUrl.isNullOrBlank()) artist.thumbnailUrl else media.thumbnailUrl,
-            )
-        }
-
-        val album = media.album?.let { alb ->
-            SavedAlbumEntity(
-                id = alb.id,
-                playlistId = null,
-                title = alb.title,
-                year = null,
-                thumbnailUrl = media.thumbnailUrl,
-                themeColor = null,
-                songCount = 1,
-                duration = media.duration,
-            )
-        }
-
-        return Song(
-            song = songEntity,
-            artists = artists,
-            album = album,
-            format = null,
-        )
     }
 
     private inline fun <reified T> readPersistentObject(fileName: String): T? {
@@ -4306,9 +4059,6 @@ class MusicService :
             thumbnailUrl = thumbnailUrl,
             album = album,
             explicit = false,
-            liked = false,
-            likedDate = null,
-            inLibrary = null,
         )
     }
 

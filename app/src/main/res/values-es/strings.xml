@@ -170,8 +170,8 @@
     <string name="error_no_internet">Sin conexión a Internet</string>
     <string name="error_timeout">Tiempo agotado</string>
     <string name="error_unknown">Error desconocido</string>
-    <string name="action_like">Me gusta</string>
-    <string name="action_remove_like">Quitar me gusta</string>
+    <string name="action_saved">Me gusta</string>
+    <string name="action_remove_saved">Quitar me gusta</string>
     <string name="action_shuffle_on">Encender aleatorio</string>
     <string name="action_shuffle_off">Apagar aleatorio</string>
     <string name="repeat_mode_off">Apagar modo repetición</string>
@@ -248,6 +248,10 @@
     <string name="new_update_available">Nueva actualización disponible</string>
     <string name="release_notes_unavailable">Las notas de la versión no están disponibles</string>
     <string name="update_text">Actualizar</string>
+    <string name="saving_backup_title">Guardando copia de seguridad</string>
+    <string name="saving_backup_message">Subiendo biblioteca a la nube de Firebase…</string>
+    <string name="restoring_backup_title">Restaurando copia de seguridad</string>
+    <string name="restoring_backup_message">Descargando y restaurando biblioteca desde la nube de Firebase…</string>
     <string name="lyrics">Letras</string>
     <string name="refresh">Refrescar</string>
     <string name="experiment_settings">Ajustes Experimentales</string>
@@ -325,6 +329,11 @@
     <string name="together_allow_guests_control">Los invitados pueden controlar la reproducción</string>
     <string name="together_require_approval">Requiere aprobación</string>
     <string name="together_lan">LAN</string>
+    <string name="together_local_lan_mode">Red Local (LAN)</string>
+    <string name="together_online_mode">Modo Online</string>
+    <string name="together_online_session">Sesión Online</string>
+    <string name="together_room_code">Código de sala</string>
+    <string name="together_room_code_hint">Introduce el código de sala de 6 dígitos</string>
     <string name="together_join_link_hint">Pega un enlace para unirte o un código</string>
     <string name="start_session">Comenzar sesión</string>
     <string name="join_session">Unirte a la sesión</string>
@@ -335,11 +344,10 @@
     <string name="invalid_code">Código invalido</string>
     <string name="not_allowed">No permitido</string>
     <string name="network_unavailable">Red no disponible</string>
-    <string name="together_online_not_configured">Las sesiones en línea no están configuradas</string>
-    <string name="together_token_missing">Las sesiones en línea no están disponibles en esta versión</string>
     <string name="together_server_unreachable">Servidor inaccesible</string>
     <string name="together_connection_timed_out">Se agotó el tiempo de conexión</string>
     <string name="together_session_not_found">Sesión no encontrada</string>
+    <string name="together_firebase_login_required">Inicia sesión en Firebase para usar las sesiones en línea.</string>
     <string name="together_server_error">Error del servidor, por favor, inténtalo de nuevo más tarde</string>
     <string name="leave">Dejar</string>
     <string name="join">Únete</string>
@@ -365,7 +373,6 @@
     <!-- Adiciones de traducciones completas -->
     <string name="error_no_similar_songs">No hay canciones similares disponibles</string>
     <string name="error_automix_failed">Error al cargar la reproducción automática</string>
-    <string name="playback_requires_youtube_music_confirmation">YouTube está pidiendo confirmar que no eres un bot. Abre YouTube Music, reproduce algo para verificarlo y vuelve a intentarlo.</string>
     <string name="assign_tags">Asignar etiquetas</string>
     <string name="no_tags_available">No hay etiquetas disponibles</string>
     <string name="manage_tags">Gestionar etiquetas</string>
@@ -402,11 +409,30 @@
     <string name="maximum_volume">Volumen máximo</string>
     <string name="error_malformed_stream">Flujo de audio malformado</string>
     <string name="copy">Copiar</string>
-    <string name="open_youtube_music">Abrir YouTube Music</string>
+
     <string name="similar_content">Contenido similar</string>
     <string name="hide_player_thumbnail">Ocultar miniatura del reproductor</string>
     <string name="logout_confirmation_title">¿Cerrar sesión?</string>
     <string name="logout_confirmation_message">¿Estás seguro de que deseas cerrar sesión?</string>
+    <string name="logout_no_connection_warning">No se puede cerrar sesión sin conexión, para no perder tus datos</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="reset_password_dialog_title">Correo enviado</string>
+    <string name="reset_password_dialog_message">Si existe una cuenta asociada a este correo, recibirás instrucciones para restablecer tu contraseña. Recuerda revisar tu carpeta de SPAM.</string>
+    <string name="invalid_email_warning">Introduce un correo electrónico válido</string>
+    <string name="region_spain">España</string>
+    <string name="region_europe">Europa</string>
+    <string name="region_latin_america">Latinoamérica</string>
+    <string name="continue_with_google">Continuar con Google</string>
+    <string name="divider_or">o</string>
+    <string name="google_login_error">Error al iniciar sesión con Google</string>
+    <string name="invalid_google_credential">Credencial de Google no válida</string>
+    <string name="export_csv_title">Exportar playlists y álbumes (CSV)</string>
+    <string name="export_csv_subtitle">Guarda tus playlists y álbumes en un archivo CSV</string>
+    <string name="export_csv_success">CSV exportado con éxito</string>
+    <string name="export_csv_error">Error al exportar CSV</string>
+    <string name="no_data_for_country">No hay datos para este país</string>
+    <string name="charts_load_error">Error al cargar éxitos</string>
+    <string name="import_from_web">Importar desde la web</string>
     <string name="empty_album">Álbum vacío</string>
     <string name="empty_album_desc">Este álbum no contiene canciones</string>
     <string name="album_not_found">Álbum no encontrado</string>
@@ -450,9 +476,7 @@
     <string name="contributors">Colaboradores</string>
     <string name="social_links">Enlaces sociales</string>
     <string name="view_license">Ver licencia</string>
-    <string name="token_shown">Token visible</string>
-    <string name="token_hidden">Token oculto</string>
-    <string name="token_adv_login_description">Configuración avanzada de inicio de sesión por token</string>
+
     <string name="open_account_before_extract">Inicia sesión en tu cuenta antes de extraer</string>
     <string name="token_generation_failed">Fallo al generar el token</string>
     <string name="extracting_from_url">Extrayendo desde URL…</string>
@@ -531,4 +555,7 @@
     <string name="liked">Favoritas</string>
     <string name="offline">Descargadas</string>
     <string name="cached_playlist">En caché</string>
+    <string name="clear_playback_history">Borrar historial de reproducción</string>
+    <string name="clear_playback_history_dialog">¿Estás seguro de que deseas borrar el historial de reproducción?</string>
+    <string name="empty_history">Sin historial de reproducción</string>
 </resources>

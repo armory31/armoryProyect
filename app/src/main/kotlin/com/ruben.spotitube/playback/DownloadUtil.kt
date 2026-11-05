@@ -1,6 +1,6 @@
 /*
  * ARMORY Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -36,17 +36,20 @@ import com.ruben.spotitube.utils.StreamClientUtils
 import com.ruben.spotitube.utils.YTPlayerUtils
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.enumPreference
-import com.ruben.spotitube.utils.get
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -64,7 +67,7 @@ constructor(
     private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
     private val audioQuality by enumPreference(context, AudioQualityKey, AudioQuality.AUTO)
     private val preferredStreamClient by enumPreference(context, PlayerStreamClientKey, PlayerStreamClient.ANDROID_VR)
-    private val songUrlCache = HashMap<String, Pair<String, Long>>()
+    private val songUrlCache = ConcurrentHashMap<String, Pair<String, Long>>()
     private val avoidStreamCodecs: Set<String> by lazy {
         if (deviceSupportsMimeType("audio/opus")) emptySet() else setOf("opus")
     }
@@ -99,7 +102,8 @@ constructor(
             }.build()
     }
 
-    val downloads = MutableStateFlow<Map<String, Download>>(emptyMap())
+    private val _downloads = MutableStateFlow<Map<String, Download>>(emptyMap())
+    val downloads: StateFlow<Map<String, Download>> = _downloads.asStateFlow()
 
     private val dataSourceFactory =
         ResolvingDataSource.Factory(
@@ -114,13 +118,6 @@ constructor(
         ) { dataSpec ->
             val mediaId = dataSpec.key ?: error("No media id")
             val length = if (dataSpec.length >= 0) dataSpec.length else 1
-            if (playerCache.cacheSpace > 500 * 1024 * 1024L) {
-                App.instance.applicationScope.launch(Dispatchers.IO) {
-                    playerCache.keys.shuffled().take(10).forEach { key ->
-                        playerCache.getCachedSpans(key).sumOf { it.length }
-                    }
-                }
-            }
             if (playerCache.isCached(mediaId, dataSpec.position, length)) {
                 return@Factory dataSpec
             }
@@ -128,7 +125,7 @@ constructor(
                 return@Factory dataSpec.withUri(it.first.toUri())
             }
             val playbackData = runBlocking(Dispatchers.IO) {
-                val networkMeteredPref = context.dataStore.get(NetworkMeteredKey, true)
+                val networkMeteredPref = context.dataStore.data.first()[NetworkMeteredKey] ?: true
                 YTPlayerUtils.playerResponseForPlayback(
                     mediaId,
                     audioQuality = audioQuality,
@@ -145,11 +142,11 @@ constructor(
                     FormatEntity(
                         id = mediaId,
                         itag = format.itag,
-                        mimeType = format.mimeType.split(";")[0],
-                        codecs = format.mimeType.split("codecs=")[1].removeSurrounding("\""),
+                        mimeType = format.mimeType.split(";").getOrNull(0) ?: format.mimeType,
+                        codecs = format.mimeType.substringAfter("codecs=\"", "").substringBefore("\""),
                         bitrate = format.bitrate,
                         sampleRate = format.audioSampleRate,
-                        contentLength = format.contentLength!!,
+                        contentLength = format.contentLength ?: -1L,
                         loudnessDb = playbackData.audioConfig?.loudnessDb,
                         perceptualLoudnessDb = playbackData.audioConfig?.perceptualLoudnessDb,
                         playbackUrl = playbackData.playbackTracking?.videostatsPlaybackUrl?.baseUrl
@@ -183,7 +180,7 @@ constructor(
                         download: Download,
                         finalException: Exception?,
                     ) {
-                        downloads.update { map ->
+                        _downloads.update { map ->
                             map.toMutableMap().apply {
                                 set(download.request.id, download)
                             }
@@ -201,11 +198,11 @@ constructor(
                     result[cursor.download.request.id] = cursor.download
                 }
             }
-            downloads.value = result
+            _downloads.value = result
         }
     }
 
-    fun getDownload(songId: String): Flow<Download?> = downloads.map { it[songId] }
+    fun getDownload(songId: String): Flow<Download?> = _downloads.map { it[songId] }
 
     private fun deviceSupportsMimeType(mimeType: String): Boolean {
         return runCatching {

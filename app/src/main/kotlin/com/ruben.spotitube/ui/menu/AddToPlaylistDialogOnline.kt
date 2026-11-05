@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -76,6 +76,7 @@ fun AddToPlaylistDialogOnline(
     onStatusChange: (String) -> Unit = {}
 ) {
     val database = LocalDatabase.current
+    val syncManager = com.ruben.spotitube.LocalSyncManager.current
     val coroutineScope = rememberCoroutineScope()
     var allPlaylists by remember { mutableStateOf(emptyList<Playlist>()) }
     val playlists = remember(allPlaylists) { playlistsForAddToPlaylist(allPlaylists).asReversed() }
@@ -103,7 +104,7 @@ fun AddToPlaylistDialogOnline(
 
     fun processSongs(
         targetPlaylist: Playlist?,
-        addToLiked: Boolean
+        addToSaved: Boolean
     ) {
         coroutineScope.launch(Dispatchers.IO) {
             val snapshotSongs = songs.toList()
@@ -129,6 +130,8 @@ fun AddToPlaylistDialogOnline(
                 val successCount = AtomicInteger(0)
                 val failCount = AtomicInteger(0)
                 val failedSongs = mutableListOf<String>()
+                val batchPlaylistItems = java.util.Collections.synchronizedList(mutableListOf<com.ruben.spotitube.db.entities.PlaylistSongItem>())
+                val batchSavedSongs = java.util.Collections.synchronizedList(mutableListOf<com.ruben.spotitube.db.entities.SavedSongEntity>())
 
                 val semaphore = Semaphore(5)
 
@@ -169,17 +172,13 @@ fun AddToPlaylistDialogOnline(
                                                 albumName = firstSong.album?.name,
                                                 explicit = firstSong.explicit
                                             )
-                                            try {
-                                                if (targetPlaylist != null) {
-                                                    database.addSongsToPlaylist(targetPlaylist.playlist.id, listOf(item))
-                                                }
-                                                if (addToLiked) {
-                                                    database.insertSavedSong(firstSong.toSavedSongEntity())
-                                                }
-                                                success = true
-                                            } catch (e: Exception) {
-                                                Timber.e(e, "Error inserting/adding song")
+                                            if (targetPlaylist != null) {
+                                                batchPlaylistItems.add(item)
                                             }
+                                            if (addToSaved) {
+                                                batchSavedSongs.add(firstSong.toSavedSongEntity())
+                                            }
+                                            success = true
                                         }
                                     }.onFailure {
                                         Timber.w(it, "Search failed for $query")
@@ -213,6 +212,13 @@ fun AddToPlaylistDialogOnline(
 
                 runCatching { tasks.awaitAll() }.onFailure {
                     Timber.e(it, "Import failed")
+                }
+
+                if (targetPlaylist != null && batchPlaylistItems.isNotEmpty()) {
+                    database.addSongsToPlaylist(targetPlaylist.playlist.id, batchPlaylistItems)
+                }
+                if (addToSaved && batchSavedSongs.isNotEmpty()) {
+                    syncManager.setSaved(batchSavedSongs, saved = true)
                 }
 
                 withContext(Dispatchers.Main) {
@@ -260,7 +266,7 @@ fun AddToPlaylistDialogOnline(
                     playlist = playlist,
                     modifier = Modifier.clickable {
                         selectedPlaylist = playlist
-                        processSongs(targetPlaylist = playlist, addToLiked = false)
+                        processSongs(targetPlaylist = playlist, addToSaved = false)
                     }
                 )
             }
@@ -268,7 +274,7 @@ fun AddToPlaylistDialogOnline(
             item {
                 ListItem(
                     modifier = Modifier.clickable {
-                        processSongs(targetPlaylist = null, addToLiked = true)
+                        processSongs(targetPlaylist = null, addToSaved = true)
                     },
                     title = stringResource(R.string.liked_songs),
                     thumbnailContent = {

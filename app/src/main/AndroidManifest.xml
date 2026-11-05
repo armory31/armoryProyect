@@ -6,11 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
@@ -58,7 +54,7 @@
             android:name="com.ruben.spotitube.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.Armory"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -81,6 +77,29 @@
                 <data
                     android:host="together"
                     android:scheme="opentune" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="armory" android:host="song" />
+                <data android:scheme="armory" android:host="album" />
+                <data android:scheme="armory" android:host="artist" />
+                <data android:scheme="armory" android:host="playlist" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="${shareHost}" />
+                <data android:pathPrefix="/song" />
+                <data android:pathPrefix="/album" />
+                <data android:pathPrefix="/artist" />
+                <data android:pathPrefix="/playlist" />
             </intent-filter>
 
             <!-- Youtube filter -->
@@ -206,7 +225,7 @@
 
         <activity
             android:name="com.ruben.spotitube.DebugActivity"
-            android:exported="true"
+            android:exported="false"
             android:process=":crash"
             android:theme="@style/Theme.Armory">
         </activity>

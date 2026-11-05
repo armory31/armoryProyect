@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -24,9 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.pullToRefresh
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,10 +52,8 @@ import com.ruben.spotitube.constants.AlbumViewTypeKey
 import com.ruben.spotitube.constants.CONTENT_TYPE_HEADER
 import com.ruben.spotitube.constants.GridItemSize
 import com.ruben.spotitube.constants.GridItemsSizeKey
-import com.ruben.spotitube.constants.GridThumbnailHeight
 import com.ruben.spotitube.constants.HideExplicitKey
 import com.ruben.spotitube.constants.LibraryViewType
-import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
 import com.ruben.spotitube.ui.component.LibraryAlbumGridItem
 import com.ruben.spotitube.ui.component.LibraryAlbumListItem
@@ -80,7 +75,7 @@ fun LibraryAlbumsScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     var viewType by rememberEnumPreference(AlbumViewTypeKey, LibraryViewType.GRID)
-    var filter by rememberEnumPreference(AlbumFilterKey, AlbumFilter.LIKED)
+    var filter by rememberEnumPreference(AlbumFilterKey, AlbumFilter.SAVED)
     val (sortType, onSortTypeChange) = rememberEnumPreference(
         AlbumSortTypeKey,
         AlbumSortType.CREATE_DATE
@@ -88,15 +83,12 @@ fun LibraryAlbumsScreen(
     val (sortDescending, onSortDescendingChange) = rememberPreference(AlbumSortDescendingKey, true)
     val gridItemSize by rememberEnumPreference(GridItemsSizeKey, GridItemSize.BIG)
 
-    val (ytmSync) = rememberPreference(YtmSyncKey, true)
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
 
     val albums by viewModel.allAlbums.collectAsStateWithLifecycle()
-    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val lazyGridState = rememberLazyGridState()
-    val pullRefreshState = rememberPullToRefreshState()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsStateWithLifecycle()
 
@@ -116,7 +108,7 @@ fun LibraryAlbumsScreen(
     val filterContent = @Composable {
         LibraryFilterChips(
             filters = listOf(
-                AlbumFilter.LIKED to stringResource(R.string.filter_liked),
+                AlbumFilter.SAVED to stringResource(R.string.filter_liked),
                 AlbumFilter.LIBRARY to stringResource(R.string.filter_library),
                 AlbumFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
                 AlbumFilter.DOWNLOADED_FULL to stringResource(R.string.filter_downloaded_full)
@@ -169,11 +161,7 @@ fun LibraryAlbumsScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().pullToRefresh(
-            state = pullRefreshState,
-            isRefreshing = isRefreshing,
-            onRefresh = { if (ytmSync) viewModel.refresh(filter) }
-        ),
+        modifier = Modifier.fillMaxSize(),
     ) {
         when (viewType) {
             LibraryViewType.LIST -> LazyColumn(
@@ -239,12 +227,5 @@ fun LibraryAlbumsScreen(
                 }
             }
         }
-        PullToRefreshDefaults.Indicator(
-            isRefreshing = isRefreshing,
-            state = pullRefreshState,
-            containerColor = ArmoryColors.Silver5,
-            color = ArmoryColors.Gold3,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
-        )
     }
 }

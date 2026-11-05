@@ -1,6 +1,6 @@
 /*
  * OpenTune Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -11,11 +11,6 @@ package com.ruben.spotitube.ui.screens.artist
 import com.ruben.spotitube.ArmoryColors
 import androidx.compose.foundation.BorderStroke
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -158,7 +153,7 @@ fun ArtistScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val artistPage = viewModel.artistPage
     val libraryArtist by viewModel.libraryArtist.collectAsStateWithLifecycle()
-    val isSubscribed by viewModel.isBookmarked.collectAsStateWithLifecycle()
+    val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
     val librarySongs by viewModel.librarySongs.collectAsStateWithLifecycle()
     val libraryAlbums by viewModel.libraryAlbums.collectAsStateWithLifecycle()
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
@@ -264,32 +259,18 @@ fun ArtistScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     ArmoryIconButton(
-                        painter = painterResource(R.drawable.link),
-                        contentDescription = "Copiar enlace",
-                        onClick = {
-                            viewModel.artistPage?.artist?.shareLink?.let { link ->
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("Artist Link", link)
-                                clipboard.setPrimaryClip(clip)
-                                Toast.makeText(context, R.string.link_copied, Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        overImage = true
-                    )
-                    ArmoryIconButton(
                         painter = painterResource(R.drawable.share),
                         contentDescription = "Compartir",
                         onClick = {
-                            val shareIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                type = "text/plain"
-                                putExtra(
-                                    Intent.EXTRA_TEXT,
-                                    viewModel.artistPage?.artist?.shareLink
-                                        ?: "https://music.youtube.com/channel/${viewModel.artistId}"
-                                )
-                            }
-                            context.startActivity(Intent.createChooser(shareIntent, null))
+                            val artistName = viewModel.artistPage?.artist?.title ?: "Artista"
+                            val artistThumbnail = viewModel.artistPage?.artist?.thumbnail
+                            com.ruben.spotitube.utils.shareItem(
+                                context = context,
+                                type = "artist",
+                                id = viewModel.artistId,
+                                title = artistName,
+                                imageUrl = artistThumbnail
+                            )
                         },
                         overImage = true
                     )
@@ -674,16 +655,16 @@ fun ArtistScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp, vertical = 6.dp)
                             ) {
-                                if (isSubscribed) {
+                                if (isSaved) {
                                     ArmoryButton(
                                         text = stringResource(R.string.subscribed),
-                                        onClick = { viewModel.toggleLike() },
+                                        onClick = { viewModel.toggleSaved() },
                                         painter = painterResource(R.drawable.done),
                                         modifier = Modifier.fillMaxWidth().height(48.dp)
                                     )
                                 } else {
                                     Button(
-                                        onClick = { viewModel.toggleLike() },
+                                        onClick = { viewModel.toggleSaved() },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = ArmoryColors.SurfaceElevated,
                                             contentColor = ArmoryColors.TextPrimary

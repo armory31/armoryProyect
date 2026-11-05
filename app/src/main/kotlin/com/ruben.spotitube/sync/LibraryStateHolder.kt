@@ -2,7 +2,6 @@
 
 package com.ruben.spotitube.sync
 
-import android.util.Log
 import com.ruben.spotitube.db.DatabaseDao
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.Artist
@@ -15,83 +14,43 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class LibraryStateHolder @Inject constructor(
-    private val syncManager: SyncManager,
-    authManager: ArmoryAuthManager,
     private val databaseDao: DatabaseDao
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    // Flow of the raw cloud DTO
-    @Suppress("unused")
-    val libraryDto: StateFlow<UserLibraryDto?> = authManager.isLoggedIn
-        .flatMapLatest { loggedIn ->
-            if (loggedIn) {
-                flow {
-                    while (true) {
-                        val dto = runCatching { syncManager.getUserLibrary() }.getOrNull()
-                        emit(dto)
-                        kotlinx.coroutines.delay(300000.milliseconds) // Poll every 5 mins or use listeners
-                    }
-                }
-            } else {
-                flowOf<UserLibraryDto?>(null)
-            }
-        }
-        .stateIn(scope, SharingStarted.Eagerly, null)
+    val savedSongIds: StateFlow<Set<String>> = databaseDao.getSavedSongIds()
+        .map { it.toSet() }
+        .distinctUntilChanged()
+        .stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
-    // Reactive sets of IDs for quick lookup (Local-First: Reading directly from local DB Room)
-    val savedSongIds: Flow<Set<String>> = databaseDao.getSavedSongIds()
+    val savedAlbumIds: StateFlow<Set<String>> = databaseDao.getSavedAlbumIds()
         .map { it.toSet() }
         .distinctUntilChanged()
-        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked songs") }
-    
-    val savedAlbumIds: Flow<Set<String>> = databaseDao.getSavedAlbumIds()
-        .map { it.toSet() }
-        .distinctUntilChanged()
-        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} liked albums") }
-    
-    val savedArtistIds: Flow<Set<String>> = databaseDao.getSavedArtistIds()
-        .map { it.toSet() }
-        .distinctUntilChanged()
-        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} bookmarked artists") }
-    
-    val savedPlaylistIds: Flow<Set<String>> = databaseDao.getSavedPlaylistIds()
-        .map { it.toSet() }
-        .distinctUntilChanged()
-        .onEach { Timber.d("[LOCAL_SAVE_DEBUG] LibraryStateHolder: Emitted ${it.size} playlists") }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
-    // Merged data for UI
+    val savedArtistIds: StateFlow<Set<String>> = databaseDao.getSavedArtistIds()
+        .map { it.toSet() }
+        .distinctUntilChanged()
+        .stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    val savedPlaylistIds: StateFlow<Set<String>> = databaseDao.getSavedPlaylistIds()
+        .map { it.toSet() }
+        .distinctUntilChanged()
+        .stateIn(scope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
     fun getLibrarySongs(): Flow<List<Song>> = databaseDao.allSavedSongs().map { list ->
         list.map { it.toSong() }
     }
 
     fun getLibraryAlbums(): Flow<List<Album>> = databaseDao.allSavedAlbums().map { entities ->
-        Log.d("SAVED_ALBUM_DEBUG", "1. DB Dao devolvió ${entities.size} registros de SavedAlbumEntity")
-        entities.firstOrNull()?.let { first ->
-            Log.d("SAVED_ALBUM_DEBUG", "   Ejemplo DB Entity -> id: ${first.id}, title: ${first.title}, playlistId: ${first.playlistId}")
-        }
-        val mapped = entities.mapNotNull { entity ->
-            val album = entity.toAlbum()
-            if (album == null) {
-                Log.d("SAVED_ALBUM_DEBUG", "   [AVISO] Entity id=${entity.id} resultó NULA tras toAlbum()")
-            }
-            album
-        }
-        Log.d("SAVED_ALBUM_DEBUG", "2. Mapper: De ${entities.size} entidades se convirtieron ${mapped.size} objetos Album")
-        mapped
+        entities.mapNotNull { it.toAlbum() }
     }
 
     fun getLibraryArtists(): Flow<List<Artist>> = databaseDao.allSavedArtists().map { list ->

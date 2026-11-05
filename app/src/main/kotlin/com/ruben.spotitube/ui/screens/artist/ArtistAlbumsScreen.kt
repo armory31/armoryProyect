@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -39,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -47,16 +46,12 @@ import androidx.navigation.NavController
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.CONTENT_TYPE_ALBUM
 import com.ruben.spotitube.constants.CONTENT_TYPE_HEADER
 import com.ruben.spotitube.constants.GridThumbnailHeight
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LibraryAlbumGridItem
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.viewmodels.ArtistAlbumsViewModel
 
 @Composable

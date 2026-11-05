@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -172,6 +172,60 @@ class BackupRestoreViewModel @Inject constructor(
                 percent = percent.coerceIn(0, 100),
                 indeterminate = indeterminate,
             )
+    }
+
+    fun exportCsv(context: Context, uri: Uri) {
+        val title = "Exportando CSV..."
+        viewModelScope.launch(Dispatchers.IO) {
+            _backupRestoreProgress.value = BackupRestoreProgressUi(
+                title = title,
+                step = "Cargando datos...",
+                percent = 0,
+                indeterminate = true
+            )
+            try {
+                val playlists = database.allSavedPlaylists().first()
+                val albums = database.allSavedAlbums().first()
+
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    java.io.OutputStreamWriter(outputStream, Charsets.UTF_8).use { writer ->
+                        writer.write("\"Track name\",\"Artist name\",\"Album\",\"Playlist name\",\"Type\",\"ISRC\",\"Spotify - id\"\n")
+
+                        fun escapeCsvField(valStr: String?): String {
+                            val str = valStr.orEmpty()
+                            val escaped = str.replace("\"", "\"\"")
+                            return "\"$escaped\""
+                        }
+
+                        for (playlist in playlists) {
+                            for (song in playlist.songs) {
+                                val trackName = escapeCsvField(song.title)
+                                val artistName = escapeCsvField(song.artistName)
+                                val albumName = escapeCsvField(song.albumName)
+                                val playlistName = escapeCsvField(playlist.name)
+                                writer.write("$trackName,$artistName,$albumName,$playlistName,\"Playlist\",\"\",\n")
+                            }
+                        }
+
+                        for (album in albums) {
+                            val albumTitle = escapeCsvField(album.title)
+                            val artistName = escapeCsvField(album.artistName)
+                            writer.write(",$artistName,$albumTitle,,\"Album\",\"\",\n")
+                        }
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, R.string.export_csv_success, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                reportException(e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, context.getString(R.string.export_csv_error) + ": ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            } finally {
+                _backupRestoreProgress.value = null
+            }
+        }
     }
 
     @SuppressLint("StringFormatInvalid")
@@ -533,6 +587,11 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
+data class CsvImportResult(
+    val playlistName: String?,
+    val songs: ArrayList<Song>
+)
+
     private fun normalizeCsvHeaderCell(value: String): String =
         value
             .trim()
@@ -542,75 +601,93 @@ class BackupRestoreViewModel @Inject constructor(
             .replace("_", "")
             .replace("-", "")
 
-    suspend fun importPlaylistFromCsv(context: Context, uri: Uri): ArrayList<Song> {
-        val songs =
-            withContext(Dispatchers.IO) {
-                val out = arrayListOf<Song>()
+    suspend fun importPlaylistFromCsv(context: Context, uri: Uri): CsvImportResult {
+        return withContext(Dispatchers.IO) {
+            val out = arrayListOf<Song>()
+            var foundPlaylistName: String? = null
 
-                runCatching {
-                    context.contentResolver.openInputStream(uri)?.use { stream ->
-                        val reader = PushbackReader(InputStreamReader(stream, Charsets.UTF_8), 1)
-                        val iterator = readCsvRecords(reader).iterator()
-                        if (!iterator.hasNext()) return@use
+            runCatching {
+                context.contentResolver.openInputStream(uri)?.use { stream ->
+                    val reader = PushbackReader(InputStreamReader(stream, Charsets.UTF_8), 1)
+                    val iterator = readCsvRecords(reader).iterator()
+                    if (!iterator.hasNext()) return@use CsvImportResult(null, arrayListOf())
 
-                        val firstRecord = iterator.next()
-                        val normalizedHeader = firstRecord.map(::normalizeCsvHeaderCell)
+                    val firstRecord = iterator.next()
+                    val normalizedHeader = firstRecord.map(::normalizeCsvHeaderCell)
 
-                        val titleIndex =
-                            normalizedHeader.indexOfFirst { it == "title" || it == "tracktitle" || it == "songtitle" }
-                        val artistIndex =
-                            normalizedHeader.indexOfFirst { it == "artist" || it == "artists" || it == "artistname" }
+                    val titleIndex =
+                        normalizedHeader.indexOfFirst { it == "title" || it == "tracktitle" || it == "songtitle" || it == "trackname" || it == "name" }
+                    val artistIndex =
+                        normalizedHeader.indexOfFirst { it == "artist" || it == "artists" || it == "artistname" }
+                    val playlistNameIndex =
+                        normalizedHeader.indexOfFirst { it == "playlistname" || it == "playlist" }
 
-                        val hasHeader = titleIndex >= 0 && artistIndex >= 0
-                        val resolvedTitleIndex = if (hasHeader) titleIndex else 0
-                        val resolvedArtistIndex = if (hasHeader) artistIndex else 1
+                    val hasHeader = titleIndex >= 0 && artistIndex >= 0
+                    val resolvedTitleIndex = if (hasHeader) titleIndex else 0
+                    val resolvedArtistIndex = if (hasHeader) artistIndex else 1
 
-                        fun addFromRecord(record: List<String>) {
-                            val titleRaw = record.getOrNull(resolvedTitleIndex).orEmpty()
-                            val artistRaw = record.getOrNull(resolvedArtistIndex).orEmpty()
+                    fun addFromRecord(record: List<String>) {
+                        if (playlistNameIndex >= 0 && foundPlaylistName == null) {
+                            record.getOrNull(playlistNameIndex)?.trim()?.takeIf { it.isNotBlank() }?.let {
+                                foundPlaylistName = it
+                            }
+                        }
 
-                            val title = titleRaw.trim().trimStart('\uFEFF')
-                            if (title.isBlank()) return
+                        val titleRaw = record.getOrNull(resolvedTitleIndex).orEmpty()
+                        val artistRaw = record.getOrNull(resolvedArtistIndex).orEmpty()
 
-                            val artistStr = artistRaw.trim()
-                            val artists =
-                                artistStr
-                                    .split(';', '|')
-                                    .map { it.trim() }
-                                    .filter { it.isNotEmpty() }
-                                    .map { SavedArtistEntity(id = "", name = it) }
+                        val title = titleRaw.trim().trimStart('\uFEFF')
+                        if (title.isBlank()) return
 
-                            out.add(
-                                Song(
-                                    song = SavedSongEntity(id = "", title = title),
-                                    artists = artists.ifEmpty { listOf(SavedArtistEntity("", "")) },
-                                )
+                        val artistStr = artistRaw.trim()
+                        val artists =
+                            artistStr
+                                .split(';', '|')
+                                .map { it.trim() }
+                                .filter { it.isNotEmpty() }
+                                .map { SavedArtistEntity(id = "", name = it) }
+
+                        out.add(
+                            Song(
+                                song = SavedSongEntity(id = "", title = title),
+                                artists = artists.ifEmpty { listOf(SavedArtistEntity("", "")) },
                             )
-                        }
-
-                        if (!hasHeader) {
-                            addFromRecord(firstRecord)
-                        }
-                        while (iterator.hasNext()) {
-                            addFromRecord(iterator.next())
-                        }
+                        )
                     }
-                }.onFailure {
-                    reportException(it)
-                }
 
-                out
+                    if (!hasHeader) {
+                        addFromRecord(firstRecord)
+                    }
+                    while (iterator.hasNext()) {
+                        addFromRecord(iterator.next())
+                    }
+                }
+            }.onFailure {
+                reportException(it)
             }
 
-        if (songs.isEmpty()) {
-            Toast.makeText(
-                context,
-                "No songs found. Invalid file, or perhaps no song matches were found.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+            val deduplicated = out.distinctBy {
+                Pair(
+                    it.song.title.lowercase().trim(),
+                    it.artists.firstOrNull()?.name?.lowercase()?.trim().orEmpty()
+                )
+            }
 
-        return songs
+            if (deduplicated.isEmpty()) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        "No songs found. Invalid file, or perhaps no song matches were found.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            CsvImportResult(
+                playlistName = foundPlaylistName,
+                songs = ArrayList(deduplicated)
+            )
+        }
     }
 
     suspend fun loadM3UOnline(

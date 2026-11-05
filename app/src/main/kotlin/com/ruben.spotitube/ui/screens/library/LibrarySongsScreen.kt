@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -25,9 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.pullToRefresh
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,7 +56,6 @@ import com.ruben.spotitube.constants.SongFilterKey
 import com.ruben.spotitube.constants.SongSortDescendingKey
 import com.ruben.spotitube.constants.SongSortType
 import com.ruben.spotitube.constants.SongSortTypeKey
-import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.playback.queues.ListQueue
@@ -93,15 +89,11 @@ fun LibrarySongsScreen(
     )
     val (sortDescending, onSortDescendingChange) = rememberPreference(SongSortDescendingKey, true)
 
-    val (ytmSync) = rememberPreference(YtmSyncKey, true)
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
 
     val songs by viewModel.allSongs.collectAsStateWithLifecycle()
-    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
-    var filter by rememberEnumPreference(SongFilterKey, SongFilter.LIKED)
-
-
+    var filter by rememberEnumPreference(SongFilterKey, SongFilter.SAVED)
 
     val wrappedSongs = remember(songs) { songs.map { item -> ItemWrapper(item) }.toMutableList() }
     var selection by remember {
@@ -113,7 +105,6 @@ fun LibrarySongsScreen(
     }
 
     val lazyListState = rememberLazyListState()
-    val pullRefreshState = rememberPullToRefreshState()
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val scrollToTop =
@@ -127,13 +118,7 @@ fun LibrarySongsScreen(
     }
 
     Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .pullToRefresh(
-                    state = pullRefreshState,
-                    isRefreshing = isRefreshing,
-                    onRefresh = { if (ytmSync) viewModel.refresh(filter) }
-                ),
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = lazyListState,
@@ -175,7 +160,7 @@ fun LibrarySongsScreen(
                     Spacer(Modifier.width(8.dp))
                     LibraryFilterChips(
                         filters = listOf(
-                            SongFilter.LIKED to stringResource(R.string.filter_liked),
+                            SongFilter.SAVED to stringResource(R.string.filter_liked),
                             SongFilter.LIBRARY to stringResource(R.string.filter_library),
                             SongFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
                         ),
@@ -357,16 +342,6 @@ fun LibrarySongsScreen(
                     ),
                 )
             },
-        )
-
-        PullToRefreshDefaults.Indicator(
-            isRefreshing = isRefreshing,
-            state = pullRefreshState,
-            containerColor = ArmoryColors.Silver5,
-            color = ArmoryColors.Gold3,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 16.dp),
         )
     }
 }

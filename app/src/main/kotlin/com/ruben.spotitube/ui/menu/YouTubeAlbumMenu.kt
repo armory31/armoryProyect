@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -71,6 +71,8 @@ import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.models.toSavedAlbumEntity
 import com.ruben.spotitube.playback.ExoDownloadService
@@ -80,9 +82,9 @@ import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
+import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.utils.reportException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -100,7 +102,7 @@ fun YouTubeAlbumMenu(
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
     
-    val isLiked by remember(albumItem.id, libraryStateHolder) {
+    val isSaved by remember(albumItem.id, libraryStateHolder) {
         libraryStateHolder.savedAlbumIds.map { albumItem.id in it }
     }.collectAsStateWithLifecycle(initialValue = false)
     
@@ -188,15 +190,16 @@ fun YouTubeAlbumMenu(
 
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
-        onGetSong = { playlist ->
-            coroutineScope.launch(Dispatchers.IO) {
-                playlist.playlist.browseId?.let { playlistId ->
-                    album?.album?.playlistId?.let { addPlaylistId ->
-                        YouTube.addPlaylistToPlaylist(playlistId, addPlaylistId)
-                    }
+        onGetSong = {
+            withContext(Dispatchers.IO) {
+                val albumPage = YouTube.album(albumItem.id).getOrNull()
+                val remoteSongs = albumPage?.songs?.map { it.toMediaMetadata() }
+                if (!remoteSongs.isNullOrEmpty()) {
+                    remoteSongs
+                } else {
+                    album?.songs?.map { it.toMediaMetadata() }.orEmpty()
                 }
             }
-            album?.songs?.map { it.id }.orEmpty()
         },
         onDismiss = { showChoosePlaylistDialog = false },
         onAddComplete = { songCount, playlistNames ->
@@ -290,13 +293,13 @@ fun YouTubeAlbumMenu(
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        syncManager.toggleAlbumLike(album?.album ?: albumItem.toSavedAlbumEntity())
+                        syncManager.toggleAlbumSaved(album?.album ?: albumItem.toSavedAlbumEntity())
                     }
                 },
             ) {
                 Icon(
-                    painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),
-                    tint = if (isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current,
+                    painter = painterResource(if (isSaved) R.drawable.favorite else R.drawable.favorite_border),
+                    tint = if (isSaved) MaterialTheme.colorScheme.error else LocalContentColor.current,
                     contentDescription = null,
                 )
             }
@@ -373,12 +376,7 @@ fun YouTubeAlbumMenu(
                         text = stringResource(R.string.share),
                         onClick = {
                             onDismiss()
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, albumItem.shareLink)
-                            }
-                            context.startActivity(Intent.createChooser(intent, null))
+                            com.ruben.spotitube.utils.shareItem(context, "album", albumItem.browseId.ifEmpty { albumItem.id }, albumItem.title, albumItem.artists?.firstOrNull()?.name, albumItem.thumbnail)
                         }
                     )
                 ),
@@ -438,17 +436,17 @@ fun YouTubeAlbumMenu(
         item {
             ListItem(
                 headlineContent = { 
-                    Text(text = if (isLiked) stringResource(R.string.remove_from_library) else stringResource(R.string.add_to_library))
+                    Text(text = if (isSaved) stringResource(R.string.remove_from_library) else stringResource(R.string.add_to_library))
                 },
                 leadingContent = {
                     Icon(
-                        painter = painterResource(if (isLiked) R.drawable.library_add_check else R.drawable.library_add),
+                        painter = painterResource(if (isSaved) R.drawable.library_add_check else R.drawable.library_add),
                         contentDescription = null,
                     )
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        syncManager.toggleAlbumLike(album?.album ?: albumItem.toSavedAlbumEntity())
+                        syncManager.toggleAlbumSaved(album?.album ?: albumItem.toSavedAlbumEntity())
                     }
                 }
             )

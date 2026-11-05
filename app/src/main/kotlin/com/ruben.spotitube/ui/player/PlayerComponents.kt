@@ -1,6 +1,6 @@
 /*
  * ARMORY Project (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -258,7 +258,7 @@ fun PlayerTopActions(
     state: BottomSheetState,
     bottomSheetPageState: BottomSheetPageState,
     context: Context,
-    currentSongLiked: Boolean
+    currentSongSaved: Boolean
 ) {
     when (playerDesignStyle) {
         PlayerDesignStyle.V2 -> {
@@ -282,15 +282,7 @@ fun PlayerTopActions(
                         .clip(shareShape)
                         .background(textButtonColor)
                         .clickable {
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                type = "text/plain"
-                                putExtra(
-                                    Intent.EXTRA_TEXT,
-                                    "https://music.youtube.com/watch?v=${mediaMetadata.id}"
-                                )
-                            }
-                            context.startActivity(Intent.createChooser(intent, null))
+                            com.ruben.spotitube.utils.shareItem(context, "song", mediaMetadata.id, mediaMetadata.title, mediaMetadata.artists.firstOrNull()?.name, mediaMetadata.thumbnailUrl)
                         }
                 ) {
                     Image(
@@ -309,12 +301,12 @@ fun PlayerTopActions(
                         .clip(favShape)
                         .background(textButtonColor)
                         .clickable {
-                            playerConnection.toggleLike()
+                            playerConnection.toggleSongSaved()
                         }
                 ) {
                     Image(
                         painter = painterResource(
-                            if (currentSongLiked)
+                            if (currentSongSaved)
                                 R.drawable.favorite
                             else R.drawable.favorite_border
                         ),
@@ -338,15 +330,7 @@ fun PlayerTopActions(
                         .size(36.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .clickable {
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                type = "text/plain"
-                                putExtra(
-                                    Intent.EXTRA_TEXT,
-                                    "https://music.youtube.com/watch?v=${mediaMetadata.id}"
-                                )
-                            }
-                            context.startActivity(Intent.createChooser(intent, null))
+                            com.ruben.spotitube.utils.shareItem(context, "song", mediaMetadata.id, mediaMetadata.title, mediaMetadata.artists.firstOrNull()?.name, mediaMetadata.thumbnailUrl)
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -361,16 +345,16 @@ fun PlayerTopActions(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable { playerConnection.toggleLike() },
+                        .clickable { playerConnection.toggleSongSaved() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(
-                            if (currentSongLiked) R.drawable.favorite
+                            if (currentSongSaved) R.drawable.favorite
                             else R.drawable.favorite_border
                         ),
                         contentDescription = null,
-                        tint = if (currentSongLiked)
+                        tint = if (currentSongSaved)
                             MaterialTheme.colorScheme.error.copy(alpha = 0.9f)
                         else textBackgroundColor.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp)
@@ -386,15 +370,7 @@ fun PlayerTopActions(
             ) {
                 Surface(
                     onClick = {
-                        val intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            type = "text/plain"
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "https://music.youtube.com/watch?v=${mediaMetadata.id}"
-                            )
-                        }
-                        context.startActivity(Intent.createChooser(intent, null))
+                        com.ruben.spotitube.utils.shareItem(context, "song", mediaMetadata.id, mediaMetadata.title, mediaMetadata.artists.firstOrNull()?.name, mediaMetadata.thumbnailUrl)
                     },
                     shape = RoundedCornerShape(14.dp),
                     color = ArmoryColors.Diamond2.copy(alpha = 0.12f),
@@ -413,7 +389,7 @@ fun PlayerTopActions(
                 }
 
                 Surface(
-                    onClick = { playerConnection.toggleLike() },
+                    onClick = { playerConnection.toggleSongSaved() },
                     shape = RoundedCornerShape(14.dp),
                     color = MaterialTheme.colorScheme.error.copy(alpha = 0.25f),
                     modifier = Modifier
@@ -423,7 +399,7 @@ fun PlayerTopActions(
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         Icon(
                             painter = painterResource(
-                                if (currentSongLiked) R.drawable.favorite
+                                if (currentSongSaved) R.drawable.favorite
                                 else R.drawable.favorite_border
                             ),
                             contentDescription = null,
@@ -478,16 +454,7 @@ fun PlayerTopActions(
                         .clip(RoundedCornerShape(24.dp))
                         .background(textButtonColor)
                         .clickable {
-                            val intent =
-                                Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    type = "text/plain"
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        "https://music.youtube.com/watch?v=${mediaMetadata.id}"
-                                    )
-                                }
-                            context.startActivity(Intent.createChooser(intent, null))
+                            com.ruben.spotitube.utils.shareItem(context, "song", mediaMetadata.id, mediaMetadata.title, mediaMetadata.artists.firstOrNull()?.name, mediaMetadata.thumbnailUrl)
                         },
             ) {
                 Image(
@@ -543,15 +510,7 @@ fun PlayerTopActions(
             ) {
                 Surface(
                     onClick = {
-                        val intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            type = "text/plain"
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "https://music.youtube.com/watch?v=${mediaMetadata.id}"
-                            )
-                        }
-                        context.startActivity(Intent.createChooser(intent, null))
+                        com.ruben.spotitube.utils.shareItem(context, "song", mediaMetadata.id, mediaMetadata.title, mediaMetadata.artists.firstOrNull()?.name, mediaMetadata.thumbnailUrl)
                     },
                     shape = RoundedCornerShape(
                         topStart = 50.dp, bottomStart = 50.dp,
@@ -573,9 +532,9 @@ fun PlayerTopActions(
                 }
 
                 Surface(
-                    onClick = { playerConnection.toggleLike() },
+                    onClick = { playerConnection.toggleSongSaved() },
                     shape = RoundedCornerShape(50),
-                    color = if (currentSongLiked)
+                    color = if (currentSongSaved)
                         MaterialTheme.colorScheme.error.copy(alpha = 0.18f)
                     else textBackgroundColor.copy(alpha = 0.12f),
                     modifier = Modifier
@@ -585,11 +544,11 @@ fun PlayerTopActions(
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         Icon(
                             painter = painterResource(
-                                if (currentSongLiked) R.drawable.favorite
+                                if (currentSongSaved) R.drawable.favorite
                                 else R.drawable.favorite_border
                             ),
                             contentDescription = null,
-                            tint = if (currentSongLiked)
+                            tint = if (currentSongSaved)
                                 MaterialTheme.colorScheme.error
                             else textBackgroundColor,
                             modifier = Modifier.size(20.dp)
@@ -646,19 +605,19 @@ fun PlayerTopActions(
                         .size(42.dp)
                         .clip(CircleShape)
                         .background(
-                            if (currentSongLiked) textBackgroundColor.copy(alpha = 0.2f)
+                            if (currentSongSaved) textBackgroundColor.copy(alpha = 0.2f)
                             else Color.Transparent
                         )
-                        .clickable { playerConnection.toggleLike() },
+                        .clickable { playerConnection.toggleSongSaved() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(
-                            if (currentSongLiked) R.drawable.favorite
+                            if (currentSongSaved) R.drawable.favorite
                             else R.drawable.favorite_border
                         ),
                         contentDescription = null,
-                        tint = textBackgroundColor.copy(alpha = if (currentSongLiked) 1f else 0.7f),
+                        tint = textBackgroundColor.copy(alpha = if (currentSongSaved) 1f else 0.7f),
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -881,7 +840,7 @@ fun PlayerPlaybackControls(
     icBackgroundColor: Color,
     playPauseRoundness: androidx.compose.ui.unit.Dp,
     playerConnection: PlayerConnection,
-    currentSongLiked: Boolean
+    currentSongSaved: Boolean
 ) {
     val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
@@ -1395,14 +1354,14 @@ fun PlayerPlaybackControls(
 
                 Box(modifier = Modifier.weight(1f)) {
                     ResizableIconButton(
-                        icon = if (currentSongLiked) R.drawable.favorite else R.drawable.favorite_border,
-                        color = if (currentSongLiked) MaterialTheme.colorScheme.error else textBackgroundColor,
+                        icon = if (currentSongSaved) R.drawable.favorite else R.drawable.favorite_border,
+                        color = if (currentSongSaved) MaterialTheme.colorScheme.error else textBackgroundColor,
                         modifier =
                             Modifier
                                 .size(32.dp)
                                 .padding(4.dp)
                                 .align(Alignment.Center),
-                        onClick = playerConnection::toggleLike,
+                        onClick = playerConnection::toggleSongSaved,
                     )
                 }
             }
@@ -1723,7 +1682,7 @@ fun PlayerControlsContent(
     onResetTimer: () -> Unit = {},
 ) {
     val libraryStateHolder = LocalLibraryStateHolder.current
-    val currentSongLiked by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
+    val currentSongSaved by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isCompact = windowSizeClass.windowWidthSizeClass == androidx.window.core.layout.WindowWidthSizeClass.COMPACT
@@ -1770,7 +1729,7 @@ fun PlayerControlsContent(
             state = state,
             bottomSheetPageState = bottomSheetPageState,
             context = context,
-            currentSongLiked = currentSongLiked
+            currentSongSaved = currentSongSaved
         )
     }
 
@@ -1850,7 +1809,7 @@ fun PlayerControlsContent(
         icBackgroundColor = effectiveIcBackgroundColor,
         playPauseRoundness = playPauseRoundness,
         playerConnection = playerConnection,
-        currentSongLiked = currentSongLiked
+        currentSongSaved = currentSongSaved
     )
 }
 @Composable

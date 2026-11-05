@@ -2,7 +2,6 @@ package com.ruben.spotitube.sync
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import com.ruben.spotitube.App
 import com.ruben.spotitube.constants.ArmoryAccountEmailKey
 import com.ruben.spotitube.constants.ArmoryAccountUidKey
 import com.ruben.spotitube.utils.dataStore
@@ -56,10 +55,13 @@ class ArmoryAuthManager @Inject constructor(
 
     suspend fun clearAccountInfo() {
         getFirebaseAuth().signOut()
+        runCatching {
+            val credentialManager = androidx.credentials.CredentialManager.create(context)
+            credentialManager.clearCredentialState(androidx.credentials.ClearCredentialStateRequest())
+        }
         context.dataStore.edit {
             it.remove(ArmoryAccountEmailKey)
             it.remove(ArmoryAccountUidKey)
         }
-        (context.applicationContext as? App)?.database?.clearUserData()
     }
 }

@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -23,12 +23,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -45,7 +43,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -78,22 +75,10 @@ fun SettingsScreen(
         }
     }
 
-    val storagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_AUDIO
-    } else {
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
-
     val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.POST_NOTIFICATIONS
     } else {
         null
-    }
-
-    var isStorageGranted by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, storagePermission) == PackageManager.PERMISSION_GRANTED
-        )
     }
 
     var isNotificationGranted by remember {
@@ -104,16 +89,13 @@ fun SettingsScreen(
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { result ->
-        isStorageGranted = result[storagePermission] == true || isStorageGranted
-        if (notificationPermission != null) {
-            isNotificationGranted = result[notificationPermission] == true || isNotificationGranted
-        }
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        isNotificationGranted = isGranted || isNotificationGranted
     }
 
-    val shouldShowPermissionHint = !isStorageGranted || !isNotificationGranted
-    val hasUpdate = !Updater.isSameVersion(latestVersionName, BuildConfig.VERSION_NAME)
+    val shouldShowPermissionHint = notificationPermission != null && !isNotificationGranted
+    val hasUpdate = Updater.isNewerVersion(latestVersionName, BuildConfig.VERSION_NAME)
 
     val resetSearch: () -> Unit = {
         isSearching = false
@@ -166,14 +148,8 @@ fun SettingsScreen(
         isSearchActive = queryText.isNotBlank(),
         hasSearchResults = hasSearchResults,
         onRequestPermission = {
-            val toRequest = buildList {
-                if (!isStorageGranted) add(storagePermission)
-                if (!isNotificationGranted && notificationPermission != null) {
-                    add(notificationPermission)
-                }
-            }
-            if (toRequest.isNotEmpty()) {
-                permissionLauncher.launch(toRequest.toTypedArray())
+            if (!isNotificationGranted && notificationPermission != null) {
+                permissionLauncher.launch(notificationPermission)
             }
         },
         onUpdateClick = { navController.navigate("settings/update") },

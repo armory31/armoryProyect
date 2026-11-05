@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -13,28 +13,22 @@ package com.ruben.spotitube.ui.screens
  import androidx.compose.foundation.lazy.grid.GridCells
  import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
  import androidx.compose.foundation.lazy.grid.items
- import androidx.compose.material3.Icon
- import androidx.compose.material3.Text
  import com.ruben.spotitube.ArmoryTopBar
- import androidx.compose.material3.TopAppBar
  import androidx.compose.material3.TopAppBarScrollBehavior
  import androidx.compose.runtime.Composable
  import androidx.lifecycle.compose.collectAsStateWithLifecycle
  import androidx.compose.runtime.getValue
  import androidx.compose.runtime.rememberCoroutineScope
  import androidx.compose.ui.Modifier
- import androidx.compose.ui.res.painterResource
  import androidx.compose.ui.unit.dp
  import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
  import androidx.navigation.NavController
  import com.ruben.spotitube.LocalPlayerAwareWindowInsets
  import com.ruben.spotitube.LocalPlayerConnection
- import com.ruben.spotitube.R
  import com.ruben.spotitube.constants.GridThumbnailHeight
  import com.ruben.spotitube.innertube.models.AlbumItem
  import com.ruben.spotitube.innertube.models.ArtistItem
  import com.ruben.spotitube.innertube.models.PlaylistItem
- import com.ruben.spotitube.ui.component.IconButton
  import com.ruben.spotitube.ui.component.LocalMenuState
  import com.ruben.spotitube.ui.component.YouTubeGridItem
  import com.ruben.spotitube.ui.component.shimmer.GridItemPlaceHolder
@@ -42,7 +36,6 @@ package com.ruben.spotitube.ui.screens
  import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
  import com.ruben.spotitube.ui.menu.YouTubeArtistMenu
  import com.ruben.spotitube.ui.menu.YouTubePlaylistMenu
- import com.ruben.spotitube.ui.utils.backToMain
  import com.ruben.spotitube.viewmodels.BrowseViewModel
 
 @Composable

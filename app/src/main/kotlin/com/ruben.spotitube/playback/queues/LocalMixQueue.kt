@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -28,17 +28,12 @@ class LocalMixQueue(
     override suspend fun getInitialStatus(): Queue.Status = withContext(Dispatchers.IO) {
         val songs = database.playlistSongs(playlistId).first()
         val playlistSongIds = songs.map { it.id }
+        val mixSongs = songs.shuffled().take(maxMixSize)
 
-        val relatedSongs = playlistSongIds.flatMap { songId ->
-            database.relatedSongs(songId)
-        }
-        val uniqueRelated = relatedSongs.filter { song -> song.id !in playlistSongIds }.distinctBy { it.id }
-        val finalMix = uniqueRelated.take(maxMixSize)
-
-        if (finalMix.isNotEmpty()) {
+        if (mixSongs.isNotEmpty()) {
             return@withContext Queue.Status(
                 title = "Mix from Playlist",
-                items = finalMix.map { it.toMediaItem() },
+                items = mixSongs.map { it.toMediaItem() },
                 mediaItemIndex = 0,
             )
         }

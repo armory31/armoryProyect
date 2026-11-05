@@ -74,6 +74,13 @@ object HistoryItemMemoryCache {
     fun putAll(items: List<SongItem>) {
         items.forEach { put(it.id, it) }
     }
+
+    @Synchronized
+    fun clear() {
+        lruMap.evictAll()
+        cache.clear()
+        failedIdsWithTime.clear()
+    }
 }
 
 object HistoryArtistMemoryCache {

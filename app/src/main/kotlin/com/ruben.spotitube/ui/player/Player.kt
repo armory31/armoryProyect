@@ -2,7 +2,7 @@
 
 /*
  * ARMORY Project (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -222,8 +222,8 @@ fun BottomSheetPlayer(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
     val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
     val libraryStateHolder = LocalLibraryStateHolder.current
-    val isLikedInLibrary by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
-    val currentSongLiked = isLikedInLibrary
+    val isSavedInLibrary by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
+    val currentSongSaved = isSavedInLibrary
     val currentFormat by playerConnection.currentFormat.collectAsStateWithLifecycle(initialValue = null)
     val queueWindows by playerConnection.queueWindows.collectAsStateWithLifecycle()
     val currentWindowIndex by playerConnection.currentWindowIndex.collectAsStateWithLifecycle()
@@ -613,7 +613,7 @@ fun BottomSheetPlayer(
                     }
 
                     Key.L -> {
-                        playerConnection.toggleLike()
+                        playerConnection.toggleSongSaved()
                         true
                     }
 
@@ -865,9 +865,9 @@ fun BottomSheetPlayer(
                                         positionMs = position,
                                         durationMs = duration,
                                         textColor = littleTextColor,
-                                        liked = currentSongLiked,
+                                        saved = currentSongSaved,
                                         onCollapse = state::collapseSoft,
-                                        onToggleLike = playerConnection::toggleLike,
+                                        onToggleSaved = playerConnection::toggleSongSaved,
                                         onExpandQueue = queueSheetState::expandSoft,
                                         onMenuClick = {
                                             menuState.show {
@@ -1016,9 +1016,9 @@ fun BottomSheetPlayer(
                                             positionMs = position,
                                             durationMs = duration,
                                             textColor = littleTextColor,
-                                            liked = currentSongLiked,
+                                            saved = currentSongSaved,
                                             onCollapse = state::collapseSoft,
-                                            onToggleLike = playerConnection::toggleLike,
+                                            onToggleSaved = playerConnection::toggleSongSaved,
                                             onExpandQueue = queueSheetState::expandSoft,
                                             onMenuClick = {
                                                 menuState.show {
@@ -1293,9 +1293,9 @@ private fun LittlePlayerContent(
     positionMs: Long,
     durationMs: Long,
     textColor: Color,
-    liked: Boolean,
+    saved: Boolean,
     onCollapse: () -> Unit,
-    onToggleLike: () -> Unit,
+    onToggleSaved: () -> Unit,
     onExpandQueue: () -> Unit,
     onMenuClick: () -> Unit,
 ) {
@@ -1426,16 +1426,16 @@ private fun LittlePlayerContent(
                 Spacer(Modifier.weight(1f))
 
                 Icon(
-                    painter = painterResource(if (liked) R.drawable.favorite else R.drawable.favorite_border),
+                    painter = painterResource(if (saved) R.drawable.favorite else R.drawable.favorite_border),
                     contentDescription = null,
-                    tint = if (liked) ArmoryColors.Gold2 else ArmoryColors.TextMuted,
+                    tint = if (saved) ArmoryColors.Gold2 else ArmoryColors.TextMuted,
                     modifier =
                         Modifier
                             .size(iconSize)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                                onClick = onToggleLike,
+                                onClick = onToggleSaved,
                             ),
                 )
 

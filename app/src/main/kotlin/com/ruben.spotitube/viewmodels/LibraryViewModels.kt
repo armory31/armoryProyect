@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -50,7 +50,6 @@ import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.playback.DownloadUtil
 import com.ruben.spotitube.sync.LibraryStateHolder
-import com.ruben.spotitube.utils.SyncUtils
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,18 +75,14 @@ constructor(
     @ApplicationContext context: Context,
     database: MusicDatabase,
     downloadUtil: DownloadUtil,
-    private val syncUtils: SyncUtils,
     private val libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
-
     val allSongs =
         context.dataStore.data
             .map {
                 Triple(
                     Triple(
-                        it[SongFilterKey].toEnum(SongFilter.LIKED),
+                        it[SongFilterKey].toEnum(SongFilter.SAVED),
                         it[SongSortTypeKey].toEnum(SongSortType.CREATE_DATE),
                         (it[SongSortDescendingKey] ?: true),
                     ),
@@ -99,7 +94,7 @@ constructor(
                 val (filter, sortType, descending) = filterSort
                 when (filter) {
                     SongFilter.LIBRARY,
-                    SongFilter.LIKED -> libraryStateHolder.getLibrarySongs().map { songs ->
+                    SongFilter.SAVED -> libraryStateHolder.getLibrarySongs().map { songs ->
                         when (sortType) {
                             SongSortType.CREATE_DATE -> songs
                             SongSortType.NAME -> songs.sortedBy { it.song.title }
@@ -125,27 +120,6 @@ constructor(
                         }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    fun refresh(filter: SongFilter) {
-        if (_isRefreshing.value) return
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.value = true
-            try {
-                when (filter) {
-                    SongFilter.LIKED, SongFilter.LIBRARY -> syncUtils.syncLikedSongs()
-                    SongFilter.DOWNLOADED -> Unit
-                }
-            } catch (e: Exception) {
-                reportException(e)
-            } finally {
-                _isRefreshing.value = false
-            }
-        }
-    }
-
-    fun syncLikedSongs() {
-        refresh(SongFilter.LIKED)
-    }
 }
 
 @HiltViewModel
@@ -154,7 +128,6 @@ class LibraryArtistsViewModel
 constructor(
     @ApplicationContext context: Context,
     database: MusicDatabase,
-    private val syncUtils: SyncUtils,
     private val libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
@@ -164,7 +137,7 @@ constructor(
         context.dataStore.data
             .map {
                 Triple(
-                    it[ArtistFilterKey].toEnum(ArtistFilter.LIKED),
+                    it[ArtistFilterKey].toEnum(ArtistFilter.SAVED),
                     it[ArtistSortTypeKey].toEnum(ArtistSortType.CREATE_DATE),
                     it[ArtistSortDescendingKey] ?: true,
                 )
@@ -172,7 +145,7 @@ constructor(
             .flatMapLatest { (filter, sortType, descending) ->
                 when (filter) {
                     ArtistFilter.LIBRARY,
-                    ArtistFilter.LIKED -> libraryStateHolder.getLibraryArtists().map { artists ->
+                    ArtistFilter.SAVED -> libraryStateHolder.getLibraryArtists().map { artists ->
                         when (sortType) {
                             ArtistSortType.CREATE_DATE -> artists.sortedBy { it.artist.savedAt }
                             ArtistSortType.NAME -> artists.sortedBy { it.artist.name }
@@ -182,25 +155,6 @@ constructor(
                     }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    fun refresh(filter: ArtistFilter) {
-        if (filter != ArtistFilter.LIKED) return
-        if (_isRefreshing.value) return
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.value = true
-            try {
-                syncUtils.syncArtistsSubscriptions()
-            } catch (e: Exception) {
-                reportException(e)
-            } finally {
-                _isRefreshing.value = false
-            }
-        }
-    }
-
-    fun sync() {
-        refresh(ArtistFilter.LIKED)
-    }
 }
 
 @HiltViewModel
@@ -210,7 +164,6 @@ constructor(
     @ApplicationContext context: Context,
     database: MusicDatabase,
     downloadUtil: DownloadUtil,
-    private val syncUtils: SyncUtils,
     private val libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
@@ -221,7 +174,7 @@ constructor(
             .map {
                 Pair(
                     Triple(
-                        it[AlbumFilterKey].toEnum(AlbumFilter.LIKED),
+                        it[AlbumFilterKey].toEnum(AlbumFilter.SAVED),
                         it[AlbumSortTypeKey].toEnum(AlbumSortType.CREATE_DATE),
                         it[AlbumSortDescendingKey] ?: true,
                     ),
@@ -261,7 +214,7 @@ constructor(
                                 }
                         }
                     AlbumFilter.LIBRARY,
-                    AlbumFilter.LIKED -> libraryStateHolder.getLibraryAlbums().map { albums ->
+                    AlbumFilter.SAVED -> libraryStateHolder.getLibraryAlbums().map { albums ->
                         when (sortType) {
                             AlbumSortType.CREATE_DATE -> albums
                             AlbumSortType.NAME -> albums.sortedBy { it.album.title }
@@ -276,25 +229,6 @@ constructor(
             }.onEach { albumsList ->
                 Log.d("SAVED_ALBUM_DEBUG", "3. ViewModel (allAlbums) emite ${albumsList.size} álbumes a la UI")
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    fun refresh(filter: AlbumFilter) {
-        if (filter != AlbumFilter.LIKED) return
-        if (_isRefreshing.value) return
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.value = true
-            try {
-                syncUtils.syncLikedAlbums()
-            } catch (e: Exception) {
-                reportException(e)
-            } finally {
-                _isRefreshing.value = false
-            }
-        }
-    }
-
-    fun sync() {
-        refresh(AlbumFilter.LIKED)
-    }
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -341,7 +275,6 @@ class LibraryPlaylistsViewModel
 constructor(
     @ApplicationContext context: Context,
     database: MusicDatabase,
-    private val syncUtils: SyncUtils,
 ) : ViewModel() {
     val allPlaylists =
         context.dataStore.data
@@ -352,18 +285,6 @@ constructor(
             .flatMapLatest { (sortType, descending) ->
                 database.playlists(sortType, descending)
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
-
-    fun sync() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.value = true
-            syncUtils.syncSavedPlaylists()
-            syncUtils.syncAutoSyncPlaylists()
-            _isRefreshing.value = false
-        }
-    }
 
     val topValue =
         context.dataStore.data
@@ -406,18 +327,8 @@ class LibraryMixViewModel
 constructor(
     @ApplicationContext context: Context,
     database: MusicDatabase,
-    private val syncUtils: SyncUtils,
     libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
-    val syncAllLibrary = {
-         viewModelScope.launch(Dispatchers.IO) {
-             try {
-                 syncUtils.performFullSync()
-             } catch (e: Exception) {
-                 Timber.e(e, "Error during manual sync")
-             }
-         }
-    }
     val topValue =
         context.dataStore.data
             .map { it[TopSize] ?: "50" }

@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -52,12 +52,14 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import com.ruben.spotitube.ArmoryTopBar
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -101,7 +103,6 @@ import com.ruben.spotitube.together.TogetherRole
 import com.ruben.spotitube.together.TogetherRoomSettings
 import com.ruben.spotitube.together.TogetherSessionState
 import com.ruben.spotitube.ui.component.TextFieldDialog
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.rememberPreference
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.ruben.spotitube.ui.component.IconButton as AtIconButton
@@ -154,14 +155,17 @@ fun MusicTogetherScreen(
     }
     val sessionState by sessionStateFlow.collectAsStateWithLifecycle()
 
-    val isHosting = sessionState is TogetherSessionState.Hosting
-    val isJoining = sessionState is TogetherSessionState.Joining
+    var isOnlineMode by rememberSaveable { mutableStateOf(false) }
+    val isHosting = sessionState is TogetherSessionState.Hosting || sessionState is TogetherSessionState.HostingOnline
+    val isJoining = sessionState is TogetherSessionState.Joining || sessionState is TogetherSessionState.JoiningOnline
     val isHostRole = when (val state = sessionState) {
-        is TogetherSessionState.Hosting -> true
+        is TogetherSessionState.Hosting, is TogetherSessionState.HostingOnline -> true
         is TogetherSessionState.Joined  -> state.role is TogetherRole.Host
         else -> false
     }
-    val isCreatingSessionLoading = (sessionState as? TogetherSessionState.Hosting)?.roomState == null && isHosting
+    val isCreatingSessionLoading =
+        (sessionState is TogetherSessionState.Hosting && (sessionState as TogetherSessionState.Hosting).roomState == null) ||
+            (sessionState is TogetherSessionState.HostingOnline && (sessionState as TogetherSessionState.HostingOnline).roomState == null)
     val isJoinedAsGuest = (sessionState as? TogetherSessionState.Joined)?.role is TogetherRole.Guest
     val isWaitingApproval = run {
         val joined = sessionState as? TogetherSessionState.Joined ?: return@run false
@@ -177,10 +181,12 @@ fun MusicTogetherScreen(
 
     val hostingLan = sessionState as? TogetherSessionState.Hosting
     val lanParticipants = hostingLan?.roomState?.participants.orEmpty()
+    val onlineParticipants = (sessionState as? TogetherSessionState.HostingOnline)?.roomState?.participants.orEmpty()
+    val hostParticipants = lanParticipants.ifEmpty { onlineParticipants }
     var confirmKickParticipantId by rememberSaveable { mutableStateOf<String?>(null) }
     var confirmBanParticipantId  by rememberSaveable { mutableStateOf<String?>(null) }
-    val confirmKickName = lanParticipants.firstOrNull { it.id == confirmKickParticipantId }?.name
-    val confirmBanName  = lanParticipants.firstOrNull { it.id == confirmBanParticipantId  }?.name
+    val confirmKickName = hostParticipants.firstOrNull { it.id == confirmKickParticipantId }?.name
+    val confirmBanName  = hostParticipants.firstOrNull { it.id == confirmBanParticipantId  }?.name
 
     LaunchedEffect(disableJoinUi, isJoining, isHosting) {
         if (disableJoinUi || isJoining || isHosting) showJoinDialog = false
@@ -235,20 +241,33 @@ fun MusicTogetherScreen(
     }
 
     var joinInput by rememberSaveable { mutableStateOf(lastJoinLink) }
-    val canJoin = remember(joinInput) { TogetherLink.decode(joinInput) != null }
+    val canJoin = remember(joinInput, isOnlineMode) {
+        if (isOnlineMode) joinInput.length == 6 && joinInput.all { it in '0'..'9' }
+        else TogetherLink.decode(joinInput) != null
+    }
 
     if (showJoinDialog) {
         TextFieldDialog(
-            title = { Text(stringResource(R.string.join_session)) },
-            placeholder = { Text(stringResource(R.string.together_join_link_hint)) },
-            singleLine = false,
-            maxLines = 8,
-            isInputValid = { TogetherLink.decode(it) != null },
+            title = {
+                Text(stringResource(if (isOnlineMode) R.string.together_room_code else R.string.join_session))
+            },
+            placeholder = {
+                Text(stringResource(if (isOnlineMode) R.string.together_room_code_hint else R.string.together_join_link_hint))
+            },
+            singleLine = isOnlineMode,
+            maxLines = if (isOnlineMode) 1 else 8,
+            isInputValid = {
+                if (isOnlineMode) it.trim().length == 6 && it.trim().all { char -> char in '0'..'9' }
+                else TogetherLink.decode(it) != null
+            },
             onDone = { raw ->
-                val trimmed = raw.trim()
+                val trimmed = if (isOnlineMode) raw.filter { it in '0'..'9' }.take(6) else raw.trim()
                 joinInput = trimmed
-                setLastJoinLink(trimmed)
-                playerConnection?.service?.joinTogether(trimmed, displayName)
+                if (isOnlineMode) playerConnection?.service?.joinTogetherOnline(trimmed, displayName)
+                else {
+                    setLastJoinLink(trimmed)
+                    playerConnection?.service?.joinTogether(trimmed, displayName)
+                }
             },
             onDismiss = { showJoinDialog = false },
         )
@@ -321,20 +340,26 @@ fun MusicTogetherScreen(
 
     // ── Screen content ────────────────────────────────────────────────────────
 
-    Column(
-        Modifier
-            .windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(
-                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+    Scaffold(
+        containerColor = Color.Transparent,
+        topBar = {
+            ArmoryTopBar(
+                title = stringResource(R.string.music_together),
+                onBack = navController::navigateUp,
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .padding(innerPadding)
+                .windowInsetsPadding(
+                    LocalPlayerAwareWindowInsets.current.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                    )
                 )
-            )
-            .verticalScroll(rememberScrollState()),
-    ) {
-        Spacer(
-            Modifier.windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
-            )
-        )
+                .verticalScroll(rememberScrollState()),
+        ) {
 
         // Status card
         StatusCard(
@@ -361,11 +386,46 @@ fun MusicTogetherScreen(
                 .padding(top = 4.dp, bottom = 12.dp),
         )
 
-        // Participants card (LAN host only)
-        if (hostingLan?.roomState != null && isHostRole) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            listOf(
+                false to stringResource(R.string.together_local_lan_mode),
+                true to stringResource(R.string.together_online_mode),
+            ).forEach { (online, label) ->
+                val selected = isOnlineMode == online
+                if (selected) {
+                    Button(
+                        onClick = {},
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(16.dp),
+                    ) { Text(label) }
+                } else {
+                    FilledTonalButton(
+                        onClick = {
+                            isOnlineMode = online
+                            joinInput = ""
+                            showJoinDialog = false
+                        },
+                        enabled = !isHosting && !isJoining && !isJoinedAsGuest,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(16.dp),
+                    ) { Text(label) }
+                }
+            }
+        }
+
+        val hostingOnline = sessionState as? TogetherSessionState.HostingOnline
+        val hostRoomState = hostingLan?.roomState ?: hostingOnline?.roomState
+        val hostSettings = hostingLan?.settings ?: hostingOnline?.settings
+        if (hostRoomState != null && isHostRole) {
             OnlineParticipantsCard(
-                participants = hostingLan.roomState.participants,
-                hostApprovalEnabled = hostingLan.settings.requireHostApprovalToJoin,
+                participants = hostRoomState.participants,
+                hostApprovalEnabled = hostSettings?.requireHostApprovalToJoin == true,
                 onApprove = { pid, approved ->
                     playerConnection?.service?.approveTogetherParticipant(pid, approved)
                 },
@@ -377,9 +437,9 @@ fun MusicTogetherScreen(
             )
         }
 
-        // Host section (LAN only)
         if (!isJoinedAsGuest) {
             HostSectionCard(
+                isOnlineMode = isOnlineMode,
                 displayName = displayName,
                 port = port,
                 allowAddTracks = allowAddTracks,
@@ -394,15 +454,13 @@ fun MusicTogetherScreen(
                         sessionState !is TogetherSessionState.Joined,
                 isLoading = isCreatingSessionLoading,
                 onStartSession = {
-                    playerConnection?.service?.startTogetherHost(
-                        port = port,
-                        displayName = displayName,
-                        settings = TogetherRoomSettings(
-                            allowGuestsToAddTracks = allowAddTracks,
-                            allowGuestsToControlPlayback = allowControlPlayback,
-                            requireHostApprovalToJoin = requireApproval,
-                        ),
+                    val settings = TogetherRoomSettings(
+                        allowGuestsToAddTracks = allowAddTracks,
+                        allowGuestsToControlPlayback = allowControlPlayback,
+                        requireHostApprovalToJoin = requireApproval,
                     )
+                    if (isOnlineMode) playerConnection?.service?.startTogetherOnlineHost(displayName, settings)
+                    else playerConnection?.service?.startTogetherHost(port, displayName, settings)
                 },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -413,7 +471,8 @@ fun MusicTogetherScreen(
         // Join section
         JoinSectionCard(
             joinInput = joinInput,
-            onJoinInputChange = { joinInput = it },
+            isOnlineMode = isOnlineMode,
+            onJoinInputChange = { joinInput = if (isOnlineMode) it.filter { char -> char in '0'..'9' }.take(6) else it },
             canJoin = canJoin,
             disableJoinUi = disableJoinUi,
             isJoined = isJoinedAsAcceptedGuest,
@@ -423,36 +482,38 @@ fun MusicTogetherScreen(
             onPasteFromClipboard = {
                 val text = clipboard.getText()?.text?.trim() ?: ""
                 if (text.isNotBlank()) {
-                    joinInput = text
+                    val pasted = if (isOnlineMode) text.filter { it in '0'..'9' }.take(6) else text
+                    joinInput = pasted
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // Auto-join if valid
-                    if (TogetherLink.decode(text) != null) {
-                        setLastJoinLink(text)
-                        playerConnection?.service?.joinTogether(text, displayName)
+                    if (isOnlineMode) {
+                        if (pasted.length == 6) playerConnection?.service?.joinTogetherOnline(pasted, displayName)
+                    } else if (TogetherLink.decode(pasted) != null) {
+                        setLastJoinLink(pasted)
+                        playerConnection?.service?.joinTogether(pasted, displayName)
                     }
                 }
             },
             onJoin = {
                 val trimmed = joinInput.trim()
-                setLastJoinLink(trimmed)
-                playerConnection?.service?.joinTogether(trimmed, displayName)
+                if (isOnlineMode) playerConnection?.service?.joinTogetherOnline(trimmed, displayName)
+                else {
+                    setLastJoinLink(trimmed)
+                    playerConnection?.service?.joinTogether(trimmed, displayName)
+                }
             },
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp),
         )
     }
-
-    ArmoryTopBar(
-        title = stringResource(R.string.music_together),
-        onBack = navController::navigateUp
-    )
+}
 }
 
 // ── Host Section Card (LAN only, no mode selector) ─────────────────────────
 
 @Composable
 private fun HostSectionCard(
+    isOnlineMode: Boolean,
     displayName: String,
     port: Int,
     allowAddTracks: Boolean,
@@ -510,18 +571,17 @@ private fun HostSectionCard(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.together_host_section),
+                        stringResource(if (isOnlineMode) R.string.together_online_session else R.string.together_host_section),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        stringResource(R.string.together_lan),
+                        stringResource(if (isOnlineMode) R.string.together_online_mode else R.string.together_local_lan_mode),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
-                // LAN badge
                 Surface(
                     shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colorScheme.secondaryContainer,
@@ -538,7 +598,7 @@ private fun HostSectionCard(
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                         Text(
-                            "LAN",
+                            stringResource(if (isOnlineMode) R.string.together_online_mode else R.string.together_lan),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -554,13 +614,15 @@ private fun HostSectionCard(
                 onClick = onShowNameDialog,
             )
             Divider()
-            SettingsItemRow(
-                icon = R.drawable.link,
-                title = stringResource(R.string.together_port),
-                subtitle = port.toString(),
-                onClick = onShowPortDialog,
-            )
-            Divider()
+            if (!isOnlineMode) {
+                SettingsItemRow(
+                    icon = R.drawable.link,
+                    title = stringResource(R.string.together_port),
+                    subtitle = port.toString(),
+                    onClick = onShowPortDialog,
+                )
+                Divider()
+            }
             ToggleRow(
                 icon = R.drawable.playlist_add,
                 title = stringResource(R.string.together_allow_guests_add),
@@ -627,6 +689,7 @@ private fun HostSectionCard(
 @Composable
 private fun JoinSectionCard(
     joinInput: String,
+    isOnlineMode: Boolean,
     onJoinInputChange: (String) -> Unit,
     canJoin: Boolean,
     disableJoinUi: Boolean,
@@ -638,7 +701,9 @@ private fun JoinSectionCard(
     onJoin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val parsedLink = remember(joinInput) { TogetherLink.decode(joinInput.trim()) }
+    val parsedLink = remember(joinInput, isOnlineMode) {
+        if (isOnlineMode) null else TogetherLink.decode(joinInput.trim())
+    }
 
     Card(
         modifier = modifier
@@ -688,7 +753,7 @@ private fun JoinSectionCard(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        stringResource(R.string.join_session),
+                        stringResource(if (isOnlineMode) R.string.together_room_code else R.string.join_session),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -722,7 +787,7 @@ private fun JoinSectionCard(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Icon(
-                            painterResource(R.drawable.link),
+                            painterResource(if (isOnlineMode) R.drawable.lock else R.drawable.link),
                             contentDescription = null,
                             tint = if (canJoin)
                                 MaterialTheme.colorScheme.primary
@@ -732,7 +797,10 @@ private fun JoinSectionCard(
                         )
                         Text(
                             text = if (joinInput.isBlank())
-                                stringResource(R.string.together_join_link_hint)
+                                stringResource(
+                                    if (isOnlineMode) R.string.together_room_code
+                                    else R.string.together_join_link_hint,
+                                )
                             else
                                 joinInput.trim(),
                             style = MaterialTheme.typography.bodySmall.copy(
@@ -1036,6 +1104,13 @@ private fun StatusCard(
                             onShare = { onShareLink(state.joinLink) },
                         )
                     }
+                    is TogetherSessionState.HostingOnline -> {
+                        OnlineRoomCodeCard(
+                            code = state.code,
+                            onCopy = { onCopyLink(state.code) },
+                            onShare = { onShareLink(state.code) },
+                        )
+                    }
                     is TogetherSessionState.Joined -> {
                         if (!isWaitingApproval) {
                             ParticipantsCard(
@@ -1061,6 +1136,42 @@ private fun StatusCard(
                     }
                     else -> Unit
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnlineRoomCodeCard(
+    code: String,
+    onCopy: () -> Unit,
+    onShare: () -> Unit,
+) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.7f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                stringResource(R.string.together_room_code),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                code,
+                style = MaterialTheme.typography.headlineMedium.copy(fontFamily = FontFamily.Monospace),
+                fontWeight = FontWeight.Bold,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onCopy) { Text(stringResource(R.string.copy_link)) }
+                TextButton(onClick = onShare) { Text(stringResource(R.string.share)) }
             }
         }
     }

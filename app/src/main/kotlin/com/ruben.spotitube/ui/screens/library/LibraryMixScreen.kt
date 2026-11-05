@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -61,9 +61,8 @@ import com.ruben.spotitube.constants.PlaylistSortTypeKey
 import com.ruben.spotitube.constants.PlaylistTagsFilterKey
 import com.ruben.spotitube.constants.ShowCachedPlaylistKey
 import com.ruben.spotitube.constants.ShowDownloadedPlaylistKey
-import com.ruben.spotitube.constants.ShowLikedPlaylistKey
+import com.ruben.spotitube.constants.ShowSavedPlaylistKey
 import com.ruben.spotitube.constants.ShowTopPlaylistKey
-import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.extensions.move
@@ -105,7 +104,6 @@ fun LibraryMixScreen(
     )
     val (sortDescending, onSortDescendingChange) = rememberPreference(MixSortDescendingKey, true)
     val (playlistSortType) = rememberEnumPreference(PlaylistSortTypeKey, PlaylistSortType.CUSTOM)
-    val (ytmSync) = rememberPreference(YtmSyncKey, true)
     val (selectedTagsFilter) = rememberPreference(PlaylistTagsFilterKey, "")
     val selectedTagIds = remember(selectedTagsFilter) {
         selectedTagsFilter.split(",").filter { it.isNotBlank() }.toSet()
@@ -115,14 +113,14 @@ fun LibraryMixScreen(
     ).collectAsStateWithLifecycle(initialValue = emptyList())
 
     val topSize by viewModel.topValue.collectAsStateWithLifecycle(initialValue = "50")
-    val likedTitle = stringResource(R.string.liked)
+    val savedTitle = stringResource(R.string.liked)
     val downloadedTitle = stringResource(R.string.offline)
     val cachedTitle = stringResource(R.string.cached_playlist)
     val topTitle = stringResource(R.string.my_top) + " $topSize"
 
-    val likedPlaylist = remember(likedTitle) {
+    val savedPlaylist = remember(savedTitle) {
         Playlist(
-            playlist = PlaylistEntity(id = "AUTO_LIKED_LIBRARY", name = likedTitle, isEditable = false),
+            playlist = PlaylistEntity(id = "AUTO_LIKED_LIBRARY", name = savedTitle, isEditable = false),
             songCount = 0,
             songThumbnails = emptyList(),
         )
@@ -149,7 +147,7 @@ fun LibraryMixScreen(
         )
     }
 
-    val (showLiked) = rememberPreference(ShowLikedPlaylistKey, true)
+    val (showLiked) = rememberPreference(ShowSavedPlaylistKey, true)
     val (showDownloaded) = rememberPreference(ShowDownloadedPlaylistKey, true)
     val (showTop) = rememberPreference(ShowTopPlaylistKey, true)
     val (showCached) = rememberPreference(ShowCachedPlaylistKey, true)
@@ -193,7 +191,7 @@ fun LibraryMixScreen(
             add(
                 LibraryShortcutItem(
                     id = "liked",
-                    title = likedPlaylist.playlist.name,
+                    title = savedPlaylist.playlist.name,
                     iconRes = R.drawable.favorite,
                     route = "auto_playlist/liked",
                     accentColor = ArmoryColors.Copper2,
@@ -280,12 +278,6 @@ fun LibraryMixScreen(
         if (!canReorderPlaylists || reorderableState.isAnyItemDragging) return@LaunchedEffect
 
         dragInfo ?: return@LaunchedEffect
-        val playlistsToReorder = mutableVisiblePlaylists.toList()
-        database.withTransaction {
-            playlistsToReorder.forEachIndexed { index, playlist ->
-                setPlaylistCustomOrder(playlist.id, index)
-            }
-        }
         dragInfo = null
     }
 

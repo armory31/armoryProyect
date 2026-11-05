@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -15,6 +15,12 @@ import kotlinx.serialization.Serializable
 data class BrowseBody(
     val context: Context,
     val browseId: String?,
-    val params: String?,
-    val continuation: String?
-)
+    val params: String? = null,
+    val continuation: String? = null,
+    val formData: FormData? = null,
+) {
+    @Serializable
+    data class FormData(
+        val selectedValues: List<String>
+    )
+}

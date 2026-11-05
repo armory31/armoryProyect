@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -47,6 +48,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.ruben.spotitube.models.toMediaMetadata
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,6 +85,7 @@ import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
+import kotlinx.coroutines.withContext
 import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.AlbumListItem
@@ -90,6 +93,7 @@ import com.ruben.spotitube.ui.component.ListDialog
 import com.ruben.spotitube.ui.component.ListItem
 import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
+import com.ruben.spotitube.ui.component.primaryShareAction
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
@@ -114,6 +118,59 @@ fun AlbumMenu(
     }
 
     val coroutineScope = rememberCoroutineScope()
+
+    val exportCsvText = stringResource(R.string.export_csv_title)
+    val exportCsvLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            coroutineScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                try {
+                    val albumId = album.album.id
+                    val albumTitle = album.album.title
+                    val defaultArtist = album.artists.firstOrNull()?.name ?: album.album.artistName.orEmpty()
+                    val fetchedSongs = runCatching {
+                        com.ruben.spotitube.innertube.YouTube.album(albumId).getOrNull()?.songs
+                    }.getOrNull()
+
+                    context.contentResolver.openOutputStream(it)?.use { stream ->
+                        java.io.OutputStreamWriter(stream, Charsets.UTF_8).use { writer ->
+                            writer.write("\"Track name\",\"Artist name\",\"Album\",\"Playlist name\",\"Type\",\"ISRC\",\"Spotify - id\"\n")
+                            fun escape(valStr: String?): String = "\"${valStr.orEmpty().replace("\"", "\"\"")}\""
+
+                            val albumTitleEsc = escape(albumTitle)
+
+                            if (!fetchedSongs.isNullOrEmpty()) {
+                                for (s in fetchedSongs) {
+                                    val trackName = escape(s.title)
+                                    val artistName = escape(s.artists.firstOrNull()?.name ?: defaultArtist)
+                                    writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                }
+                            } else {
+                                val dbSongs = database.albumSongs(albumId).first()
+                                if (dbSongs.isNotEmpty()) {
+                                    for (s in dbSongs) {
+                                        val trackName = escape(s.song.title)
+                                        val artistName = escape(s.artists.firstOrNull()?.name ?: defaultArtist)
+                                        writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                    }
+                                } else {
+                                    writer.write(",${escape(defaultArtist)},$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                }
+                            }
+                        }
+                    }
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, R.string.export_csv_success, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, R.string.export_csv_error, android.widget.Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         database.albumSongs(album.id).collect {
@@ -197,15 +254,16 @@ fun AlbumMenu(
 
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
-        onGetSong = { playlist ->
-            coroutineScope.launch(Dispatchers.IO) {
-                playlist.playlist.browseId?.let { playlistId ->
-                    album.album.playlistId?.let { addPlaylistId ->
-                        YouTube.addPlaylistToPlaylist(playlistId, addPlaylistId)
-                    }
+        onGetSong = {
+            withContext(Dispatchers.IO) {
+                val albumPage = YouTube.album(album.id).getOrNull()
+                val remoteSongs = albumPage?.songs?.map { it.toMediaMetadata() }
+                if (!remoteSongs.isNullOrEmpty()) {
+                    remoteSongs
+                } else {
+                    songs.map { it.toMediaMetadata() }
                 }
             }
-            songs.map { it.id }
         },
         onDismiss = {
             showChoosePlaylistDialog = false
@@ -304,23 +362,23 @@ fun AlbumMenu(
 
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
-    val isLiked by libraryStateHolder.isSavedAlbum(album.id).collectAsStateWithLifecycle(initialValue = false)
+    val isSaved by libraryStateHolder.isSavedAlbum(album.id).collectAsStateWithLifecycle(initialValue = false)
 
     AlbumListItem(
         album = album,
-        showLikedIcon = false,
+        showSavedIcon = false,
         badges = {},
         trailingContent = {
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        syncManager.toggleAlbumLike(album.album)
+                        syncManager.toggleAlbumSaved(album.album)
                     }
                 },
             ) {
                 Icon(
-                    painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),
-                    tint = if (isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current,
+                    painter = painterResource(if (isSaved) R.drawable.favorite else R.drawable.favorite_border),
+                    tint = if (isSaved) MaterialTheme.colorScheme.error else LocalContentColor.current,
                     contentDescription = null,
                 )
             }
@@ -394,24 +452,28 @@ fun AlbumMenu(
                             }
                         }
                     ),
+                    primaryShareAction(
+                        text = stringResource(R.string.share),
+                        onClick = {
+                            onDismiss()
+                            com.ruben.spotitube.utils.shareItem(context, "album", album.album.id, album.album.title, album.artists.firstOrNull()?.name, album.album.thumbnailUrl)
+                        },
+                        backgroundColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
                     NewAction(
                         icon = {
                             Icon(
-                                painter = painterResource(R.drawable.share),
+                                painter = painterResource(R.drawable.ic_download),
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        text = stringResource(R.string.share),
+                        text = exportCsvText,
                         onClick = {
                             onDismiss()
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/playlist?list=${album.album.playlistId}")
-                            }
-                            context.startActivity(Intent.createChooser(intent, null))
+                            exportCsvLauncher.launch("${album.album.title}.csv")
                         }
                     )
                 ),

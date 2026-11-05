@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -27,11 +27,9 @@ import com.ruben.spotitube.innertube.models.filterVideo
 import com.ruben.spotitube.models.PlaylistSuggestion
 import com.ruben.spotitube.models.PlaylistSuggestionPage
 import com.ruben.spotitube.models.PlaylistSuggestionQuery
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.sync.SyncManager
 import com.ruben.spotitube.utils.PlaylistSuggestionQueryBuilder
-import com.ruben.spotitube.utils.SyncUtils
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -66,7 +64,6 @@ class LocalPlaylistViewModel
 constructor(
     @ApplicationContext private val context: Context,
     private val database: MusicDatabase,
-    private val syncUtils: SyncUtils,
     libraryStateHolder: LibraryStateHolder,
     private val syncManager: SyncManager,
     savedStateHandle: SavedStateHandle,
@@ -77,7 +74,7 @@ constructor(
             .playlist(playlistId)
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val isLiked = libraryStateHolder.isSavedPlaylist(playlistId)
+    val isSaved = libraryStateHolder.isSavedPlaylist(playlistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val playlistSongs: StateFlow<List<Song>> =
@@ -132,9 +129,6 @@ constructor(
     
     // Cache for current suggestion page
     private var currentSuggestionPage: PlaylistSuggestionPage? = null
-
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -205,26 +199,10 @@ constructor(
         }
     }
 
-    fun toggleLike() {
+    fun toggleSaved() {
         val currentPlaylist = playlist.value?.playlist ?: return
         viewModelScope.launch {
-            syncManager.togglePlaylistLike(currentPlaylist)
-        }
-    }
-
-    fun refresh() {
-        if (_isRefreshing.value) return
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.value = true
-            try {
-                val p = playlist.first() ?: return@launch
-                val browseId = p.playlist.browseId ?: return@launch
-                syncUtils.syncPlaylistNow(browseId = browseId, playlistId = playlistId)
-            } catch (e: Exception) {
-                reportException(e)
-            } finally {
-                _isRefreshing.value = false
-            }
+            syncManager.togglePlaylistSaved(currentPlaylist)
         }
     }
     
@@ -365,7 +343,7 @@ constructor(
                 if (p == null) {
                     // If not found, we can't add to it.
                     // This might happen if it's a special playlist that hasn't been created yet.
-                    if (playlistId == com.ruben.spotitube.db.entities.PlaylistEntity.LIKED_PLAYLIST_ID) {
+                    if (playlistId == com.ruben.spotitube.db.entities.PlaylistEntity.SAVED_PLAYLIST_ID) {
                         insertSavedPlaylist(
                             com.ruben.spotitube.db.entities.SavedPlaylistEntity(
                                 id = playlistId,

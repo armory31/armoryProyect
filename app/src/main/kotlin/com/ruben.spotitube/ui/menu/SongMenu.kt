@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -95,6 +95,7 @@ import com.ruben.spotitube.ui.component.LocalBottomSheetPageState
 import com.ruben.spotitube.ui.component.MenuSurfaceSection
 import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
+import com.ruben.spotitube.ui.component.primaryShareAction
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.TextFieldDialog
 import com.ruben.spotitube.ui.utils.ShowMediaInfo
@@ -103,6 +104,8 @@ import com.ruben.spotitube.viewmodels.CachePlaylistViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
@@ -255,7 +258,7 @@ fun SongMenu(
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
         onGetSong = {
-            listOf(song.id)
+            listOf(song.toMediaMetadata())
         },
         onDismiss = {
             showChoosePlaylistDialog = false
@@ -343,8 +346,7 @@ fun SongMenu(
         }
     }
 
-    val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
-    val isInLibrary by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
+    val isSaved by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
 
     Surface(
         shape = RoundedCornerShape(28.dp),
@@ -359,13 +361,13 @@ fun SongMenu(
                 IconButton(
                     onClick = {
                         coroutineScope.launch {
-                            syncManager.toggleLike(song.song)
+                            syncManager.toggleSongSaved(song.song)
                         }
                     },
                 ) {
                     Icon(
-                        painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),
-                        tint = if (isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current,
+                        painter = painterResource(if (isSaved) R.drawable.favorite else R.drawable.favorite_border),
+                        tint = if (isSaved) MaterialTheme.colorScheme.error else LocalContentColor.current,
                         contentDescription = null,
                     )
                 }
@@ -386,10 +388,12 @@ fun SongMenu(
     val addToPlaylistText = stringResource(R.string.add_to_playlist)
     val shareText = stringResource(R.string.share)
     val editText = stringResource(R.string.edit)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
 
     val primaryActions = remember(
         song,
-        isLiked,
+        isSaved,
         startRadioText,
         playNextText,
         addToQueueText,
@@ -457,29 +461,17 @@ fun SongMenu(
                 text = addToPlaylistText,
                 onClick = { showChoosePlaylistDialog = true },
             ),
-            NewAction(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.share),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
+            primaryShareAction(
                 text = shareText,
                 onClick = {
                     onDismiss()
-                    val intent =
-                        Intent().apply {
-                            action = Intent.ACTION_SEND
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/watch?v=${song.id}")
-                        }
-                    context.startActivity(Intent.createChooser(intent, null))
+                    com.ruben.spotitube.utils.shareItem(context, "song", song.id, song.song.title, song.artists.firstOrNull()?.name, song.song.thumbnailUrl)
                 },
+                backgroundColor = primaryColor,
+                contentColor = onPrimaryColor,
             )
         )
-        if (isLiked) {
+        if (isSaved) {
             actions.add(
                 NewAction(
                     icon = {
@@ -520,43 +512,6 @@ fun SongMenu(
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        item {
-            MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text =
-                                stringResource(
-                                    if (!isInLibrary) R.string.add_to_library
-                                    else R.string.remove_from_library,
-                                ),
-                        )
-                    },
-                    leadingContent = {
-                        Icon(
-                            painter =
-                                painterResource(
-                                    if (!isInLibrary) R.drawable.library_add
-                                    else R.drawable.library_add_check,
-                                ),
-                            contentDescription = null,
-                        )
-                    },
-                    modifier =
-                        Modifier.clickable {
-                            coroutineScope.launch {
-                                syncManager.toggleLike(song.song)
-                                onDismiss()
-                            }
-                        },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                )
-            }
-        }
 
         item {
             Spacer(modifier = Modifier.height(12.dp))

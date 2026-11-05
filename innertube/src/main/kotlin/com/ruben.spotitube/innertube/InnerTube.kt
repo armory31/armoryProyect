@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -230,19 +230,24 @@ class InnerTube {
         params: String? = null,
         continuation: String? = null,
         setLogin: Boolean = false,
+        gl: String? = null,
+        chartsCountry: String? = null,
     ) = withRetry {
         httpClient.post("browse") {
             ytClient(client, setLogin = setLogin || useLoginForBrowse)
+            val effectiveLocale = if (gl != null) locale.copy(gl = gl) else locale
+            val formData = chartsCountry?.let { BrowseBody.FormData(selectedValues = listOf(it)) }
             setBody(
                 BrowseBody(
                     context = client.toContext(
-                        locale,
+                        effectiveLocale,
                         visitorData,
                         if (setLogin || useLoginForBrowse) dataSyncId else null
                     ),
                     browseId = browseId,
                     params = params,
-                    continuation = continuation
+                    continuation = continuation,
+                    formData = formData
                 )
             )
         }

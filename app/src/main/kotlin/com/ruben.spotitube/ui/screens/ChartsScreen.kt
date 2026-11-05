@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,15 +40,14 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,15 +56,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
+import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.innertube.models.AlbumItem
@@ -74,12 +78,7 @@ import com.ruben.spotitube.innertube.models.WatchEndpoint
 import com.ruben.spotitube.innertube.pages.ChartsPage
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.YouTubeQueue
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
-import com.ruben.spotitube.SectionHeader
-import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.ui.component.shimmer.GridItemPlaceHolder
@@ -88,7 +87,7 @@ import com.ruben.spotitube.ui.component.shimmer.TextPlaceholder
 import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
 import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
-import com.ruben.spotitube.ui.utils.backToMain
+import com.ruben.spotitube.viewmodels.ChartsError
 import com.ruben.spotitube.viewmodels.ChartsViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -105,9 +104,11 @@ fun ChartsScreen(
 
     val chartsPage by viewModel.chartsPage.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val chartsError by viewModel.error.collectAsStateWithLifecycle()
 
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val layoutDirection = LocalLayoutDirection.current
 
     LaunchedEffect(Unit) {
         if (chartsPage == null) {
@@ -128,7 +129,7 @@ fun ChartsScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            if (isLoading || chartsPage == null) {
+            if (isLoading && chartsPage == null) {
                 ShimmerHost(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -201,6 +202,39 @@ fun ChartsScreen(
                         }
                     }
                 }
+            } else if (chartsError != null && (chartsPage == null || chartsPage?.sections.orEmpty().isEmpty())) {
+                val errorMsg = when (chartsError) {
+                    ChartsError.NO_DATA -> stringResource(R.string.no_data_for_country)
+                    else -> stringResource(R.string.charts_load_error)
+                }
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = errorMsg,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (chartsError == ChartsError.NETWORK_ERROR) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.loadCharts() }) {
+                            Text(stringResource(R.string.retry))
+                        }
+                    }
+                }
+            } else if (chartsPage == null || chartsPage?.sections.orEmpty().isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_data_for_country),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
                 LazyColumn(
                     state = lazyListState,
@@ -208,10 +242,13 @@ fun ChartsScreen(
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                         .asPaddingValues(),
                 ) {
-                    chartsPage?.sections?.filter { it.title != "Top music videos" }?.forEach { section ->
+                    chartsPage?.sections?.forEach { section ->
                         item {
                             SectionHeader(
                                 text = when (section.title) {
+                                    "ESPAÑA" -> stringResource(R.string.region_spain)
+                                    "EUROPA" -> stringResource(R.string.region_europe)
+                                    "LATINOAMÉRICA" -> stringResource(R.string.region_latin_america)
                                     "Trending" -> stringResource(R.string.trending)
                                     "New releases", "Álbumes y singles nuevos" -> stringResource(R.string.new_releases)
                                     else -> section.title ?: stringResource(R.string.charts)
@@ -220,12 +257,15 @@ fun ChartsScreen(
                             )
                         }
                         item {
-                            val hasAlbums = section.chartType == ChartsPage.ChartType.NEW_RELEASES || section.items.any { it is AlbumItem }
+                            val systemBarsInsets = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+                            val rowContentPadding = PaddingValues(
+                                start = 12.dp + systemBarsInsets.calculateStartPadding(layoutDirection),
+                                end = 12.dp + systemBarsInsets.calculateEndPadding(layoutDirection)
+                            )
+                            val hasAlbums = section.chartType == ChartsPage.ChartType.NEW_RELEASES || section.items.any { it is AlbumItem || it is PlaylistItem || it is ArtistItem }
                             if (hasAlbums) {
                                 LazyRow(
-                                    contentPadding = WindowInsets.systemBars
-                                        .only(WindowInsetsSides.Horizontal)
-                                        .asPaddingValues(),
+                                    contentPadding = rowContentPadding,
                                     modifier = Modifier.animateItem(),
                                 ) {
                                     items(
@@ -255,7 +295,7 @@ fun ChartsScreen(
                                                             }
                                                             is AlbumItem -> navController.navigate("album/${item.id}")
                                                             is ArtistItem -> navController.navigate("artist/${item.id}")
-                                                            is PlaylistItem -> navController.navigate("online_playlist/${item.id}")
+                                                            is PlaylistItem -> navController.navigate("online_playlist/${item.id.removePrefix("VL")}")
                                                         }
                                                     },
                                                     onLongClick = {
@@ -295,9 +335,7 @@ fun ChartsScreen(
                                             state = lazyGridState,
                                             rows = GridCells.Fixed(rowCount),
                                             flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
-                                            contentPadding = WindowInsets.systemBars
-                                                .only(WindowInsetsSides.Horizontal)
-                                                .asPaddingValues(),
+                                            contentPadding = rowContentPadding,
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(ListItemHeight * rowCount)
@@ -311,7 +349,6 @@ fun ChartsScreen(
                                                     item = song,
                                                     isActive = song.id == mediaMetadata?.id,
                                                     isPlaying = isPlaying,
-                                                    isSwipeable = false,
                                                     trailingContent = {
                                                         IconButton(
                                                             onClick = {
@@ -355,66 +392,12 @@ fun ChartsScreen(
                                                                     )
                                                                 }
                                                             },
-                                                        ),
+                                                        )
+                                                        .animateItem(),
                                                 )
                                             }
                                         }
                                     }
-                                }
-                            }
-                        }
-                    }
-
-                    chartsPage?.sections?.find { it.title == "Top music videos" }?.let { topVideosSection ->
-                        item {
-                            SectionHeader(
-                                text = stringResource(R.string.top_music_videos),
-                                modifier = Modifier.animateItem(),
-                            )
-                        }
-                        item {
-                            LazyRow(
-                                contentPadding = WindowInsets.systemBars
-                                    .only(WindowInsetsSides.Horizontal)
-                                    .asPaddingValues(),
-                                modifier = Modifier.animateItem(),
-                            ) {
-                                items(
-                                    items = topVideosSection.items.filterIsInstance<SongItem>().distinctBy { it.id },
-                                    key = { it.id },
-                                ) { video ->
-                                    YouTubeGridItem(
-                                        item = video,
-                                        isActive = video.id == mediaMetadata?.id,
-                                        isPlaying = isPlaying,
-                                        coroutineScope = coroutineScope,
-                                        modifier = Modifier
-                                            .combinedClickable(
-                                                onClick = {
-                                                    if (video.id == mediaMetadata?.id) {
-                                                        playerConnection.player.togglePlayPause()
-                                                    } else {
-                                                        playerConnection.playQueue(
-                                                            YouTubeQueue(
-                                                                endpoint = WatchEndpoint(videoId = video.id),
-                                                                preloadItem = video.toMediaMetadata(),
-                                                            ),
-                                                        )
-                                                    }
-                                                },
-                                                onLongClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    menuState.show {
-                                                        YouTubeSongMenu(
-                                                            song = video,
-                                                            navController = navController,
-                                                            onDismiss = menuState::dismiss,
-                                                        )
-                                                    }
-                                                },
-                                            )
-                                            .animateItem(),
-                                    )
                                 }
                             }
                         }

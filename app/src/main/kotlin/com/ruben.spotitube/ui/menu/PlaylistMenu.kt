@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -71,6 +71,7 @@ import com.ruben.spotitube.ui.component.EditPlaylistDialog
 import com.ruben.spotitube.ui.component.MenuSurfaceSection
 import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
+import com.ruben.spotitube.ui.component.primaryShareAction
 import com.ruben.spotitube.ui.component.PlaylistListItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,7 +95,7 @@ fun PlaylistMenu(
     val downloadUtil = LocalDownloadUtil.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val dbPlaylist by database.playlist(playlist.id).collectAsStateWithLifecycle(initialValue = playlist)
-    val isLiked by remember(playlist.id, playlist.playlist.browseId) {
+    val isSaved by remember(playlist.id, playlist.playlist.browseId) {
         val targetId = playlist.playlist.browseId ?: playlist.id
         libraryStateHolder.savedPlaylistIds.map { it.contains(targetId) }
     }.collectAsStateWithLifecycle(initialValue = false)
@@ -119,6 +120,39 @@ fun PlaylistMenu(
     }
 
     val editable: Boolean = playlist.playlist.isEditable
+
+    val exportCsvText = stringResource(R.string.export_csv_title)
+    val exportCsvLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    context.contentResolver.openOutputStream(it)?.use { stream ->
+                        java.io.OutputStreamWriter(stream, Charsets.UTF_8).use { writer ->
+                            writer.write("\"Track name\",\"Artist name\",\"Album\",\"Playlist name\",\"Type\",\"ISRC\",\"Spotify - id\"\n")
+                            fun escape(valStr: String?): String = "\"${valStr.orEmpty().replace("\"", "\"\"")}\""
+
+                            for (song in songs) {
+                                val trackName = escape(song.song.title)
+                                val artistName = escape(song.artists.firstOrNull()?.name)
+                                val albumName = escape(song.song.albumName)
+                                val playlistName = escape(playlist.playlist.name)
+                                writer.write("$trackName,$artistName,$albumName,$playlistName,\"Playlist\",\"\",\n")
+                            }
+                        }
+                    }
+                    withContext(Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, R.string.export_csv_success, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                } catch (_: Exception) {
+                    withContext(Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, R.string.export_csv_error, android.widget.Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(songs) {
         if (songs.isEmpty()) return@LaunchedEffect
@@ -286,13 +320,13 @@ fun PlaylistMenu(
                     IconButton(
                         onClick = {
                             coroutineScope.launch {
-                                syncManager.togglePlaylistLike(playlist.playlist)
+                                syncManager.togglePlaylistSaved(playlist.playlist)
                             }
                         },
                     ) {
                         Icon(
-                            painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),
-                            tint = if (isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current,
+                            painter = painterResource(if (isSaved) R.drawable.favorite else R.drawable.favorite_border),
+                            tint = if (isSaved) MaterialTheme.colorScheme.error else LocalContentColor.current,
                             contentDescription = null,
                         )
                     }
@@ -312,6 +346,8 @@ fun PlaylistMenu(
     val playNextText = stringResource(R.string.play_next)
     val addToQueueText = stringResource(R.string.add_to_queue)
     val shareText = stringResource(R.string.share)
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
 
     val primaryActions = remember(
         songs,
@@ -319,77 +355,92 @@ fun PlaylistMenu(
         shuffleText,
         shareText,
         playlist.playlist.name,
+        playlist.playlist.isEditable,
         dbPlaylist?.playlist?.browseId,
         onDismiss,
         playerConnection,
     ) {
-        listOf(
-            NewAction(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.play),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                text = playText,
-                onClick = {
-                    onDismiss()
-                    if (songs.isNotEmpty()) {
-                        playerConnection.playQueue(
-                            ListQueue(
-                                title = playlist.playlist.name,
-                                items = songs.map(Song::toMediaItem),
-                            ),
+        buildList {
+            add(
+                NewAction(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.play),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                    }
-                },
-            ),
-            NewAction(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.shuffle),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                text = shuffleText,
-                onClick = {
-                    onDismiss()
-                    if (songs.isNotEmpty()) {
-                        playerConnection.playQueue(
-                            ListQueue(
-                                title = playlist.playlist.name,
-                                items = songs.shuffled().map(Song::toMediaItem),
-                            ),
-                        )
-                    }
-                },
-            ),
-            NewAction(
-                icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.share),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                text = shareText,
-                onClick = {
-                    onDismiss()
-                    val intent =
-                        Intent().apply {
-                            action = Intent.ACTION_SEND
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/playlist?list=${dbPlaylist?.playlist?.browseId}")
+                    },
+                    text = playText,
+                    onClick = {
+                        onDismiss()
+                        if (songs.isNotEmpty()) {
+                            playerConnection.playQueue(
+                                ListQueue(
+                                    title = playlist.playlist.name,
+                                    items = songs.map(Song::toMediaItem),
+                                ),
+                            )
                         }
-                    context.startActivity(Intent.createChooser(intent, null))
-                },
-            ),
-        )
+                    },
+                )
+            )
+            add(
+                NewAction(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.shuffle),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    text = shuffleText,
+                    onClick = {
+                        onDismiss()
+                        if (songs.isNotEmpty()) {
+                            playerConnection.playQueue(
+                                ListQueue(
+                                    title = playlist.playlist.name,
+                                    items = songs.shuffled().map(Song::toMediaItem),
+                                ),
+                            )
+                        }
+                    },
+                )
+            )
+            if (!playlist.playlist.isEditable) {
+                add(
+                    primaryShareAction(
+                        text = shareText,
+                        onClick = {
+                            onDismiss()
+                            val id = (playlist.playlist.browseId ?: playlist.playlist.id).removePrefix("VL")
+                            com.ruben.spotitube.utils.shareItem(context, "playlist", id, playlist.playlist.name, imageUrl = playlist.thumbnails.firstOrNull())
+                        },
+                        backgroundColor = primaryColor,
+                        contentColor = onPrimaryColor,
+                    )
+                )
+            }
+            add(
+                NewAction(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_download),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    text = exportCsvText,
+                    onClick = {
+                        onDismiss()
+                        exportCsvLauncher.launch("${playlist.playlist.name}.csv")
+                    },
+                )
+            )
+        }
     }
 
     LazyColumn(

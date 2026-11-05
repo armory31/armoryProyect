@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -35,12 +34,6 @@ fun fetchGitCommitHash(): String {
     }
 }
 
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(localPropertiesFile.inputStream())
-}
-
 val gitCommit = if (System.getenv("CI") == null) "debug-local" else fetchGitCommitHash()
 
 android {
@@ -57,13 +50,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        val togetherBearerToken =
-            localProperties.getProperty("TOGETHER_BEARER_TOKEN")
-                ?: System.getenv("TOGETHER_BEARER_TOKEN")
-                ?: ""
-        buildConfigField("String", "TOGETHER_BEARER_TOKEN", "\"$togetherBearerToken\"")
-
         buildConfigField("String", "GIT_COMMIT", "\"$gitCommit\"")
+
+        val shareHost = "armory-share.vercel.app"
+        buildConfigField("String", "SHARE_HOST", "\"$shareHost\"")
+        manifestPlaceholders["shareHost"] = shareHost
     }
 
     flavorDimensions += "abi"
@@ -199,6 +190,10 @@ ksp {
 }
 
 dependencies {
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
     implementation(libs.guava)
     implementation(libs.coroutines.guava)
     implementation(libs.concurrent.futures)
@@ -255,6 +250,9 @@ dependencies {
     // implementation(libs.kuromoji.ipadic)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
 
     implementation(libs.apache.lang3)
 
@@ -291,6 +289,7 @@ dependencies {
     implementation(project.dependencies.platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.database)
     // implementation("com.google.protobuf:protobuf-javalite:4.29.3")
     implementation(libs.kotlinx.coroutines.play.services)
     testImplementation(libs.junit)
@@ -320,4 +319,3 @@ configurations.configureEach {
         "androidx.compose.animation:animation-graphics:${libs.versions.compose.get()}",
     )
 }
-

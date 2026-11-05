@@ -1,17 +1,21 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
 package com.ruben.spotitube.together
 
 import androidx.compose.runtime.Immutable
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.request.header
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
@@ -28,37 +32,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 sealed interface TogetherClientEvent {
-    data class Welcome(
-        val welcome: ServerWelcome,
-    ) : TogetherClientEvent
-
-    data class RoomState(
-        val state: TogetherRoomState,
-    ) : TogetherClientEvent
-
-    data class JoinDecision(
-        val decision: com.ruben.spotitube.together.JoinDecision,
-    ) : TogetherClientEvent
-
-    data class ServerIssue(
-        val message: String,
-        val code: String? = null,
-    ) : TogetherClientEvent
-
-    data class Error(
-        val message: String,
-        val throwable: Throwable? = null,
-    ) : TogetherClientEvent
-
+    data class Welcome(val welcome: ServerWelcome) : TogetherClientEvent
+    data class RoomState(val state: TogetherRoomState) : TogetherClientEvent
+    data class JoinDecision(val decision: com.ruben.spotitube.together.JoinDecision) : TogetherClientEvent
+    data class ServerIssue(val message: String, val code: String? = null) : TogetherClientEvent
+    data class Error(val message: String, val throwable: Throwable? = null) : TogetherClientEvent
     data class HeartbeatPong(
         val pong: com.ruben.spotitube.together.HeartbeatPong,
         val receivedAtElapsedRealtimeMs: Long,
     ) : TogetherClientEvent
-
     data object Disconnected : TogetherClientEvent
 }
 
@@ -67,21 +54,13 @@ sealed class TogetherClientState {
     data object Idle : TogetherClientState()
     data class Connecting(val joinInfo: TogetherJoinInfo) : TogetherClientState()
     data class Connected(val session: TogetherJoinInfo) : TogetherClientState()
-    data class ConnectingRemote(
-        val wsUrl: String,
-        val sessionId: String,
-    ) : TogetherClientState()
-
-    data class ConnectedRemote(
-        val wsUrl: String,
-        val sessionId: String,
-    ) : TogetherClientState()
+    data class ConnectingRemote(val sessionId: String) : TogetherClientState()
+    data class ConnectedRemote(val sessionId: String) : TogetherClientState()
 }
 
 class TogetherClient(
     externalScope: CoroutineScope,
     clientId: String = UUID.randomUUID().toString(),
-    bearerToken: String? = null,
 ) {
     private val client =
         HttpClient(OkHttp) {
@@ -100,10 +79,8 @@ class TogetherClient(
         }
 
     private val scope = CoroutineScope(externalScope.coroutineContext + SupervisorJob())
-
     private val _state = MutableStateFlow<TogetherClientState>(TogetherClientState.Idle)
     val state = _state.asStateFlow()
-
     private val _events = MutableSharedFlow<TogetherClientEvent>(extraBufferCapacity = 64)
     val events = _events.asSharedFlow()
 
@@ -111,36 +88,34 @@ class TogetherClient(
     private var loopJob: Job? = null
     private var selfParticipantId: String? = null
     private val clientId = clientId.trim().ifBlank { UUID.randomUUID().toString() }.take(64)
-    private val normalizedBearerToken: String? = bearerToken?.trim()?.takeIf { it.isNotBlank() }
+    private var onlineSessionId: String? = null
+    private var onlineUid: String? = null
+    private var onlineGuestRef: DatabaseReference? = null
+    private var onlineInboxRef: DatabaseReference? = null
+    private var onlineInboxListener: ChildEventListener? = null
+    private var onlineStateListener: ValueEventListener? = null
+    private var onlineHostConnectedListener: ValueEventListener? = null
 
     fun connect(joinInfo: TogetherJoinInfo, displayName: String) {
         scope.launch {
             disconnect()
             _state.value = TogetherClientState.Connecting(joinInfo)
-
-            val wsUrl = joinInfo.toWebSocketUrl()
-            val urls = listOfNotNull(wsUrl, alternateWebSocketSchemeOrNull(wsUrl)).distinct()
-
-            val token = normalizedBearerToken
-
+            val urls = listOfNotNull(
+                joinInfo.toWebSocketUrl(),
+                alternateWebSocketSchemeOrNull(joinInfo.toWebSocketUrl()),
+            ).distinct()
             var lastError: Throwable? = null
             for (candidate in urls) {
                 try {
-                    client.webSocket(
-                        urlString = candidate,
-                        request = {
-                            if (token != null) header("Authorization", "Bearer $token")
-                        },
-                    ) {
+                    client.webSocket(urlString = candidate) {
                         session = this
-                        val hello =
-                            ClientHello(
-                                protocolVersion = TogetherProtocolVersion,
-                                sessionId = joinInfo.sessionId,
-                                sessionKey = joinInfo.sessionKey,
-                                clientId = clientId,
-                                displayName = displayName.trim(),
-                            )
+                        val hello = ClientHello(
+                            protocolVersion = TogetherProtocolVersion,
+                            sessionId = joinInfo.sessionId,
+                            sessionKey = joinInfo.sessionKey,
+                            clientId = clientId,
+                            displayName = displayName.trim(),
+                        )
                         send(TogetherJson.json.encodeToString(TogetherMessage.serializer(), hello))
                         _state.value = TogetherClientState.Connected(joinInfo)
                         runLoop(this, joinInfo.sessionId)
@@ -150,56 +125,46 @@ class TogetherClient(
                     lastError = t
                 }
             }
-
             _events.tryEmit(TogetherClientEvent.Error(connectionFailureMessage(lastError), lastError))
             _state.value = TogetherClientState.Idle
         }
     }
 
-    fun connect(
-        wsUrl: String,
-        sessionId: String,
-        sessionKey: String,
-        displayName: String,
-    ) {
+    fun connectOnline(sessionId: String, displayName: String) {
         scope.launch {
             disconnect()
-            _state.value = TogetherClientState.ConnectingRemote(wsUrl = wsUrl, sessionId = sessionId)
-
-            val urls = listOfNotNull(wsUrl.trim(), alternateWebSocketSchemeOrNull(wsUrl.trim())).distinct()
-
-            val token = normalizedBearerToken
-
-            var lastError: Throwable? = null
-            for (candidate in urls) {
-                try {
-                    client.webSocket(
-                        urlString = candidate,
-                        request = {
-                            if (token != null) header("Authorization", "Bearer $token")
-                        },
-                    ) {
-                        session = this
-                        val hello =
-                            ClientHello(
-                                protocolVersion = TogetherProtocolVersion,
-                                sessionId = sessionId,
-                                sessionKey = sessionKey,
-                                clientId = clientId,
-                                displayName = displayName.trim().ifBlank { "Guest" },
-                            )
-                        send(TogetherJson.json.encodeToString(TogetherMessage.serializer(), hello))
-                        _state.value = TogetherClientState.ConnectedRemote(wsUrl = candidate, sessionId = sessionId)
-                        runLoop(this, sessionId)
-                    }
-                    return@launch
-                } catch (t: Throwable) {
-                    lastError = t
-                }
+            _state.value = TogetherClientState.ConnectingRemote(sessionId)
+            val uid = TogetherFirebase.currentUid()
+            if (uid == null) {
+                _events.tryEmit(TogetherClientEvent.Error(TogetherFirebase.loginRequiredMessage()))
+                _state.value = TogetherClientState.Idle
+                return@launch
             }
 
-            _events.tryEmit(TogetherClientEvent.Error(connectionFailureMessage(lastError), lastError))
-            _state.value = TogetherClientState.Idle
+            val sessionRef = TogetherFirebase.session(sessionId)
+            val guestRef = sessionRef.child("guests").child(uid)
+            val inboxRef = sessionRef.child("guestInbox").child(uid)
+            try {
+                inboxRef.removeValue().await()
+                guestRef.onDisconnect().removeValue().await()
+                guestRef.setValue(mapOf("displayName" to displayName.trim().ifBlank { "Guest" })).await()
+                onlineSessionId = sessionId
+                onlineUid = uid
+                onlineGuestRef = guestRef
+                onlineInboxRef = inboxRef
+                attachOnlineListeners(sessionRef, inboxRef)
+                val hello = ClientHello(
+                    protocolVersion = TogetherProtocolVersion,
+                    sessionId = sessionId,
+                    sessionKey = "",
+                    clientId = clientId,
+                    displayName = displayName.trim().ifBlank { "Guest" },
+                )
+                enqueueOnlineMessage(sessionRef.child("hostInbox"), uid, hello)
+            } catch (t: Throwable) {
+                _events.tryEmit(TogetherClientEvent.Error("Failed to connect to session", t))
+                disconnect()
+            }
         }
     }
 
@@ -225,58 +190,208 @@ class TogetherClient(
                     if (raw.contains("ws", ignoreCase = true) && raw.contains("scheme", ignoreCase = true)) "Invalid server websocket URL" else null
                 else -> null
             }
-
         val detail = reason ?: raw.takeIf { it.isNotBlank() }
         return if (detail == null) "Connection failed" else "Connection failed: $detail"
     }
 
     suspend fun disconnect() {
+        val activeSessionId = onlineSessionId
+        val uid = onlineUid
+        val guestRef = onlineGuestRef
+        if (activeSessionId != null && uid != null) {
+            try {
+                enqueueOnlineMessage(
+                    TogetherFirebase.session(activeSessionId).child("hostInbox"),
+                    uid,
+                    ClientLeave(activeSessionId, uid),
+                )
+            } catch (t: Throwable) {
+                _events.tryEmit(TogetherClientEvent.Error("Failed to leave session", t))
+            }
+        }
+        removeOnlineListeners()
         loopJob?.cancel()
         loopJob?.cancelAndJoin()
         loopJob = null
         runCatching { session?.close(CloseReason(CloseReason.Codes.NORMAL, "Disconnect")) }
         session = null
         selfParticipantId = null
+        onlineSessionId = null
+        onlineUid = null
+        onlineGuestRef = null
+        onlineInboxRef = null
+        if (activeSessionId != null && uid != null) {
+            try {
+                guestRef?.removeValue()?.await()
+            } catch (t: Throwable) {
+                _events.tryEmit(TogetherClientEvent.Error("Failed to remove guest from session", t))
+            }
+            _events.tryEmit(TogetherClientEvent.Disconnected)
+        }
         _state.value = TogetherClientState.Idle
     }
 
     fun requestControl(sessionId: String, action: ControlAction) {
-        val pid = selfParticipantId ?: return
+        val participantId = selfParticipantId ?: return
         scope.launch {
-            session?.send(
-                TogetherJson.json.encodeToString(
-                    TogetherMessage.serializer(),
-                    ControlRequest(sessionId = sessionId, participantId = pid, action = action),
-                ),
-            )
+            sendMessage(ControlRequest(sessionId, participantId, action))
         }
     }
 
     fun requestAddTrack(sessionId: String, track: TogetherTrack, mode: AddTrackMode) {
-        val pid = selfParticipantId ?: return
+        val participantId = selfParticipantId ?: return
         scope.launch {
-            session?.send(
-                TogetherJson.json.encodeToString(
-                    TogetherMessage.serializer(),
-                    AddTrackRequest(sessionId = sessionId, participantId = pid, track = track, mode = mode),
-                ),
-            )
+            sendMessage(AddTrackRequest(sessionId, participantId, track, mode))
         }
     }
 
     fun sendHeartbeat(sessionId: String, pingId: Long, clientElapsedRealtimeMs: Long) {
         scope.launch {
-            session?.send(
-                TogetherJson.json.encodeToString(
-                    TogetherMessage.serializer(),
-                    HeartbeatPing(
-                        sessionId = sessionId,
-                        pingId = pingId,
-                        clientElapsedRealtimeMs = clientElapsedRealtimeMs,
-                    ),
-                ),
-            )
+            sendMessage(HeartbeatPing(sessionId, pingId, clientElapsedRealtimeMs))
         }
+    }
+
+    private suspend fun sendMessage(message: TogetherMessage) {
+        val sessionId = onlineSessionId
+        val uid = onlineUid
+        if (sessionId != null && uid != null) {
+            enqueueOnlineMessage(TogetherFirebase.session(sessionId).child("hostInbox"), uid, message)
+        } else {
+            session?.send(TogetherJson.json.encodeToString(TogetherMessage.serializer(), message))
+        }
+    }
+
+    private suspend fun enqueueOnlineMessage(
+        inbox: DatabaseReference,
+        fromUid: String,
+        message: TogetherMessage,
+    ) {
+        inbox.push().setValue(
+            mapOf(
+                "fromUid" to fromUid,
+                "msg" to TogetherJson.json.encodeToString(TogetherMessage.serializer(), message),
+            ),
+        ).await()
+    }
+
+    private fun attachOnlineListeners(sessionRef: DatabaseReference, inboxRef: DatabaseReference) {
+        val inboxListener = object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                scope.launch {
+                    try {
+                        processOnlineInboxChild(snapshot)
+                    } catch (t: Throwable) {
+                        _events.tryEmit(TogetherClientEvent.Error("Failed to process session message", t))
+                    } finally {
+                        try {
+                            snapshot.ref.removeValue().await()
+                        } catch (t: Throwable) {
+                            _events.tryEmit(TogetherClientEvent.Error("Failed to remove processed session message", t))
+                        }
+                    }
+                }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) = Unit
+            override fun onChildRemoved(snapshot: DataSnapshot) = Unit
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) = Unit
+            override fun onCancelled(error: DatabaseError) {
+                _events.tryEmit(TogetherClientEvent.Error("Session inbox listener failed", error.toException()))
+            }
+        }
+        onlineInboxListener = inboxListener
+        inboxRef.addChildEventListener(inboxListener)
+
+        val stateListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val json = snapshot.getValue(String::class.java) ?: return
+                val roomState = runCatching {
+                    TogetherJson.json.decodeFromString(TogetherMessage.serializer(), json) as? RoomStateMessage
+                }.getOrElse {
+                    _events.tryEmit(TogetherClientEvent.Error("Failed to decode room state", it))
+                    return
+                } ?: return
+                if (roomState.state.sessionId == onlineSessionId) {
+                    _events.tryEmit(TogetherClientEvent.RoomState(roomState.state))
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                _events.tryEmit(TogetherClientEvent.Error("Room state listener failed", error.toException()))
+            }
+        }
+        onlineStateListener = stateListener
+        sessionRef.child("state").addValueEventListener(stateListener)
+
+        val hostConnectedListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val connected = snapshot.getValue(Boolean::class.java) == true
+                if (!connected && _state.value is TogetherClientState.ConnectedRemote) {
+                    _events.tryEmit(TogetherClientEvent.Error("Host left"))
+                    scope.launch { disconnect() }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                _events.tryEmit(TogetherClientEvent.Error("Host status listener failed", error.toException()))
+            }
+        }
+        onlineHostConnectedListener = hostConnectedListener
+        sessionRef.child("meta").child("hostConnected").addValueEventListener(hostConnectedListener)
+    }
+
+    private suspend fun processOnlineInboxChild(snapshot: DataSnapshot) {
+        val messageJson = snapshot.child("msg").getValue(String::class.java) ?: return
+        val message = try {
+            TogetherJson.json.decodeFromString(TogetherMessage.serializer(), messageJson)
+        } catch (t: Throwable) {
+            _events.tryEmit(TogetherClientEvent.Error("Failed to decode message", t))
+            return
+        }
+        val sessionId = onlineSessionId ?: return
+        when (message) {
+            is ServerWelcome -> if (message.sessionId == sessionId) {
+                selfParticipantId = onlineUid
+                _state.value = TogetherClientState.ConnectedRemote(sessionId)
+                _events.tryEmit(TogetherClientEvent.Welcome(message))
+            }
+            is JoinDecision -> if (message.sessionId == sessionId && message.participantId == onlineUid) {
+                _events.tryEmit(TogetherClientEvent.JoinDecision(message))
+            }
+            is KickParticipant -> if (message.sessionId == sessionId && message.participantId == onlineUid) {
+                _events.tryEmit(TogetherClientEvent.Error(message.reason?.trim().orEmpty().ifBlank { "Kicked" }))
+                disconnect()
+            }
+            is BanParticipant -> if (message.sessionId == sessionId && message.participantId == onlineUid) {
+                _events.tryEmit(TogetherClientEvent.Error(message.reason?.trim().orEmpty().ifBlank { "Banned" }))
+                disconnect()
+            }
+            is HeartbeatPong -> if (message.sessionId == sessionId) {
+                _events.tryEmit(
+                    TogetherClientEvent.HeartbeatPong(
+                        message,
+                        android.os.SystemClock.elapsedRealtime(),
+                    ),
+                )
+            }
+            is ServerError -> _events.tryEmit(TogetherClientEvent.ServerIssue(message.message, message.code))
+            else -> Unit
+        }
+    }
+
+    private fun removeOnlineListeners() {
+        onlineInboxListener?.let { listener -> onlineInboxRef?.removeEventListener(listener) }
+        onlineStateListener?.let { listener ->
+            onlineSessionId?.let { TogetherFirebase.session(it).child("state").removeEventListener(listener) }
+        }
+        onlineHostConnectedListener?.let { listener ->
+            onlineSessionId?.let {
+                TogetherFirebase.session(it).child("meta").child("hostConnected").removeEventListener(listener)
+            }
+        }
+        onlineInboxListener = null
+        onlineStateListener = null
+        onlineHostConnectedListener = null
     }
 
     private suspend fun runLoop(session: WebSocketSession, sessionId: String) {
@@ -290,7 +405,6 @@ class TogetherClient(
                             } catch (_: ClosedReceiveChannelException) {
                                 break
                             }
-
                         val text = (frame as? Frame.Text)?.readText() ?: continue
                         val message =
                             runCatching { TogetherJson.json.decodeFromString(TogetherMessage.serializer(), text) }
@@ -298,58 +412,34 @@ class TogetherClient(
                                     _events.tryEmit(TogetherClientEvent.Error("Failed to decode message", it))
                                     continue
                                 }
-
                         when (message) {
-                            is ServerWelcome -> {
-                                if (message.sessionId == sessionId) {
-                                    selfParticipantId = message.participantId
-                                    _events.tryEmit(TogetherClientEvent.Welcome(message))
-                                }
+                            is ServerWelcome -> if (message.sessionId == sessionId) {
+                                selfParticipantId = message.participantId
+                                _events.tryEmit(TogetherClientEvent.Welcome(message))
                             }
-
-                            is RoomStateMessage -> {
-                                if (message.state.sessionId == sessionId) {
-                                    _events.tryEmit(TogetherClientEvent.RoomState(message.state))
-                                }
+                            is RoomStateMessage -> if (message.state.sessionId == sessionId) {
+                                _events.tryEmit(TogetherClientEvent.RoomState(message.state))
                             }
-
-                            is JoinDecision -> {
-                                if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
-                                    _events.tryEmit(TogetherClientEvent.JoinDecision(message))
-                                }
+                            is JoinDecision -> if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
+                                _events.tryEmit(TogetherClientEvent.JoinDecision(message))
                             }
-
-                            is KickParticipant -> {
-                                if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
-                                    val detail = message.reason?.trim().orEmpty().ifBlank { "Kicked" }
-                                    _events.tryEmit(TogetherClientEvent.Error(detail, null))
-                                    break
-                                }
+                            is KickParticipant -> if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
+                                _events.tryEmit(TogetherClientEvent.Error(message.reason?.trim().orEmpty().ifBlank { "Kicked" }))
+                                break
                             }
-
-                            is BanParticipant -> {
-                                if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
-                                    val detail = message.reason?.trim().orEmpty().ifBlank { "Banned" }
-                                    _events.tryEmit(TogetherClientEvent.Error(detail, null))
-                                    break
-                                }
+                            is BanParticipant -> if (message.sessionId == sessionId && message.participantId == selfParticipantId) {
+                                _events.tryEmit(TogetherClientEvent.Error(message.reason?.trim().orEmpty().ifBlank { "Banned" }))
+                                break
                             }
-
-                            is HeartbeatPong -> {
-                                if (message.sessionId == sessionId) {
-                                    _events.tryEmit(
-                                        TogetherClientEvent.HeartbeatPong(
-                                            pong = message,
-                                            receivedAtElapsedRealtimeMs = android.os.SystemClock.elapsedRealtime(),
-                                        ),
-                                    )
-                                }
+                            is HeartbeatPong -> if (message.sessionId == sessionId) {
+                                _events.tryEmit(
+                                    TogetherClientEvent.HeartbeatPong(
+                                        message,
+                                        android.os.SystemClock.elapsedRealtime(),
+                                    ),
+                                )
                             }
-
-                            is ServerError -> {
-                                _events.tryEmit(TogetherClientEvent.ServerIssue(message = message.message, code = message.code))
-                            }
-
+                            is ServerError -> _events.tryEmit(TogetherClientEvent.ServerIssue(message.message, message.code))
                             else -> Unit
                         }
                     }

@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -50,8 +50,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
-import com.ruben.spotitube.SectionHeader
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -131,7 +129,6 @@ import com.ruben.spotitube.ui.menu.YouTubePlaylistMenu
 import com.ruben.spotitube.ui.menu.YouTubeSongMenu
 import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.ui.utils.formatCompactCount
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.OnlinePlaylistViewModel
@@ -157,7 +154,7 @@ fun OnlinePlaylistScreen(
     val songs by viewModel.playlistSongs.collectAsStateWithLifecycle()
     val viewCounts by viewModel.viewCounts.collectAsStateWithLifecycle()
     val dbPlaylist by viewModel.dbPlaylist.collectAsStateWithLifecycle()
-    val isLiked by viewModel.isLiked.collectAsStateWithLifecycle()
+    val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -657,7 +654,7 @@ fun OnlinePlaylistScreen(
                                     // Like/Save Button
                                     if (playlist.id != "LM") {
                                         Surface(
-                                            onClick = viewModel::toggleLike,
+                                            onClick = viewModel::toggleSaved,
                                             shape = CircleShape,
                                             color = MaterialTheme.colorScheme.surfaceVariant,
                                             modifier = Modifier.size(48.dp)
@@ -669,13 +666,13 @@ fun OnlinePlaylistScreen(
                                                 Icon(
                                                     painter =
                                                         painterResource(
-                                                            if (isLiked)
+                                                            if (isSaved)
                                                                 R.drawable.favorite
                                                             else R.drawable.favorite_border
                                                         ),
                                                     contentDescription = null,
                                                     tint =
-                                                        if (isLiked)
+                                                        if (isSaved)
                                                             MaterialTheme.colorScheme.error
                                                         else
                                                             MaterialTheme.colorScheme

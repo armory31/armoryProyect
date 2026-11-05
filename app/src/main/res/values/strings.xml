@@ -187,8 +187,8 @@
     <string name="error_timeout">Timeout</string>
     <string name="error_unknown">Unknown error</string>
     <!-- Player action -->
-    <string name="action_like">Like</string>
-    <string name="action_remove_like">Remove like</string>
+    <string name="action_saved">Like</string>
+    <string name="action_remove_saved">Remove like</string>
     <string name="action_shuffle_on">Shuffle on</string>
     <string name="action_shuffle_off">Shuffle off</string>
     <string name="repeat_mode_off">Repeat mode off</string>
@@ -239,7 +239,6 @@
     <string name="action_logout">Log out</string>
     <string name="login">Login</string>
     <string name="not_logged_in">Not logged in</string>
-    <string name="playback_requires_youtube_music_confirmation">YouTube is asking to confirm you\'re not a bot. Open YouTube Music, play something to verify, and try again.</string>
     <string name="queue">Queue</string>
     <string name="artist_separators">Symbols to split artists</string>
     <string name="open_with_downloader">Open with Downloader</string>
@@ -288,6 +287,10 @@
     <string name="backup_create_failed">Could not create backup</string>
     <string name="restore_success">Backup restored successfully</string>
     <string name="restore_failed">Failed to restore backup</string>
+    <string name="saving_backup_title">Saving backup</string>
+    <string name="saving_backup_message">Uploading library to Firebase cloud…</string>
+    <string name="restoring_backup_title">Restoring backup</string>
+    <string name="restoring_backup_message">Downloading and restoring library from Firebase cloud…</string>
     <!-- Last.fm -->
     <!-- ListenBrainz -->
     <!-- Discord activity customization -->
@@ -302,6 +305,25 @@
     <string name="refresh">Refresh</string>
     <string name="logout_confirmation_title">Cerrar Sesión</string>
     <string name="logout_confirmation_message">¿Estás seguro de que deseas cerrar sesión? Se borrarán todos los datos locales de la aplicación.</string>
+    <string name="logout_no_connection_warning">Cannot log out without a network connection, to prevent data loss</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="reset_password_dialog_title">Reset Email Sent</string>
+    <string name="reset_password_dialog_message">If an account exists with this email, you will receive instructions to reset your password. Please check your SPAM folder.</string>
+    <string name="invalid_email_warning">Please enter a valid email address</string>
+    <string name="region_spain">Spain</string>
+    <string name="region_europe">Europe</string>
+    <string name="region_latin_america">Latin America</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="divider_or">or</string>
+    <string name="google_login_error">Error signing in with Google</string>
+    <string name="invalid_google_credential">Invalid Google credential</string>
+    <string name="export_csv_title">Export playlists and albums (CSV)</string>
+    <string name="export_csv_subtitle">Save playlists and albums to a CSV file</string>
+    <string name="export_csv_success">CSV exported successfully</string>
+    <string name="export_csv_error">Error exporting CSV</string>
+    <string name="no_data_for_country">No data available for this country</string>
+    <string name="charts_load_error">Failed to load charts</string>
+    <string name="import_from_web">Import from web</string>
     <!--Misc settings additions-->
     <string name="experiment_settings">Experimental Settings</string>
     <string name="filter_levels">Filter levels</string>
@@ -381,6 +403,11 @@
     <string name="together_allow_guests_control">Guests can control playback</string>
     <string name="together_require_approval">Require approval</string>
     <string name="together_lan">LAN</string>
+    <string name="together_local_lan_mode">Local Network (LAN)</string>
+    <string name="together_online_mode">Online</string>
+    <string name="together_online_session">Online Session</string>
+    <string name="together_room_code">Room code</string>
+    <string name="together_room_code_hint">Enter the 6-digit room code</string>
     <string name="together_join_link_hint">Paste a join link or code</string>
     <string name="start_session">Start session</string>
     <string name="join_session">Join session</string>
@@ -391,11 +418,10 @@
     <string name="invalid_code">Invalid code</string>
     <string name="not_allowed">Not allowed</string>
     <string name="network_unavailable">Network unavailable</string>
-    <string name="together_online_not_configured">Online sessions are not configured</string>
-    <string name="together_token_missing">Online sessions are not available in this build</string>
     <string name="together_server_unreachable">Server unreachable</string>
     <string name="together_connection_timed_out">Connection timed out</string>
     <string name="together_session_not_found">Session not found</string>
+    <string name="together_firebase_login_required">Sign in to Firebase to use online sessions.</string>
     <string name="together_server_error">Server error, please try again later</string>
     <string name="leave">Leave</string>
     <string name="join">Join</string>
@@ -453,10 +479,7 @@
     <!-- AOD Auto-activation -->
 
     <!-- AOD Fullscreen -->
-    <string name="open_youtube_music">Open YouTube Music</string>
-    <string name="playback_login_refresh_required">Refresh YouTube Music login</string>
-    <string name="playback_confirmation_required">Playback confirmation required</string>
-    <string name="playback_requires_youtube_music_login_refresh">Refresh your YouTube Music login, then return to ARMORY.</string>
+
     <string name="error_malformed_stream">Source error</string>
     <string name="new_releases">New Releases</string>
     <string name="singles">Singles</string>
@@ -481,4 +504,7 @@
         <item quantity="one">%d play</item>
         <item quantity="other">%d plays</item>
     </plurals>
+    <string name="clear_playback_history">Clear playback history</string>
+    <string name="clear_playback_history_dialog">Are you sure you want to clear playback history?</string>
+    <string name="empty_history">No listening history</string>
 </resources>

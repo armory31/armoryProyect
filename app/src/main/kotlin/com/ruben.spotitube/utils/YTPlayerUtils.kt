@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -53,11 +53,7 @@ object YTPlayerUtils {
     private const val LOG_TAG = "YTPlayerUtils"
     private const val FAILED_CLIENT_BACKOFF_MS = 10 * 60 * 1000L
 
-    class LoginRequiredForPlaybackException(
-        val videoId: String,
-        val targetUrl: String,
-        reason: String?,
-    ) : IllegalStateException(reason)
+
 
     private data class PlaybackGateFailure(
         val clientName: String,
@@ -218,11 +214,7 @@ object YTPlayerUtils {
         return true
     }
 
-    class InvalidPlaybackLoginContextException(
-        val videoId: String,
-        val targetUrl: String,
-        cause: Throwable,
-    ) : IllegalStateException("Invalid YouTube Music playback login context", cause)
+
 
     private fun normalizeStreamClientKey(clientKey: String?): String {
         return clientKey?.trim()?.takeIf { it.isNotBlank() }?.uppercase(Locale.US).orEmpty()
@@ -459,10 +451,10 @@ object YTPlayerUtils {
                 Timber.tag(LOG_TAG).w(
                     "Playback requires login recovery for $videoId via ${failure.clientName} (${failure.status}): ${failure.reason.orEmpty()}"
                 )
-                throw LoginRequiredForPlaybackException(
-                    videoId = videoId,
-                    targetUrl = "https://music.youtube.com/watch?v=$videoId",
-                    reason = failure.reason,
+                throw PlaybackException(
+                    failure.reason ?: "Playback failed",
+                    null,
+                    PlaybackException.ERROR_CODE_REMOTE_ERROR
                 )
             }
             if (botDetectedClients.isNotEmpty()) {
@@ -481,10 +473,10 @@ object YTPlayerUtils {
             val errorReason = streamPlayerResponse.playabilityStatus.reason
             if (isLoginRecoveryError(errorReason.orEmpty())) {
                 Timber.tag(LOG_TAG).w("Playback requires login recovery for $videoId: $errorReason")
-                throw LoginRequiredForPlaybackException(
-                    videoId = videoId,
-                    targetUrl = "https://music.youtube.com/watch?v=$videoId",
-                    reason = errorReason,
+                throw PlaybackException(
+                    errorReason ?: "Playback failed",
+                    null,
+                    PlaybackException.ERROR_CODE_REMOTE_ERROR
                 )
             }
             Timber.tag(LOG_TAG).e("Playability status not OK: $errorReason")

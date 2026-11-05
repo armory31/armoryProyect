@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -63,7 +63,7 @@ class OnlinePlaylistViewModel @Inject constructor(
     val dbPlaylist = database.playlistByBrowseId(playlistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val isLiked = libraryStateHolder.isSavedPlaylist(playlistId)
+    val isSaved = libraryStateHolder.isSavedPlaylist(playlistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     private val _viewCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
@@ -110,7 +110,7 @@ class OnlinePlaylistViewModel @Inject constructor(
         load(initial = true)
     }
 
-    fun toggleLike() {
+    fun toggleSaved() {
         val currentPlaylist = playlist.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val entity = database.withTransaction {
@@ -152,7 +152,7 @@ class OnlinePlaylistViewModel @Inject constructor(
                     local
                 }
             }
-            syncManager.togglePlaylistLike(entity)
+            syncManager.togglePlaylistSaved(entity)
         }
     }
 

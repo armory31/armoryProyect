@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,11 +36,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ruben.spotitube.R
+
+fun primaryShareAction(
+    text: String,
+    onClick: () -> Unit,
+    backgroundColor: Color,
+    contentColor: Color,
+): NewAction {
+    return NewAction(
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.share),
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
+                tint = contentColor,
+            )
+        },
+        text = text,
+        onClick = onClick,
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+    )
+}
 
 // Enhanced Action Button - Material 3 Expressive Design
 @Composable

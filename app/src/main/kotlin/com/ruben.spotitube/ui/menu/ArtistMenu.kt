@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -8,7 +8,6 @@
 
 package com.ruben.spotitube.ui.menu
 
-import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +45,7 @@ import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.ArtistListItem
 import com.ruben.spotitube.ui.component.NewAction
 import com.ruben.spotitube.ui.component.NewActionGrid
+import com.ruben.spotitube.ui.component.primaryShareAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -66,7 +66,7 @@ fun ArtistMenu(
 
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
-    val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
+    val isSaved by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
 
     ArtistListItem(
         artist = artist,
@@ -159,33 +159,17 @@ fun ArtistMenu(
                         )
                     }
 
-                    if (artist.artist.isYouTubeArtist) {
-                        add(
-                            NewAction(
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(R.drawable.share),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(28.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                text = stringResource(R.string.share),
-                                onClick = {
-                                    onDismiss()
-                                    val intent = Intent().apply {
-                                        action = Intent.ACTION_SEND
-                                        type = "text/plain"
-                                        putExtra(
-                                            Intent.EXTRA_TEXT,
-                                            "https://music.youtube.com/channel/${artist.id}"
-                                        )
-                                    }
-                                    context.startActivity(Intent.createChooser(intent, null))
-                                }
-                            )
+                    add(
+                        primaryShareAction(
+                            text = stringResource(R.string.share),
+                            onClick = {
+                                onDismiss()
+                                com.ruben.spotitube.utils.shareItem(context, "artist", artist.id, artist.artist.name, imageUrl = artist.artist.thumbnailUrl)
+                            },
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
                         )
-                    }
+                    )
                 },
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 16.dp)
             )
@@ -195,17 +179,17 @@ fun ArtistMenu(
         item {
             ListItem(
                 headlineContent = {
-                    Text(text = if (isBookmarked) stringResource(R.string.subscribed) else stringResource(R.string.subscribe))
+                    Text(text = if (isSaved) stringResource(R.string.subscribed) else stringResource(R.string.subscribe))
                 },
                 leadingContent = {
                     Icon(
-                        painter = painterResource(if (isBookmarked) R.drawable.subscribed else R.drawable.subscribe),
+                        painter = painterResource(if (isSaved) R.drawable.subscribed else R.drawable.subscribe),
                         contentDescription = null,
                     )
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        syncManager.toggleArtistLike(artist.artist)
+                        syncManager.toggleArtistSaved(artist.artist)
                     }
                 }
             )

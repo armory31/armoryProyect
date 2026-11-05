@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -23,7 +23,6 @@ import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.extensions.reversed
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.playback.DownloadUtil
-import com.ruben.spotitube.utils.SyncUtils
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,12 +50,8 @@ constructor(
     database: MusicDatabase,
     downloadUtil: DownloadUtil,
     savedStateHandle: SavedStateHandle,
-    private val syncUtils: SyncUtils,
 ) : ViewModel() {
     val playlist = savedStateHandle.get<String>("playlist")!!
-
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
 
     private fun AutoPlaylistSongSortType.toSongSortType(): SongSortType =
         when (this) {
@@ -67,7 +62,7 @@ constructor(
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val likedSongs =
+    val savedSongs =
         context.dataStore.data
             .map {
                 Triple(
@@ -82,7 +77,7 @@ constructor(
                 val (sortType, descending) = sortDesc
                 val songSortType = sortType.toSongSortType()
                 when (playlist) {
-                    "liked" -> database.likedSongsByRowIdAsc()
+                    "liked" -> database.allSongs()
                     "downloaded" -> combine(
                         database.allSongs().flowOn(Dispatchers.IO),
                         downloadUtil.downloads
@@ -105,25 +100,4 @@ constructor(
                     else -> MutableStateFlow(emptyList())
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    fun refresh() {
-        if (_isRefreshing.value) return
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.value = true
-            try {
-                when (playlist) {
-                    "liked" -> syncUtils.syncLikedSongs()
-                    else -> Unit
-                }
-            } catch (e: Exception) {
-                reportException(e)
-            } finally {
-                _isRefreshing.value = false
-            }
-        }
-    }
-
-    fun syncLikedSongs() {
-        refresh()
-    }
 }

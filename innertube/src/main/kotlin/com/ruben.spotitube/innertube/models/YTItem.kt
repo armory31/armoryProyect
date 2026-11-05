@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -90,11 +90,11 @@ data class PlaylistItem(
     override val id: String,
     override val title: String,
     val author: Artist?,
-    val songCountText: String?,
+    val songCountText: String? = null,
     override val thumbnail: String?,
-    val playEndpoint: WatchEndpoint?,
-    val shuffleEndpoint: WatchEndpoint?,
-    val radioEndpoint: WatchEndpoint?,
+    val playEndpoint: WatchEndpoint? = null,
+    val shuffleEndpoint: WatchEndpoint? = null,
+    val radioEndpoint: WatchEndpoint? = null,
     val isEditable: Boolean = false,
 ) : YTItem {
     override val explicit: Boolean
@@ -109,8 +109,8 @@ data class ArtistItem(
     override val thumbnail: String?,
     val channelId: String? = null,
     val playEndpoint: WatchEndpoint? = null,
-    val shuffleEndpoint: WatchEndpoint?,
-    val radioEndpoint: WatchEndpoint?,
+    val shuffleEndpoint: WatchEndpoint? = null,
+    val radioEndpoint: WatchEndpoint? = null,
 ) : YTItem {
     override val explicit: Boolean
         get() = false

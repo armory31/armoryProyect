@@ -1,6 +1,6 @@
 /*
  * ARMORY Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -18,7 +18,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.preferences.core.edit
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ruben.spotitube.BuildConfig
@@ -41,7 +43,7 @@ import androidx.core.net.toUri
 object UpdateNotificationManager {
     private const val CHANNEL_ID = "update_notification_channel"
     private const val NOTIFICATION_ID = 9999
-    private const val WORK_NAME = "update_check_work"
+    private const val WORK_NAME = "update_check_work_v2"
     private const val CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -58,10 +60,11 @@ object UpdateNotificationManager {
     }
 
     fun schedulePeriodicUpdateCheck(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("update_check_work")
+
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .setRequiresBatteryNotLow(true)
-            .setRequiresDeviceIdle(true)
             .build()
 
         val updateCheckRequest = PeriodicWorkRequestBuilder<UpdateCheckWorker>(
@@ -75,6 +78,22 @@ object UpdateNotificationManager {
             WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
             updateCheckRequest
+        )
+    }
+
+    fun checkNow(context: Context) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val request = OneTimeWorkRequestBuilder<UpdateCheckWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "update_check_now",
+            ExistingWorkPolicy.REPLACE,
+            request
         )
     }
 
@@ -111,7 +130,7 @@ object UpdateNotificationManager {
                 dataStore.edit { it[LastUpdateCheckKey] = now }
 
                 Updater.getLatestVersionName().onSuccess { latestVersion ->
-                    if (!Updater.isSameVersion(latestVersion, BuildConfig.VERSION_NAME)) {
+                    if (Updater.isNewerVersion(latestVersion, BuildConfig.VERSION_NAME)) {
                         notifyIfNewVersion(context, latestVersion)
                     }
                 }
@@ -126,7 +145,7 @@ object UpdateNotificationManager {
             val dataStore = context.dataStore
             val lastNotified = dataStore.data.map { it[LastNotifiedVersionKey] ?: "" }.first()
 
-            if (latestVersion != lastNotified && !Updater.isSameVersion(latestVersion, BuildConfig.VERSION_NAME)) {
+            if (latestVersion != lastNotified && Updater.isNewerVersion(latestVersion, BuildConfig.VERSION_NAME)) {
                 showUpdateNotification(context, latestVersion)
                 dataStore.edit { it[LastNotifiedVersionKey] = latestVersion }
             }
@@ -139,7 +158,7 @@ object UpdateNotificationManager {
         createNotificationChannel(context)
 
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra("navigate_to", "settings/update")
         }
         val openAppPendingIntent = PendingIntent.getActivity(

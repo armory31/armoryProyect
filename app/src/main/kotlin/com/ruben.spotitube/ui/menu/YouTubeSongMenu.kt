@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -73,7 +73,6 @@ import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
 import com.ruben.spotitube.extensions.toMediaItem
-import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.models.toMediaMetadata
@@ -106,7 +105,7 @@ fun YouTubeSongMenu(
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
     
-    val isLiked by remember(song.id, libraryStateHolder) {
+    val isSaved by remember(song.id, libraryStateHolder) {
         libraryStateHolder.savedSongIds.map { song.id in it }
     }.collectAsStateWithLifecycle(initialValue = false)
     
@@ -155,13 +154,8 @@ fun YouTubeSongMenu(
 
     AddToPlaylistDialog(  
         isVisible = showChoosePlaylistDialog,  
-        onGetSong = { playlist ->  
-            playlist.playlist.browseId?.let { browseId ->
-                coroutineScope.launch(Dispatchers.IO) {
-                    YouTube.addToPlaylist(browseId, song.id)
-                }
-            }
-            listOf(song.id)  
+        onGetSong = {  
+            listOf(song.toMediaMetadata())  
         },  
         onDismiss = { showChoosePlaylistDialog = false },
         onAddComplete = { _, playlistNames ->
@@ -255,14 +249,14 @@ fun YouTubeSongMenu(
                 onClick = {  
                     coroutineScope.launch {
                         withContext(Dispatchers.IO) {
-                            syncManager.toggleLike(song.toSavedSongEntity())
+                            syncManager.toggleSongSaved(song.toSavedSongEntity())
                         }
                     }
                 },  
             ) {  
                 Icon(  
-                    painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),  
-                    tint = if (isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current,  
+                    painter = painterResource(if (isSaved) R.drawable.favorite else R.drawable.favorite_border),  
+                    tint = if (isSaved) MaterialTheme.colorScheme.error else LocalContentColor.current,  
                     contentDescription = null,  
                 )  
             }  
@@ -335,12 +329,7 @@ fun YouTubeSongMenu(
                         },
                         text = stringResource(R.string.share),
                         onClick = {
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, song.shareLink)
-                            }
-                            context.startActivity(Intent.createChooser(intent, null))
+                            com.ruben.spotitube.utils.shareItem(context, "song", song.id, song.title, song.artists.firstOrNull()?.name, song.thumbnail)
                             onDismiss()
                         }
                     )
@@ -381,17 +370,17 @@ fun YouTubeSongMenu(
         item {
             ListItem(
                 headlineContent = { 
-                    Text(text = if (isLiked) stringResource(R.string.remove_from_library) else stringResource(R.string.add_to_library))
+                    Text(text = if (isSaved) stringResource(R.string.remove_from_library) else stringResource(R.string.add_to_library))
                 },
                 leadingContent = {
                     Icon(
-                        painter = painterResource(if (isLiked) R.drawable.library_add_check else R.drawable.library_add),
+                        painter = painterResource(if (isSaved) R.drawable.library_add_check else R.drawable.library_add),
                         contentDescription = null,
                     )
                 },
                 modifier = Modifier.clickable {
                     coroutineScope.launch {
-                        syncManager.toggleLike(song.toSavedSongEntity())
+                        syncManager.toggleSongSaved(song.toSavedSongEntity())
                     }
                 }
             )

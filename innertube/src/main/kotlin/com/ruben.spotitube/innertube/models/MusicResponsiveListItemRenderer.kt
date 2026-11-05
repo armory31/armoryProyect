@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -34,6 +34,7 @@ data class MusicResponsiveListItemRenderer(
     val playlistItemData: PlaylistItemData?,
     val overlay: Overlay?,
     val navigationEndpoint: NavigationEndpoint?,
+    val customIndexColumn: CustomIndexColumn? = null,
 ) {
     val isSong: Boolean
         get() = navigationEndpoint == null || navigationEndpoint.watchEndpoint != null || navigationEndpoint.watchPlaylistEndpoint != null
@@ -62,6 +63,17 @@ data class MusicResponsiveListItemRenderer(
         val playlistSetVideoId: String?,
         val videoId: String,
     )
+
+    @Serializable
+    data class CustomIndexColumn(
+        val musicCustomIndexColumnRenderer: MusicCustomIndexColumnRenderer? = null,
+    ) {
+        @Serializable
+        data class MusicCustomIndexColumnRenderer(
+            val text: Runs? = null,
+            val icon: Icon? = null,
+        )
+    }
 
     @Serializable
     data class Overlay(

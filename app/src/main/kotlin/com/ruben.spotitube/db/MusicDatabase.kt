@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -43,16 +43,12 @@ import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.SearchHistory
 import com.ruben.spotitube.db.entities.SetVideoIdEntity
-import com.ruben.spotitube.db.entities.SongArtistMap
 import com.ruben.spotitube.db.entities.TagEntity
 import com.ruben.spotitube.extensions.toSQLiteQuery
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import timber.log.Timber
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.Date
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
@@ -715,3 +711,11 @@ class Migration19To20 : AutoMigrationSpec {
 
 @DeleteColumn.Entries(DeleteColumn(tableName = "song", columnName = "artistName"))
 class Migration20To21 : AutoMigrationSpec
+
+suspend fun MusicDatabase.clearHistoryCompletely() {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        clearListenHistory()
+        com.ruben.spotitube.utils.HistoryItemMemoryCache.clear()
+    }
+}
+

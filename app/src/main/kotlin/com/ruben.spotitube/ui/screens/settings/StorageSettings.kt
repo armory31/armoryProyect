@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -27,8 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.db.clearHistoryCompletely
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,12 +57,10 @@ import com.ruben.spotitube.constants.SmartTrimmerKey
 import com.ruben.spotitube.extensions.directorySizeBytes
 import com.ruben.spotitube.extensions.tryOrNull
 import com.ruben.spotitube.ui.component.ActionPromptDialog
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.ListPreference
 import com.ruben.spotitube.ui.component.PreferenceEntry
 import com.ruben.spotitube.ui.component.SwitchPreference
 import com.ruben.spotitube.ui.player.CanvasArtworkPlaybackCache
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.ui.utils.formatFileSize
 import com.ruben.spotitube.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
@@ -201,27 +199,32 @@ fun StorageSettings(
         }
     }
 
-    Column(
-        Modifier
-            .fillMaxSize() // Asegurar fondo completo
-            .background(MaterialTheme.colorScheme.background) // Inactivado fondo por defecto, forzado Pure Black
-            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-            .verticalScroll(rememberScrollState())
-            .padding(12.dp)
-    ) {
-        Spacer(
-            Modifier.windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
+    androidx.compose.material3.Scaffold(
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        topBar = {
+            ArmoryTopBar(
+                title = stringResource(R.string.storage),
+                onBack = navController::navigateUp,
+                scrollBehavior = scrollBehavior
             )
-        )
-
-        SwitchPreference(
-            title = { Text(stringResource(R.string.smart_trimmer)) },
-            description = stringResource(R.string.smart_trimmer_description),
-            checked = smartTrimmer && isSmartTrimmerAvailable,
-            onCheckedChange = onSmartTrimmerChange,
-            isEnabled = isSmartTrimmerAvailable,
-        )
+        }
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
+                .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                .verticalScroll(rememberScrollState())
+                .padding(12.dp)
+        ) {
+            SwitchPreference(
+                title = { Text(stringResource(R.string.smart_trimmer)) },
+                description = stringResource(R.string.smart_trimmer_description),
+                checked = smartTrimmer && isSmartTrimmerAvailable,
+                onCheckedChange = onSmartTrimmerChange,
+                isEnabled = isSmartTrimmerAvailable,
+            )
 
         // --- Section: Downloads ---
         CacheCard(
@@ -402,12 +405,41 @@ fun StorageSettings(
                 }
             )
         }
-    }
 
-    ArmoryTopBar(
-        title = stringResource(R.string.storage),
-        onBack = navController::navigateUp
-    )
+        var clearHistoryDialog by remember { mutableStateOf(false) }
+
+        CacheCard(
+            icon = R.drawable.history,
+            title = stringResource(R.string.clear_playback_history),
+            description = stringResource(R.string.history),
+            progress = null,
+            actions = {
+                PreferenceEntry(
+                    title = { Text(stringResource(R.string.clear)) },
+                    onClick = { clearHistoryDialog = true },
+                )
+            }
+        )
+
+        if (clearHistoryDialog) {
+            val musicService = LocalPlayerConnection.current?.service
+            ActionPromptDialog(
+                title = stringResource(R.string.clear_playback_history),
+                onDismiss = { clearHistoryDialog = false },
+                onConfirm = {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        musicService?.database?.clearHistoryCompletely()
+                    }
+                    clearHistoryDialog = false
+                },
+                onCancel = { clearHistoryDialog = false },
+                content = {
+                    Text(text = stringResource(R.string.clear_playback_history_dialog))
+                }
+            )
+        }
+    }
+}
 }
 
 @Composable

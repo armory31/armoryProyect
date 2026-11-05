@@ -1,8 +1,8 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -95,9 +95,10 @@ fun CurrentSongHeader(
     songCount: Int,
     queueDuration: Int,
     infiniteQueueEnabled: Boolean,
+    isSaved: Boolean,
     backgroundColor: Color,
     onBackgroundColor: Color,
-    onToggleLike: () -> Unit,
+    onToggleSaved: () -> Unit,
     onMenuClick: () -> Unit,
     onRepeatClick: () -> Unit,
     onShuffleClick: () -> Unit,
@@ -166,20 +167,20 @@ fun CurrentSongHeader(
             }
 
             IconButton(
-                onClick = onToggleLike,
+                onClick = onToggleSaved,
                 modifier = Modifier.size(44.dp),
                 colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = if (mediaMetadata?.liked == true)
+                    contentColor = if (isSaved)
                         MaterialTheme.colorScheme.primary
                     else onBackgroundColor
                 )
             ) {
                 Icon(
                     painter = painterResource(
-                        if (mediaMetadata?.liked == true) R.drawable.favorite
+                        if (isSaved) R.drawable.favorite
                         else R.drawable.favorite_border
                     ),
-                    contentDescription = stringResource(R.string.action_like),
+                    contentDescription = stringResource(R.string.action_saved),
                     modifier = Modifier.size(26.dp)
                 )
             }

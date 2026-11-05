@@ -1,6 +1,6 @@
 /*
  * OpenTune Project - Music Player (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -53,8 +53,6 @@ import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.ArmoryGradients
 import com.ruben.spotitube.ArmoryHeader
 import com.ruben.spotitube.rememberAvatarUrl
-import com.ruben.spotitube.constants.InnerTubeCookieKey
-import com.ruben.spotitube.innertube.utils.parseCookieString
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
@@ -99,12 +97,8 @@ fun HomeScreen(
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountImageUrl by viewModel.accountImageUrl.collectAsStateWithLifecycle()
-    val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
-    val isLoggedIn = remember(innerTubeCookie) {
-        "SAPISID" in parseCookieString(innerTubeCookie)
-    }
     val savedAvatarUrl = rememberAvatarUrl()
-    val url = savedAvatarUrl ?: if (isLoggedIn && !accountImageUrl.isNullOrEmpty()) accountImageUrl else null
+    val url = savedAvatarUrl ?: accountImageUrl.takeIf { !it.isNullOrEmpty() }
 
     val scope = rememberCoroutineScope()
     val lazylistState = rememberLazyListState()

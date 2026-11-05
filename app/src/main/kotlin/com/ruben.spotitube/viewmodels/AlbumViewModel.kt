@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -59,7 +59,7 @@ constructor(
     val albumId = savedStateHandle.get<String>("albumId")!!
     val playlistId = MutableStateFlow("")
 
-    val isLiked = libraryStateHolder.isSavedAlbum(albumId)
+    val isSaved = libraryStateHolder.isSavedAlbum(albumId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     private val onlineAlbumWithSongs = MutableStateFlow<AlbumWithSongs?>(null)
@@ -114,7 +114,7 @@ constructor(
         }
     }
 
-    fun toggleLike() {
+    fun toggleSaved() {
         viewModelScope.launch {
             val current = albumWithSongs.value
             val album = current?.album
@@ -122,9 +122,9 @@ constructor(
                 ?: database.getSavedAlbum(albumId)?.toAlbum()?.album
 
             if (album != null) {
-                syncManager.toggleAlbumLike(album)
+                syncManager.toggleAlbumSaved(album)
             } else {
-                syncManager.toggleAlbumLike(
+                syncManager.toggleAlbumSaved(
                     albumId = albumId,
                     title = ""
                 )

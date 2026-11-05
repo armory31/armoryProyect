@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -77,23 +77,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.ruben.spotitube.App.Companion.forgetAccount
 import com.ruben.spotitube.BuildConfig
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.AccountAvatarUriKey
-import com.ruben.spotitube.constants.AccountChannelHandleKey
 import com.ruben.spotitube.constants.AccountNameKey
-import com.ruben.spotitube.constants.DataSyncIdKey
-import com.ruben.spotitube.constants.InnerTubeCookieKey
-import com.ruben.spotitube.constants.SelectedYtmPlaylistsKey
-import com.ruben.spotitube.constants.VisitorDataKey
-import com.ruben.spotitube.innertube.YouTube
-import com.ruben.spotitube.innertube.utils.completed
-import com.ruben.spotitube.innertube.utils.parseCookieString
-import com.ruben.spotitube.ui.component.InfoLabel
-import com.ruben.spotitube.ui.component.TextFieldDialog
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.Updater
 import com.ruben.spotitube.utils.dataStore
@@ -113,10 +102,6 @@ fun AccountSettings(
 
     val (accountNamePref, onAccountNameChange) = rememberPreference(AccountNameKey, "")
     val (accountAvatarUriPref) = rememberPreference(AccountAvatarUriKey, "")
-    val (accountChannelHandle, onAccountChannelHandleChange) = rememberPreference(AccountChannelHandleKey, "")
-    val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
-    val (visitorData, onVisitorDataChange) = rememberPreference(VisitorDataKey, "")
-    val (dataSyncId, onDataSyncIdChange) = rememberPreference(DataSyncIdKey, "")
 
     val session = remember { SessionManager(context) }
     val currentUser = remember { FirebaseAuth.getInstance().currentUser }
@@ -129,13 +114,53 @@ fun AccountSettings(
         ?: "Usuario"
     val accountImageUrl = accountAvatarUriPref.ifEmpty { session.getAvatarUri().ifEmpty { currentUser?.photoUrl?.toString() } }
 
-    var showToken by remember { mutableStateOf(false) }
-    var showTokenEditor by remember { mutableStateOf(false) }
-    var showPlaylistDialog by remember { mutableStateOf(false) }
-    
     var showLogoutProgress by remember { mutableStateOf(false) }
+    var isBackupLoading by remember { mutableStateOf(false) }
+    var isRestoreLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val syncManager = LocalSyncManager.current
+
+    if (isBackupLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { },
+            title = { Text(stringResource(R.string.saving_backup_title)) },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.saving_backup_message))
+                }
+            },
+            properties = androidx.compose.ui.window.DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        )
+    }
+
+    if (isRestoreLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { },
+            title = { Text(stringResource(R.string.restoring_backup_title)) },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.restoring_backup_message))
+                }
+            },
+            properties = androidx.compose.ui.window.DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        )
+    }
 
     if (showLogoutProgress) {
         AlertDialog(
@@ -158,7 +183,7 @@ fun AccountSettings(
         )
     }
 
-    val hasUpdate = !Updater.isSameVersion(latestVersionName, BuildConfig.VERSION_NAME)
+    val hasUpdate = Updater.isNewerVersion(latestVersionName, BuildConfig.VERSION_NAME)
 
     Column(
         modifier = Modifier
@@ -188,7 +213,6 @@ fun AccountSettings(
                         val success = syncManager.handleLogout(context)
                         if (success) {
                             session.logout()
-                            forgetAccount(context)
                             (context as? Activity)?.finish()
                             context.startActivity(Intent(context, LoginActivity::class.java))
                         } else {
@@ -199,25 +223,6 @@ fun AccountSettings(
                 }
             )
 
-            // Token Editor Dialog
-            if (showTokenEditor) {
-                TokenEditorDialog(
-                    innerTubeCookie = innerTubeCookie,
-                    visitorData = visitorData,
-                    dataSyncId = dataSyncId,
-                    accountNamePref = accountNamePref,
-                    accountEmail = accountEmail,
-                    accountChannelHandle = accountChannelHandle,
-                    onInnerTubeCookieChange = onInnerTubeCookieChange,
-                    onVisitorDataChange = onVisitorDataChange,
-                    onDataSyncIdChange = onDataSyncIdChange,
-                    onAccountNameChange = onAccountNameChange,
-                    onAccountEmailChange = { /* No longer used directly */ },
-                    onAccountChannelHandleChange = onAccountChannelHandleChange,
-                    onDismiss = { showTokenEditor = false }
-                )
-            }
-
             // Account Options Section
             SettingsSection(title = stringResource(R.string.account)) {
                 SettingsClickableItem(
@@ -227,12 +232,14 @@ fun AccountSettings(
                     onClick = {
                         coroutineScope.launch {
                             if (isInternetAvailable(context)) {
-                                Toast.makeText(context, "Subiendo copia a la nube...", Toast.LENGTH_SHORT).show()
+                                isBackupLoading = true
                                 try {
                                     syncManager.pushLibraryToCloud()
                                     Toast.makeText(context, "Copia guardada con éxito", Toast.LENGTH_SHORT).show()
                                 } catch (e: Exception) {
                                     Toast.makeText(context, "Error al guardar copia", Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isBackupLoading = false
                                 }
                             } else {
                                 Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
@@ -253,13 +260,15 @@ fun AccountSettings(
                     onClick = {
                         coroutineScope.launch {
                             if (isInternetAvailable(context)) {
-                                Toast.makeText(context, "Descargando copia...", Toast.LENGTH_SHORT).show()
+                                isRestoreLoading = true
                                 try {
                                     val lib = syncManager.getUserLibrary()
                                     syncManager.applyLibraryToLocal(lib)
                                     Toast.makeText(context, "Biblioteca restaurada con éxito", Toast.LENGTH_SHORT).show()
                                 } catch (e: Exception) {
                                     Toast.makeText(context, e.message ?: "Error al restaurar copia", Toast.LENGTH_LONG).show()
+                                } finally {
+                                    isRestoreLoading = false
                                 }
                             } else {
                                 Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
@@ -277,18 +286,6 @@ fun AccountSettings(
                     onClick = {
                         onClose()
                         navController.navigate("settings/music_together")
-                    }
-                )
-            }
-
-            // Advanced Section
-            SettingsSection(title = stringResource(R.string.misc)) {
-                SettingsClickableItem(
-                    icon = painterResource(R.drawable.token),
-                    title = if (showToken) stringResource(R.string.token_shown) else stringResource(R.string.token_hidden),
-                    onClick = {
-                        if (!showToken) showToken = true
-                        else showTokenEditor = true
                     }
                 )
             }
@@ -323,13 +320,6 @@ fun AccountSettings(
 
             Spacer(Modifier.height(8.dp))
         }
-    }
-
-    // Playlist Selection Dialog
-    if (showPlaylistDialog) {
-        PlaylistSelectionDialog(
-            onDismiss = { showPlaylistDialog = false }
-        )
     }
 }
 
@@ -790,203 +780,3 @@ private fun AppVersionFooter() {
     }
 }
 
-@Composable
-private fun TokenEditorDialog(
-    innerTubeCookie: String,
-    visitorData: String,
-    dataSyncId: String,
-    accountNamePref: String,
-    accountEmail: String,
-    accountChannelHandle: String,
-    onInnerTubeCookieChange: (String) -> Unit,
-    onVisitorDataChange: (String) -> Unit,
-    onDataSyncIdChange: (String) -> Unit,
-    onAccountNameChange: (String) -> Unit,
-    onAccountEmailChange: (String) -> Unit,
-    onAccountChannelHandleChange: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val text = """
-        ***INNERTUBE COOKIE*** =$innerTubeCookie
-        ***VISITOR DATA*** =$visitorData
-        ***DATASYNC ID*** =$dataSyncId
-        ***ACCOUNT NAME*** =$accountNamePref
-        ***ACCOUNT EMAIL*** =$accountEmail
-        ***ACCOUNT CHANNEL HANDLE*** =$accountChannelHandle
-    """.trimIndent()
-
-    TextFieldDialog(
-        initialTextFieldValue = TextFieldValue(text),
-        onDone = { data ->
-            data.split("\n").forEach { line ->
-                when {
-                    line.startsWith("***INNERTUBE COOKIE*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onInnerTubeCookieChange)
-                    line.startsWith("***VISITOR DATA*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onVisitorDataChange)
-                    line.startsWith("***DATASYNC ID*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onDataSyncIdChange)
-                    line.startsWith("***ACCOUNT NAME*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onAccountNameChange)
-                    line.startsWith("***ACCOUNT EMAIL*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onAccountEmailChange)
-                    line.startsWith("***ACCOUNT CHANNEL HANDLE*** =") -> line.substringAfter("=").takeIf { it.isNotBlank() }?.let(onAccountChannelHandleChange)
-                }
-            }
-        },
-        onDismiss = onDismiss,
-        singleLine = false,
-        maxLines = 20,
-        isInputValid = {
-            it.isNotEmpty() && "SAPISID" in parseCookieString(it)
-        },
-        extraContent = {
-            InfoLabel(text = stringResource(R.string.token_adv_login_description))
-        }
-    )
-}
-
-@Composable
-private fun PlaylistSelectionDialog(onDismiss: () -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val (initialSelected, _) = rememberPreference(SelectedYtmPlaylistsKey, "")
-    val selectedList = remember { mutableStateListOf<String>() }
-
-    LaunchedEffect(initialSelected) {
-        selectedList.clear()
-        if (initialSelected.isNotEmpty()) {
-            selectedList.addAll(
-                initialSelected.split(',')
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-            )
-        }
-    }
-
-    var loading by remember { mutableStateOf(true) }
-    val playlists = remember { mutableStateListOf<com.ruben.spotitube.innertube.models.PlaylistItem>() }
-
-    LaunchedEffect(Unit) {
-        loading = true
-        YouTube
-            .library("FEmusic_liked_playlists")
-            .completed()
-            .onSuccess { page ->
-                playlists.clear()
-                playlists.addAll(
-                    page.items
-                        .filterIsInstance<com.ruben.spotitube.innertube.models.PlaylistItem>()
-                        .filterNot { it.id == "LM" || it.id == "SE" }
-                        .reversed()
-                )
-            }
-        loading = false
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(28.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    com.ruben.spotitube.utils.PreferenceStore.launchEdit(context.dataStore) {
-                        this[SelectedYtmPlaylistsKey] = selectedList.joinToString(",")
-                    }
-                    onDismiss()
-                }
-            ) {
-                Text(
-                    text = stringResource(R.string.save),
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.cancel_button))
-            }
-        },
-        title = {
-            Text(
-                text = stringResource(R.string.select_playlist_to_sync),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-        },
-        text = {
-            if (loading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp),
-                        strokeWidth = 3.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.height(400.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(playlists, key = { it.id }) { pl ->
-                        val isSelected = selectedList.contains(pl.id)
-                        val backgroundColor by animateColorAsState(
-                            targetValue = if (isSelected)
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-                            else
-                                Color.Transparent,
-                            label = "playlistItemColor"
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(backgroundColor)
-                                .clickable {
-                                    if (isSelected) selectedList.remove(pl.id)
-                                    else selectedList.add(pl.id)
-                                }
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = isSelected,
-                                onCheckedChange = { checked ->
-                                    if (checked) selectedList.add(pl.id)
-                                    else selectedList.remove(pl.id)
-                                },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
-
-                            Spacer(Modifier.width(8.dp))
-
-                            AsyncImage(
-                                model = pl.thumbnail,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-
-                            Spacer(Modifier.width(12.dp))
-
-                            Text(
-                                text = pl.title,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
-}

@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -54,9 +54,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.pullToRefresh
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -177,10 +174,9 @@ fun LocalPlaylistScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     val playlist by viewModel.playlist.collectAsStateWithLifecycle()
-    val isLiked by viewModel.isLiked.collectAsStateWithLifecycle()
+    val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
     val songs by viewModel.playlistSongs.collectAsStateWithLifecycle()
     val viewCounts by viewModel.viewCounts.collectAsStateWithLifecycle()
-    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val mutableSongs = remember { mutableStateListOf<PlaylistSongWrapper>() }
     val playlistLength = remember(songs) {
         songs.fastSumBy { it.song.duration }
@@ -208,7 +204,6 @@ fun LocalPlaylistScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val pullRefreshState = rememberPullToRefreshState()
 
     // System bars padding
     val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
@@ -533,12 +528,7 @@ fun LocalPlaylistScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(surfaceColor)
-            .pullToRefresh(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                onRefresh = viewModel::refresh
-            ),
+            .background(surfaceColor),
     ) {
         // Mesh gradient background layer
         if (!disableBlur && gradientColors.isNotEmpty() && gradientAlpha > 0f) {
@@ -829,7 +819,7 @@ fun LocalPlaylistScreen(
                                         }
                                     } else {
                                         Surface(
-                                            onClick = viewModel::toggleLike,
+                                            onClick = viewModel::toggleSaved,
                                             shape = CircleShape,
                                             color = MaterialTheme.colorScheme.surfaceVariant,
                                             modifier = Modifier.size(48.dp)
@@ -840,10 +830,10 @@ fun LocalPlaylistScreen(
                                             ) {
                                                 Icon(
                                                     painter = painterResource(
-                                                        if (isLiked) R.drawable.favorite else R.drawable.favorite_border
+                                                        if (isSaved) R.drawable.favorite else R.drawable.favorite_border
                                                     ),
                                                     contentDescription = null,
-                                                    tint = if (isLiked)
+                                                    tint = if (isSaved)
                                                         MaterialTheme.colorScheme.error
                                                     else
                                                         MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1485,14 +1475,6 @@ fun LocalPlaylistScreen(
                     )
                 }
             }
-        )
-
-        PullToRefreshDefaults.Indicator(
-            isRefreshing = isRefreshing,
-            state = pullRefreshState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
         )
 
         SnackbarHost(

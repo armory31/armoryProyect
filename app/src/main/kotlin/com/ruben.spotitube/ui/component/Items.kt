@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -596,33 +596,25 @@ fun SongListItem(
     albumIndex: Int? = null,
     viewCountText: String? = null,
     metadata: ItemMetadata? = null,
-    showLikedIcon: Boolean = true,
+    showSavedIcon: Boolean = true,
     showInLibraryIcon: Boolean = false,
     showDownloadIcon: Boolean = true,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (showLikedIcon && metadata.isLiked) Icon.Favorite()
-            if (song.song.explicit) Icon.Explicit()
-            if (showInLibraryIcon && metadata.isInLibrary) Icon.Library()
-            if (showDownloadIcon) Icon.Download(metadata.downloadState)
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
-            if (showLikedIcon && isLiked) Icon.Favorite()
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
+        if (showSavedIcon && isSaved) Icon.Favorite()
 
-            if (song.song.explicit) {
-                Icon.Explicit()
-            }
+        if (song.song.explicit) {
+            Icon.Explicit()
+        }
 
-            if (showInLibraryIcon && isLiked) {
-                Icon.Library()
-            }
-
-            if (showDownloadIcon) {
+        if (showDownloadIcon) {
+            val downloadState = metadata?.downloadState ?: run {
                 val download by LocalDownloadUtil.current.getDownload(song.id)
                     .collectAsStateWithLifecycle(initialValue = null)
-                Icon.Download(download?.state)
+                download?.state
             }
+            Icon.Download(downloadState)
         }
     },
     isSelected: Boolean = false,
@@ -678,27 +670,21 @@ fun SongGridItem(
     song: Song,
     modifier: Modifier = Modifier,
     metadata: ItemMetadata? = null,
-    showLikedIcon: Boolean = true,
+    showSavedIcon: Boolean = true,
     showInLibraryIcon: Boolean = false,
     showDownloadIcon: Boolean = true,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (showLikedIcon && metadata.isLiked) Icon.Favorite()
-            if (showInLibraryIcon && metadata.isInLibrary) Icon.Library()
-            if (showDownloadIcon) Icon.Download(metadata.downloadState)
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
-            if (showLikedIcon && isLiked) {
-                Icon.Favorite()
-            }
-            if (showInLibraryIcon && isLiked) {
-                Icon.Library()
-            }
-            if (showDownloadIcon) {
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedSong(song.id).collectAsStateWithLifecycle(initialValue = false)
+        if (showSavedIcon && isSaved) {
+            Icon.Favorite()
+        }
+        if (showDownloadIcon) {
+            val downloadState = metadata?.downloadState ?: run {
                 val download by LocalDownloadUtil.current.getDownload(song.id).collectAsStateWithLifecycle(initialValue = null)
-                Icon.Download(download?.state)
+                download?.state
             }
+            Icon.Download(downloadState)
         }
     },
     isActive: Boolean = false,
@@ -750,14 +736,10 @@ fun ArtistListItem(
     modifier: Modifier = Modifier,
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Library()
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
-            if (isBookmarked) {
-                Icon.Library()
-            }
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
+        if (isSaved) {
+            Icon.Library()
         }
     },
     trailingContent: @Composable RowScope.() -> Unit = {},
@@ -784,14 +766,10 @@ fun ArtistGridItem(
     modifier: Modifier = Modifier,
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Library()
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
-            if (isBookmarked) {
-                Icon.Library()
-            }
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
+        if (isSaved) {
+            Icon.Library()
         }
     },
     fillMaxWidth: Boolean = false,
@@ -818,13 +796,19 @@ fun AlbumListItem(
     album: Album,
     modifier: Modifier = Modifier,
     metadata: ItemMetadata? = null,
-    showLikedIcon: Boolean = true,
+    showSavedIcon: Boolean = true,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (showLikedIcon && metadata.isLiked) Icon.Favorite()
-            if (album.album.explicit) Icon.Explicit()
-            Icon.Download(metadata.downloadState)
-        } else {
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedAlbum(album.id).collectAsStateWithLifecycle(initialValue = false)
+        if (showSavedIcon && isSaved) {
+            Icon.Favorite()
+        }
+
+        if (album.album.explicit) {
+            Icon.Explicit()
+        }
+
+        val downloadState = metadata?.downloadState ?: run {
             val database = LocalDatabase.current
             val downloadUtil = LocalDownloadUtil.current
             var songs by remember {
@@ -837,26 +821,23 @@ fun AlbumListItem(
                 }
             }
 
-            var downloadState by remember {
+            var dState by remember {
                 mutableIntStateOf(Download.STATE_STOPPED)
             }
 
             LaunchedEffect(songs) {
                 if (songs.isEmpty()) return@LaunchedEffect
                 downloadUtil.downloads.collect { downloads ->
-                    downloadState = when {
+                    dState = when {
                         songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
                         songs.all { downloads[it.id]?.state in listOf(STATE_QUEUED, STATE_DOWNLOADING, STATE_COMPLETED) } -> STATE_DOWNLOADING
                         else -> Download.STATE_STOPPED
                     }
                 }
             }
-
-            if (album.album.explicit) {
-                Icon.Explicit()
-            }
-            Icon.Download(downloadState)
+            dState
         }
+        Icon.Download(downloadState)
     },
     isActive: Boolean = false,
     isPlaying: Boolean = false,
@@ -889,11 +870,17 @@ fun AlbumGridItem(
     coroutineScope: CoroutineScope,
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
-            if (album.album.explicit) Icon.Explicit()
-            Icon.Download(metadata.downloadState)
-        } else {
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedAlbum(album.id).collectAsStateWithLifecycle(initialValue = false)
+        if (isSaved) {
+            Icon.Favorite()
+        }
+
+        if (album.album.explicit) {
+            Icon.Explicit()
+        }
+
+        val downloadState = metadata?.downloadState ?: run {
             val database = LocalDatabase.current
             val downloadUtil = LocalDownloadUtil.current
             var songs by remember { mutableStateOf(emptyList<Song>()) }
@@ -902,31 +889,21 @@ fun AlbumGridItem(
                 database.albumSongs(album.id).collect { songs = it }
             }
 
-            var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
+            var dState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
 
             LaunchedEffect(songs) {
                 if (songs.isEmpty()) return@LaunchedEffect
                 downloadUtil.downloads.collect { downloads ->
-                    downloadState = when {
+                    dState = when {
                         songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
                         songs.all { downloads[it.id]?.state in listOf(STATE_QUEUED, STATE_DOWNLOADING, STATE_COMPLETED) } -> STATE_DOWNLOADING
                         else -> Download.STATE_STOPPED
                     }
                 }
             }
-
-            if (album.album.explicit) {
-                Icon.Explicit()
-            }
-            
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSavedAlbum(album.id).collectAsStateWithLifecycle(initialValue = false)
-            if (isLiked) {
-                Icon.Favorite()
-            }
-
-            Icon.Download(downloadState)
+            dState
         }
+        Icon.Download(downloadState)
     },
     isActive: Boolean = false,
     isPlaying: Boolean = false,
@@ -938,7 +915,7 @@ fun AlbumGridItem(
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.basicMarquee().fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
     },
     subtitle = {
@@ -987,14 +964,10 @@ fun PlaylistListItem(
     autoPlaylist: Boolean = false,
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSavedPlaylist(playlist.id).collectAsStateWithLifecycle(initialValue = false)
-            if (isLiked) {
-                Icon.Favorite()
-            }
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedPlaylist(playlist.id).collectAsStateWithLifecycle(initialValue = false)
+        if (isSaved) {
+            Icon.Favorite()
         }
     },
     trailingContent: @Composable RowScope.() -> Unit = {}
@@ -1168,14 +1141,10 @@ fun PlaylistGridItem(
     autoPlaylist: Boolean = false,
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isLiked by libraryStateHolder.isSavedPlaylist(playlist.id).collectAsStateWithLifecycle(initialValue = false)
-            if (isLiked) {
-                Icon.Favorite()
-            }
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by libraryStateHolder.isSavedPlaylist(playlist.id).collectAsStateWithLifecycle(initialValue = false)
+        if (isSaved) {
+            Icon.Favorite()
         }
     },
     fillMaxWidth: Boolean = false,
@@ -1186,7 +1155,7 @@ fun PlaylistGridItem(
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.basicMarquee().fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
     },
     subtitle = {
@@ -1293,34 +1262,27 @@ fun YouTubeListItem(
     isSwipeable: Boolean = true,
     trailingContent: @Composable RowScope.() -> Unit = {},
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
-            if (item.explicit) Icon.Explicit()
-            if (metadata.isInLibrary) Icon.Library()
-            if (item is SongItem) Icon.Download(metadata.downloadState)
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isSongLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedSong(item.id) }.collectAsStateWithLifecycle(initialValue = false)
-            val isAlbumLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedAlbum(item.id) }.collectAsStateWithLifecycle(initialValue = false)
-            val isArtistBookmarked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedArtist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
-            val isPlaylistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedPlaylist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedSong(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val isAlbumSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedAlbum(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val isArtistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedArtist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val isPlaylistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedPlaylist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
 
-            if ((item is SongItem && isSongLiked) ||
-                (item is AlbumItem && isAlbumLiked) ||
-                (item is ArtistItem && isArtistBookmarked) ||
-                (item is PlaylistItem && isPlaylistSaved)
-            ) {
-                Icon.Favorite()
-            }
-            if (item.explicit) Icon.Explicit()
+        if ((item is SongItem && isSaved) ||
+            (item is AlbumItem && isAlbumSaved) ||
+            (item is ArtistItem && isArtistSaved) ||
+            (item is PlaylistItem && isPlaylistSaved)
+        ) {
+            Icon.Favorite()
+        }
+        if (item.explicit) Icon.Explicit()
 
-            if (item is SongItem && isSongLiked) {
-                Icon.Library()
-            }
-            if (item is SongItem) {
+        if (item is SongItem) {
+            val downloadState = metadata?.downloadState ?: run {
                 val downloads by LocalDownloadUtil.current.downloads.collectAsStateWithLifecycle()
-                Icon.Download(downloads[item.id]?.state)
+                downloads[item.id]?.state
             }
+            Icon.Download(downloadState)
         }
     },
 ) {
@@ -1376,32 +1338,26 @@ fun YouTubeGridItem(
     coroutineScope: CoroutineScope? = null,
     metadata: ItemMetadata? = null,
     badges: @Composable RowScope.() -> Unit = {
-        if (metadata != null) {
-            if (metadata.isLiked) Icon.Favorite()
-            if (item.explicit) Icon.Explicit()
-            if (metadata.isInLibrary) Icon.Library()
-            if (item is SongItem) Icon.Download(metadata.downloadState)
-        } else {
-            val libraryStateHolder = LocalLibraryStateHolder.current
-            val isSongLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedSong(item.id) }.collectAsStateWithLifecycle(initialValue = false)
-            val isAlbumLiked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedAlbum(item.id) }.collectAsStateWithLifecycle(initialValue = false)
-            val isArtistBookmarked by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedArtist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
-            val isPlaylistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedPlaylist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val libraryStateHolder = LocalLibraryStateHolder.current
+        val isSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedSong(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val isAlbumSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedAlbum(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val isArtistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedArtist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
+        val isPlaylistSaved by remember(item.id, libraryStateHolder) { libraryStateHolder.isSavedPlaylist(item.id) }.collectAsStateWithLifecycle(initialValue = false)
 
-            if ((item is SongItem && isSongLiked) ||
-                (item is AlbumItem && isAlbumLiked) ||
-                (item is ArtistItem && isArtistBookmarked) ||
-                (item is PlaylistItem && isPlaylistSaved)
-            ) {
-                Icon.Favorite()
-            }
-            if (item.explicit) Icon.Explicit()
-            
-            if (item is SongItem && isSongLiked) Icon.Library()
-            if (item is SongItem) {
+        if ((item is SongItem && isSaved) ||
+            (item is AlbumItem && isAlbumSaved) ||
+            (item is ArtistItem && isArtistSaved) ||
+            (item is PlaylistItem && isPlaylistSaved)
+        ) {
+            Icon.Favorite()
+        }
+        if (item.explicit) Icon.Explicit()
+        if (item is SongItem) {
+            val downloadState = metadata?.downloadState ?: run {
                 val downloads by LocalDownloadUtil.current.downloads.collectAsStateWithLifecycle()
-                Icon.Download(downloads[item.id]?.state)
+                downloads[item.id]?.state
             }
+            Icon.Download(downloadState)
         }
     },
     thumbnailRatio: Float = if (item is SongItem) 16f / 9 else 1f,
@@ -1416,7 +1372,7 @@ fun YouTubeGridItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = if (item is ArtistItem) TextAlign.Center else TextAlign.Start,
-            modifier = Modifier.basicMarquee().fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
     },
     subtitle = {

@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -79,10 +79,8 @@ import com.ruben.spotitube.constants.EnableUpdateNotificationKey
 import com.ruben.spotitube.constants.UpdateChannel
 import com.ruben.spotitube.constants.UpdateChannelKey
 import com.ruben.spotitube.ui.component.EnumListPreference
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.PreferenceGroupTitle
 import com.ruben.spotitube.ui.component.SwitchPreference
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.GitCommit
 import com.ruben.spotitube.utils.UpdateInfo
 import com.ruben.spotitube.utils.UpdateNotificationManager
@@ -151,6 +149,7 @@ fun UpdateScreen(
         if (granted) {
             onEnableUpdateNotificationChange(true)
             UpdateNotificationManager.schedulePeriodicUpdateCheck(context)
+            UpdateNotificationManager.checkNow(context)
         }
     }
 
@@ -159,7 +158,7 @@ fun UpdateScreen(
         if (updateCheckState == UpdateCheckState.Loading) return
         coroutineScope.launch {
             updateCheckState = UpdateCheckState.Loading
-            Updater.checkForUpdate(BuildConfig.VERSION_NAME)
+            Updater.checkForUpdate(BuildConfig.VERSION_NAME, forceRefresh = true)
                 .onSuccess { info ->
                     if (info == null) {
                         updateCheckState = UpdateCheckState.UpToDate
@@ -197,6 +196,7 @@ fun UpdateScreen(
                 else {
                     onEnableUpdateNotificationChange(true)
                     UpdateNotificationManager.schedulePeriodicUpdateCheck(context)
+                    UpdateNotificationManager.checkNow(context)
                 }
             },
             onDismiss = { showNotifConfirmDialog = false }
@@ -293,7 +293,7 @@ fun UpdateScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 latestVersion?.let { latest ->
-                                    if (!Updater.isSameVersion(latest, BuildConfig.VERSION_NAME)) {
+                                    if (Updater.isNewerVersion(latest, BuildConfig.VERSION_NAME)) {
                                         Spacer(Modifier.height(2.dp))
                                         Text(
                                             text = stringResource(R.string.latest_version_format, latest),

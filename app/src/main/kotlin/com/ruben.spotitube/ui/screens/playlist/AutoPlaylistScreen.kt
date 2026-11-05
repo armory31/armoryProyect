@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -47,8 +47,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import com.ruben.spotitube.ArmoryTopBar
 import com.ruben.spotitube.ArmoryIconButton
-import com.ruben.spotitube.ArmoryIcon
-import com.ruben.spotitube.SectionHeader
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,10 +85,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastSumBy
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
@@ -108,7 +104,6 @@ import com.ruben.spotitube.constants.AutoPlaylistSongSortType
 import com.ruben.spotitube.constants.AutoPlaylistSongSortTypeKey
 import com.ruben.spotitube.constants.DisableBlurKey
 import com.ruben.spotitube.constants.HideExplicitKey
-import com.ruben.spotitube.constants.YtmSyncKey
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
@@ -117,7 +112,6 @@ import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.DraggableScrollbar
 import com.ruben.spotitube.ui.component.EmptyPlaceholder
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.SortHeader
@@ -125,7 +119,6 @@ import com.ruben.spotitube.ui.menu.SelectionSongMenu
 import com.ruben.spotitube.ui.menu.SongMenu
 import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
@@ -149,7 +142,7 @@ fun AutoPlaylistScreen(
     val playlist =
         if (viewModel.playlist == "liked") stringResource(R.string.liked) else stringResource(R.string.offline)
 
-    val songs by viewModel.likedSongs.collectAsStateWithLifecycle(initialValue = null)
+    val songs by viewModel.savedSongs.collectAsStateWithLifecycle(initialValue = null)
     val mutableSongs = remember { mutableStateListOf<Song>() }
 
     var isSearching by remember { mutableStateOf(false) }
@@ -162,7 +155,6 @@ fun AutoPlaylistScreen(
         }
     }
 
-    val (ytmSync) = rememberPreference(YtmSyncKey, true)
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
@@ -172,7 +164,7 @@ fun AutoPlaylistScreen(
 
     val playlistId = viewModel.playlist
     val playlistType = when (playlistId) {
-        "liked" -> PlaylistType.LIKE
+        "liked" -> PlaylistType.SAVED
         "downloaded" -> PlaylistType.DOWNLOAD
         else -> PlaylistType.OTHER
     }
@@ -203,13 +195,7 @@ fun AutoPlaylistScreen(
     val downloadUtil = LocalDownloadUtil.current
     var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
 
-    LaunchedEffect(Unit) {
-        if (ytmSync) {
-            withContext(Dispatchers.IO) {
-                if (playlistType == PlaylistType.LIKE) viewModel.syncLikedSongs()
-            }
-        }
-    }
+
 
     LaunchedEffect(songs) {
         mutableSongs.apply {
@@ -942,5 +928,5 @@ fun AutoPlaylistScreen(
 }
 
 enum class PlaylistType {
-    LIKE, DOWNLOAD, OTHER
+    SAVED, DOWNLOAD, OTHER
 }

@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -43,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,9 +50,7 @@ import com.ruben.spotitube.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.UpdateChannel
 import com.ruben.spotitube.constants.UpdateChannelKey
-import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.MarkdownText
-import com.ruben.spotitube.ui.utils.backToMain
 import com.ruben.spotitube.utils.NightlyInfo
 import com.ruben.spotitube.utils.ReleaseInfo
 import com.ruben.spotitube.utils.Updater

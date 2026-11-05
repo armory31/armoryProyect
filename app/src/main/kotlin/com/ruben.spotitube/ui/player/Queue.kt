@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -81,6 +81,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import androidx.navigation.NavController
+import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.AutoLoadMoreKey
@@ -140,6 +141,8 @@ fun Queue(
 
     val currentWindowIndex by playerConnection.currentWindowIndex.collectAsStateWithLifecycle()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val libraryStateHolder = LocalLibraryStateHolder.current
+    val isSavedInLibrary by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
 
     val currentFormat by playerConnection.currentFormat.collectAsStateWithLifecycle(initialValue = null)
 
@@ -563,11 +566,10 @@ fun Queue(
                     songCount = queueWindows.size,
                     queueDuration = queueLength,
                     infiniteQueueEnabled = infiniteQueueEnabled,
+                    isSaved = isSavedInLibrary,
                     backgroundColor = backgroundColor,
                     onBackgroundColor = onBackgroundColor,
-                    onToggleLike = {
-                        playerConnection.service.toggleLike()
-                    },
+                    onToggleSaved = playerConnection::toggleSongSaved,
                     onMenuClick = {
                         menuState.show {
                             PlayerMenu(

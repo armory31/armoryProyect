@@ -1,17 +1,13 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
-
-
 
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.ruben.spotitube.ui.player
 
-import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,9 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.PlaybackException
-import com.ruben.spotitube.MainActivity
 import com.ruben.spotitube.R
-import androidx.core.net.toUri
 
 @Composable
 fun PlaybackError(
@@ -61,19 +55,11 @@ fun PlaybackError(
     val fallbackMalformedStream = stringResource(R.string.error_malformed_stream)
     val copyText = stringResource(R.string.copy)
     val copiedText = stringResource(R.string.copied)
-    val openYouTubeMusicText = stringResource(R.string.open_youtube_music)
     val errorInfo = remember(error, mediaId) { error.toPlaybackErrorInfo(mediaId) }
     val httpCode = errorInfo.httpCode
-    val title =
-        when (errorInfo.kind) {
-            PlaybackErrorKind.LoginRefreshRequired -> stringResource(R.string.playback_login_refresh_required)
-            PlaybackErrorKind.ConfirmationRequired -> stringResource(R.string.playback_confirmation_required)
-            else -> fallbackUnknown
-        }
+    val title = fallbackUnknown
     val reason =
         when (errorInfo.kind) {
-            PlaybackErrorKind.LoginRefreshRequired -> stringResource(R.string.playback_requires_youtube_music_login_refresh)
-            PlaybackErrorKind.ConfirmationRequired -> stringResource(R.string.playback_requires_youtube_music_confirmation)
             PlaybackErrorKind.NoInternet -> fallbackNoInternet
             PlaybackErrorKind.Timeout -> fallbackTimeout
             PlaybackErrorKind.NoStream -> fallbackNoStream
@@ -146,51 +132,19 @@ fun PlaybackError(
                 }
             }
 
-            val displayText = if (errorInfo.kind == PlaybackErrorKind.ConfirmationRequired) reason else details
-
             Surface(
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.06f),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = displayText,
+                    text = details,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.92f),
                     modifier = Modifier.padding(12.dp),
                     maxLines = 12,
                     overflow = TextOverflow.Clip,
                 )
-            }
-
-            errorInfo.loginRecoveryUrl?.let { targetUrl ->
-                Button(
-                    onClick = {
-                        val deepLink = "archivetune://login?url=${Uri.encode(targetUrl)}".toUri()
-                        val loginIntent =
-                            Intent(Intent.ACTION_VIEW, deepLink, context, MainActivity::class.java).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            }
-                        val fallbackIntent =
-                            Intent(Intent.ACTION_VIEW, targetUrl.toUri()).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-
-                        runCatching { context.startActivity(loginIntent) }
-                            .recoverCatching { context.startActivity(fallbackIntent) }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.onErrorContainer,
-                            contentColor = MaterialTheme.colorScheme.errorContainer,
-                        ),
-                    shapes = ButtonDefaults.shapes(),
-                ) {
-                    Text(text = openYouTubeMusicText)
-                }
             }
 
             Row(

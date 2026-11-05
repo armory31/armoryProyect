@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -51,7 +51,7 @@ class ArtistViewModel @Inject constructor(
     val artistId = savedStateHandle.get<String>("artistId")!!
     var artistPage by mutableStateOf<ArtistPage?>(null)
     
-    val isBookmarked = libraryStateHolder.isSavedArtist(artistId)
+    val isSaved = libraryStateHolder.isSavedArtist(artistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val libraryArtist = database.artist(artistId)
@@ -103,7 +103,7 @@ class ArtistViewModel @Inject constructor(
         }
     }
 
-    fun toggleLike() {
+    fun toggleSaved() {
         Timber.d("[LOCAL_SAVE_DEBUG] ArtistViewModel: Intentando cambiar estado de suscripción para ${artistPage?.artist?.title ?: "local artist"}")
         val artist = libraryArtist.value?.artist ?: artistPage?.artist?.let {
             SavedArtistEntity(
@@ -115,7 +115,7 @@ class ArtistViewModel @Inject constructor(
         } ?: return
 
         viewModelScope.launch {
-            syncManager.toggleArtistLike(artist)
+            syncManager.toggleArtistSaved(artist)
         }
     }
 }

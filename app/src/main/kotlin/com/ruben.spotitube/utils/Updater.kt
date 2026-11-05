@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -191,6 +191,16 @@ object Updater {
         }
     }
 
+    internal fun isNewerVersion(latest: String, current: String): Boolean {
+        val latestSemVer = parseSemVerOrNull(latest)
+        val currentSemVer = parseSemVerOrNull(current)
+        return if (latestSemVer != null && currentSemVer != null) {
+            latestSemVer > currentSemVer
+        } else {
+            latest.trim() != current.trim()
+        }
+    }
+
     internal fun findLatestRelease(releases: List<ReleaseInfo>): ReleaseInfo? {
         if (releases.isEmpty()) return null
         val parsed =
@@ -242,7 +252,7 @@ object Updater {
         cachedEtag: String?,
     ): ReleasesNetworkResult = withContext(Dispatchers.IO) {
         val response: HttpResponse =
-            client.get("https://api.github.com/repos/Arturo254/OpenTune/releases?per_page=$perPage") {
+            client.get("https://api.github.com/repos/armory31/armoryProyect/releases?per_page=$perPage") {
                 headers {
                     append("Accept", "application/vnd.github+json")
                     append("User-Agent", "ARMORY")
@@ -314,10 +324,10 @@ object Updater {
             ?: emptyList()
     }
 
-    suspend fun getLatestVersionName(): Result<String> = runCatchingCancellable {
+    suspend fun getLatestVersionName(forceRefresh: Boolean = false): Result<String> = runCatchingCancellable {
         when (getCurrentUpdateChannel()) {
             UpdateChannel.STABLE -> {
-                val latest = getLatestReleaseInfo().getOrThrow()
+                val latest = getLatestReleaseInfo(forceRefresh = forceRefresh).getOrThrow()
                 preferredReleaseVersionNameOrNull(latest) ?: latest.name.ifBlank { latest.tagName }
             }
             UpdateChannel.NIGHTLY -> {
@@ -333,10 +343,10 @@ object Updater {
         }
     }
 
-    suspend fun getLatestReleaseInfo(): Result<ReleaseInfo> = runCatchingCancellable {
+    suspend fun getLatestReleaseInfo(forceRefresh: Boolean = false): Result<ReleaseInfo> = runCatchingCancellable {
         when (getCurrentUpdateChannel()) {
             UpdateChannel.STABLE -> {
-                val releases = getAllReleases().getOrThrow()
+                val releases = getAllReleases(forceRefresh = forceRefresh).getOrThrow()
                 val latest = findLatestRelease(releases)
                     ?: throw IllegalStateException("No releases found")
                 lastCheckTime = System.currentTimeMillis()
@@ -367,21 +377,21 @@ object Updater {
      * - Devuelve `null` dentro del [Result] cuando ya se tiene la versión más
      *   reciente instalada.
      */
-    suspend fun checkForUpdate(currentVersionName: String): Result<UpdateInfo?> =
+    suspend fun checkForUpdate(currentVersionName: String, forceRefresh: Boolean = false): Result<UpdateInfo?> =
         runCatchingCancellable {
             when (getCurrentUpdateChannel()) {
-                UpdateChannel.STABLE -> checkForUpdateStable(currentVersionName)
+                UpdateChannel.STABLE -> checkForUpdateStable(currentVersionName, forceRefresh = forceRefresh)
                 UpdateChannel.NIGHTLY -> checkForUpdateNightly(currentVersionName)
             }
         }
 
-    private suspend fun checkForUpdateStable(currentVersionName: String): UpdateInfo? {
-        val latest = getLatestReleaseInfo().getOrThrow()
+    private suspend fun checkForUpdateStable(currentVersionName: String, forceRefresh: Boolean = false): UpdateInfo? {
+        val latest = getLatestReleaseInfo(forceRefresh = forceRefresh).getOrThrow()
         val latestVersionName =
             preferredReleaseVersionNameOrNull(latest)
                 ?: latest.name.ifBlank { latest.tagName }
 
-        if (isSameVersion(latestVersionName, currentVersionName)) return null
+        if (!isNewerVersion(latestVersionName, currentVersionName)) return null
 
         val downloadUrl = resolveApkDownloadUrl(latest.tagName)
 
@@ -397,7 +407,7 @@ object Updater {
 
     private suspend fun checkForUpdateNightly(currentVersionName: String): UpdateInfo? {
         val nightly = fetchNightlyJson().getOrThrow()
-        return if (isSameVersion(nightly.versionName, currentVersionName)) {
+        return if (!isNewerVersion(nightly.versionName, currentVersionName)) {
             null
         } else {
             cachedNightlyInfo = nightly
@@ -419,11 +429,11 @@ object Updater {
      */
     private suspend fun resolveApkDownloadUrl(tagName: String): String {
         val fallback =
-            "https://github.com/Arturo254/OpenTune/releases/download/$tagName/$APK_ASSET_NAME"
+            "https://github.com/armory31/armoryProyect/releases/download/$tagName/$APK_ASSET_NAME"
 
         return runCatching {
             val response = client.get(
-                "https://api.github.com/repos/Arturo254/OpenTune/releases/tags/$tagName"
+                "https://api.github.com/repos/armory31/armoryProyect/releases/tags/$tagName"
             ) {
                 headers {
                     append("Accept", "application/vnd.github+json")
@@ -445,10 +455,10 @@ object Updater {
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    suspend fun getCommitHistory(count: Int = 20, branch: String = "master"): Result<List<GitCommit>> =
+    suspend fun getCommitHistory(count: Int = 20): Result<List<GitCommit>> =
         runCatchingCancellable {
             val response =
-                client.get("https://api.github.com/repos/Arturo254/OpenTune/commits?sha=$branch&per_page=$count") {
+                client.get("https://api.github.com/repos/armory31/armoryProyect/commits?per_page=$count") {
                     headers {
                         append("Accept", "application/vnd.github+json")
                         append("User-Agent", "ARMORY")
@@ -479,7 +489,7 @@ object Updater {
         }
         return when (channel) {
             UpdateChannel.STABLE -> {
-                "https://github.com/Arturo254/OpenTune/releases/latest/download/$APK_ASSET_NAME"
+                "https://github.com/armory31/armoryProyect/releases/latest/download/$APK_ASSET_NAME"
             }
             UpdateChannel.NIGHTLY -> {
                 cachedNightlyInfo?.apkUrl

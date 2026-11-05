@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -38,11 +38,15 @@ class UpdateCheckWorker(
 
             if (updateChannel == UpdateChannel.NIGHTLY) return Result.success()
 
-            Updater.getLatestVersionName().onSuccess { latestVersion ->
-                if (!Updater.isSameVersion(latestVersion, BuildConfig.VERSION_NAME)) {
-                    UpdateNotificationManager.notifyIfNewVersion(applicationContext, latestVersion)
+            Updater.getLatestVersionName(forceRefresh = true)
+                .onSuccess { latestVersion ->
+                    if (Updater.isNewerVersion(latestVersion, BuildConfig.VERSION_NAME)) {
+                        UpdateNotificationManager.notifyIfNewVersion(applicationContext, latestVersion)
+                    }
                 }
-            }
+                .onFailure {
+                    return Result.retry()
+                }
 
             Result.success()
         } catch (e: Exception) {

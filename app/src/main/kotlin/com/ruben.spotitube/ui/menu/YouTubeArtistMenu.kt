@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -56,7 +56,7 @@ fun YouTubeArtistMenu(
     val syncManager = LocalSyncManager.current
     val scope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isBookmarked by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
+    val isSaved by libraryStateHolder.isSavedArtist(artist.id).collectAsStateWithLifecycle(initialValue = false)
 
     YouTubeListItem(
         item = artist,
@@ -137,13 +137,8 @@ fun YouTubeArtistMenu(
                             },
                             text = stringResource(R.string.share),
                             onClick = {
-                                val intent = Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, artist.shareLink)
-                                }
-                                context.startActivity(Intent.createChooser(intent, null))
                                 onDismiss()
+                                com.ruben.spotitube.utils.shareItem(context, "artist", artist.id, artist.title, imageUrl = artist.thumbnail)
                             }
                         )
                     )
@@ -156,12 +151,12 @@ fun YouTubeArtistMenu(
         item {
             ListItem(
                 headlineContent = {
-                    Text(text = if (isBookmarked) stringResource(R.string.subscribed) else stringResource(R.string.subscribe))
+                    Text(text = if (isSaved) stringResource(R.string.subscribed) else stringResource(R.string.subscribe))
                 },
                 leadingContent = {
                     Icon(
                         painter = painterResource(
-                            if (isBookmarked) {
+                            if (isSaved) {
                                 R.drawable.subscribed
                             } else {
                                 R.drawable.subscribe
@@ -172,7 +167,7 @@ fun YouTubeArtistMenu(
                 },
                 modifier = Modifier.clickable {
                     scope.launch {
-                        syncManager.toggleArtistLike(artist.toSavedArtistEntity())
+                        syncManager.toggleArtistSaved(artist.toSavedArtistEntity())
                     }
                 }
             )

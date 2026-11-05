@@ -1,6 +1,6 @@
 /*
  * OpenTune Project (2026)
- * Arturo254 (github.com/Arturo254)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -56,8 +56,6 @@ val ProxyEnabledKey = booleanPreferencesKey("proxyEnabled")
 val ProxyUrlKey = stringPreferencesKey("proxyUrl")
 val ProxyTypeKey = stringPreferencesKey("proxyType")
 val StreamBypassProxyKey = booleanPreferencesKey("streamBypassProxy")
-val YtmSyncKey = booleanPreferencesKey("ytmSync")
-val SelectedYtmPlaylistsKey = stringPreferencesKey("ytm_selected_playlists")
 
 val TogetherDisplayNameKey = stringPreferencesKey("together_display_name")
 val TogetherClientIdKey = stringPreferencesKey("together_client_id")
@@ -96,7 +94,7 @@ val AudioNormalizationKey = booleanPreferencesKey("audioNormalization")
 val AudioOffload = booleanPreferencesKey("audioOffload")
 val AudioCrossfadeDurationKey = intPreferencesKey("audioCrossfadeDuration")
 val AutoLoadMoreKey = booleanPreferencesKey("autoLoadMore")
-val AutoDownloadOnLikeKey = booleanPreferencesKey("autoDownloadOnLike")
+val AutoDownloadOnSavedKey = booleanPreferencesKey("autoDownloadOnLike")
 val AutoSkipNextOnErrorKey = booleanPreferencesKey("autoSkipNextOnError")
 val PauseOnDeviceMuteKey = booleanPreferencesKey("pauseOnDeviceMute")
 val AutoStartOnBluetoothKey = booleanPreferencesKey("autoStartOnBluetooth")
@@ -151,7 +149,7 @@ val SongFilterKey = stringPreferencesKey("songFilter")
 val ArtistFilterKey = stringPreferencesKey("artistFilter")
 val AlbumFilterKey = stringPreferencesKey("albumFilter")
 
-val LastLikeSongSyncKey = longPreferencesKey("last_like_song_sync")
+val LastSavedSongSyncKey = longPreferencesKey("last_like_song_sync")
 val LastLibSongSyncKey = longPreferencesKey("last_library_song_sync")
 val LastAlbumSyncKey = longPreferencesKey("last_album_sync")
 val LastArtistSyncKey = longPreferencesKey("last_artist_sync")
@@ -167,7 +165,7 @@ val SpeedDialSongIdsKey = stringPreferencesKey("speedDialSongIds")
 val PreferredLyricsProviderKey = stringPreferencesKey("lyricsProvider")
 val QueueEditLockKey = booleanPreferencesKey("queueEditLock")
 
-val ShowLikedPlaylistKey = booleanPreferencesKey("show_liked_playlist")
+val ShowSavedPlaylistKey = booleanPreferencesKey("show_liked_playlist")
 val ShowDownloadedPlaylistKey = booleanPreferencesKey("show_downloaded_playlist")
 val ShowTopPlaylistKey = booleanPreferencesKey("show_top_playlist")
 val ShowCachedPlaylistKey = booleanPreferencesKey("show_cached_playlist")
@@ -186,18 +184,18 @@ enum class LibraryViewType {
 
 enum class SongFilter {
     LIBRARY,
-    LIKED,
+    SAVED,
     DOWNLOADED
 }
 
 enum class ArtistFilter {
     LIBRARY,
-    LIKED
+    SAVED
 }
 
 enum class AlbumFilter {
     LIBRARY,
-    LIKED,
+    SAVED,
     DOWNLOADED,
     DOWNLOADED_FULL
 }
@@ -400,15 +398,10 @@ enum class SearchSource {
         }
 }
 
-val VisitorDataKey = stringPreferencesKey("visitorData")
-val DataSyncIdKey = stringPreferencesKey("dataSyncId")
-val InnerTubeCookieKey = stringPreferencesKey("innerTubeCookie")
 val AccountNameKey = stringPreferencesKey("accountName")
-val AccountEmailKey = stringPreferencesKey("accountEmail")
 val AccountAvatarUriKey = stringPreferencesKey("accountAvatarUri")
-val AccountChannelHandleKey = stringPreferencesKey("accountChannelHandle")
-val UseLoginForBrowse = booleanPreferencesKey("useLoginForBrowse")
 val YouTubeClientScoresKey = stringPreferencesKey("youtubeClientScores")
+val ChartsCountryKey = stringPreferencesKey("charts_country")
 
 // Armory Cloud Sync
 val ArmoryAccountEmailKey = stringPreferencesKey("armory_account_email")
@@ -417,6 +410,7 @@ val ArmorySyncEnabledKey = booleanPreferencesKey("armory_sync_enabled")
 val ArmoryLastSyncKey = longPreferencesKey("armory_last_sync")
 
 val UseVisitorDataKey = booleanPreferencesKey("useVisitorData")
+val VisitorDataKey = stringPreferencesKey("visitorData")
 
 val LanguageCodeToName =
     mapOf(
@@ -453,8 +447,6 @@ val GitHubReleasesJsonKey = stringPreferencesKey("github_releases_json")
 val GitHubReleasesLastCheckedAtKey = longPreferencesKey("github_releases_last_checked_at")
 val GitHubReleasesFingerprintKey = stringPreferencesKey("github_releases_fingerprint")
 
-val TogetherOnlineEndpointCacheKey = stringPreferencesKey("together_online_endpoint_cache")
-val TogetherOnlineEndpointLastCheckedAtKey = longPreferencesKey("together_online_endpoint_last_checked_at")
 
 enum class UpdateChannel {
     STABLE,

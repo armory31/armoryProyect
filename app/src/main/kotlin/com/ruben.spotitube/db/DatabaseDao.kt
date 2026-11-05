@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -8,6 +8,7 @@
 
 package com.ruben.spotitube.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -25,7 +26,6 @@ import com.ruben.spotitube.constants.ArtistSortType
 import com.ruben.spotitube.constants.PlaylistSortType
 import com.ruben.spotitube.constants.SongSortType
 import com.ruben.spotitube.db.entities.Album
-import com.ruben.spotitube.db.entities.AlbumArtistMap
 import com.ruben.spotitube.db.entities.AlbumWithSongs
 import com.ruben.spotitube.db.entities.Artist
 import com.ruben.spotitube.db.entities.FormatEntity
@@ -47,7 +47,6 @@ import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
-import com.ruben.spotitube.db.entities.SongArtistMap
 import com.ruben.spotitube.db.entities.AlbumStatRow
 import com.ruben.spotitube.db.entities.ArtistStatRow
 import com.ruben.spotitube.db.entities.HistoryRangeTotals
@@ -76,16 +75,6 @@ internal fun String.escapeSqlLike(): String =
 @Dao
 @RewriteQueriesToDropUnusedColumns
 interface DatabaseDao {
-    suspend fun clearNonLocalSongs() {}
-    suspend fun clearNonLocalArtists() {}
-    suspend fun clearNonLocalAlbums() {}
-    suspend fun clearNonLocalPlaylists() {}
-    suspend fun clearSongArtistMaps() {}
-    suspend fun clearSongAlbumMaps() {}
-
-    @Transaction
-    suspend fun clearUserData() {}
-
     fun songsByRowIdAsc(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
     fun songsByNameAsc(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() }.sortedBy { s -> s.song.title } }
     fun songsByPlayTimeAsc(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
@@ -151,16 +140,27 @@ interface DatabaseDao {
 
     fun songsByRowIdAscNoVideo(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
     fun songsByNameAscNoVideo(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() }.sortedBy { s -> s.song.title } }
-    fun songsByPlayTimeAscNoVideo(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
 
-    fun albumSongs(albumId: String): Flow<List<Song>> = allSavedSongs().map { list -> list.filter { it.albumId == albumId }.map { it.toSong() } }
+    @Query("SELECT * FROM savedsong WHERE albumId = :albumId ORDER BY savedAt DESC")
+    fun getSavedSongsByAlbum(albumId: String): Flow<List<SavedSongEntity>>
+
+    @Query("SELECT * FROM savedsong WHERE artistId = :artistId ORDER BY savedAt DESC")
+    fun getSavedSongsByArtist(artistId: String): Flow<List<SavedSongEntity>>
+
+    @Query("SELECT * FROM savedsong WHERE artistId = :artistId ORDER BY savedAt DESC LIMIT :limit")
+    fun getSavedSongsByArtistPreview(artistId: String, limit: Int): Flow<List<SavedSongEntity>>
+
+    @Query("SELECT * FROM savedsong ORDER BY savedAt DESC LIMIT :limit")
+    fun getSavedSongsRecommendation(limit: Int): Flow<List<SavedSongEntity>>
+
+    fun albumSongs(albumId: String): Flow<List<Song>> = getSavedSongsByAlbum(albumId).map { list -> list.map { it.toSong() } }
 
     fun artistSongs(
         artistId: String,
         sortType: ArtistSongSortType,
         descending: Boolean,
-    ): Flow<List<Song>> = allSavedSongs().map { savedList ->
-        val savedMatching = savedList.filter { it.artistId == artistId }.map { it.toSong() }
+    ): Flow<List<Song>> = getSavedSongsByArtist(artistId).map { savedList ->
+        val savedMatching = savedList.map { it.toSong() }
         val collator = Collator.getInstance(Locale.getDefault())
         collator.strength = Collator.PRIMARY
         when (sortType) {
@@ -173,8 +173,8 @@ interface DatabaseDao {
     fun artistSongsPreview(
         artistId: String,
         previewSize: Int = 3,
-    ): Flow<List<Song>> = allSavedSongs().map { savedList ->
-        savedList.filter { it.artistId == artistId }.map { it.toSong() }.take(previewSize)
+    ): Flow<List<Song>> = getSavedSongsByArtistPreview(artistId, previewSize).map { savedList ->
+        savedList.map { it.toSong() }
     }.flowOn(Dispatchers.IO)
 
     fun quickPicks(now: Long = System.currentTimeMillis()): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
@@ -183,7 +183,7 @@ interface DatabaseDao {
         now: Long = System.currentTimeMillis(),
         limit: Int = 5,
         offset: Int = 0,
-    ): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() }.take(limit) }
+    ): Flow<List<Song>> = getSavedSongsRecommendation(limit).map { list -> list.map { it.toSong() } }
 
     @Query("""
         SELECT songId AS id, 
@@ -332,8 +332,14 @@ interface DatabaseDao {
         }.flowOn(Dispatchers.IO)
     }
 
-    fun artistAlbumsPreview(artistId: String, previewSize: Int = 6): Flow<List<Album>> = allSavedAlbums().map { savedList ->
-        savedList.filter { it.artistId == artistId }.map { it.toAlbum() }.take(previewSize)
+    @Query("SELECT * FROM savedalbum WHERE artistId = :artistId ORDER BY savedAt DESC LIMIT :limit")
+    fun getSavedAlbumsByArtistPreview(artistId: String, limit: Int): Flow<List<SavedAlbumEntity>>
+
+    @Query("SELECT * FROM savedsong WHERE id = :songId LIMIT 1")
+    fun getSavedSongFlow(songId: String?): Flow<SavedSongEntity?>
+
+    fun artistAlbumsPreview(artistId: String, previewSize: Int = 6): Flow<List<Album>> = getSavedAlbumsByArtistPreview(artistId, previewSize).map { savedList ->
+        savedList.map { it.toAlbum() }
     }.flowOn(Dispatchers.IO)
 
     @Query("SELECT sum(count) from playCount WHERE song = :songId")
@@ -349,18 +355,13 @@ interface DatabaseDao {
         now: Long = System.currentTimeMillis(),
         limit: Int = 5,
         offset: Int = 0,
-    ): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() }.take(limit) }
+    ): Flow<List<Song>> = getSavedSongsRecommendation(limit).map { list -> list.map { it.toSong() } }
 
-    @Query("SELECT EXISTS(SELECT 1 FROM related_song_map WHERE songId = :songId LIMIT 1)")
-    fun hasRelatedSongs(songId: String): Flow<Boolean>
-
-    fun song(songId: String?): Flow<Song?> = allSavedSongs().map { list -> list.firstOrNull { it.id == songId }?.toSong() }
+    fun song(songId: String?): Flow<Song?> = getSavedSongFlow(songId).map { it?.toSong() }
 
     suspend fun getSongById(songId: String): Song? = getSavedSong(songId)?.toSong()
 
     fun getSongByIdBlocking(songId: String): Song? = kotlinx.coroutines.runBlocking { getSavedSong(songId)?.toSong() }
-
-    fun songArtistMap(songId: String): List<SongArtistMap> = emptyList()
 
     fun allSongs(): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
 
@@ -391,7 +392,16 @@ interface DatabaseDao {
 
     fun artists(sortType: ArtistSortType, descending: Boolean) = allSavedArtists().map { list -> list.map { it.toArtist() } }
 
-    fun artist(id: String): Flow<Artist?> = allSavedArtists().map { list -> list.firstOrNull { it.id == id }?.toArtist() }
+    @Query("SELECT * FROM savedartist WHERE id = :id LIMIT 1")
+    fun getSavedArtistFlow(id: String): Flow<SavedArtistEntity?>
+
+    @Query("SELECT * FROM savedalbum WHERE id = :id LIMIT 1")
+    fun getSavedAlbumFlow(id: String): Flow<SavedAlbumEntity?>
+
+    @Query("SELECT * FROM savedalbum WHERE id IN (:ids) ORDER BY savedAt DESC")
+    fun getSavedAlbumsByIds(ids: Collection<String>): Flow<List<SavedAlbumEntity>>
+
+    fun artist(id: String): Flow<Artist?> = getSavedArtistFlow(id).map { it?.toArtist() }
 
     fun albumsByRowIdAsc(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() } }
     fun albumsByNameAsc(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() }.sortedBy { a -> a.album.title } }
@@ -426,27 +436,25 @@ interface DatabaseDao {
         AlbumSortType.PLAY_TIME -> albumsByPlayTimeAsc()
     }.map { it.reversed(descending) }
 
-    fun album(id: String): Flow<Album?> = allSavedAlbums().map { list -> list.firstOrNull { it.id == id }?.toAlbum() }
+    fun album(id: String): Flow<Album?> = getSavedAlbumFlow(id).map { it?.toAlbum() }
 
-    fun albumsByRowId(ids: Collection<String>): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
-    fun albumsByTitle(ids: Collection<String>): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
-    fun albumsByYear(ids: Collection<String>): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
-    fun albumsBySongCount(ids: Collection<String>): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
-    fun albumsByDuration(ids: Collection<String>): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
-    fun albumsByPlayTime(ids: Collection<String>): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
+    fun albumsByRowId(ids: Collection<String>): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
+    fun albumsByTitle(ids: Collection<String>): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
+    fun albumsByYear(ids: Collection<String>): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
+    fun albumsBySongCount(ids: Collection<String>): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
+    fun albumsByDuration(ids: Collection<String>): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
+    fun albumsByPlayTime(ids: Collection<String>): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
 
     fun albumsByIds(
         ids: Collection<String>,
         sortType: AlbumSortType,
         descending: Boolean,
-    ): Flow<List<Album>> = allSavedAlbums().map { list -> list.filter { it.id in ids }.map { it.toAlbum() } }
+    ): Flow<List<Album>> = getSavedAlbumsByIds(ids).map { list -> list.map { it.toAlbum() } }
 
     fun albumWithSongs(albumId: String): Flow<AlbumWithSongs?> = allSavedAlbums().map { list ->
         val saved = list.firstOrNull { it.id == albumId }
         saved?.let { AlbumWithSongs(album = it.toAlbum().album, songs = emptyList(), artists = emptyList()) }
     }
-
-    fun albumArtistMaps(albumId: String): List<AlbumArtistMap> = emptyList()
 
     fun playlistsWithMetadata(): Flow<List<Playlist>> = allSavedPlaylists().map { savedPlaylists ->
         savedPlaylists.map { saved ->
@@ -512,8 +520,6 @@ interface DatabaseDao {
         }
     }
 
-    suspend fun setPlaylistCustomOrder(playlistId: String, customOrder: Int) {}
-
     fun playlists(
         sortType: PlaylistSortType,
         descending: Boolean,
@@ -533,12 +539,10 @@ interface DatabaseDao {
         if (descending && sortType != PlaylistSortType.CUSTOM) list.asReversed() else list
     }
 
-    fun likedSongsByRowIdAsc(): Flow<List<Song>> = allSongs()
+    fun albumsSavedInternal(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() } }
 
-    fun albumsLikedInternal(): Flow<List<Album>> = allSavedAlbums().map { list -> list.map { it.toAlbum() } }
-
-    fun albumsLiked(sortType: AlbumSortType, descending: Boolean): Flow<List<Album>> =
-        albumsLikedInternal().map { albums ->
+    fun albumsSaved(sortType: AlbumSortType, descending: Boolean): Flow<List<Album>> =
+        albumsSavedInternal().map { albums ->
             val collator = Collator.getInstance(Locale.getDefault())
             collator.strength = Collator.PRIMARY
             when (sortType) {
@@ -552,10 +556,10 @@ interface DatabaseDao {
             }.reversed(descending)
         }
 
-    fun artistsBookmarkedInternal(): Flow<List<Artist>> = allSavedArtists().map { list -> list.map { it.toArtist() } }
+    fun artistsSavedInternal(): Flow<List<Artist>> = allSavedArtists().map { list -> list.map { it.toArtist() } }
 
-    fun artistsBookmarked(sortType: ArtistSortType, descending: Boolean): Flow<List<Artist>> =
-        artistsBookmarkedInternal().map { artists ->
+    fun artistsSaved(sortType: ArtistSortType, descending: Boolean): Flow<List<Artist>> =
+        artistsSavedInternal().map { artists ->
             val collator = Collator.getInstance(Locale.getDefault())
             collator.strength = Collator.PRIMARY
             when (sortType) {
@@ -588,8 +592,14 @@ interface DatabaseDao {
     """)
     fun getLibrarySummary(): Flow<LibrarySummary>
 
-    fun playlistSongItems(playlistId: String): Flow<List<PlaylistSongItem>> = allSavedPlaylists().map { list ->
-        list.firstOrNull { it.id == playlistId || it.browseId == playlistId }?.songs ?: emptyList()
+    @Query("SELECT * FROM savedplaylist WHERE id = :playlistId OR browseId = :playlistId OR id = REPLACE(:playlistId, 'VL', '') OR browseId = REPLACE(:playlistId, 'VL', '') OR id = 'VL' || REPLACE(:playlistId, 'VL', '') OR browseId = 'VL' || REPLACE(:playlistId, 'VL', '') LIMIT 1")
+    fun getSavedPlaylistFlow(playlistId: String): Flow<SavedPlaylistEntity?>
+
+    @Query("SELECT * FROM savedplaylist WHERE browseId = :browseId LIMIT 1")
+    fun getSavedPlaylistByBrowseIdFlow(browseId: String): Flow<SavedPlaylistEntity?>
+
+    fun playlistSongItems(playlistId: String): Flow<List<PlaylistSongItem>> = getSavedPlaylistFlow(playlistId).map { playlist ->
+        playlist?.songs ?: emptyList()
     }
 
     fun playlistSongs(playlistId: String): Flow<List<Song>> = playlistSongItems(playlistId).map { items ->
@@ -613,13 +623,11 @@ interface DatabaseDao {
         }
     }
 
-    fun playlist(id: String): Flow<Playlist?> = playlistsWithMetadata().map { list -> list.firstOrNull { it.id == id || it.playlist.browseId == id } }
+    fun playlist(id: String): Flow<Playlist?> = getSavedPlaylistFlow(id).map { it?.toPlaylist() }
 
-    suspend fun getPlaylistById(playlistId: String): Playlist? = playlistsWithMetadata().first().firstOrNull { it.id == playlistId || it.playlist.browseId == playlistId }
+    suspend fun getPlaylistById(playlistId: String): Playlist? = getSavedPlaylist(playlistId)?.toPlaylist()
 
-    fun getPlaylistByIdBlocking(playlistId: String): Playlist? = kotlinx.coroutines.runBlocking { getPlaylistById(playlistId) }
-
-    fun playlistByBrowseId(browseId: String): Flow<Playlist?> = playlistsWithMetadata().map { list -> list.firstOrNull { it.playlist.browseId == browseId } }
+    fun playlistByBrowseId(browseId: String): Flow<Playlist?> = getSavedPlaylistByBrowseIdFlow(browseId).map { it?.toPlaylist() }
 
     @Query("""
         SELECT * FROM savedsong 
@@ -682,7 +690,8 @@ interface DatabaseDao {
     @Query("SELECT * FROM historialsong ORDER BY playedAt ASC LIMIT 1")
     fun firstEvent(): Flow<HistorySongEntity?>
 
-    fun clearListenHistory() {}
+    @Query("DELETE FROM historialsong")
+    suspend fun clearListenHistory()
 
     @Transaction
     @Query("SELECT * FROM search_history WHERE `query` LIKE :query || '%' ORDER BY id DESC")
@@ -691,8 +700,6 @@ interface DatabaseDao {
     @Transaction
     @Query("DELETE FROM search_history")
     fun clearSearchHistory()
-
-    fun incrementTotalPlayTime(songId: String, playTime: Long) {}
 
     @Query("UPDATE playCount SET count = count + 1 WHERE song = :songId AND year = :year AND month = :month")
     suspend fun incrementPlayCount(songId: String, year: Int, month: Int)
@@ -711,13 +718,8 @@ interface DatabaseDao {
         incrementPlayCount(songId, time.year, time.monthValue)
     }
 
-    fun getRelatedSongs(songId: String): Flow<List<Song>> = allSavedSongs().map { list -> list.map { it.toSong() } }
-
-    fun relatedSongs(songId: String): List<Song> = emptyList()
-
-    fun artistByName(name: String): SavedArtistEntity? = kotlinx.coroutines.runBlocking {
-        allSavedArtists().first().firstOrNull { it.name.equals(name, ignoreCase = true) }?.let { SavedArtistEntity(id = it.id, name = it.name) }
-    }
+    @Query("SELECT * FROM savedartist WHERE name = :name COLLATE NOCASE LIMIT 1")
+    suspend fun artistByName(name: String): SavedArtistEntity?
 
     suspend fun getArtistById(id: String): SavedArtistEntity? {
         val saved = getSavedArtist(id)
@@ -766,6 +768,9 @@ interface DatabaseDao {
         explicit: Boolean,
         year: Int?
     )
+
+    @Query("UPDATE savedsong SET duration = :duration WHERE id = :songId AND (duration = -1 OR duration IS NULL)")
+    fun updateSongDuration(songId: String, duration: Int)
 
     @Query("SELECT * FROM savedsong WHERE id = :songId")
     fun getSavedSongDirect(songId: String): SavedSongEntity?
@@ -1044,8 +1049,17 @@ interface DatabaseDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertHistoryPlaylist(historyPlaylist: HistoryPlaylistEntity)
 
+    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC LIMIT :limit")
+    fun recentHistorySongs(limit: Int): Flow<List<HistorySongEntity>>
+
     @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
-    fun allHistorySongs(): Flow<List<HistorySongEntity>>
+    fun historySongsPagingSource(): PagingSource<Int, HistorySongEntity>
+
+    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC LIMIT :limit")
+    suspend fun getHistorySongsLimited(limit: Int): List<HistorySongEntity>
+
+    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
+    suspend fun getHistorySongsDirect(): List<HistorySongEntity>
 
     @Query("SELECT * FROM historialartist ORDER BY playedAt DESC")
     fun allHistoryArtists(): Flow<List<HistoryArtistEntity>>

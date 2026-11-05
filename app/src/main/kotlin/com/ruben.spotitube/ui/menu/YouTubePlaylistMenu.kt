@@ -1,6 +1,6 @@
 /*
- * OpenTune Project Original (2026)
- * Arturo254 (github.com/Arturo254)
+ * ARMORY Project Original (2026)
+ * armory31 (github.com/armory31)
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
@@ -67,7 +67,6 @@ import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
-import com.ruben.spotitube.LocalSyncUtils
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
@@ -115,8 +114,7 @@ fun YouTubePlaylistMenu(
     val syncManager = LocalSyncManager.current
     val downloadUtil = LocalDownloadUtil.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val syncUtils = LocalSyncUtils.current
-    val isLiked by remember(playlist.id) {
+    val isSaved by remember(playlist.id) {
         libraryStateHolder.savedPlaylistIds.map { it.contains(playlist.id) }
     }.collectAsStateWithLifecycle(initialValue = false)
     val dbPlaylist by database.playlistByBrowseId(playlist.id).collectAsStateWithLifecycle(initialValue = null)
@@ -131,12 +129,12 @@ fun YouTubePlaylistMenu(
 
     AddToPlaylistDialog(
         isVisible = showChoosePlaylistDialog,
-        onGetSong = { targetPlaylist ->
+        onGetSong = {
             val allSongs = songs
                 .ifEmpty {
                     YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
                 }
-            allSongs.map { it.id }
+            allSongs.map { it.toMediaMetadata() }
         },
         onDismiss = { showChoosePlaylistDialog = false },
         onAddComplete = { songCount, playlistNames ->
@@ -163,7 +161,7 @@ fun YouTubePlaylistMenu(
                     IconButton(
                         onClick = {
                             coroutineScope.launch {
-                                syncManager.togglePlaylistLike(
+                                syncManager.togglePlaylistSaved(
                                     PlaylistEntity(
                                         name = playlist.title,
                                         browseId = playlist.id,
@@ -181,8 +179,8 @@ fun YouTubePlaylistMenu(
                         },
                     ) {
                         Icon(
-                            painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),
-                            tint = if (isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current,
+                            painter = painterResource(if (isSaved) R.drawable.favorite else R.drawable.favorite_border),
+                            tint = if (isSaved) MaterialTheme.colorScheme.error else LocalContentColor.current,
                             contentDescription = null,
                         )
                     }
@@ -613,7 +611,6 @@ fun YouTubePlaylistMenu(
                                                 }
 
                                                 if (newValue) {
-                                                    syncUtils.syncAutoSyncPlaylists()
                                                     withContext(Dispatchers.Main) {
                                                         snackbarHostState?.showSnackbar(context.getString(R.string.playlist_synced))
                                                             ?: Toast.makeText(context, context.getString(R.string.playlist_synced), Toast.LENGTH_SHORT).show()
@@ -733,14 +730,8 @@ fun YouTubePlaylistMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            val intent =
-                                Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, playlist.shareLink)
-                                }
-                            context.startActivity(Intent.createChooser(intent, null))
                             onDismiss()
+                            com.ruben.spotitube.utils.shareItem(context, "playlist", playlist.id.removePrefix("VL"), playlist.title, playlist.author?.name, playlist.thumbnail)
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     )
