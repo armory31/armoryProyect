@@ -59,11 +59,9 @@ val StreamBypassProxyKey = booleanPreferencesKey("streamBypassProxy")
 
 val TogetherDisplayNameKey = stringPreferencesKey("together_display_name")
 val TogetherClientIdKey = stringPreferencesKey("together_client_id")
-val TogetherDefaultPortKey = intPreferencesKey("together_default_port")
 val TogetherAllowGuestsToAddTracksKey = booleanPreferencesKey("together_allow_guests_add_tracks")
 val TogetherAllowGuestsToControlPlaybackKey = booleanPreferencesKey("together_allow_guests_control_playback")
 val TogetherRequireHostApprovalToJoinKey = booleanPreferencesKey("together_require_host_approval_to_join")
-val TogetherLastJoinLinkKey = stringPreferencesKey("together_last_join_link")
 val TogetherWelcomeShownKey = booleanPreferencesKey("together_welcome_shown")
 
 val AudioQualityKey = stringPreferencesKey("audioQuality")

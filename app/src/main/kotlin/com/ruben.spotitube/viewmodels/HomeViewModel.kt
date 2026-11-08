@@ -120,17 +120,23 @@ class HomeViewModel @Inject constructor(
             QuickPicks.QUICK_PICKS -> {
                 val fromTimeStamp = System.currentTimeMillis() - 86400000L * 30
                 var mostPlayedRows = runCatching {
-                    database.mostPlayedSongs(fromTimeStamp, limit = 20, offset = 0).first()
+                    com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedSongs") {
+                        database.mostPlayedSongs(fromTimeStamp, limit = 20, offset = 0).first()
+                    }
                 }.getOrDefault(emptyList())
 
                 if (mostPlayedRows.size < 10) {
                     mostPlayedRows = runCatching {
-                        database.mostPlayedSongStatsAllTime(limit = 20, offset = 0).first()
+                        com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedSongStatsAllTime") {
+                            database.mostPlayedSongStatsAllTime(limit = 20, offset = 0).first()
+                        }
                     }.getOrDefault(emptyList())
                 }
                 HomeTiming.log("getQuickPicks #$n: DB queries done")
 
-                val metadataMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(mostPlayedRows.map { it.id }, timeoutMs = 5000L)
+                val metadataMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveQuickPicks") {
+                    com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(mostPlayedRows.map { it.id }, timeoutMs = 5000L)
+                }
                 HomeTiming.log("getQuickPicks #$n: resolve done (requested=${mostPlayedRows.size}, resolved=${metadataMap.size})")
 
                 val mostPlayed: List<Song> = mostPlayedRows.mapNotNull { row ->
@@ -138,7 +144,9 @@ class HomeViewModel @Inject constructor(
                 }
 
                 val savedSongs: List<Song> = runCatching {
-                    database.getRandomSavedSongs(20).map { it.toSong() }
+                    com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.getRandomSavedSongs") {
+                        database.getRandomSavedSongs(20).map { it.toSong() }
+                    }
                 }.getOrDefault(emptyList())
 
                 val localList: List<Song> = (mostPlayed + savedSongs).distinctBy { it.id }
@@ -166,14 +174,20 @@ class HomeViewModel @Inject constructor(
                 }
 
                 if (combined.size < 20) {
-                    val lastSongId = runCatching { database.getLastHistorySongId() }.getOrNull()
+                    val lastSongId = runCatching {
+                        com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.getLastHistorySongId") {
+                            database.getLastHistorySongId()
+                        }
+                    }.getOrNull()
                     if (!lastSongId.isNullOrBlank()) {
                         val nextSongs = runCatching {
-                            YouTube.next(WatchEndpoint(videoId = lastSongId)).getOrNull()
-                                ?.items
-                                ?.filterIsInstance<SongItem>()
-                                ?.map { it.toSong() }
-                                .orEmpty()
+                            com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("YouTube.nextQuickPicks") {
+                                YouTube.next(WatchEndpoint(videoId = lastSongId)).getOrNull()
+                                    ?.items
+                                    ?.filterIsInstance<SongItem>()
+                                    ?.map { it.toSong() }
+                                    .orEmpty()
+                            }
                         }.getOrDefault(emptyList())
                         HomeTiming.log("getQuickPicks #$n: YouTube.next done")
 
@@ -280,21 +294,26 @@ class HomeViewModel @Inject constructor(
                     HomeTiming.log("load: quickPicks end")
                 }
                 launch {
-                    loadSpeedDialSongs()
-                    HomeTiming.log("load: speedDial end")
-                }
-                launch {
-                    _forgottenFavorites.value = database.forgottenFavorites().first().shuffled().take(20)
+                    _forgottenFavorites.value = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.forgottenFavorites") {
+                        database.forgottenFavorites().first().shuffled().take(20)
+                    }
                     HomeTiming.log("load: forgottenFavorites end")
                 }
                 
                 launch {
-                    val keepListeningRows = database.mostPlayedSongs(fromTimeStamp, limit = 15, offset = 5)
-                        .first().shuffled().take(10)
-                    val keepListeningMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(keepListeningRows.map { it.id }, timeoutMs = 5000L)
+                    val keepListeningRows = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedSongsKeepListening") {
+                        database.mostPlayedSongs(fromTimeStamp, limit = 15, offset = 5).first()
+                    }.shuffled().take(10)
+                    val keepListeningMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveKeepListening") {
+                        com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(keepListeningRows.map { it.id }, timeoutMs = 5000L)
+                    }
                     val keepListeningSongs: List<Song> = keepListeningRows.mapNotNull { row -> keepListeningMap[row.id]?.toSong() }
-                    val rawAlbums = database.mostPlayedAlbums(fromTimeStamp, limit = 8, offset = 2).first()
-                    val albumsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveAlbums(rawAlbums.map { it.id }, timeoutMs = 5000L)
+                    val rawAlbums = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedAlbumsKeepListening") {
+                        database.mostPlayedAlbums(fromTimeStamp, limit = 8, offset = 2).first()
+                    }
+                    val albumsMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveAlbumsKeepListening") {
+                        com.ruben.spotitube.utils.HistoryMetadataLoader.resolveAlbums(rawAlbums.map { it.id }, timeoutMs = 5000L)
+                    }
                     val keepListeningAlbums = rawAlbums.mapNotNull { albumObj ->
                         albumsMap[albumObj.id]?.let { meta ->
                             com.ruben.spotitube.db.entities.Album(
@@ -310,8 +329,12 @@ class HomeViewModel @Inject constructor(
                         }
                     }.filter { it.album.thumbnailUrl != null }.shuffled().take(5)
 
-                    val rawArtists = database.mostPlayedArtists(fromTimeStamp).first()
-                    val artistsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtists.map { it.id }, timeoutMs = 5000L)
+                    val rawArtists = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedArtistsKeepListening") {
+                        database.mostPlayedArtists(fromTimeStamp).first()
+                    }
+                    val artistsMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveArtistsKeepListening") {
+                        com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtists.map { it.id }, timeoutMs = 5000L)
+                    }
                     val keepListeningArtists = rawArtists.mapNotNull { artistObj ->
                         artistsMap[artistObj.id]?.let { meta ->
                             com.ruben.spotitube.db.entities.Artist(
@@ -339,7 +362,9 @@ class HomeViewModel @Inject constructor(
 
                 launch {
                     HomeTiming.log("Before YouTube.home(): gl=${YouTube.locale.gl}, visitorDataIsEmpty=${YouTube.visitorData.isNullOrBlank()}")
-                    YouTube.home().onSuccess { page ->
+                    com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("YouTube.home") {
+                        YouTube.home()
+                    }.onSuccess { page ->
                         _homePage.value = page.copy(
                             sections = page.sections.map { section ->
                                 section.copy(items = section.items.filterVideo(hideVideo))

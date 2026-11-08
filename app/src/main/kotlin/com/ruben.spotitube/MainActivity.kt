@@ -22,17 +22,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -46,9 +52,11 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
@@ -56,12 +64,15 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import com.ruben.spotitube.playback.DownloadProgress
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -109,6 +120,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import com.ruben.spotitube.constants.AppBarHeight
@@ -123,7 +135,6 @@ import com.ruben.spotitube.constants.NavigationTab
 import com.ruben.spotitube.constants.RemindAfterKey
 import com.ruben.spotitube.constants.SYSTEM_DEFAULT
 import com.ruben.spotitube.constants.StopMusicOnTaskClearKey
-import com.ruben.spotitube.constants.TogetherDisplayNameKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
@@ -203,7 +214,6 @@ class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
     private var pendingDeepLinkSong: PendingDeepLinkSong? = null
-    private var pendingTogetherJoinLink: String? = null
     private var latestVersionName: String by mutableStateOf(BuildConfig.VERSION_NAME)
 
     private var playerConnection by mutableStateOf<PlayerConnection?>(null)
@@ -221,7 +231,6 @@ class MainActivity : ComponentActivity() {
                     playerConnection =
                         PlayerConnection(this@MainActivity, service, database, lifecycleScope)
                     playPendingDeepLinkSongIfReady()
-                    joinPendingTogetherIfReady()
                 }
             }
 
@@ -249,23 +258,6 @@ class MainActivity : ComponentActivity() {
             shouldExpandPlayerForDeepLink = true
         } else {
             expandPlayer()
-        }
-    }
-
-    private fun joinPendingTogetherIfReady() {
-        val pending = pendingTogetherJoinLink ?: return
-        val connection = playerConnection ?: return
-        pendingTogetherJoinLink = null
-        lifecycleScope.launch(Dispatchers.IO) {
-            val displayName =
-                runCatching { dataStore.data.first()[TogetherDisplayNameKey] }
-                    .getOrNull()
-                    ?.trim()
-                    .orEmpty()
-                    .ifBlank { Build.MODEL ?: getString(R.string.app_name) }
-            withContext(Dispatchers.Main) {
-                connection.service.joinTogether(pending, displayName)
-            }
         }
     }
 
@@ -323,9 +315,13 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val mainActivityStartMs = com.ruben.spotitube.utils.PerfTiming.beginSection("MainActivity.toFirstFrame")
         val splashScreen = installSplashScreen()
         startMusicServiceSafely()
         super.onCreate(savedInstanceState)
+        window.decorView.post {
+            com.ruben.spotitube.utils.PerfTiming.endSection("MainActivity.toFirstFrame", mainActivityStartMs)
+        }
 
         var isLoginChecked by mutableStateOf(false)
         var isRedirecting by mutableStateOf(false)
@@ -399,6 +395,18 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            val downloadProgress by downloadUtil.progress.collectAsStateWithLifecycle()
+            var showDownloadPopup by remember { mutableStateOf(false) }
+
+            LaunchedEffect(downloadProgress.isActive, downloadProgress.total) {
+                if (downloadProgress.isActive) {
+                    showDownloadPopup = true
+                } else if (downloadProgress.total > 0) {
+                    delay(2500.milliseconds)
+                    showDownloadPopup = false
+                }
+            }
+
             val notificationPermissionLauncher =
                 rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
                     if (isGranted) {
@@ -955,8 +963,9 @@ class MainActivity : ComponentActivity() {
                                                         3 -> Screens.Library.route
                                                         else -> Screens.Home.route
                                                     }
+                                                    com.ruben.spotitube.utils.PerfTiming.onTabClicked(screenRoute)
                                                     navController.navigate(screenRoute) {
-                                                        popUpTo(navController.graph.startDestinationId) {
+                                                        popUpTo(navController.graph.findStartDestination().id) {
                                                             saveState = true
                                                         }
                                                         launchSingleTop = true
@@ -1008,8 +1017,9 @@ class MainActivity : ComponentActivity() {
                                                                     3 -> Screens.Library.route
                                                                     else -> Screens.Home.route
                                                                 }
+                                                                com.ruben.spotitube.utils.PerfTiming.onTabClicked(nextRoute)
                                                                 navController.navigate(nextRoute) {
-                                                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                                                     launchSingleTop = true
                                                                     restoreState = true
                                                                 }
@@ -1020,8 +1030,9 @@ class MainActivity : ComponentActivity() {
                                                                     2 -> Screens.MoodAndGenres.route
                                                                     else -> Screens.Home.route
                                                                 }
+                                                                com.ruben.spotitube.utils.PerfTiming.onTabClicked(prevRoute)
                                                                 navController.navigate(prevRoute) {
-                                                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                                                     launchSingleTop = true
                                                                     restoreState = true
                                                                 }
@@ -1060,28 +1071,28 @@ class MainActivity : ComponentActivity() {
                                             ),
                                         enterTransition = {
                                             if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
-                                                EnterTransition.None
+                                                fadeIn(tween(50))
                                             } else {
                                                 fadeIn(tween(250)) + slideInHorizontally { it / 2 }
                                             }
                                         },
                                         exitTransition = {
                                             if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
-                                                ExitTransition.None
+                                                fadeOut(tween(50))
                                             } else {
                                                 fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
                                             }
                                         },
                                         popEnterTransition = {
                                             if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
-                                                EnterTransition.None
+                                                fadeIn(tween(50))
                                             } else {
                                                 fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
                                             }
                                         },
                                         popExitTransition = {
                                             if (initialState.destination.route in topLevelScreens && targetState.destination.route in topLevelScreens) {
-                                                ExitTransition.None
+                                                fadeOut(tween(50))
                                             } else {
                                                 fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
                                             }
@@ -1115,6 +1126,19 @@ class MainActivity : ComponentActivity() {
                         BottomSheetMenu(
                             state = menuState,
                         )
+
+                        AnimatedVisibility(
+                            visible = showDownloadPopup && isUiReady,
+                            enter = fadeIn() + slideInVertically { -it },
+                            exit = fadeOut() + slideOutVertically { -it },
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .statusBarsPadding()
+                                .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                                .fillMaxWidth(),
+                        ) {
+                            DownloadProgressPopup(downloadProgress, Modifier.fillMaxWidth())
+                        }
 
                         if (!isUiReady) {
                             Box(
@@ -1170,14 +1194,6 @@ class MainActivity : ComponentActivity() {
         val pathSegments = uri.pathSegments.filter(String::isNotBlank)
 
 
-        // 1. Manejo especial de Together
-        val isSupportedScheme = scheme == "armory" || scheme == "opentune"
-        if (isSupportedScheme && authority == "together") {
-            pendingTogetherJoinLink = uri.toString()
-            startMusicServiceSafely()
-            joinPendingTogetherIfReady()
-            return
-        }
 
         // Helper para popBackStack si la pantalla actual coincide con el tipo de pantalla a navegar
         fun navigateWithPop(targetRoute: String, routePrefix: String) {
@@ -1212,6 +1228,13 @@ class MainActivity : ComponentActivity() {
             val (type, id) = normalizedDeepLinkPair
 
             when (type) {
+                "together" -> {
+                    val code = id.filter { it in '0'..'9' }
+                    if (code.length == 6) {
+                        navigateWithPop("settings/music_together?code=$code", "settings/music_together")
+                    }
+                    return
+                }
                 "song" -> {
                     coroutineScope.launch {
                         try {
@@ -1352,3 +1375,57 @@ val LocalSyncManager =
 val LocalLibraryStateHolder =
     staticCompositionLocalOf<com.ruben.spotitube.sync.LibraryStateHolder> { error("No LibraryStateHolder provided") }
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
+
+@Composable
+private fun DownloadProgressPopup(
+    progress: DownloadProgress,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 6.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val titleText = if (progress.isActive) {
+                    "Descargando ${progress.completed}/${progress.total}"
+                } else {
+                    "Descarga completada"
+                }
+                Text(
+                    text = titleText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = "${progress.percent}%",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { progress.percent / 100f },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (progress.failed > 0) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${progress.failed} fallidas",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+    }
+}

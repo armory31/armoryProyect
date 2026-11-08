@@ -207,10 +207,42 @@ class BackupRestoreViewModel @Inject constructor(
                             }
                         }
 
-                        for (album in albums) {
-                            val albumTitle = escapeCsvField(album.title)
-                            val artistName = escapeCsvField(album.artistName)
-                            writer.write(",$artistName,$albumTitle,,\"Album\",\"\",\n")
+                        for ((index, album) in albums.withIndex()) {
+                            val percent = ((index + 1) * 100) / albums.size.coerceAtLeast(1)
+                            emitProgress(
+                                title = title,
+                                step = "Exportando álbum ${index + 1} de ${albums.size}...",
+                                percent = percent,
+                                indeterminate = false
+                            )
+
+                            val albumId = album.id
+                            val albumTitleEsc = escapeCsvField(album.title)
+                            val defaultArtist = album.artistName.orEmpty()
+
+                            val fetchedSongs = runCatching {
+                                com.ruben.spotitube.innertube.YouTube.album(albumId).getOrNull()?.songs
+                            }.getOrNull()
+
+                            if (!fetchedSongs.isNullOrEmpty()) {
+                                for (s in fetchedSongs) {
+                                    val trackName = escapeCsvField(s.title)
+                                    val artistName = escapeCsvField(s.artists.firstOrNull()?.name ?: defaultArtist)
+                                    writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                }
+                            } else {
+                                val dbSongs = database.albumSongs(albumId).first()
+                                if (dbSongs.isNotEmpty()) {
+                                    for (s in dbSongs) {
+                                        val trackName = escapeCsvField(s.song.title)
+                                        val artistName = escapeCsvField(s.artists.firstOrNull()?.name ?: defaultArtist)
+                                        writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                    }
+                                } else {
+                                    val artistNameEsc = escapeCsvField(defaultArtist)
+                                    writer.write(",$artistNameEsc,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                }
+                            }
                         }
                     }
                 }
@@ -224,6 +256,63 @@ class BackupRestoreViewModel @Inject constructor(
                 }
             } finally {
                 _backupRestoreProgress.value = null
+            }
+        }
+    }
+
+    fun exportAlbumCsv(
+        context: Context,
+        uri: Uri,
+        albumId: String,
+        albumTitle: String,
+        defaultArtist: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    java.io.OutputStreamWriter(outputStream, Charsets.UTF_8).use { writer ->
+                        writer.write("\"Track name\",\"Artist name\",\"Album\",\"Playlist name\",\"Type\",\"ISRC\",\"Spotify - id\"\n")
+
+                        fun escape(valStr: String?): String {
+                            val str = valStr.orEmpty()
+                            val escaped = str.replace("\"", "\"\"")
+                            return "\"$escaped\""
+                        }
+
+                        val albumTitleEsc = escape(albumTitle)
+                        val fetchedSongs = runCatching {
+                            com.ruben.spotitube.innertube.YouTube.album(albumId).getOrNull()?.songs
+                        }.getOrNull()
+
+                        if (!fetchedSongs.isNullOrEmpty()) {
+                            for (s in fetchedSongs) {
+                                val trackName = escape(s.title)
+                                val artistName = escape(s.artists.firstOrNull()?.name ?: defaultArtist)
+                                writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                            }
+                        } else {
+                            val dbSongs = database.albumSongs(albumId).first()
+                            if (dbSongs.isNotEmpty()) {
+                                for (s in dbSongs) {
+                                    val trackName = escape(s.song.title)
+                                    val artistName = escape(s.artists.firstOrNull()?.name ?: defaultArtist)
+                                    writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                                }
+                            } else {
+                                val artistNameEsc = escape(defaultArtist)
+                                writer.write(",$artistNameEsc,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
+                            }
+                        }
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, R.string.export_csv_success, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                reportException(e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, context.getString(R.string.export_csv_error) + ": ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -587,9 +676,15 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
+data class CsvImportGroup(
+    val name: String?,
+    val songs: ArrayList<Song>
+)
+
 data class CsvImportResult(
     val playlistName: String?,
-    val songs: ArrayList<Song>
+    val songs: ArrayList<Song>,
+    val groups: List<CsvImportGroup> = emptyList()
 )
 
     private fun normalizeCsvHeaderCell(value: String): String =
@@ -603,14 +698,13 @@ data class CsvImportResult(
 
     suspend fun importPlaylistFromCsv(context: Context, uri: Uri): CsvImportResult {
         return withContext(Dispatchers.IO) {
-            val out = arrayListOf<Song>()
-            var foundPlaylistName: String? = null
+            val groupsMap = LinkedHashMap<String?, ArrayList<Song>>()
 
             runCatching {
                 context.contentResolver.openInputStream(uri)?.use { stream ->
                     val reader = PushbackReader(InputStreamReader(stream, Charsets.UTF_8), 1)
                     val iterator = readCsvRecords(reader).iterator()
-                    if (!iterator.hasNext()) return@use CsvImportResult(null, arrayListOf())
+                    if (!iterator.hasNext()) return@use CsvImportResult(null, arrayListOf(), emptyList())
 
                     val firstRecord = iterator.next()
                     val normalizedHeader = firstRecord.map(::normalizeCsvHeaderCell)
@@ -627,11 +721,9 @@ data class CsvImportResult(
                     val resolvedArtistIndex = if (hasHeader) artistIndex else 1
 
                     fun addFromRecord(record: List<String>) {
-                        if (playlistNameIndex >= 0 && foundPlaylistName == null) {
-                            record.getOrNull(playlistNameIndex)?.trim()?.takeIf { it.isNotBlank() }?.let {
-                                foundPlaylistName = it
-                            }
-                        }
+                        val groupName = if (playlistNameIndex >= 0) {
+                            record.getOrNull(playlistNameIndex)?.trim()?.takeIf { it.isNotBlank() }
+                        } else null
 
                         val titleRaw = record.getOrNull(resolvedTitleIndex).orEmpty()
                         val artistRaw = record.getOrNull(resolvedArtistIndex).orEmpty()
@@ -647,12 +739,12 @@ data class CsvImportResult(
                                 .filter { it.isNotEmpty() }
                                 .map { SavedArtistEntity(id = "", name = it) }
 
-                        out.add(
-                            Song(
-                                song = SavedSongEntity(id = "", title = title),
-                                artists = artists.ifEmpty { listOf(SavedArtistEntity("", "")) },
-                            )
+                        val song = Song(
+                            song = SavedSongEntity(id = "", title = title),
+                            artists = artists.ifEmpty { listOf(SavedArtistEntity("", "")) },
                         )
+
+                        groupsMap.getOrPut(groupName) { arrayListOf() }.add(song)
                     }
 
                     if (!hasHeader) {
@@ -666,14 +758,19 @@ data class CsvImportResult(
                 reportException(it)
             }
 
-            val deduplicated = out.distinctBy {
-                Pair(
-                    it.song.title.lowercase().trim(),
-                    it.artists.firstOrNull()?.name?.lowercase()?.trim().orEmpty()
-                )
+            val resultGroups = groupsMap.map { (name, songsInGroup) ->
+                val deduplicatedGroup = songsInGroup.distinctBy {
+                    Pair(
+                        it.song.title.lowercase().trim(),
+                        it.artists.firstOrNull()?.name?.lowercase()?.trim().orEmpty()
+                    )
+                }
+                CsvImportGroup(name = name, songs = ArrayList(deduplicatedGroup))
             }
 
-            if (deduplicated.isEmpty()) {
+            val totalSongs = resultGroups.sumOf { it.songs.size }
+
+            if (totalSongs == 0) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         context,
@@ -683,9 +780,13 @@ data class CsvImportResult(
                 }
             }
 
+            val firstPlaylistName = resultGroups.firstOrNull { !it.name.isNullOrBlank() }?.name ?: resultGroups.firstOrNull()?.name
+            val allSongsCombined = ArrayList(resultGroups.flatMap { it.songs })
+
             CsvImportResult(
-                playlistName = foundPlaylistName,
-                songs = ArrayList(deduplicated)
+                playlistName = firstPlaylistName,
+                songs = allSongsCombined,
+                groups = resultGroups
             )
         }
     }

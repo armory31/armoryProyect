@@ -111,6 +111,7 @@ import com.ruben.spotitube.constants.SwipeToSongKey
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.Artist
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
@@ -609,11 +610,8 @@ fun SongListItem(
         }
 
         if (showDownloadIcon) {
-            val downloadState = metadata?.downloadState ?: run {
-                val download by LocalDownloadUtil.current.getDownload(song.id)
-                    .collectAsStateWithLifecycle(initialValue = null)
-                download?.state
-            }
+            val downloadState = metadata?.downloadState
+                ?: LocalDownloadUtil.current.songState(song.id).collectAsStateWithLifecycle(initialValue = null).value
             Icon.Download(downloadState)
         }
     },
@@ -680,10 +678,8 @@ fun SongGridItem(
             Icon.Favorite()
         }
         if (showDownloadIcon) {
-            val downloadState = metadata?.downloadState ?: run {
-                val download by LocalDownloadUtil.current.getDownload(song.id).collectAsStateWithLifecycle(initialValue = null)
-                download?.state
-            }
+            val downloadState = metadata?.downloadState
+                ?: LocalDownloadUtil.current.songState(song.id).collectAsStateWithLifecycle(initialValue = null).value
             Icon.Download(downloadState)
         }
     },
@@ -808,35 +804,9 @@ fun AlbumListItem(
             Icon.Explicit()
         }
 
-        val downloadState = metadata?.downloadState ?: run {
-            val database = LocalDatabase.current
-            val downloadUtil = LocalDownloadUtil.current
-            var songs by remember {
-                mutableStateOf(emptyList<Song>())
-            }
-
-            LaunchedEffect(Unit) {
-                database.albumSongs(album.id).collect {
-                    songs = it
-                }
-            }
-
-            var dState by remember {
-                mutableIntStateOf(Download.STATE_STOPPED)
-            }
-
-            LaunchedEffect(songs) {
-                if (songs.isEmpty()) return@LaunchedEffect
-                downloadUtil.downloads.collect { downloads ->
-                    dState = when {
-                        songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
-                        songs.all { downloads[it.id]?.state in listOf(STATE_QUEUED, STATE_DOWNLOADING, STATE_COMPLETED) } -> STATE_DOWNLOADING
-                        else -> Download.STATE_STOPPED
-                    }
-                }
-            }
-            dState
-        }
+        val downloadState = metadata?.downloadState
+            ?: LocalDownloadUtil.current.originState(DownloadOriginType.ALBUM, album.id)
+                .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
         Icon.Download(downloadState)
     },
     isActive: Boolean = false,
@@ -880,29 +850,9 @@ fun AlbumGridItem(
             Icon.Explicit()
         }
 
-        val downloadState = metadata?.downloadState ?: run {
-            val database = LocalDatabase.current
-            val downloadUtil = LocalDownloadUtil.current
-            var songs by remember { mutableStateOf(emptyList<Song>()) }
-
-            LaunchedEffect(Unit) {
-                database.albumSongs(album.id).collect { songs = it }
-            }
-
-            var dState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
-
-            LaunchedEffect(songs) {
-                if (songs.isEmpty()) return@LaunchedEffect
-                downloadUtil.downloads.collect { downloads ->
-                    dState = when {
-                        songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
-                        songs.all { downloads[it.id]?.state in listOf(STATE_QUEUED, STATE_DOWNLOADING, STATE_COMPLETED) } -> STATE_DOWNLOADING
-                        else -> Download.STATE_STOPPED
-                    }
-                }
-            }
-            dState
-        }
+        val downloadState = metadata?.downloadState
+            ?: LocalDownloadUtil.current.originState(DownloadOriginType.ALBUM, album.id)
+                .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
         Icon.Download(downloadState)
     },
     isActive: Boolean = false,
@@ -1278,10 +1228,10 @@ fun YouTubeListItem(
         if (item.explicit) Icon.Explicit()
 
         if (item is SongItem) {
-            val downloadState = metadata?.downloadState ?: run {
-                val downloads by LocalDownloadUtil.current.downloads.collectAsStateWithLifecycle()
-                downloads[item.id]?.state
-            }
+            val downloadUtil = LocalDownloadUtil.current
+            val songStateFlow = remember(item.id) { downloadUtil.songState(item.id) }
+            val downloadState = metadata?.downloadState
+                ?: songStateFlow.collectAsStateWithLifecycle(initialValue = null).value
             Icon.Download(downloadState)
         }
     },
@@ -1353,10 +1303,10 @@ fun YouTubeGridItem(
         }
         if (item.explicit) Icon.Explicit()
         if (item is SongItem) {
-            val downloadState = metadata?.downloadState ?: run {
-                val downloads by LocalDownloadUtil.current.downloads.collectAsStateWithLifecycle()
-                downloads[item.id]?.state
-            }
+            val downloadUtil = LocalDownloadUtil.current
+            val songStateFlow = remember(item.id) { downloadUtil.songState(item.id) }
+            val downloadState = metadata?.downloadState
+                ?: songStateFlow.collectAsStateWithLifecycle(initialValue = null).value
             Icon.Download(downloadState)
         }
     },
@@ -1590,7 +1540,7 @@ fun ItemThumbnail(
                 Text(
                     text = albumIndex.toString(),
                     style = MaterialTheme.typography.labelLarge,
-                    color = ArmoryColors.Rust2,
+                    color = ArmoryColors.TextGold,
                     fontWeight = FontWeight.Bold
                 )
             }

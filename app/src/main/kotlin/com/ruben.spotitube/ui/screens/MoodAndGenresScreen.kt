@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,7 +54,18 @@ import com.ruben.spotitube.viewmodels.MoodAndGenresViewModel
 @Composable
 fun MoodAndGenresScreen(
     navController: NavController,
-    viewModel: MoodAndGenresViewModel = hiltViewModel(),
+    viewModel: MoodAndGenresViewModel = run {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val owner = androidx.compose.runtime.remember(context) {
+            var ctx = context
+            while (ctx is android.content.ContextWrapper) {
+                if (ctx is androidx.activity.ComponentActivity) return@remember ctx
+                ctx = ctx.baseContext
+            }
+            null
+        }
+        if (owner != null) hiltViewModel(viewModelStoreOwner = owner) else hiltViewModel()
+    },
 ) {
     val moodAndGenres by viewModel.moodAndGenres.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
@@ -65,6 +77,16 @@ fun MoodAndGenresScreen(
         backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsStateWithLifecycle()
 
     val avatarUrl = rememberAvatarUrl()
+
+    LaunchedEffect(Unit) {
+        viewModel.load()
+    }
+
+    LaunchedEffect(moodAndGenres) {
+        if (moodAndGenres != null) {
+            com.ruben.spotitube.utils.PerfTiming.onTabComposedWithData(Screens.MoodAndGenres.route, hasData = true)
+        }
+    }
 
     LaunchedEffect(scrollToTop?.value) {
         if (scrollToTop?.value == true) {
@@ -80,6 +102,8 @@ fun MoodAndGenresScreen(
             avatarUrl = avatarUrl,
             onSettings = { navController.navigate("account") }
         )
+
+        val moodAndGenresList = androidx.compose.runtime.remember(moodAndGenres) { moodAndGenres.orEmpty() }
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -106,7 +130,7 @@ fun MoodAndGenresScreen(
                 }
             } else {
                 items(
-                    items = moodAndGenres.orEmpty(),
+                    items = moodAndGenresList,
                     key = { item -> "${item.title}:${item.endpoint.browseId}:${item.endpoint.params}" },
                 ) { item ->
                     MoodAndGenresButton(
@@ -134,38 +158,28 @@ fun MoodAndGenresButton(
     modifier: Modifier = Modifier,
 ) {
     val baseColor = if (stripeColor != 0L) Color(stripeColor) else ArmoryColors.Gold2
-    val cardBackground = Brush.linearGradient(
-        colors = listOf(
-            ArmoryColors.SurfaceElevated,
-            ArmoryColors.SurfaceBlack
-        ),
-        start = Offset(0f, 0f),
-        end = Offset(400f, 400f)
-    )
-    val topEndGlow = Brush.radialGradient(
-        colors = listOf(
-            baseColor.copy(alpha = 0.25f),
-            Color.Transparent
-        ),
-        center = Offset(400f, 0f),
-        radius = 300f
-    )
+    val tinted = lerp(ArmoryColors.SurfaceBlack, baseColor, 0.55f)
 
     Box(
-        contentAlignment = Alignment.BottomStart,
         modifier = modifier
             .height(MoodAndGenresButtonHeight)
             .clip(RoundedCornerShape(16.dp))
-            .background(ArmoryColors.SurfaceBlack)
-            .background(cardBackground)
-            .background(topEndGlow)
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        tinted,
+                        lerp(ArmoryColors.SurfaceBlack, baseColor, 0.18f)
+                    ),
+                    start = Offset(Float.POSITIVE_INFINITY, 0f),
+                    end = Offset(0f, Float.POSITIVE_INFINITY)
+                )
+            )
             .border(
                 1.dp,
-                ArmoryColors.SurfaceBorder,
+                baseColor.copy(alpha = 0.35f),
                 RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onClick)
-            .padding(16.dp),
     ) {
         Text(
             text = title,
@@ -175,6 +189,9 @@ fun MoodAndGenresButton(
             color = ArmoryColors.TextGold,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp),
         )
     }
 }

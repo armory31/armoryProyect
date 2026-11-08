@@ -108,25 +108,6 @@ data class ParticipantLeft(
 ) : TogetherMessage
 
 @Serializable
-@SerialName("heartbeat_ping")
-@Immutable
-data class HeartbeatPing(
-    val sessionId: String,
-    val pingId: Long,
-    val clientElapsedRealtimeMs: Long,
-) : TogetherMessage
-
-@Serializable
-@SerialName("heartbeat_pong")
-@Immutable
-data class HeartbeatPong(
-    val sessionId: String,
-    val pingId: Long,
-    val clientElapsedRealtimeMs: Long,
-    val serverElapsedRealtimeMs: Long,
-) : TogetherMessage
-
-@Serializable
 @SerialName("client_leave")
 @Immutable
 data class ClientLeave(

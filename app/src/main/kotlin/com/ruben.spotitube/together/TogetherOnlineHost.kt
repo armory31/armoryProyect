@@ -11,6 +11,7 @@ import androidx.compose.runtime.Immutable
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ServerValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -193,21 +194,25 @@ class TogetherOnlineHost(
         val stateChanged = previous == null ||
             previous.copy(
                 positionMs = roomState.positionMs,
-                sentAtElapsedRealtimeMs = roomState.sentAtElapsedRealtimeMs,
+                sentAtServerMs = roomState.sentAtServerMs,
             ) != roomState
         val expectedPosition = previous?.let {
-            it.positionMs + if (it.isPlaying) (now - it.sentAtElapsedRealtimeMs).coerceAtLeast(0L) else 0L
+            it.positionMs + if (it.isPlaying) (now - lastWriteElapsedMs).coerceAtLeast(0L) else 0L
         }
         val positionDrifted = expectedPosition == null || abs(roomState.positionMs - expectedPosition) > 1_500L
         val shouldWrite = stateChanged || positionDrifted || now - lastWriteElapsedMs >= 5_000L
         if (!shouldWrite) return
 
         try {
+            val jsonStr = TogetherJson.json.encodeToString(
+                TogetherMessage.serializer(),
+                RoomStateMessage(roomState),
+            )
             sessionRef.child("state").setValue(
-                TogetherJson.json.encodeToString(
-                    TogetherMessage.serializer(),
-                    RoomStateMessage(roomState),
-                ),
+                mapOf(
+                    "json" to jsonStr,
+                    "ts" to ServerValue.TIMESTAMP,
+                )
             ).await()
             lastWrittenState = roomState
             lastWriteElapsedMs = now
@@ -322,20 +327,6 @@ class TogetherOnlineHost(
             is AddTrackRequest -> {
                 if (message.sessionId == sessionId && message.participantId == fromUid && guestCanSend(fromUid)) {
                     onEvent?.invoke(TogetherServerEvent.AddTrackRequested(message))
-                }
-            }
-
-            is HeartbeatPing -> {
-                if (message.sessionId == sessionId && hasGuest(fromUid)) {
-                    sendToGuest(
-                        fromUid,
-                        HeartbeatPong(
-                            sessionId = sessionId,
-                            pingId = message.pingId,
-                            clientElapsedRealtimeMs = message.clientElapsedRealtimeMs,
-                            serverElapsedRealtimeMs = SystemClock.elapsedRealtime(),
-                        ),
-                    )
                 }
             }
 

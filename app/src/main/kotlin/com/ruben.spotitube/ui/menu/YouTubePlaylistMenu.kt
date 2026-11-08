@@ -61,7 +61,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalLibraryStateHolder
@@ -72,6 +71,7 @@ import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.utils.rememberPreference
+import com.ruben.spotitube.utils.reportException
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.extensions.toMediaItem
@@ -79,9 +79,10 @@ import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.PlaylistItem
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.utils.completed
+import com.ruben.spotitube.db.entities.DownloadOriginType
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.models.toMediaMetadata
-import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.ListDialog
@@ -118,6 +119,25 @@ fun YouTubePlaylistMenu(
         libraryStateHolder.savedPlaylistIds.map { it.contains(playlist.id) }
     }.collectAsStateWithLifecycle(initialValue = false)
     val dbPlaylist by database.playlistByBrowseId(playlist.id).collectAsStateWithLifecycle(initialValue = null)
+
+    var playlistSongs by remember { mutableStateOf(songs) }
+
+    LaunchedEffect(playlist.id, songs) {
+        if (songs.isNotEmpty()) {
+            playlistSongs = songs
+        } else {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
+                }
+            }.onSuccess { fetched ->
+                playlistSongs = fetched
+            }.onFailure { exception ->
+                playlistSongs = emptyList()
+                reportException(exception)
+            }
+        }
+    }
 
     var showChoosePlaylistDialog by rememberSaveable { mutableStateOf(false) }
     var showImportPlaylistDialog by rememberSaveable { mutableStateOf(false) }
@@ -194,25 +214,9 @@ fun YouTubePlaylistMenu(
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    var downloadState by remember {
-        mutableIntStateOf(Download.STATE_STOPPED)
-    }
-    LaunchedEffect(songs) {
-        if (songs.isEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it.id]?.state == Download.STATE_COMPLETED })
-                    Download.STATE_COMPLETED
-                else if (songs.all {
-                        downloads[it.id]?.state == Download.STATE_QUEUED
-                                || downloads[it.id]?.state == Download.STATE_DOWNLOADING
-                                || downloads[it.id]?.state == Download.STATE_COMPLETED
-                    })
-                    Download.STATE_DOWNLOADING
-                else
-                    Download.STATE_STOPPED
-        }
-    }
+    val originId = remember(playlist.id) { playlist.id.removePrefix("VL") }
+    val downloadState = downloadUtil.originState(DownloadOriginType.PLAYLIST, originId)
+        .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
     var showRemoveDownloadDialog by remember {
         mutableStateOf(false)
     }
@@ -238,13 +242,8 @@ fun YouTubePlaylistMenu(
                 TextButton(
                     onClick = {
                         showRemoveDownloadDialog = false
-                        songs.forEach { song ->
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.id,
-                                false
-                            )
+                        coroutineScope.launch {
+                            downloadUtil.removeOrigin(DownloadOriginType.PLAYLIST, originId)
                         }
                     }
                 ) {
@@ -674,7 +673,9 @@ fun YouTubePlaylistMenu(
                                 )
                             },
                             modifier = Modifier.clickable {
-                                showRemoveDownloadDialog = true
+                                coroutineScope.launch {
+                                    downloadUtil.cancelPending(DownloadOriginType.PLAYLIST, originId)
+                                }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         )
@@ -691,20 +692,26 @@ fun YouTubePlaylistMenu(
                             },
                             modifier = Modifier.clickable {
                                 coroutineScope.launch {
-                                    songs
-                                        .ifEmpty {
-                                            withContext(Dispatchers.IO) {
-                                                YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
-                                            }
-                                        }.forEach { song ->
-                                            val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                            DownloadService.sendAddDownload(
-                                                context,
-                                                ExoDownloadService::class.java,
-                                                downloadRequest,
-                                                false,
-                                            )
+                                    val targetSongs = if (playlistSongs.isNotEmpty()) {
+                                        playlistSongs
+                                    } else {
+                                        val fetched = withContext(Dispatchers.IO) {
+                                            YouTube.playlist(playlist.id).completed().getOrNull()?.songs.orEmpty()
                                         }
+                                        if (fetched.isNotEmpty()) {
+                                            playlistSongs = fetched
+                                        }
+                                        fetched
+                                    }
+                                    if (targetSongs.isNotEmpty()) {
+                                        downloadUtil.enqueue(
+                                            DownloadOriginType.PLAYLIST,
+                                            originId,
+                                            playlist.title,
+                                            playlist.thumbnail,
+                                            targetSongs.map { DownloadedSongMetadata.fromSongItem(it) }
+                                        )
+                                    }
                                 }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),

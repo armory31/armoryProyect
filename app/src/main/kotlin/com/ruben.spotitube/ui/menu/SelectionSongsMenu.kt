@@ -42,21 +42,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalLibraryStateHolder
 import com.ruben.spotitube.LocalPlayerConnection
 import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.extensions.toMediaItem
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.models.MediaMetadata
-import com.ruben.spotitube.playback.ExoDownloadService
+import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.NewAction
@@ -82,28 +83,9 @@ fun SelectionSongMenu(
     val libraryStateHolder = LocalLibraryStateHolder.current
     val syncManager = LocalSyncManager.current
 
-    var downloadState by remember {
-        mutableIntStateOf(Download.STATE_STOPPED)
-    }
-
-    LaunchedEffect(songSelection) {
-        if (songSelection.isEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songSelection.all { downloads[it.id]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songSelection.all {
-                        downloads[it.id]?.state == Download.STATE_QUEUED ||
-                                downloads[it.id]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it.id]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
-        }
-    }
+    val downloadState = remember(songSelection) {
+        downloadUtil.songsState(songSelection.map { it.id })
+    }.collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
 
     var showChoosePlaylistDialog by rememberSaveable {
         mutableStateOf(false)
@@ -154,13 +136,10 @@ fun SelectionSongMenu(
                 TextButton(
                     onClick = {
                         showRemoveDownloadDialog = false
-                        songSelection.forEach { song ->
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.song.id,
-                                false,
-                            )
+                        coroutineScope.launch {
+                            songSelection.forEach { song ->
+                                downloadUtil.removeOrigin(DownloadOriginType.SONG, song.id)
+                            }
                         }
                     },
                 ) {
@@ -388,13 +367,13 @@ fun SelectionSongMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            songSelection.forEach { song ->
-                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                DownloadService.sendAddDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    downloadRequest,
-                                    false,
+                            coroutineScope.launch {
+                                downloadUtil.enqueue(
+                                    DownloadOriginType.SONG,
+                                    "",
+                                    null,
+                                    null,
+                                    songSelection.map { DownloadedSongMetadata.fromSong(it) }
                                 )
                             }
                         }
@@ -470,28 +449,9 @@ fun SelectionMediaMetadataMenu(
         },
     )
 
-    var downloadState by remember {
-        mutableIntStateOf(Download.STATE_STOPPED)
-    }
-
-    LaunchedEffect(songSelection) {
-        if (songSelection.isEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songSelection.all { downloads[it.id]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songSelection.all {
-                        downloads[it.id]?.state == Download.STATE_QUEUED ||
-                                downloads[it.id]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it.id]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
-        }
-    }
+    val downloadState = remember(songSelection) {
+        downloadUtil.songsState(songSelection.map { it.id })
+    }.collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
 
     var showRemoveDownloadDialog by remember {
         mutableStateOf(false)
@@ -519,13 +479,10 @@ fun SelectionMediaMetadataMenu(
                 TextButton(
                     onClick = {
                         showRemoveDownloadDialog = false
-                        songSelection.forEach { song ->
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.id,
-                                false,
-                            )
+                        coroutineScope.launch {
+                            songSelection.forEach { song ->
+                                downloadUtil.removeOrigin(DownloadOriginType.SONG, song.id)
+                            }
                         }
                     },
                 ) {
@@ -706,13 +663,13 @@ fun SelectionMediaMetadataMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            songSelection.forEach { media ->
-                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(media)
-                                DownloadService.sendAddDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    downloadRequest,
-                                    false,
+                            coroutineScope.launch {
+                                downloadUtil.enqueue(
+                                    DownloadOriginType.SONG,
+                                    "",
+                                    null,
+                                    null,
+                                    songSelection.map { DownloadedSongMetadata.fromMediaMetadata(it) }
                                 )
                             }
                         }

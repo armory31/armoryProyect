@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.LocalDatabase
@@ -72,12 +71,13 @@ import com.ruben.spotitube.constants.ExternalDownloaderPackageKey
 import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.ThumbnailCornerRadius
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.models.SongItem
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.models.toSavedSongEntity
-import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.ListDialog
 import com.ruben.spotitube.ui.component.LocalBottomSheetPageState
@@ -109,7 +109,9 @@ fun YouTubeSongMenu(
         libraryStateHolder.savedSongIds.map { song.id in it }
     }.collectAsStateWithLifecycle(initialValue = false)
     
-    val download by LocalDownloadUtil.current.getDownload(song.id).collectAsStateWithLifecycle(initialValue = null)
+    val downloadUtil = LocalDownloadUtil.current
+    val downloadState = downloadUtil.songState(song.id)
+        .collectAsStateWithLifecycle(initialValue = null).value
     val coroutineScope = rememberCoroutineScope()
     val artists = remember {
         song.artists.mapNotNull {
@@ -386,7 +388,7 @@ fun YouTubeSongMenu(
             )
         }
         item {
-            when (download?.state) {
+            when (downloadState) {
                 Download.STATE_COMPLETED -> {
                     ListItem(
                         headlineContent = { 
@@ -402,12 +404,9 @@ fun YouTubeSongMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.id,
-                                false,
-                            )
+                            coroutineScope.launch {
+                                downloadUtil.removeOrigin(DownloadOriginType.SONG, song.id)
+                            }
                         }
                     )
                 }
@@ -421,12 +420,9 @@ fun YouTubeSongMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.id,
-                                false,
-                            )
+                            coroutineScope.launch {
+                                downloadUtil.cancelPending(DownloadOriginType.SONG, song.id)
+                            }
                         }
                     )
                 }
@@ -440,13 +436,15 @@ fun YouTubeSongMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                            DownloadService.sendAddDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                downloadRequest,
-                                false,
-                            )
+                            coroutineScope.launch {
+                                downloadUtil.enqueue(
+                                    DownloadOriginType.SONG,
+                                    song.id,
+                                    null,
+                                    null,
+                                    listOf(DownloadedSongMetadata.fromSongItem(song))
+                                )
+                            }
                         }
                     )
                 }

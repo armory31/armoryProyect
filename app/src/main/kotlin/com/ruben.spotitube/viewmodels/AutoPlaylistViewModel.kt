@@ -12,7 +12,6 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.exoplayer.offline.Download
 import com.ruben.spotitube.constants.AutoPlaylistSongSortDescendingKey
 import com.ruben.spotitube.constants.AutoPlaylistSongSortType
 import com.ruben.spotitube.constants.AutoPlaylistSongSortTypeKey
@@ -79,23 +78,30 @@ constructor(
                 when (playlist) {
                     "liked" -> database.allSongs()
                     "downloaded" -> combine(
-                        database.allSongs().flowOn(Dispatchers.IO),
-                        downloadUtil.downloads
-                    ) { songs, downloads ->
-                        songs.filter {
-                            downloads[it.id]?.state == Download.STATE_COMPLETED
-                        }.let { filteredSongs ->
-                            when (songSortType) {
-                                SongSortType.CREATE_DATE -> filteredSongs.sortedBy {
-                                    downloads[it.id]?.updateTimeMs ?: 0L
-                                }
-                                SongSortType.NAME -> filteredSongs.sortedBy { it.song.title }
-                                SongSortType.ARTIST -> filteredSongs.sortedBy { song ->
-                                    song.artists.joinToString(separator = "") { it.name }
-                                }
-                                SongSortType.PLAY_TIME -> filteredSongs
-                            }.reversed(descending)
-                        }
+                        database.allDownloadedSongs().flowOn(Dispatchers.IO),
+                        database.allSongs().flowOn(Dispatchers.IO)
+                    ) { downloaded, library ->
+                        val libraryMap = library.associateBy { it.id }
+                        downloaded
+                            .map { entity ->
+                                val song = libraryMap[entity.id] ?: entity.toSong()
+                                song to entity.downloadedAt
+                            }
+                            .distinctBy { it.first.id }
+                            .let { pairs ->
+                                when (songSortType) {
+                                    SongSortType.CREATE_DATE -> pairs.sortedBy { (_, downloadedAt) ->
+                                        downloadedAt
+                                    }
+                                    SongSortType.NAME -> pairs.sortedBy { (song, _) ->
+                                        song.song.title
+                                    }
+                                    SongSortType.ARTIST -> pairs.sortedBy { (song, _) ->
+                                        song.artists.joinToString(separator = "") { it.name }
+                                    }
+                                    SongSortType.PLAY_TIME -> pairs
+                                }.map { it.first }.reversed(descending)
+                            }
                     }
                     else -> MutableStateFlow(emptyList())
                 }

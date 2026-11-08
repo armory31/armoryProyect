@@ -130,7 +130,7 @@ fun CreatePlaylistDialog(
                             isImportingCsv = true
                             coroutineScope.launch(Dispatchers.IO) {
                                 try {
-                                    val playlistId = importCsvPlaylistAndFetchMetadata(
+                                    val playlistIds = importCsvPlaylistAndFetchMetadata(
                                         context = context,
                                         uri = uri,
                                         database = database,
@@ -143,13 +143,18 @@ fun CreatePlaylistDialog(
                                     )
                                     withContext(Dispatchers.Main) {
                                         isImportingCsv = false
-                                        if (playlistId != null) {
-                                            Toast.makeText(context, "Playlist importada correctamente", Toast.LENGTH_SHORT).show()
-                                            onDismiss()
-                                        } else {
-                                            Toast.makeText(context, "No se encontraron canciones en el CSV", Toast.LENGTH_SHORT).show()
-                                            onDismiss()
+                                        when {
+                                            playlistIds.isEmpty() -> {
+                                                Toast.makeText(context, "No se encontraron canciones en el CSV", Toast.LENGTH_SHORT).show()
+                                            }
+                                            playlistIds.size == 1 -> {
+                                                Toast.makeText(context, "Playlist importada correctamente", Toast.LENGTH_SHORT).show()
+                                            }
+                                            else -> {
+                                                Toast.makeText(context, "${playlistIds.size} playlists importadas correctamente", Toast.LENGTH_SHORT).show()
+                                            }
                                         }
+                                        onDismiss()
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -249,64 +254,79 @@ suspend fun importCsvPlaylistAndFetchMetadata(
     viewModel: BackupRestoreViewModel,
     customName: String = "Playlist CSV",
     onProgress: ((processed: Int, total: Int) -> Unit)? = null
-): String? {
+): List<String> {
     val csvResult = viewModel.importPlaylistFromCsv(context, uri)
-    val songs = csvResult.songs
-    if (songs.isEmpty()) return null
+    val groups = csvResult.groups.filter { it.songs.isNotEmpty() }
+    if (groups.isEmpty()) return emptyList()
 
-    val total = songs.size
-    onProgress?.invoke(0, total)
+    val totalCount = groups.sumOf { it.songs.size }
+    onProgress?.invoke(0, totalCount)
 
-    val finalPlaylistName = csvResult.playlistName?.takeIf { it.isNotBlank() } ?: customName.ifBlank { "Playlist CSV" }
+    val createdPlaylistIds = mutableListOf<String>()
+    val songIdCache = mutableMapOf<String, String>()
+    var processedCount = 0
 
-    val playlistId = SavedPlaylistEntity.generatePlaylistId()
-    database.insertSavedPlaylist(
-        SavedPlaylistEntity(
-            id = playlistId,
-            name = finalPlaylistName,
-            isEditable = true
+    for (group in groups) {
+        val playlistName = group.name?.takeIf { it.isNotBlank() } ?: customName.ifBlank { "Playlist CSV" }
+        val playlistId = SavedPlaylistEntity.generatePlaylistId()
+        database.insertSavedPlaylist(
+            SavedPlaylistEntity(
+                id = playlistId,
+                name = playlistName,
+                isEditable = true
+            )
         )
-    )
+        createdPlaylistIds.add(playlistId)
 
-    songs.forEachIndexed { index, songItem ->
-        var songId = songItem.song.id
-        val title = songItem.song.title
-        val artistName = songItem.artists.firstOrNull()?.name.orEmpty()
+        for (songItem in group.songs) {
+            var songId = songItem.song.id
+            val title = songItem.song.title
+            val artistName = songItem.artists.firstOrNull()?.name.orEmpty()
+            val cacheKey = "${title.trim().lowercase()}|${artistName.trim().lowercase()}"
 
-        if (songId.isBlank()) {
-            val query = "$title $artistName".trim()
-            if (query.isNotEmpty()) {
-                val searchResult = YouTube.search(query, YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items?.filterIsInstance<SongItem>()?.firstOrNull()
-                if (searchResult != null) {
-                    songId = searchResult.id
+            if (songId.isBlank()) {
+                if (songIdCache.containsKey(cacheKey)) {
+                    songId = songIdCache[cacheKey].orEmpty()
                 } else {
-                    songId = "CSV_" + RandomStringUtils.insecure().nextAlphanumeric(8)
+                    val query = "$title $artistName".trim()
+                    if (query.isNotEmpty()) {
+                        val searchResult = YouTube.search(query, YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items?.filterIsInstance<SongItem>()?.firstOrNull()
+                        if (searchResult != null) {
+                            songId = searchResult.id
+                        } else {
+                            songId = "CSV_" + RandomStringUtils.insecure().nextAlphanumeric(8)
+                        }
+                    }
+                    if (songId.isNotBlank()) {
+                        songIdCache[cacheKey] = songId
+                    }
                 }
             }
-        }
 
-        if (songId.isNotBlank()) {
-            if (database.checkInPlaylist(playlistId, songId) == 0) {
-                val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(listOf(songId), timeoutMs = 5000L)
-                val item = resolvedMap[songId]?.let { songItem ->
-                    com.ruben.spotitube.db.entities.PlaylistSongItem(
-                        id = songItem.id,
-                        title = songItem.title,
-                        artistName = songItem.artists.joinToString(", ") { it.name }.ifEmpty { null },
-                        thumbnailUrl = songItem.thumbnail,
-                        duration = songItem.duration ?: -1,
-                        albumId = songItem.album?.id,
-                        albumName = songItem.album?.name,
-                        explicit = songItem.explicit
-                    )
-                }
-                if (item != null) {
-                    database.addSongsToPlaylist(playlistId, listOf(item))
+            if (songId.isNotBlank()) {
+                if (database.checkInPlaylist(playlistId, songId) == 0) {
+                    val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(listOf(songId), timeoutMs = 5000L)
+                    val item = resolvedMap[songId]?.let { resolvedSong ->
+                        com.ruben.spotitube.db.entities.PlaylistSongItem(
+                            id = resolvedSong.id,
+                            title = resolvedSong.title,
+                            artistName = resolvedSong.artists.joinToString(", ") { it.name }.ifEmpty { null },
+                            thumbnailUrl = resolvedSong.thumbnail,
+                            duration = resolvedSong.duration ?: -1,
+                            albumId = resolvedSong.album?.id,
+                            albumName = resolvedSong.album?.name,
+                            explicit = resolvedSong.explicit
+                        )
+                    }
+                    if (item != null) {
+                        database.addSongsToPlaylist(playlistId, listOf(item))
+                    }
                 }
             }
+            processedCount++
+            onProgress?.invoke(processedCount, totalCount)
         }
-        onProgress?.invoke(index + 1, total)
     }
 
-    return playlistId
+    return createdPlaylistIds
 }

@@ -147,6 +147,15 @@ object ArmoryGradients {
         )
     )
 
+    val MetallicSilverHeader = Brush.linearGradient(
+        colors = listOf(
+            ArmoryColors.Silver1,
+            ArmoryColors.Silver2,
+            ArmoryColors.Silver3,
+            ArmoryColors.Silver1
+        )
+    )
+
     val HeaderGold = Brush.linearGradient(
         colors = listOf(
             Color(0xFFC89B48),
@@ -567,6 +576,7 @@ fun ArmoryTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
     overImage: Boolean = false,
+    opaque: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {}
@@ -577,11 +587,11 @@ fun ArmoryTopBar(
         if (onBack != null) IconButton(
             onClick = onBack,
             modifier = if (overImage) Modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else Modifier
-        ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.TextGold) }
+        ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.Gold2) }
     },
     actions = actions,
     scrollBehavior = scrollBehavior,
-    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
+    colors = TopAppBarDefaults.topAppBarColors(containerColor = if (opaque) ArmoryColors.Background else Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -590,6 +600,7 @@ fun ArmoryTopBar(
     title: @Composable () -> Unit,
     onBack: (() -> Unit)? = null,
     overImage: Boolean = false,
+    opaque: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {}
@@ -600,11 +611,11 @@ fun ArmoryTopBar(
         if (onBack != null) IconButton(
             onClick = onBack,
             modifier = if (overImage) Modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else Modifier
-        ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.TextGold) }
+        ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.Gold2) }
     },
     actions = actions,
     scrollBehavior = scrollBehavior,
-    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
+    colors = TopAppBarDefaults.topAppBarColors(containerColor = if (opaque) ArmoryColors.Background else Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
 )
 
 @Composable

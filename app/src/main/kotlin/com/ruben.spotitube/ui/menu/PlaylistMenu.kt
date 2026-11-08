@@ -50,7 +50,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalDownloadUtil
 import com.ruben.spotitube.LocalLibraryStateHolder
@@ -59,10 +58,11 @@ import com.ruben.spotitube.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.utils.rememberPreference
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
-import com.ruben.spotitube.playback.ExoDownloadService
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.AssignTagsDialog
@@ -115,13 +115,9 @@ fun PlaylistMenu(
         }
     }
 
-    var downloadState by remember {
-        mutableIntStateOf(Download.STATE_STOPPED)
-    }
-
     val editable: Boolean = playlist.playlist.isEditable
 
-    val exportCsvText = stringResource(R.string.export_csv_title)
+    val exportCsvText = stringResource(R.string.export_csv_playlist_title)
     val exportCsvLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")
     ) { uri ->
@@ -152,26 +148,14 @@ fun PlaylistMenu(
                 }
             }
         }
+        onDismiss()
     }
 
-    LaunchedEffect(songs) {
-        if (songs.isEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it.id]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songs.all {
-                        downloads[it.id]?.state == Download.STATE_QUEUED ||
-                                downloads[it.id]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it.id]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
-        }
+    val originId = remember(playlist) {
+        (playlist.playlist.browseId ?: playlist.id).removePrefix("VL")
     }
+    val downloadState = downloadUtil.originState(DownloadOriginType.PLAYLIST, originId)
+        .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
 
     var showEditDialog by remember {
         mutableStateOf(false)
@@ -233,13 +217,8 @@ fun PlaylistMenu(
                 TextButton(
                     onClick = {
                         showRemoveDownloadDialog = false
-                        songs.forEach { song ->
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.id,
-                                false,
-                            )
+                        coroutineScope.launch {
+                            downloadUtil.removeOrigin(DownloadOriginType.PLAYLIST, originId)
                         }
                     },
                 ) {
@@ -435,7 +414,6 @@ fun PlaylistMenu(
                     },
                     text = exportCsvText,
                     onClick = {
-                        onDismiss()
                         exportCsvLauncher.launch("${playlist.playlist.name}.csv")
                     },
                 )
@@ -624,7 +602,9 @@ fun PlaylistMenu(
                                     )
                                 },
                                 modifier = Modifier.clickable {
-                                    showRemoveDownloadDialog = true
+                                    coroutineScope.launch {
+                                        downloadUtil.cancelPending(DownloadOriginType.PLAYLIST, originId)
+                                    }
                                 },
                                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             )
@@ -640,14 +620,16 @@ fun PlaylistMenu(
                                     )
                                 },
                                 modifier = Modifier.clickable {
-                                    songs.forEach { song ->
-                                        val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                        DownloadService.sendAddDownload(
-                                            context,
-                                            ExoDownloadService::class.java,
-                                            downloadRequest,
-                                            false,
-                                        )
+                                    if (songs.isNotEmpty()) {
+                                        coroutineScope.launch {
+                                            downloadUtil.enqueue(
+                                                DownloadOriginType.PLAYLIST,
+                                                originId,
+                                                playlist.playlist.name,
+                                                playlist.thumbnails.firstOrNull(),
+                                                songs.map { DownloadedSongMetadata.fromSong(it) }
+                                            )
+                                        }
                                     }
                                 },
                                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),

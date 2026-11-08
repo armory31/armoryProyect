@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ruben.spotitube.db.normalizeForSearch
 import java.time.LocalDateTime
 
 @Immutable
@@ -24,6 +25,12 @@ data class SavedAlbumEntity(
     val lastUpdateTime: LocalDateTime = LocalDateTime.now(),
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {
+    @ColumnInfo(defaultValue = "''")
+    var titleNormalized: String = normalizeForSearch(title)
+
+    @ColumnInfo(defaultValue = "''")
+    var artistNormalized: String = normalizeForSearch(artistName)
+
     fun toAlbum(): Album {
         val artistEntity = artistName?.let {
             SavedArtistEntity(

@@ -87,7 +87,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.LocalDatabase
@@ -108,12 +107,14 @@ import com.ruben.spotitube.constants.EqualizerVirtualizerStrengthKey
 import com.ruben.spotitube.constants.ExternalDownloaderEnabledKey
 import com.ruben.spotitube.constants.ExternalDownloaderPackageKey
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
+import com.ruben.spotitube.db.entities.DownloadOriginType
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.playback.EqProfile
 import com.ruben.spotitube.playback.EqProfilesPayload
 import com.ruben.spotitube.playback.EqualizerJson
-import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.ui.component.BottomSheetState
+import kotlinx.coroutines.launch
 import com.ruben.spotitube.ui.component.ListDialog
 import com.ruben.spotitube.ui.component.MenuSurfaceSection
 import com.ruben.spotitube.ui.component.NewAction
@@ -146,8 +147,9 @@ fun ColumnScope.PlayerMenu(
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
 
-    val download by LocalDownloadUtil.current.getDownload(mediaMetadata.id)
-        .collectAsStateWithLifecycle(initialValue = null)
+    val downloadUtil = LocalDownloadUtil.current
+    val downloadState = downloadUtil.songState(mediaMetadata.id)
+        .collectAsStateWithLifecycle(initialValue = null).value
 
     val artists =
         remember(mediaMetadata.artists) {
@@ -530,7 +532,7 @@ fun ColumnScope.PlayerMenu(
         // ── Descarga ─────────────────────────────────────────────────────────
         item {
             MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
-                when (download?.state) {
+                when (downloadState) {
                     Download.STATE_COMPLETED -> {
                         ListItem(
                             headlineContent = {
@@ -540,7 +542,9 @@ fun ColumnScope.PlayerMenu(
                                 Icon(painter = painterResource(R.drawable.offline), contentDescription = null, tint = MaterialTheme.colorScheme.error)
                             },
                             modifier = Modifier.clickable {
-                                DownloadService.sendRemoveDownload(context, ExoDownloadService::class.java, mediaMetadata.id, false)
+                                coroutineScope.launch {
+                                    downloadUtil.removeOrigin(DownloadOriginType.SONG, mediaMetadata.id)
+                                }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         )
@@ -550,7 +554,9 @@ fun ColumnScope.PlayerMenu(
                             headlineContent = { Text(text = stringResource(R.string.downloading)) },
                             leadingContent = { CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp) },
                             modifier = Modifier.clickable {
-                                DownloadService.sendRemoveDownload(context, ExoDownloadService::class.java, mediaMetadata.id, false)
+                                coroutineScope.launch {
+                                    downloadUtil.cancelPending(DownloadOriginType.SONG, mediaMetadata.id)
+                                }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         )
@@ -562,8 +568,15 @@ fun ColumnScope.PlayerMenu(
                                 Icon(painter = painterResource(R.drawable.download), contentDescription = null)
                             },
                             modifier = Modifier.clickable {
-                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(mediaMetadata)
-                                DownloadService.sendAddDownload(context, ExoDownloadService::class.java, downloadRequest, false)
+                                coroutineScope.launch {
+                                    downloadUtil.enqueue(
+                                        DownloadOriginType.SONG,
+                                        mediaMetadata.id,
+                                        null,
+                                        null,
+                                        listOf(DownloadedSongMetadata.fromMediaMetadata(mediaMetadata))
+                                    )
+                                }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         )

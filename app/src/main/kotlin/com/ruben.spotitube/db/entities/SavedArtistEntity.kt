@@ -1,8 +1,10 @@
 package com.ruben.spotitube.db.entities
 
 import androidx.compose.runtime.Immutable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ruben.spotitube.db.normalizeForSearch
 import java.time.LocalDateTime
 
 @Immutable
@@ -15,6 +17,9 @@ data class SavedArtistEntity(
     val lastUpdateTime: LocalDateTime = LocalDateTime.now(),
     val savedAt: LocalDateTime = LocalDateTime.now()
 ) {
+    @ColumnInfo(defaultValue = "''")
+    var nameNormalized: String = normalizeForSearch(name)
+
     val isYouTubeArtist: Boolean
         get() = id.startsWith("UC") || id.startsWith("FEmusic_library_privately_owned_artist")
 

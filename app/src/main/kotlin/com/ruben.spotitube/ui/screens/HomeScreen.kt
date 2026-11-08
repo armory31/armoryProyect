@@ -64,7 +64,18 @@ import com.ruben.spotitube.viewmodels.HomeViewModel
 fun HomeScreen(
     navController: NavController,
     onVisible: () -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = run {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val owner = remember(context) {
+            var ctx = context
+            while (ctx is android.content.ContextWrapper) {
+                if (ctx is androidx.activity.ComponentActivity) return@remember ctx
+                ctx = ctx.baseContext
+            }
+            null
+        }
+        if (owner != null) hiltViewModel(viewModelStoreOwner = owner) else hiltViewModel()
+    },
 ) {
     LaunchedEffect(Unit) {
         onVisible()
@@ -88,8 +99,32 @@ fun HomeScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
 
+    val moodAndGenresViewModel: com.ruben.spotitube.viewmodels.MoodAndGenresViewModel = run {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val owner = remember(context) {
+            var ctx = context
+            while (ctx is android.content.ContextWrapper) {
+                if (ctx is androidx.activity.ComponentActivity) return@remember ctx
+                ctx = ctx.baseContext
+            }
+            null
+        }
+        if (owner != null) hiltViewModel(viewModelStoreOwner = owner) else hiltViewModel()
+    }
+
     LaunchedEffect(isInitialLoadComplete) {
         if (isInitialLoadComplete) {
+            moodAndGenresViewModel.load()
+        }
+    }
+
+    val hasLoggedHomeVisible = remember { androidx.compose.runtime.mutableStateOf(false) }
+
+    LaunchedEffect(isInitialLoadComplete, quickPicks) {
+        if ((isInitialLoadComplete || !quickPicks.isNullOrEmpty()) && !hasLoggedHomeVisible.value) {
+            hasLoggedHomeVisible.value = true
+            com.ruben.spotitube.utils.PerfTiming.endSection("Home.contentVisible", com.ruben.spotitube.utils.PerfTiming.appStartTimeMs)
+            com.ruben.spotitube.utils.PerfTiming.onTabComposedWithData(Screens.Home.route, hasData = !quickPicks.isNullOrEmpty())
             onVisible()
         }
     }
@@ -242,11 +277,12 @@ fun HomeScreen(
                             title = "Sigue escuchando",
                             modifier = Modifier.padding(top = 24.dp)
                         )
-                        if (keepListening.isNullOrEmpty()) {
+                        val keepListeningList = remember(keepListening) { keepListening?.take(4) }
+                        if (keepListeningList.isNullOrEmpty()) {
                              HomeLoadingShimmer()
                         } else {
                             KeepListeningSection(
-                                keepListening = keepListening!!.take(4),
+                                keepListening = keepListeningList,
                                 mediaMetadata = mediaMetadata,
                                 isPlaying = isPlaying,
                                 navController = navController,

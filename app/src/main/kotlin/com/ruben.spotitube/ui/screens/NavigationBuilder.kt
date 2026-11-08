@@ -49,6 +49,15 @@ fun NavGraphBuilder.navigationBuilder(
         ExploreScreen(navController)
     }
     composable(
+        route = "library_search/{type}",
+        arguments = listOf(navArgument("type") { type = NavType.StringType }),
+    ) { backStackEntry ->
+        ExploreScreen(
+            navController,
+            initialSearchType = backStackEntry.arguments?.getString("type"),
+        )
+    }
+    composable(
         Screens.Library.route,
     ) {
         LibraryScreen(navController)
@@ -280,8 +289,18 @@ fun NavGraphBuilder.navigationBuilder(
     composable("settings/integration") {
         IntegrationScreen(navController, scrollBehavior)
     }
-    composable("settings/music_together") {
-        MusicTogetherScreen(navController, scrollBehavior)
+    composable(
+        route = "settings/music_together?code={code}",
+        arguments = listOf(
+            navArgument("code") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val initialCode = backStackEntry.arguments?.getString("code")
+        MusicTogetherScreen(navController, scrollBehavior, initialCode = initialCode)
     }
     composable("settings/misc") {
         DebugSettings(navController)
@@ -293,8 +312,13 @@ fun NavGraphBuilder.navigationBuilder(
         ChangelogScreen(navController, scrollBehavior)
     }
 
-
-
-
-
+    composable(
+        route = "downloaded_origin/{type}/{originId}",
+        arguments = listOf(
+            navArgument("type") { type = NavType.StringType },
+            navArgument("originId") { type = NavType.StringType }
+        )
+    ) {
+        DownloadedOriginScreen(navController)
+    }
 }

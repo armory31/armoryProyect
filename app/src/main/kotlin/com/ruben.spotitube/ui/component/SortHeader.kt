@@ -4,16 +4,20 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.ui.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -27,11 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.PlaylistSongSortType
 import com.ruben.spotitube.constants.PlaylistSortType
@@ -52,54 +58,66 @@ inline fun <reified T : Enum<T>> SortHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.padding(vertical = 8.dp),
     ) {
-        Text(
-            text = stringResource(sortTypeText(sortType)),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelLarge,
-            modifier =
-            Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(bounded = false),
-                ) {
-                    menuExpanded = !menuExpanded
-                }.padding(horizontal = 4.dp, vertical = 8.dp),
-        )
-
-        DropdownMenu(
-            expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false },
-            modifier = Modifier.widthIn(min = 172.dp),
-        ) {
-            enumValues<T>().forEach { type ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(sortTypeText(type)),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(
-                            painter =
-                            painterResource(
-                                if (sortType ==
-                                    type
-                                ) {
-                                    R.drawable.radio_button_checked
-                                } else {
-                                    R.drawable.radio_button_unchecked
-                                },
-                            ),
-                            contentDescription = null,
-                        )
-                    },
-                    onClick = {
-                        onSortTypeChange(type)
-                        menuExpanded = false
-                    },
+        Box {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, ArmoryColors.Gold2.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                    .background(ArmoryColors.SurfaceElevated)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(bounded = false),
+                    ) {
+                        menuExpanded = !menuExpanded
+                    }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            ) {
+                Text(
+                    text = stringResource(sortTypeText(sortType)),
+                    color = ArmoryColors.TextGold,
+                    style = MaterialTheme.typography.labelLarge,
                 )
+                Icon(
+                    imageVector = Icons.Rounded.ArrowDropDown,
+                    contentDescription = null,
+                    tint = ArmoryColors.Gold2,
+                )
+            }
+
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                modifier = Modifier.widthIn(min = 172.dp),
+            ) {
+                enumValues<T>().forEach { type ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(sortTypeText(type)),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                painter =
+                                painterResource(
+                                    if (sortType == type) {
+                                        R.drawable.radio_button_checked
+                                    } else {
+                                        R.drawable.radio_button_unchecked
+                                    },
+                                ),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onSortTypeChange(type)
+                            menuExpanded = false
+                        },
+                    )
+                }
             }
         }
 

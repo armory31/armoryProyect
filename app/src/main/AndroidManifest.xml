@@ -64,19 +64,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="together"
-                    android:scheme="armory" />
-                <data
-                    android:host="together"
-                    android:scheme="opentune" />
-            </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -99,6 +86,7 @@
                 <data android:pathPrefix="/album" />
                 <data android:pathPrefix="/artist" />
                 <data android:pathPrefix="/playlist" />
+                <data android:pathPrefix="/together" />
             </intent-filter>
 
             <!-- Youtube filter -->

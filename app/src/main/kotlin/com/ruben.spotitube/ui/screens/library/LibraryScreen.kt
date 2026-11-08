@@ -24,6 +24,10 @@ import com.ruben.spotitube.utils.rememberEnumPreference
 
 @Composable
 fun LibraryScreen(navController: NavController) {
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        com.ruben.spotitube.utils.PerfTiming.onTabComposedWithData(com.ruben.spotitube.ui.screens.Screens.Library.route, hasData = true)
+    }
+
     var filterType by rememberEnumPreference(ChipSortTypeKey, LibraryFilter.PLAYLISTS)
 
     val avatarUrl = rememberAvatarUrl()

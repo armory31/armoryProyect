@@ -67,7 +67,6 @@ import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
 import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
 import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
 import androidx.media3.exoplayer.offline.Download.STATE_STOPPED
-import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.LocalDatabase
@@ -81,12 +80,13 @@ import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.db.entities.Album
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import kotlinx.coroutines.withContext
-import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.ui.component.AlbumListItem
 import com.ruben.spotitube.ui.component.ListDialog
@@ -96,6 +96,10 @@ import com.ruben.spotitube.ui.component.NewActionGrid
 import com.ruben.spotitube.ui.component.primaryShareAction
 import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.utils.rememberPreference
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ruben.spotitube.innertube.models.SongItem
+import com.ruben.spotitube.utils.reportException
+import com.ruben.spotitube.viewmodels.BackupRestoreViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -110,66 +114,43 @@ fun AlbumMenu(
     val database = LocalDatabase.current
     val downloadUtil = LocalDownloadUtil.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
+    val scope = coroutineScope
     val libraryAlbum by database.album(originalAlbum.id).collectAsStateWithLifecycle(initialValue = originalAlbum)
     val album = libraryAlbum ?: originalAlbum
     var songs by remember {
         mutableStateOf(emptyList<Song>())
     }
 
-    val coroutineScope = rememberCoroutineScope()
+    var remoteSongs by remember { mutableStateOf<List<SongItem>>(emptyList()) }
 
-    val exportCsvText = stringResource(R.string.export_csv_title)
+    LaunchedEffect(album.id) {
+        withContext(Dispatchers.IO) {
+            YouTube.album(album.id)
+        }.onSuccess { albumPage ->
+            remoteSongs = albumPage.songs
+        }.onFailure { exception ->
+            remoteSongs = emptyList()
+            reportException(exception)
+        }
+    }
+
+    val backupRestoreViewModel: BackupRestoreViewModel = hiltViewModel()
+
+    val exportCsvText = stringResource(R.string.export_csv_album_title)
     val exportCsvLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")
     ) { uri ->
-        uri?.let {
-            coroutineScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                try {
-                    val albumId = album.album.id
-                    val albumTitle = album.album.title
-                    val defaultArtist = album.artists.firstOrNull()?.name ?: album.album.artistName.orEmpty()
-                    val fetchedSongs = runCatching {
-                        com.ruben.spotitube.innertube.YouTube.album(albumId).getOrNull()?.songs
-                    }.getOrNull()
-
-                    context.contentResolver.openOutputStream(it)?.use { stream ->
-                        java.io.OutputStreamWriter(stream, Charsets.UTF_8).use { writer ->
-                            writer.write("\"Track name\",\"Artist name\",\"Album\",\"Playlist name\",\"Type\",\"ISRC\",\"Spotify - id\"\n")
-                            fun escape(valStr: String?): String = "\"${valStr.orEmpty().replace("\"", "\"\"")}\""
-
-                            val albumTitleEsc = escape(albumTitle)
-
-                            if (!fetchedSongs.isNullOrEmpty()) {
-                                for (s in fetchedSongs) {
-                                    val trackName = escape(s.title)
-                                    val artistName = escape(s.artists.firstOrNull()?.name ?: defaultArtist)
-                                    writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
-                                }
-                            } else {
-                                val dbSongs = database.albumSongs(albumId).first()
-                                if (dbSongs.isNotEmpty()) {
-                                    for (s in dbSongs) {
-                                        val trackName = escape(s.song.title)
-                                        val artistName = escape(s.artists.firstOrNull()?.name ?: defaultArtist)
-                                        writer.write("$trackName,$artistName,$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
-                                    }
-                                } else {
-                                    writer.write(",${escape(defaultArtist)},$albumTitleEsc,$albumTitleEsc,\"Album\",\"\",\n")
-                                }
-                            }
-                        }
-                    }
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        android.widget.Toast.makeText(context, R.string.export_csv_success, android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e: Exception) {
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        android.widget.Toast.makeText(context, R.string.export_csv_error, android.widget.Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
+        if (uri != null) {
+            backupRestoreViewModel.exportAlbumCsv(
+                context = context,
+                uri = uri,
+                albumId = album.album.id,
+                albumTitle = album.album.title,
+                defaultArtist = album.artists.firstOrNull()?.name ?: album.album.artistName.orEmpty(),
+            )
         }
+        onDismiss()
     }
 
     LaunchedEffect(Unit) {
@@ -178,28 +159,8 @@ fun AlbumMenu(
         }
     }
 
-    var downloadState by remember {
-        mutableIntStateOf(STATE_STOPPED)
-    }
-
-    LaunchedEffect(songs) {
-        if (songs.isEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it.id]?.state == STATE_COMPLETED }) {
-                    STATE_COMPLETED
-                } else if (songs.all {
-                        downloads[it.id]?.state == STATE_QUEUED ||
-                                downloads[it.id]?.state == STATE_DOWNLOADING ||
-                                downloads[it.id]?.state == STATE_COMPLETED
-                    }
-                ) {
-                    STATE_DOWNLOADING
-                } else {
-                    STATE_STOPPED
-                }
-        }
-    }
+    val downloadState = downloadUtil.originState(DownloadOriginType.ALBUM, album.id)
+        .collectAsStateWithLifecycle(initialValue = STATE_STOPPED).value
 
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
 
@@ -472,7 +433,6 @@ fun AlbumMenu(
                         },
                         text = exportCsvText,
                         onClick = {
-                            onDismiss()
                             exportCsvLauncher.launch("${album.album.title}.csv")
                         }
                     )
@@ -541,13 +501,8 @@ fun AlbumMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            songs.forEach { song ->
-                                DownloadService.sendRemoveDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    song.id,
-                                    false,
-                                )
+                            coroutineScope.launch {
+                                downloadUtil.removeOrigin(DownloadOriginType.ALBUM, album.id)
                             }
                         }
                     )
@@ -562,13 +517,8 @@ fun AlbumMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            songs.forEach { song ->
-                                DownloadService.sendRemoveDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    song.id,
-                                    false,
-                                )
+                            coroutineScope.launch {
+                                downloadUtil.cancelPending(DownloadOriginType.ALBUM, album.id)
                             }
                         }
                     )
@@ -583,14 +533,21 @@ fun AlbumMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            songs.forEach { song ->
-                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                DownloadService.sendAddDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    downloadRequest,
-                                    false,
-                                )
+                            coroutineScope.launch {
+                                val list = if (remoteSongs.isNotEmpty()) {
+                                    remoteSongs.map { DownloadedSongMetadata.fromSongItem(it) }
+                                } else {
+                                    songs.map { DownloadedSongMetadata.fromSong(it) }
+                                }
+                                if (list.isNotEmpty()) {
+                                    downloadUtil.enqueue(
+                                        DownloadOriginType.ALBUM,
+                                        album.id,
+                                        album.album.title,
+                                        album.album.thumbnailUrl,
+                                        list
+                                    )
+                                }
                             }
                         }
                     )

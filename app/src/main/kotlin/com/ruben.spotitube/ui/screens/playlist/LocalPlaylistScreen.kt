@@ -99,7 +99,6 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
@@ -119,6 +118,7 @@ import com.ruben.spotitube.constants.PlaylistSongSortDescendingKey
 import com.ruben.spotitube.constants.PlaylistSongSortType
 import com.ruben.spotitube.constants.PlaylistSongSortTypeKey
 import com.ruben.spotitube.constants.SwipeToSongKey
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.PlaylistSong
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.move
@@ -126,7 +126,7 @@ import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.utils.completed
-import com.ruben.spotitube.playback.ExoDownloadService
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.playback.queues.ListQueue
 import com.ruben.spotitube.playback.queues.LocalMixQueue
 import com.ruben.spotitube.ui.component.AssignTagsDialog
@@ -261,8 +261,12 @@ fun LocalPlaylistScreen(
         }
     }
 
+    val originId = remember(playlist, viewModel.playlistId) {
+        (playlist?.playlist?.browseId ?: viewModel.playlistId).removePrefix("VL")
+    }
     val downloadUtil = LocalDownloadUtil.current
-    var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
+    val downloadState = downloadUtil.originState(DownloadOriginType.PLAYLIST, originId)
+        .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
 
     val editable: Boolean = playlist?.playlist?.isEditable == true
 
@@ -276,21 +280,6 @@ fun LocalPlaylistScreen(
         mutableSongs.apply {
             clear()
             addAll(wrapped)
-        }
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it.song.id]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songs.all {
-                        downloads[it.song.id]?.state == Download.STATE_QUEUED ||
-                                downloads[it.song.id]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it.song.id]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
         }
     }
 
@@ -356,13 +345,8 @@ fun LocalPlaylistScreen(
                                 }
                             }
                         }
-                        songs.forEach { song ->
-                            DownloadService.sendRemoveDownload(
-                                context,
-                                ExoDownloadService::class.java,
-                                song.song.id,
-                                false
-                            )
+                        coroutineScope.launch {
+                            downloadUtil.removeOrigin(DownloadOriginType.PLAYLIST, originId)
                         }
                     }
                 ) {
@@ -750,6 +734,7 @@ fun LocalPlaylistScreen(
                                 Text(
                                     text = playlist.playlist.name,
                                     style = MaterialTheme.typography.headlineSmall,
+                                    color = ArmoryColors.Gold2,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
                                     maxLines = 2,
@@ -772,8 +757,8 @@ fun LocalPlaylistScreen(
                                     MetadataChip(
                                         icon = R.drawable.music_note,
                                         text = pluralStringResource(R.plurals.n_song, songCount, songCount),
-                                        textColor = ArmoryColors.Rust2,
-                                        iconTint = ArmoryColors.Rust2
+                                        textColor = ArmoryColors.TextGold,
+                                        iconTint = ArmoryColors.TextGold
                                     )
 
                                     // Duration
@@ -781,8 +766,8 @@ fun LocalPlaylistScreen(
                                         MetadataChip(
                                             icon = R.drawable.timer,
                                             text = makeTimeString(playlistLength * 1000L),
-                                            textColor = ArmoryColors.Rust2,
-                                            iconTint = ArmoryColors.Rust2
+                                            textColor = ArmoryColors.TextGold,
+                                            iconTint = ArmoryColors.TextGold
                                         )
                                     }
                                 }
@@ -908,25 +893,22 @@ fun LocalPlaylistScreen(
                                                 Download.STATE_COMPLETED -> {
                                                     showRemoveDownloadDialog = true
                                                 }
-                                                Download.STATE_DOWNLOADING -> {
-                                                    songs.forEach { song ->
-                                                        DownloadService.sendRemoveDownload(
-                                                            context,
-                                                            ExoDownloadService::class.java,
-                                                            song.song.id,
-                                                            false,
-                                                        )
+                                                Download.STATE_DOWNLOADING, Download.STATE_QUEUED -> {
+                                                    coroutineScope.launch {
+                                                        downloadUtil.cancelPending(DownloadOriginType.PLAYLIST, originId)
                                                     }
                                                 }
                                                 else -> {
-                                                    songs.forEach { song ->
-                                                        val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                                        DownloadService.sendAddDownload(
-                                                            context,
-                                                            ExoDownloadService::class.java,
-                                                            downloadRequest,
-                                                            false,
-                                                        )
+                                                    if (songs.isNotEmpty()) {
+                                                        coroutineScope.launch {
+                                                            downloadUtil.enqueue(
+                                                                DownloadOriginType.PLAYLIST,
+                                                                originId,
+                                                                playlist?.playlist?.name,
+                                                                playlist?.thumbnails?.firstOrNull(),
+                                                                songs.map { DownloadedSongMetadata.fromSong(it) }
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1412,7 +1394,8 @@ fun LocalPlaylistScreen(
                 } else if (showTopBarTitle) {
                     Text(
                         text = playlist?.playlist?.name.orEmpty(),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = ArmoryColors.Gold2
                     )
                 }
             },
@@ -1427,6 +1410,7 @@ fun LocalPlaylistScreen(
                 }
             },
             overImage = transparentAppBar,
+            opaque = !transparentAppBar,
             actions = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }

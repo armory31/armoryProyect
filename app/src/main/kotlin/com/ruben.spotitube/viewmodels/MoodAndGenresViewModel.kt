@@ -4,8 +4,6 @@
  * Licensed Under GPL-3.0 | see git history for contributors
  */
 
-
-
 package com.ruben.spotitube.viewmodels
 
 import androidx.lifecycle.ViewModel
@@ -23,16 +21,24 @@ class MoodAndGenresViewModel
 @Inject
 constructor() : ViewModel() {
     val moodAndGenres = MutableStateFlow<List<MoodAndGenres.Item>?>(null)
+    @Volatile
+    private var isJobRunning = false
 
-    init {
+    fun load() {
+        if (moodAndGenres.value != null || isJobRunning) return
+        isJobRunning = true
         viewModelScope.launch {
-            YouTube
-                .explore()
-                .onSuccess {
+            try {
+                com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("YouTube.explore") {
+                    YouTube.explore()
+                }.onSuccess {
                     moodAndGenres.value = it.moodAndGenres
                 }.onFailure {
                     reportException(it)
                 }
+            } finally {
+                isJobRunning = false
+            }
         }
     }
 }

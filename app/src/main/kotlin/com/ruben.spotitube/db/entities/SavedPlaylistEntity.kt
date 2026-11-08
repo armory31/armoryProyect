@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ruben.spotitube.db.normalizeForSearch
 import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDateTime
 
@@ -19,6 +20,9 @@ data class SavedPlaylistEntity(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val songs: List<PlaylistSongItem> = emptyList()
 ) {
+    @ColumnInfo(defaultValue = "''")
+    var nameNormalized: String = normalizeForSearch(name)
+
     fun toPlaylist(
         songCount: Int = songs.size,
         songThumbnails: List<String?> = if (thumbnailUrl != null) {

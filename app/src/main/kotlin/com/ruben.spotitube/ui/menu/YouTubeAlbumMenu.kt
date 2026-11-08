@@ -56,7 +56,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import com.ruben.spotitube.LocalDatabase
 import com.ruben.spotitube.LocalDownloadUtil
@@ -68,14 +67,14 @@ import com.ruben.spotitube.constants.ArtistSeparatorsKey
 import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.innertube.YouTube
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.ruben.spotitube.innertube.models.AlbumItem
+import com.ruben.spotitube.innertube.models.SongItem
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.models.toSavedAlbumEntity
-import com.ruben.spotitube.playback.ExoDownloadService
 import com.ruben.spotitube.playback.queues.YouTubeAlbumRadio
 import com.ruben.spotitube.ui.component.ListDialog
 import com.ruben.spotitube.ui.component.NewAction
@@ -85,8 +84,10 @@ import com.ruben.spotitube.ui.component.YouTubeListItem
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.utils.reportException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SuppressLint("MutableCollectionMutableState", "LocalContextGetResourceValueCall")
 @Composable
@@ -109,6 +110,19 @@ fun YouTubeAlbumMenu(
     val album by database.albumWithSongs(albumItem.id).collectAsStateWithLifecycle(initialValue = null)
     val coroutineScope = rememberCoroutineScope()
 
+    var albumSongs by remember { mutableStateOf<List<SongItem>>(emptyList()) }
+
+    LaunchedEffect(albumItem.id) {
+        withContext(Dispatchers.IO) {
+            YouTube.album(albumItem.id)
+        }.onSuccess { albumPage ->
+            albumSongs = albumPage.songs
+        }.onFailure { exception ->
+            albumSongs = emptyList()
+            reportException(exception)
+        }
+    }
+
     LaunchedEffect(Unit) {
         database.album(albumItem.id).collect { album ->
             if (album == null) {
@@ -125,28 +139,8 @@ fun YouTubeAlbumMenu(
         }
     }
 
-    var downloadState by remember {
-        mutableIntStateOf(Download.STATE_STOPPED)
-    }
-
-    LaunchedEffect(album) {
-        val songs = album?.songs?.map { it.id } ?: return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songs.all {
-                        downloads[it]?.state == Download.STATE_QUEUED ||
-                                downloads[it]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
-        }
-    }
+    val downloadState = downloadUtil.originState(DownloadOriginType.ALBUM, albumItem.id)
+        .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
 
     // Artist separators for splitting artist names
     val (artistSeparators) = rememberPreference(ArtistSeparatorsKey, defaultValue = ",;/&")
@@ -468,13 +462,8 @@ fun YouTubeAlbumMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            album?.songs?.forEach { song ->
-                                DownloadService.sendRemoveDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    song.id,
-                                    false,
-                                )
+                            coroutineScope.launch {
+                                downloadUtil.removeOrigin(DownloadOriginType.ALBUM, albumItem.id)
                             }
                         }
                     )
@@ -489,13 +478,8 @@ fun YouTubeAlbumMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            album?.songs?.forEach { song ->
-                                DownloadService.sendRemoveDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    song.id,
-                                    false,
-                                )
+                            coroutineScope.launch {
+                                downloadUtil.cancelPending(DownloadOriginType.ALBUM, albumItem.id)
                             }
                         }
                     )
@@ -510,14 +494,27 @@ fun YouTubeAlbumMenu(
                             )
                         },
                         modifier = Modifier.clickable {
-                            album?.songs?.forEach { song ->
-                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                DownloadService.sendAddDownload(
-                                    context,
-                                    ExoDownloadService::class.java,
-                                    downloadRequest,
-                                    false,
-                                )
+                            coroutineScope.launch {
+                                val targetSongs = if (albumSongs.isNotEmpty()) {
+                                    albumSongs
+                                } else {
+                                    val fetched = withContext(Dispatchers.IO) {
+                                        YouTube.album(albumItem.id).getOrNull()?.songs.orEmpty()
+                                    }
+                                    if (fetched.isNotEmpty()) {
+                                        albumSongs = fetched
+                                    }
+                                    fetched
+                                }
+                                if (targetSongs.isNotEmpty()) {
+                                    downloadUtil.enqueue(
+                                        DownloadOriginType.ALBUM,
+                                        albumItem.id,
+                                        albumItem.title,
+                                        albumItem.thumbnail,
+                                        targetSongs.map { DownloadedSongMetadata.fromSongItem(it) }
+                                    )
+                                }
                             }
                         }
                     )

@@ -28,6 +28,9 @@ import com.ruben.spotitube.constants.SongSortType
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.AlbumWithSongs
 import com.ruben.spotitube.db.entities.Artist
+import com.ruben.spotitube.db.entities.DownloadOriginEntity
+import com.ruben.spotitube.db.entities.DownloadedOriginRow
+import com.ruben.spotitube.db.entities.DownloadedSongEntity
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
@@ -35,7 +38,6 @@ import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.PlaylistSongItem
 import com.ruben.spotitube.db.entities.PlaylistTagMap
-import com.ruben.spotitube.db.entities.RelatedSongMap
 import com.ruben.spotitube.db.entities.SearchHistory
 import com.ruben.spotitube.db.entities.SetVideoIdEntity
 import com.ruben.spotitube.db.entities.Song
@@ -467,8 +469,12 @@ interface DatabaseDao {
     fun playlistsByNameAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
     fun playlistsByCustomOrderAsc(): Flow<List<Playlist>> = playlistsWithMetadata()
 
-    @Query("UPDATE savedplaylist SET name = :name WHERE id = :playlistId OR browseId = :playlistId")
-    suspend fun updatePlaylistTitle(playlistId: String, name: String)
+    @Query("UPDATE savedplaylist SET name = :name, nameNormalized = :nameNormalized WHERE id = :playlistId OR browseId = :playlistId")
+    suspend fun updatePlaylistTitleRaw(playlistId: String, name: String, nameNormalized: String)
+
+    suspend fun updatePlaylistTitle(playlistId: String, name: String) {
+        updatePlaylistTitleRaw(playlistId = playlistId, name = name, nameNormalized = normalizeForSearch(name))
+    }
 
     @Query("UPDATE savedplaylist SET thumbnailUrl = :thumbnailUrl WHERE id = :playlistId OR browseId = :playlistId")
     suspend fun updatePlaylistThumbnail(playlistId: String, thumbnailUrl: String?)
@@ -631,59 +637,95 @@ interface DatabaseDao {
 
     @Query("""
         SELECT * FROM savedsong 
-        WHERE title LIKE '%' || :query || '%' ESCAPE '\' 
-           OR artistName LIKE '%' || :query || '%' ESCAPE '\' 
+        WHERE titleNormalized LIKE '%' || :query || '%' ESCAPE '\' 
+           OR artistNormalized LIKE '%' || :query || '%' ESCAPE '\' 
+           OR (titleNormalized = '' AND (title LIKE '%' || :rawQuery || '%' ESCAPE '\' OR artistName LIKE '%' || :rawQuery || '%' ESCAPE '\'))
         LIMIT :limit
     """)
-    fun searchSongsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedSongEntity>>
+    fun searchSongsRaw(
+        query: String,
+        rawQuery: String,
+        limit: Int = Int.MAX_VALUE
+    ): Flow<List<SavedSongEntity>>
 
     fun searchSongs(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Song>> = searchSongsRaw(query.escapeSqlLike(), previewSize).map { list ->
+    ): Flow<List<Song>> = searchSongsRaw(
+        query = normalizeForSearch(query).escapeSqlLike(),
+        rawQuery = query.escapeSqlLike(),
+        limit = previewSize
+    ).map { list ->
         list.map { it.toSong() }
     }.flowOn(Dispatchers.IO)
 
     @Query("""
         SELECT * FROM savedartist 
-        WHERE name LIKE '%' || :query || '%' ESCAPE '\' 
+        WHERE nameNormalized LIKE '%' || :query || '%' ESCAPE '\' 
+           OR (nameNormalized = '' AND name LIKE '%' || :rawQuery || '%' ESCAPE '\')
         LIMIT :limit
     """)
-    fun searchArtistsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedArtistEntity>>
+    fun searchArtistsRaw(
+        query: String,
+        rawQuery: String,
+        limit: Int = Int.MAX_VALUE
+    ): Flow<List<SavedArtistEntity>>
 
     fun searchArtists(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Artist>> = searchArtistsRaw(query.escapeSqlLike(), previewSize).map { list ->
+    ): Flow<List<Artist>> = searchArtistsRaw(
+        query = normalizeForSearch(query).escapeSqlLike(),
+        rawQuery = query.escapeSqlLike(),
+        limit = previewSize
+    ).map { list ->
         list.map { it.toArtist() }
     }.flowOn(Dispatchers.IO)
 
     @Query("""
         SELECT * FROM savedalbum 
-        WHERE title LIKE '%' || :query || '%' ESCAPE '\' 
-           OR artistName LIKE '%' || :query || '%' ESCAPE '\' 
+        WHERE titleNormalized LIKE '%' || :query || '%' ESCAPE '\' 
+           OR artistNormalized LIKE '%' || :query || '%' ESCAPE '\' 
+           OR (titleNormalized = '' AND (title LIKE '%' || :rawQuery || '%' ESCAPE '\' OR artistName LIKE '%' || :rawQuery || '%' ESCAPE '\'))
         LIMIT :limit
     """)
-    fun searchAlbumsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedAlbumEntity>>
+    fun searchAlbumsRaw(
+        query: String,
+        rawQuery: String,
+        limit: Int = Int.MAX_VALUE
+    ): Flow<List<SavedAlbumEntity>>
 
     fun searchAlbums(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Album>> = searchAlbumsRaw(query.escapeSqlLike(), previewSize).map { list ->
+    ): Flow<List<Album>> = searchAlbumsRaw(
+        query = normalizeForSearch(query).escapeSqlLike(),
+        rawQuery = query.escapeSqlLike(),
+        limit = previewSize
+    ).map { list ->
         list.map { it.toAlbum() }
     }.flowOn(Dispatchers.IO)
 
     @Query("""
         SELECT * FROM savedplaylist 
-        WHERE name LIKE '%' || :query || '%' ESCAPE '\' 
+        WHERE nameNormalized LIKE '%' || :query || '%' ESCAPE '\' 
+           OR (nameNormalized = '' AND name LIKE '%' || :rawQuery || '%' ESCAPE '\')
         LIMIT :limit
     """)
-    fun searchPlaylistsRaw(query: String, limit: Int = Int.MAX_VALUE): Flow<List<SavedPlaylistEntity>>
+    fun searchPlaylistsRaw(
+        query: String,
+        rawQuery: String,
+        limit: Int = Int.MAX_VALUE
+    ): Flow<List<SavedPlaylistEntity>>
 
     fun searchPlaylists(
         query: String,
         previewSize: Int = Int.MAX_VALUE,
-    ): Flow<List<Playlist>> = searchPlaylistsRaw(query.escapeSqlLike(), previewSize).map { list ->
+    ): Flow<List<Playlist>> = searchPlaylistsRaw(
+        query = normalizeForSearch(query).escapeSqlLike(),
+        rawQuery = query.escapeSqlLike(),
+        limit = previewSize
+    ).map { list ->
         list.map { it.toPlaylist() }
     }.flowOn(Dispatchers.IO)
 
@@ -738,16 +780,15 @@ interface DatabaseDao {
     fun insert(searchHistory: SearchHistory)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(map: RelatedSongMap)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(playCountEntity: PlayCountEntity): Long
 
     @Query("""
         UPDATE savedsong 
         SET title = :title,
+            titleNormalized = :titleNormalized,
             artistId = COALESCE(:artistId, artistId),
             artistName = COALESCE(:artistName, artistName),
+            artistNormalized = COALESCE(:artistNormalized, artistNormalized),
             duration = CASE WHEN :duration > 0 THEN :duration ELSE duration END,
             thumbnailUrl = COALESCE(:thumbnailUrl, thumbnailUrl),
             albumId = COALESCE(:albumId, albumId),
@@ -756,6 +797,21 @@ interface DatabaseDao {
             year = COALESCE(:year, year)
         WHERE id = :id
     """)
+    fun updateSongMetadataOnlyRaw(
+        id: String,
+        title: String,
+        titleNormalized: String,
+        artistId: String?,
+        artistName: String?,
+        artistNormalized: String?,
+        duration: Int,
+        thumbnailUrl: String?,
+        albumId: String?,
+        albumName: String?,
+        explicit: Boolean,
+        year: Int?
+    )
+
     fun updateSongMetadataOnly(
         id: String,
         title: String,
@@ -767,7 +823,24 @@ interface DatabaseDao {
         albumName: String?,
         explicit: Boolean,
         year: Int?
-    )
+    ) {
+        val titleNormalized = normalizeForSearch(title)
+        val artistNormalized = artistName?.let { normalizeForSearch(it) }
+        updateSongMetadataOnlyRaw(
+            id = id,
+            title = title,
+            titleNormalized = titleNormalized,
+            artistId = artistId,
+            artistName = artistName,
+            artistNormalized = artistNormalized,
+            duration = duration,
+            thumbnailUrl = thumbnailUrl,
+            albumId = albumId,
+            albumName = albumName,
+            explicit = explicit,
+            year = year
+        )
+    }
 
     @Query("UPDATE savedsong SET duration = :duration WHERE id = :songId AND (duration = -1 OR duration IS NULL)")
     fun updateSongDuration(songId: String, duration: Int)
@@ -1036,6 +1109,61 @@ interface DatabaseDao {
     @Query("SELECT * FROM savedplaylist ORDER BY createdAt DESC")
     fun allSavedPlaylists(): Flow<List<SavedPlaylistEntity>>
 
+    // --- Downloaded ---
+    @Upsert
+    fun upsertDownloadedSong(song: DownloadedSongEntity)
+
+    @Upsert
+    fun upsertDownloadedSongs(songs: List<DownloadedSongEntity>)
+
+    @Query("SELECT * FROM downloaded_song ORDER BY downloadedAt DESC")
+    fun allDownloadedSongs(): Flow<List<DownloadedSongEntity>>
+
+    @Query("SELECT id FROM downloaded_song")
+    fun downloadedSongIds(): Flow<List<String>>
+
+    @Query("SELECT * FROM downloaded_song")
+    suspend fun getDownloadedSongsDirect(): List<DownloadedSongEntity>
+
+    @Query("DELETE FROM downloaded_song WHERE id = :songId")
+    suspend fun deleteDownloadedSong(songId: String)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertDownloadOrigins(origins: List<DownloadOriginEntity>)
+
+    @Query("DELETE FROM download_origin WHERE originType = :type AND originId = :originId")
+    suspend fun deleteDownloadOrigin(type: String, originId: String)
+
+    @Query("SELECT songId FROM download_origin WHERE originType = :type AND originId = :originId ORDER BY position")
+    suspend fun getOriginSongIds(type: String, originId: String): List<String>
+
+    @Query("SELECT songId FROM download_origin WHERE originType = :type AND originId = :originId ORDER BY position")
+    fun originSongIdsFlow(type: String, originId: String): Flow<List<String>>
+
+    @Query("SELECT COUNT(*) FROM download_origin WHERE songId = :songId")
+    suspend fun countOriginsForSong(songId: String): Int
+
+    @Query("SELECT id FROM downloaded_song WHERE id NOT IN (SELECT songId FROM download_origin)")
+    suspend fun downloadedSongIdsWithoutOrigin(): List<String>
+
+    @Query("SELECT * FROM download_origin WHERE originType = :type GROUP BY originId ORDER BY MAX(createdAt) DESC")
+    fun downloadOriginsByType(type: String): Flow<List<DownloadOriginEntity>>
+
+    @Query("SELECT o.originId AS originId, MAX(o.originTitle) AS originTitle, MAX(o.originThumbnailUrl) AS originThumbnailUrl, COUNT(*) AS songCount FROM download_origin o INNER JOIN downloaded_song d ON d.id = o.songId WHERE o.originType = :type GROUP BY o.originId ORDER BY MAX(o.createdAt) DESC")
+    fun downloadedOriginRows(type: String): Flow<List<DownloadedOriginRow>>
+
+    @Query("DELETE FROM download_origin WHERE songId = :songId")
+    suspend fun deleteOriginsForSong(songId: String)
+
+    @Query("SELECT DISTINCT songId FROM download_origin")
+    suspend fun getAllOriginSongIds(): List<String>
+
+    @Query("SELECT d.* FROM downloaded_song d INNER JOIN download_origin o ON o.songId = d.id WHERE o.originType = :type AND o.originId = :originId ORDER BY o.position")
+    fun downloadedSongsByOrigin(type: String, originId: String): Flow<List<DownloadedSongEntity>>
+
+    @Query("SELECT * FROM download_origin WHERE originType = :type AND originId = :originId LIMIT 1")
+    fun downloadOriginInfo(type: String, originId: String): Flow<DownloadOriginEntity?>
+
     // --- Historial ---
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertHistorySong(historySong: HistorySongEntity)
@@ -1070,4 +1198,3 @@ interface DatabaseDao {
     @Query("SELECT * FROM historialplaylist ORDER BY playedAt DESC")
     fun allHistoryPlaylists(): Flow<List<HistoryPlaylistEntity>>
 }
-

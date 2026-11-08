@@ -51,7 +51,7 @@ data class TogetherRoomState(
     val positionMs: Long = 0L,
     val repeatMode: Int = 0,
     val shuffleEnabled: Boolean = false,
-    val sentAtElapsedRealtimeMs: Long = 0L,
+    val sentAtServerMs: Long = 0L,
 )
 
 @Immutable
@@ -63,24 +63,12 @@ sealed class TogetherRole {
 @Immutable
 sealed class TogetherSessionState {
     data object Idle : TogetherSessionState()
-    data class Hosting(
-        val sessionId: String,
-        val joinLink: String,
-        val localAddressHint: String?,
-        val port: Int,
-        val settings: TogetherRoomSettings,
-        val roomState: TogetherRoomState?,
-    ) : TogetherSessionState()
 
     data class HostingOnline(
         val sessionId: String,
         val code: String,
         val settings: TogetherRoomSettings,
         val roomState: TogetherRoomState?,
-    ) : TogetherSessionState()
-
-    data class Joining(
-        val joinLink: String,
     ) : TogetherSessionState()
 
     data class JoiningOnline(
@@ -98,4 +86,13 @@ sealed class TogetherSessionState {
         val message: String,
         val recoverable: Boolean = true,
     ) : TogetherSessionState()
+}
+
+sealed interface TogetherServerEvent {
+    data class ParticipantJoined(val participant: TogetherParticipant) : TogetherServerEvent
+    data class ParticipantLeft(val participantId: String, val reason: String? = null) : TogetherServerEvent
+    data class JoinRequested(val participant: TogetherParticipant) : TogetherServerEvent
+    data class ControlRequested(val request: ControlRequest) : TogetherServerEvent
+    data class AddTrackRequested(val request: AddTrackRequest) : TogetherServerEvent
+    data class Error(val message: String, val throwable: Throwable? = null) : TogetherServerEvent
 }

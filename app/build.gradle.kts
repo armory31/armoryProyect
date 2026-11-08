@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.androidx.baselineprofile)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.kotlin.serialization)
@@ -84,9 +85,15 @@ android {
         }
     }
 
+    val releaseKeystoreFile = file("keystore/release.keystore")
+    val hasReleaseKeystore = releaseKeystoreFile.exists() &&
+            !System.getenv("STORE_PASSWORD").isNullOrBlank() &&
+            !System.getenv("KEY_ALIAS").isNullOrBlank() &&
+            !System.getenv("KEY_PASSWORD").isNullOrBlank()
+
     signingConfigs {
         create("release") {
-            storeFile = file("keystore/release.keystore")
+            storeFile = releaseKeystoreFile
             storePassword = System.getenv("STORE_PASSWORD")
             keyAlias = System.getenv("KEY_ALIAS")
             keyPassword = System.getenv("KEY_PASSWORD")
@@ -95,6 +102,11 @@ android {
 
     buildTypes {
         release {
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -110,6 +122,15 @@ android {
             // Desactivar optimizaciones costosas en Debug
             extra["enableCrunchPngs"] = false
             extra["alwaysUpdateBuildId"] = false
+        }
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+            matchingFallbacks += listOf("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            versionNameSuffix = "-benchmark"
         }
     }
 
@@ -134,6 +155,7 @@ android {
         warningsAsErrors = false
         abortOnError = false
         checkDependencies = false
+        checkReleaseBuilds = false
     }
 
     androidResources {
@@ -275,11 +297,6 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.serialization.json)
-    implementation(libs.ktor.client.websockets)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.cio)
-    implementation(libs.ktor.server.websockets)
-    implementation(libs.ktor.server.content.negotiation)
 
     coreLibraryDesugaring(libs.desugaring)
 
@@ -295,6 +312,18 @@ dependencies {
     testImplementation(libs.junit)
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.compose.material3.adaptive:adaptive:1.2.0")
+
+    baselineProfile(project(":baselineprofile"))
+}
+
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    saveInSrc = true
+    variants {
+        create("arm64Release") {
+            mergeIntoMain = true
+        }
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

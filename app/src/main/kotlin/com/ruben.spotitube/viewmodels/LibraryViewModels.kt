@@ -283,7 +283,9 @@ constructor(
                     ?: true)
             }.distinctUntilChanged()
             .flatMapLatest { (sortType, descending) ->
-                database.playlists(sortType, descending)
+                com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Library.playlists") {
+                    database.playlists(sortType, descending)
+                }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val topValue =

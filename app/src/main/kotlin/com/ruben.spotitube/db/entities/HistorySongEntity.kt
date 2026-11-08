@@ -2,11 +2,13 @@ package com.ruben.spotitube.db.entities
 
 import androidx.compose.runtime.Immutable
 import androidx.room.Entity
+import androidx.room.Index
 
 @Immutable
 @Entity(
     tableName = "historialsong",
-    primaryKeys = ["playedAt", "songId"]
+    primaryKeys = ["playedAt", "songId"],
+    indices = [Index("songId")]
 )
 data class HistorySongEntity(
     val playedAt: Long = System.currentTimeMillis(),

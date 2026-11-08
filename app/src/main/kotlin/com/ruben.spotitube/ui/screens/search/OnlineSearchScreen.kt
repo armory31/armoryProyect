@@ -87,6 +87,7 @@ fun OnlineSearchScreen(
     navController: NavController,
     onSearch: (String) -> Unit,
     onDismiss: () -> Unit,
+    initialSearchType: String? = null,
     viewModel: OnlineSearchSuggestionViewModel = hiltViewModel(),
     onlineSearchViewModel: OnlineSearchViewModel = hiltViewModel(),
 ) {
@@ -115,6 +116,15 @@ fun OnlineSearchScreen(
     }
 
     val lazyListState = rememberLazyListState()
+
+    LaunchedEffect(initialSearchType) {
+        onlineSearchViewModel.filter.value = when (initialSearchType) {
+            "PLAYLISTS" -> FILTER_COMMUNITY_PLAYLIST
+            "ALBUMS" -> FILTER_ALBUM
+            "ARTISTS" -> FILTER_ARTIST
+            else -> null
+        }
+    }
 
     LaunchedEffect(Unit) {
         snapshotFlow { lazyListState.firstVisibleItemScrollOffset }

@@ -27,6 +27,8 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import com.ruben.spotitube.db.entities.DownloadOriginEntity
+import com.ruben.spotitube.db.entities.DownloadedSongEntity
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.HistoryAlbumEntity
 import com.ruben.spotitube.db.entities.HistoryArtistEntity
@@ -36,7 +38,6 @@ import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.db.entities.PlaylistTagMap
-import com.ruben.spotitube.db.entities.RelatedSongMap
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
@@ -55,7 +56,7 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MusicDatabase"
-private const val CURRENT_VERSION = 32
+private const val CURRENT_VERSION = 34
 
 class MusicDatabase(
     internal var delegate: InternalDatabase,
@@ -117,7 +118,7 @@ class MusicDatabase(
 
         private fun build(context: Context): InternalDatabase {
             val universalMigrations =
-                (2..30)
+                (2..33)
                     .map { from -> UniversalMigration(context, from, CURRENT_VERSION) }
                     .toTypedArray()
 
@@ -128,7 +129,6 @@ class MusicDatabase(
                     *universalMigrations,
                 )
                 .addCallback(DatabaseCallback())
-                .fallbackToDestructiveMigration()
                 .fallbackToDestructiveMigrationOnDowngrade()
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 .setTransactionExecutor(Executors.newFixedThreadPool(4))
@@ -186,7 +186,6 @@ class MusicDatabase(
         SearchHistory::class,
         FormatEntity::class,
         LyricsEntity::class,
-        RelatedSongMap::class,
         SetVideoIdEntity::class,
         PlayCountEntity::class,
         TagEntity::class,
@@ -199,6 +198,8 @@ class MusicDatabase(
         HistoryArtistEntity::class,
         HistoryAlbumEntity::class,
         HistoryPlaylistEntity::class,
+        DownloadedSongEntity::class,
+        DownloadOriginEntity::class,
     ],
     views = [],
     version = CURRENT_VERSION,
@@ -248,6 +249,7 @@ private class DatabaseCallback : RoomDatabase.Callback() {
                 
                 cleanupDuplicatePlaylistsOnOpen(db)
                 ensurePlaylistBrowseIdIndex(db)
+                backfillNormalizedColumns(db)
                 db.execSQL("UPDATE playlist SET isEditable = 1")
                 db.execSQL("UPDATE savedplaylist SET isEditable = 1")
             } catch (e: Exception) {
@@ -280,6 +282,112 @@ private class DatabaseCallback : RoomDatabase.Callback() {
             db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_playlist_browseId ON playlist (browseId) WHERE browseId IS NOT NULL")
         } catch (e: Exception) {
             Timber.tag(TAG).w(e, "Failed to create browseId index")
+        }
+    }
+
+    private fun backfillNormalizedColumns(db: SupportSQLiteDatabase) {
+        try {
+            val cursor = db.query("SELECT id, title, artistName FROM savedsong WHERE COALESCE(titleNormalized, '') = '' OR COALESCE(artistNormalized, '') = ''")
+            cursor.use { c ->
+                if (c.moveToFirst()) {
+                    db.beginTransaction()
+                    try {
+                        do {
+                            val id = c.getString(0)
+                            val title = if (c.isNull(1)) null else c.getString(1)
+                            val artistName = if (c.isNull(2)) null else c.getString(2)
+                            val titleNorm = normalizeForSearch(title)
+                            val artistNorm = normalizeForSearch(artistName)
+                            db.execSQL(
+                                "UPDATE savedsong SET titleNormalized = ?, artistNormalized = ? WHERE id = ?",
+                                arrayOf(titleNorm, artistNorm, id)
+                            )
+                        } while (c.moveToNext())
+                        db.setTransactionSuccessful()
+                    } finally {
+                        db.endTransaction()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to backfill savedsong normalized columns")
+        }
+
+        try {
+            val cursor = db.query("SELECT id, title, artistName FROM savedalbum WHERE COALESCE(titleNormalized, '') = '' OR COALESCE(artistNormalized, '') = ''")
+            cursor.use { c ->
+                if (c.moveToFirst()) {
+                    db.beginTransaction()
+                    try {
+                        do {
+                            val id = c.getString(0)
+                            val title = if (c.isNull(1)) null else c.getString(1)
+                            val artistName = if (c.isNull(2)) null else c.getString(2)
+                            val titleNorm = normalizeForSearch(title)
+                            val artistNorm = normalizeForSearch(artistName)
+                            db.execSQL(
+                                "UPDATE savedalbum SET titleNormalized = ?, artistNormalized = ? WHERE id = ?",
+                                arrayOf(titleNorm, artistNorm, id)
+                            )
+                        } while (c.moveToNext())
+                        db.setTransactionSuccessful()
+                    } finally {
+                        db.endTransaction()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to backfill savedalbum normalized columns")
+        }
+
+        try {
+            val cursor = db.query("SELECT id, name FROM savedartist WHERE COALESCE(nameNormalized, '') = ''")
+            cursor.use { c ->
+                if (c.moveToFirst()) {
+                    db.beginTransaction()
+                    try {
+                        do {
+                            val id = c.getString(0)
+                            val name = if (c.isNull(1)) null else c.getString(1)
+                            val nameNorm = normalizeForSearch(name)
+                            db.execSQL(
+                                "UPDATE savedartist SET nameNormalized = ? WHERE id = ?",
+                                arrayOf(nameNorm, id)
+                            )
+                        } while (c.moveToNext())
+                        db.setTransactionSuccessful()
+                    } finally {
+                        db.endTransaction()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to backfill savedartist normalized columns")
+        }
+
+        try {
+            val cursor = db.query("SELECT id, name FROM savedplaylist WHERE COALESCE(nameNormalized, '') = ''")
+            cursor.use { c ->
+                if (c.moveToFirst()) {
+                    db.beginTransaction()
+                    try {
+                        do {
+                            val id = c.getString(0)
+                            val name = if (c.isNull(1)) null else c.getString(1)
+                            val nameNorm = normalizeForSearch(name)
+                            db.execSQL(
+                                "UPDATE savedplaylist SET nameNormalized = ? WHERE id = ?",
+                                arrayOf(nameNorm, id)
+                            )
+                        } while (c.moveToNext())
+                        db.setTransactionSuccessful()
+                    } finally {
+                        db.endTransaction()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Failed to backfill savedplaylist normalized columns")
         }
     }
 }
@@ -370,6 +478,7 @@ private object SchemaTools {
 
         db.execSQL("PRAGMA foreign_keys=OFF")
         dropNonTableObjects(db)
+        db.execSQL("DROP TABLE IF EXISTS related_song_map")
 
         expectedTables.forEach { table ->
             ensureTableSchema(db = db, expectedDb = expectedDb, table = table, expectedIndices = expectedIndices)

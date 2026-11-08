@@ -94,7 +94,6 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
@@ -112,8 +111,9 @@ import com.ruben.spotitube.constants.AppBarHeight
 import com.ruben.spotitube.constants.DisableBlurKey
 import com.ruben.spotitube.constants.HideExplicitKey
 import com.ruben.spotitube.db.entities.Album
+import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.extensions.togglePlayPause
-import com.ruben.spotitube.playback.ExoDownloadService
+import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.playback.queues.LocalAlbumRadio
 import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
@@ -375,8 +375,8 @@ fun AlbumScreen(
 
     // Gradient colors state for album cover
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val fallbackColor = MaterialTheme.colorScheme.background.toArgb()
+    val surfaceColor = MaterialTheme.colorScheme.background
 
     // Estados para descarga de carátula
     var downloadingCover by remember { mutableStateOf(false) }
@@ -436,27 +436,8 @@ fun AlbumScreen(
     }
 
     val downloadUtil = LocalDownloadUtil.current
-    var downloadState by remember { mutableIntStateOf(Download.STATE_STOPPED) }
-
-    LaunchedEffect(albumWithSongs) {
-        val songs = albumWithSongs?.songs?.map { it.id }
-        if (songs.isNullOrEmpty()) return@LaunchedEffect
-        downloadUtil.downloads.collect { downloads ->
-            downloadState =
-                if (songs.all { downloads[it]?.state == Download.STATE_COMPLETED }) {
-                    Download.STATE_COMPLETED
-                } else if (songs.all {
-                        downloads[it]?.state == Download.STATE_QUEUED ||
-                                downloads[it]?.state == Download.STATE_DOWNLOADING ||
-                                downloads[it]?.state == Download.STATE_COMPLETED
-                    }
-                ) {
-                    Download.STATE_DOWNLOADING
-                } else {
-                    Download.STATE_STOPPED
-                }
-        }
-    }
+    val downloadState = downloadUtil.originState(DownloadOriginType.ALBUM, viewModel.albumId)
+        .collectAsStateWithLifecycle(initialValue = Download.STATE_STOPPED).value
 
     // State for LazyColumn to track scroll
     val lazyListState = rememberLazyListState()
@@ -696,6 +677,7 @@ fun AlbumScreen(
                         Text(
                             text = albumWithSongs.album.title,
                             style = MaterialTheme.typography.headlineSmall,
+                            color = ArmoryColors.Gold2,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
@@ -745,7 +727,9 @@ fun AlbumScreen(
                             albumWithSongs.album.year?.let { year ->
                                 MetadataChip(
                                     icon = R.drawable.calendar_today,
-                                    text = year.toString()
+                                    text = year.toString(),
+                                    textColor = ArmoryColors.TextGold,
+                                    iconTint = ArmoryColors.TextGold
                                 )
                             }
 
@@ -757,8 +741,8 @@ fun AlbumScreen(
                                     wrappedSongs.size,
                                     wrappedSongs.size
                                 ),
-                                textColor = ArmoryColors.Rust2,
-                                iconTint = ArmoryColors.Rust2
+                                textColor = ArmoryColors.TextGold,
+                                iconTint = ArmoryColors.TextGold
                             )
 
                             // Duration
@@ -767,8 +751,8 @@ fun AlbumScreen(
                                 MetadataChip(
                                     icon = R.drawable.timer,
                                     text = makeTimeString(totalDuration * 1000L),
-                                    textColor = ArmoryColors.Rust2,
-                                    iconTint = ArmoryColors.Rust2
+                                    textColor = ArmoryColors.TextGold,
+                                    iconTint = ArmoryColors.TextGold
                                 )
                             }
                         }
@@ -872,34 +856,26 @@ fun AlbumScreen(
                                 onClick = {
                                     when (downloadState) {
                                         Download.STATE_COMPLETED -> {
-                                            albumWithSongs.songs.forEach { song ->
-                                                DownloadService.sendRemoveDownload(
-                                                    context,
-                                                    ExoDownloadService::class.java,
-                                                    song.id,
-                                                    false,
-                                                )
+                                            scope.launch {
+                                                downloadUtil.removeOrigin(DownloadOriginType.ALBUM, viewModel.albumId)
                                             }
                                         }
-                                        Download.STATE_DOWNLOADING -> {
-                                            albumWithSongs.songs.forEach { song ->
-                                                DownloadService.sendRemoveDownload(
-                                                    context,
-                                                    ExoDownloadService::class.java,
-                                                    song.id,
-                                                    false,
-                                                )
+                                        Download.STATE_DOWNLOADING, Download.STATE_QUEUED -> {
+                                            scope.launch {
+                                                downloadUtil.cancelPending(DownloadOriginType.ALBUM, viewModel.albumId)
                                             }
                                         }
                                         else -> {
-                                            albumWithSongs.songs.forEach { song ->
-                                                val downloadRequest = com.ruben.spotitube.models.DownloadedSongMetadata.buildDownloadRequest(song)
-                                                DownloadService.sendAddDownload(
-                                                    context,
-                                                    ExoDownloadService::class.java,
-                                                    downloadRequest,
-                                                    false,
-                                                )
+                                            albumWithSongs?.let { data ->
+                                                scope.launch {
+                                                    downloadUtil.enqueue(
+                                                        DownloadOriginType.ALBUM,
+                                                        viewModel.albumId,
+                                                        data.album.title,
+                                                        data.album.thumbnailUrl,
+                                                        data.songs.map { DownloadedSongMetadata.fromSong(it) }
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -1256,12 +1232,14 @@ fun AlbumScreen(
                     val count = wrappedSongs.count { it.isSelected }
                     Text(
                         text = pluralStringResource(R.plurals.n_song, count, count),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = ArmoryColors.Gold2
                     )
                 } else if (showTopBarTitle) {
                     Text(
                         text = albumWithSongs?.album?.title.orEmpty(),
                         style = MaterialTheme.typography.titleLarge,
+                        color = ArmoryColors.Gold2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1275,6 +1253,7 @@ fun AlbumScreen(
                 }
             },
             overImage = transparentAppBar,
+            opaque = !transparentAppBar,
             scrollBehavior = scrollBehavior,
             actions = {
                 if (selection) {

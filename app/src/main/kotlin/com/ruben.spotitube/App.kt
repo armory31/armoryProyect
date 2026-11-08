@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.ruben.spotitube.utils.PerfTiming
 import timber.log.Timber
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -72,10 +73,12 @@ import javax.inject.Inject
 import kotlin.system.exitProcess
 
 object HomeTiming {
-    var startTimeMs: Long = 0L
+    var startTimeMs: Long
+        get() = PerfTiming.appStartTimeMs
+        set(value) { PerfTiming.appStartTimeMs = value }
+
     fun log(event: String) {
-        val elapsed = android.os.SystemClock.elapsedRealtime() - startTimeMs
-        Timber.tag("HomeTiming").i("$event +${elapsed}ms")
+        PerfTiming.logHomeTiming(event)
     }
 }
 
@@ -120,18 +123,24 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
 
     
     override fun onCreate() {
-        HomeTiming.startTimeMs = android.os.SystemClock.elapsedRealtime()
+        val appOnCreateStartMs = PerfTiming.beginSection("Application.onCreate")
+        PerfTiming.appStartTimeMs = appOnCreateStartMs
         HomeTiming.log("App.onCreate start")
         super.onCreate()
         instance = this
         if (currentProcessName()?.endsWith(":crash") == true) {
             FirebaseApp.initializeApp(this)
-            Timber.plant(Timber.DebugTree())
+            if (BuildConfig.DEBUG || BuildConfig.BUILD_TYPE == "benchmark") {
+                Timber.plant(Timber.DebugTree())
+            }
+            PerfTiming.endSection("Application.onCreate", appOnCreateStartMs)
             return
         }
         
         FirebaseApp.initializeApp(this)
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG || BuildConfig.BUILD_TYPE == "benchmark") {
+            Timber.plant(Timber.DebugTree())
+        }
         try {
             Timber.plant(com.ruben.spotitube.utils.GlobalLogTree())
         } catch (_: Exception) {}
@@ -144,6 +153,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             initializeCriticalSync()
         }
         initializeDeferredAsync()
+        PerfTiming.endSection("Application.onCreate", appOnCreateStartMs)
     }
 
     private fun initializeCriticalSync() {

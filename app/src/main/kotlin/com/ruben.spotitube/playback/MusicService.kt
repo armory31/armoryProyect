@@ -10,7 +10,6 @@
 
 package com.ruben.spotitube.playback
 
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -32,7 +31,6 @@ import android.media.audiofx.Equalizer
 import android.media.audiofx.LoudnessEnhancer
 import android.media.audiofx.Virtualizer
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.widget.Toast
@@ -116,7 +114,6 @@ import com.ruben.spotitube.constants.RepeatModeKey
 import com.ruben.spotitube.constants.ShowLyricsKey
 import com.ruben.spotitube.constants.SkipSilenceKey
 import com.ruben.spotitube.constants.SmartTrimmerKey
-import com.ruben.spotitube.constants.TogetherClientIdKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
@@ -156,7 +153,6 @@ import com.ruben.spotitube.utils.YTPlayerUtils
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.enumPreference
 import com.ruben.spotitube.utils.get
-import com.ruben.spotitube.utils.getAsync
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -371,23 +367,19 @@ class MusicService :
     val togetherSessionState = MutableStateFlow<com.ruben.spotitube.together.TogetherSessionState>(
         com.ruben.spotitube.together.TogetherSessionState.Idle,
     )
-    private var togetherServer: com.ruben.spotitube.together.TogetherServer? = null
     private var togetherOnlineHost: com.ruben.spotitube.together.TogetherOnlineHost? = null
     private var togetherClient: com.ruben.spotitube.together.TogetherClient? = null
     private var togetherBroadcastJob: Job? = null
     private var togetherOnlineConnectJob: Job? = null
     private var togetherClientEventsJob: Job? = null
-    private var togetherHeartbeatJob: Job? = null
-    private var togetherClock: com.ruben.spotitube.together.TogetherClock? = null
     private var togetherSelfParticipantId: String? = null
     private var togetherLastAppliedQueueHash: String? = null
-    private var togetherIsOnlineSession: Boolean = false
     @Volatile
     private var togetherApplyingRemote: Boolean = false
     @Volatile
     private var togetherSuppressEchoUntilElapsedMs: Long = 0L
     @Volatile
-    private var togetherLastAppliedRoomStateSentAtElapsedMs: Long = 0L
+    private var togetherLastAppliedRoomStateSentAtServerMs: Long = 0L
     @Volatile
     private var togetherLastRemoteAppliedPlayWhenReady: Boolean? = null
     @Volatile
@@ -425,13 +417,6 @@ class MusicService :
         }
     }
 
-    private suspend fun getOrCreateTogetherClientId(): String {
-        val existing = dataStore.getAsync(TogetherClientIdKey)?.trim().orEmpty()
-        if (existing.isNotBlank()) return existing
-        val generated = java.util.UUID.randomUUID().toString()
-        dataStore.edit { prefs -> prefs[TogetherClientIdKey] = generated }
-        return generated
-    }
 
     private fun ensureStartedAsForeground() {
 
@@ -1941,86 +1926,6 @@ class MusicService :
         player.prepare()
     }
 
-    fun startTogetherHost(
-        port: Int,
-        displayName: String,
-        settings: com.ruben.spotitube.together.TogetherRoomSettings,
-    ) {
-        ensureScopesActive()
-        scope.launch(SilentHandler) {
-            togetherSessionState.value = com.ruben.spotitube.together.TogetherSessionState.Idle
-        }
-
-        ioScope.launch(SilentHandler) {
-            stopTogetherInternal()
-            togetherIsOnlineSession = false
-
-            val localIp = getLocalIpv4Address()
-            val sessionId = java.util.UUID.randomUUID().toString()
-            val sessionKey = java.util.UUID.randomUUID().toString()
-            val joinInfo =
-                com.ruben.spotitube.together.TogetherJoinInfo(
-                    host = localIp ?: "127.0.0.1",
-                    port = port,
-                    sessionId = sessionId,
-                    sessionKey = sessionKey,
-                )
-            val joinLink = com.ruben.spotitube.together.TogetherLink.encode(joinInfo)
-
-            val server =
-                com.ruben.spotitube.together.TogetherServer(
-                    scope = ioScope,
-                    sessionId = sessionId,
-                    sessionKey = sessionKey,
-                    hostDisplayName = displayName.trim().ifBlank { getString(R.string.app_name) },
-                    initialSettings = settings,
-                )
-
-            server.onEvent = { event ->
-                ioScope.launch(SilentHandler) {
-                    handleTogetherHostEvent(event) { server.currentSettings() }
-                }
-            }
-
-            server.start(port)
-            togetherServer = server
-
-            scope.launch(SilentHandler) {
-                togetherSessionState.value =
-                    com.ruben.spotitube.together.TogetherSessionState.Hosting(
-                        sessionId = sessionId,
-                        joinLink = joinLink,
-                        localAddressHint = localIp,
-                        port = port,
-                        settings = settings,
-                        roomState = null,
-                    )
-            }
-
-            togetherBroadcastJob =
-                ioScope.launch(SilentHandler) {
-                    while (togetherServer === server) {
-                        val state = buildTogetherRoomState(sessionId = sessionId, hostId = togetherHostId)
-                        server.broadcastRoomState(state)
-                        scope.launch(SilentHandler) {
-                            val hosting = togetherSessionState.value as? com.ruben.spotitube.together.TogetherSessionState.Hosting
-                            if (hosting?.sessionId == sessionId) {
-                                togetherSessionState.value =
-                                    hosting.copy(
-                                        settings = server.currentSettings(),
-                                        roomState = state.copy(
-                                            participants = server.currentParticipants(),
-                                            settings = server.currentSettings(),
-                                        ),
-                                    )
-                            }
-                        }
-                        delay(750.milliseconds)
-                    }
-                }
-        }
-    }
-
     private fun togetherOnlineErrorMessage(t: Throwable): String {
         if (t is com.ruben.spotitube.together.TogetherOnlineApiException) {
             val code = t.statusCode
@@ -2051,7 +1956,6 @@ class MusicService :
 
         ioScope.launch(SilentHandler) {
             stopTogetherInternal()
-            togetherIsOnlineSession = true
 
             val api = com.ruben.spotitube.together.TogetherOnlineApi()
             val hostName = displayName.trim().ifBlank { getString(R.string.app_name) }
@@ -2139,187 +2043,6 @@ class MusicService :
         }
     }
 
-    fun joinTogether(
-        rawLink: String,
-        displayName: String,
-    ) {
-        ensureScopesActive()
-        val joinInfo = com.ruben.spotitube.together.TogetherLink.decode(rawLink)
-        if (joinInfo == null) {
-            scope.launch(SilentHandler) {
-                togetherSessionState.value =
-                    com.ruben.spotitube.together.TogetherSessionState.Error(
-                        message = getString(R.string.invalid_link),
-                        recoverable = true,
-                    )
-            }
-            return
-        }
-
-        scope.launch(SilentHandler) {
-            togetherSessionState.value = com.ruben.spotitube.together.TogetherSessionState.Joining(joinInfo.toDeepLink())
-        }
-
-        ioScope.launch(SilentHandler) {
-            stopTogetherInternal()
-            togetherIsOnlineSession = false
-            val client =
-                com.ruben.spotitube.together.TogetherClient(
-                    ioScope,
-                    clientId = getOrCreateTogetherClientId(),
-                )
-            togetherClient = client
-            togetherClock = com.ruben.spotitube.together.TogetherClock()
-            togetherSelfParticipantId = null
-            togetherLastAppliedQueueHash = null
-
-            togetherClientEventsJob?.cancel()
-            togetherClientEventsJob =
-                ioScope.launch(SilentHandler) {
-                client.events.collect { event ->
-                    when (event) {
-                        is com.ruben.spotitube.together.TogetherClientEvent.Welcome -> {
-                            togetherSelfParticipantId = event.welcome.participantId
-                            scope.launch(SilentHandler) {
-                                val state = togetherSessionState.value
-                                if (state is com.ruben.spotitube.together.TogetherSessionState.Joining) {
-                                    val selfName = displayName.trim().ifBlank { getString(R.string.together_role_guest) }
-                                    val initial =
-                                        com.ruben.spotitube.together.TogetherRoomState(
-                                            sessionId = joinInfo.sessionId,
-                                            hostId = togetherHostId,
-                                            participants =
-                                                listOf(
-                                                    com.ruben.spotitube.together.TogetherParticipant(
-                                                        id = event.welcome.participantId,
-                                                        name = selfName,
-                                                        isHost = false,
-                                                        isPending = event.welcome.isPending,
-                                                        isConnected = true,
-                                                    ),
-                                                ),
-                                            settings = event.welcome.settings,
-                                            queue = emptyList(),
-                                            queueHash = "",
-                                            currentIndex = 0,
-                                            isPlaying = false,
-                                            positionMs = 0L,
-                                            repeatMode = 0,
-                                            shuffleEnabled = false,
-                                            sentAtElapsedRealtimeMs = android.os.SystemClock.elapsedRealtime(),
-                                        )
-                                    togetherSessionState.value =
-                                        com.ruben.spotitube.together.TogetherSessionState.Joined(
-                                            role = com.ruben.spotitube.together.TogetherRole.Guest,
-                                            sessionId = joinInfo.sessionId,
-                                            selfParticipantId = event.welcome.participantId,
-                                            roomState = initial,
-                                        )
-                                }
-                            }
-                            startTogetherHeartbeat(joinInfo.sessionId, client)
-                        }
-
-                        is com.ruben.spotitube.together.TogetherClientEvent.RoomState -> {
-                            applyRemoteRoomState(event.state)
-                        }
-
-                        is com.ruben.spotitube.together.TogetherClientEvent.JoinDecision -> {
-                            if (!event.decision.approved) {
-                                scope.launch(SilentHandler) {
-                                    togetherSessionState.value =
-                                        com.ruben.spotitube.together.TogetherSessionState.Error(
-                                            message = getString(R.string.not_allowed),
-                                            recoverable = true,
-                                        )
-                                }
-                                ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                            }
-                        }
-
-                        is com.ruben.spotitube.together.TogetherClientEvent.ServerIssue -> {
-                            Timber.tag("Together").w("server issue (lan) code=${event.code.orEmpty()} message=${event.message}")
-                            when (event.code) {
-                                "GUEST_CONTROL_DISABLED" -> {
-                                    showTogetherNotice(event.message, key = "GUEST_CONTROL_DISABLED")
-                                    val joined =
-                                        togetherSessionState.value as? com.ruben.spotitube.together.TogetherSessionState.Joined
-                                    if (joined?.role is com.ruben.spotitube.together.TogetherRole.Guest) {
-                                        togetherPendingGuestControl = null
-                                        togetherLastSentControlAction = null
-                                        scope.launch(SilentHandler) { applyRemoteRoomState(joined.roomState) }
-                                    }
-                                }
-
-                                "GUEST_ADD_DISABLED" -> {
-                                    showTogetherNotice(event.message, key = "GUEST_ADD_DISABLED")
-                                }
-
-                                "HOST_OFFLINE" -> {
-                                    showTogetherNotice(event.message, key = "HOST_OFFLINE")
-                                }
-
-                                else -> {
-                                    scope.launch(SilentHandler) {
-                                        togetherSessionState.value =
-                                            com.ruben.spotitube.together.TogetherSessionState.Error(
-                                                message = event.message,
-                                                recoverable = true,
-                                            )
-                                    }
-                                    ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                                }
-                            }
-                        }
-
-                        is com.ruben.spotitube.together.TogetherClientEvent.HeartbeatPong -> {
-                            val clock = togetherClock ?: return@collect
-                            clock.onPong(
-                                sentAtElapsedMs = event.pong.clientElapsedRealtimeMs,
-                                receivedAtElapsedMs = event.receivedAtElapsedRealtimeMs,
-                                serverElapsedMs = event.pong.serverElapsedRealtimeMs,
-                            )
-                        }
-
-                        is com.ruben.spotitube.together.TogetherClientEvent.Error -> {
-                            scope.launch(SilentHandler) {
-                                togetherSessionState.value =
-                                    com.ruben.spotitube.together.TogetherSessionState.Error(
-                                        message = event.message,
-                                        recoverable = true,
-                                    )
-                            }
-                            ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                        }
-
-                        com.ruben.spotitube.together.TogetherClientEvent.Disconnected -> {
-                            val current = togetherSessionState.value
-                            if (current is com.ruben.spotitube.together.TogetherSessionState.Idle) return@collect
-                            scope.launch(SilentHandler) {
-                                val currentState = togetherSessionState.value
-                                togetherSessionState.value =
-                                    com.ruben.spotitube.together.TogetherSessionState.Error(
-                                        message =
-                                            if (currentState is com.ruben.spotitube.together.TogetherSessionState.Joined &&
-                                                currentState.role is com.ruben.spotitube.together.TogetherRole.Guest
-                                            ) {
-                                                getString(R.string.together_host_left_session)
-                                            } else {
-                                                getString(R.string.network_unavailable)
-                                            },
-                                        recoverable = true,
-                                    )
-                            }
-                            ioScope.launch(SilentHandler) { stopTogetherInternal() }
-                        }
-                    }
-                }
-            }
-
-            client.connect(joinInfo, displayName.trim().ifBlank { getString(R.string.together_role_guest) })
-        }
-    }
-
     fun joinTogetherOnline(
         code: String,
         displayName: String,
@@ -2343,7 +2066,6 @@ class MusicService :
 
         ioScope.launch(SilentHandler) {
             stopTogetherInternal()
-            togetherIsOnlineSession = true
 
             val api = com.ruben.spotitube.together.TogetherOnlineApi()
             val resolved =
@@ -2362,7 +2084,6 @@ class MusicService :
 
             val client = com.ruben.spotitube.together.TogetherClient(ioScope)
             togetherClient = client
-            togetherClock = com.ruben.spotitube.together.TogetherClock()
             togetherSelfParticipantId = null
             togetherLastAppliedQueueHash = null
 
@@ -2399,7 +2120,7 @@ class MusicService :
                                                 positionMs = 0L,
                                                 repeatMode = 0,
                                                 shuffleEnabled = false,
-                                                sentAtElapsedRealtimeMs = android.os.SystemClock.elapsedRealtime(),
+                                                sentAtServerMs = 0L,
                                             )
                                         togetherSessionState.value =
                                             com.ruben.spotitube.together.TogetherSessionState.Joined(
@@ -2410,7 +2131,6 @@ class MusicService :
                                             )
                                     }
                                 }
-                                startTogetherHeartbeat(resolved.sessionId, client)
                             }
 
                             is com.ruben.spotitube.together.TogetherClientEvent.RoomState -> {
@@ -2465,15 +2185,6 @@ class MusicService :
                                 }
                             }
 
-                            is com.ruben.spotitube.together.TogetherClientEvent.HeartbeatPong -> {
-                                val clock = togetherClock ?: return@collect
-                                clock.onPong(
-                                    sentAtElapsedMs = event.pong.clientElapsedRealtimeMs,
-                                    receivedAtElapsedMs = event.receivedAtElapsedRealtimeMs,
-                                    serverElapsedMs = event.pong.serverElapsedRealtimeMs,
-                                )
-                            }
-
                             is com.ruben.spotitube.together.TogetherClientEvent.Error -> {
                                 scope.launch(SilentHandler) {
                                     togetherSessionState.value =
@@ -2525,22 +2236,16 @@ class MusicService :
     }
 
     fun updateTogetherSettings(settings: com.ruben.spotitube.together.TogetherRoomSettings) {
-        val server = togetherServer
-        val onlineHost = togetherOnlineHost
-        if (server == null && onlineHost == null) return
+        val onlineHost = togetherOnlineHost ?: return
         ioScope.launch(SilentHandler) {
-            server?.updateSettings(settings)
-            onlineHost?.updateSettings(settings)
+            onlineHost.updateSettings(settings)
         }
     }
 
     fun approveTogetherParticipant(participantId: String, approved: Boolean) {
-        val server = togetherServer
-        val onlineHost = togetherOnlineHost
-        if (server == null && onlineHost == null) return
+        val onlineHost = togetherOnlineHost ?: return
         ioScope.launch(SilentHandler) {
-            server?.approveParticipant(participantId, approved)
-            onlineHost?.approveParticipant(participantId, approved)
+            onlineHost.approveParticipant(participantId, approved)
         }
     }
 
@@ -2578,7 +2283,7 @@ class MusicService :
         togetherLastSentControlAction = action
         togetherLastSentControlAtElapsedMs = now
 
-        val timeout = if (togetherIsOnlineSession) 5000L else 2000L
+        val timeout = 5000L
         togetherPendingGuestControl =
             when (action) {
                 com.ruben.spotitube.together.ControlAction.Play ->
@@ -2763,7 +2468,7 @@ class MusicService :
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 repeatMode = player.repeatMode,
                 shuffleEnabled = player.shuffleModeEnabled,
-                sentAtElapsedRealtimeMs = android.os.SystemClock.elapsedRealtime(),
+                sentAtServerMs = 0L,
             )
         }
     }
@@ -2793,14 +2498,12 @@ class MusicService :
             }
         }
 
-        val lastSentAt = togetherLastAppliedRoomStateSentAtElapsedMs
-        val sentAt = state.sentAtElapsedRealtimeMs
+        val lastSentAt = togetherLastAppliedRoomStateSentAtServerMs
+        val sentAt = state.sentAtServerMs
         if (sentAt > 0L && lastSentAt > 0L && sentAt <= lastSentAt) return
 
-        val offset = if (togetherIsOnlineSession) 0L else (togetherClock?.snapshot()?.estimatedOffsetMs ?: 0L)
-        val correctedSentAt = sentAt + offset
-        val estimatedOnlineLatency = if (togetherIsOnlineSession) 1200L else 0L
-        val delta = if (togetherIsOnlineSession) estimatedOnlineLatency else (now - correctedSentAt).coerceAtLeast(0L)
+        val serverNow = togetherClient?.serverNowMs() ?: System.currentTimeMillis()
+        val delta = (serverNow - state.sentAtServerMs).coerceIn(0L, 6000L)
         val targetPos =
             if (state.isPlaying) (state.positionMs + delta).coerceAtLeast(0L) else state.positionMs.coerceAtLeast(0L)
 
@@ -2863,7 +2566,7 @@ class MusicService :
                         }
                     } else {
                         val drift = kotlin.math.abs(player.currentPosition - targetPos)
-                        val seekThreshold = if (togetherIsOnlineSession) 4000L else 2000L
+                        val seekThreshold = 1500L
                         val threshold = if (state.isPlaying) seekThreshold else 200L
                         
                         if (drift > threshold) {
@@ -2874,7 +2577,7 @@ class MusicService :
                     togetherLastRemoteAppliedIndex = index
                 }
                 togetherLastRemoteAppliedPlayWhenReady = state.isPlaying
-                togetherLastAppliedRoomStateSentAtElapsedMs = sentAt
+                togetherLastAppliedRoomStateSentAtServerMs = sentAt
 
                 togetherSessionState.value =
                     com.ruben.spotitube.together.TogetherSessionState.Joined(
@@ -2889,19 +2592,6 @@ class MusicService :
         }
     }
 
-    private fun startTogetherHeartbeat(sessionId: String, client: com.ruben.spotitube.together.TogetherClient) {
-        togetherHeartbeatJob?.cancel()
-        togetherHeartbeatJob =
-            ioScope.launch(SilentHandler) {
-                var pingId = 0L
-                while (togetherClient === client) {
-                    val now = android.os.SystemClock.elapsedRealtime()
-                    client.sendHeartbeat(sessionId = sessionId, pingId = pingId++, clientElapsedRealtimeMs = now)
-                    delay(2000.milliseconds)
-                }
-            }
-    }
-
     private suspend fun stopTogetherInternal() {
         togetherBroadcastJob?.cancel()
         togetherBroadcastJob = null
@@ -2912,16 +2602,11 @@ class MusicService :
         togetherClientEventsJob?.cancel()
         togetherClientEventsJob = null
 
-        togetherHeartbeatJob?.cancel()
-        togetherHeartbeatJob = null
-
-        togetherClock = null
         togetherSelfParticipantId = null
         togetherLastAppliedQueueHash = null
-        togetherIsOnlineSession = false
         togetherApplyingRemote = false
         togetherSuppressEchoUntilElapsedMs = 0L
-        togetherLastAppliedRoomStateSentAtElapsedMs = 0L
+        togetherLastAppliedRoomStateSentAtServerMs = 0L
         togetherLastRemoteAppliedPlayWhenReady = null
         togetherLastRemoteAppliedIndex = -1
         togetherLastSentControlAtElapsedMs = 0L
@@ -2937,11 +2622,6 @@ class MusicService :
             togetherOnlineHost?.disconnect()
         } catch (_: Exception) {}
         togetherOnlineHost = null
-
-        try {
-            togetherServer?.stop()
-        } catch (_: Exception) {}
-        togetherServer = null
     }
 
     private fun com.ruben.spotitube.together.TogetherTrack.toMediaMetadata(): com.ruben.spotitube.models.MediaMetadata {
@@ -2955,18 +2635,6 @@ class MusicService :
             setVideoId = null,
             explicit = false,
         )
-    }
-
-    private fun getLocalIpv4Address(): String? {
-        return runCatching {
-            java.net.NetworkInterface.getNetworkInterfaces().toList()
-                .asSequence()
-                .filter { it.isUp && !it.isLoopback }
-                .flatMap { it.inetAddresses.toList().asSequence() }
-                .filterIsInstance<java.net.Inet4Address>()
-                .map { it.hostAddress }
-                .firstOrNull { it.isNotBlank() && it != "127.0.0.1" }
-        }.getOrNull()
     }
 
     fun toggleSongSaved() {
