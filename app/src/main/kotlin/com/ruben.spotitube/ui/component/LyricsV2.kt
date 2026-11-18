@@ -93,7 +93,7 @@ import coil3.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.LyricsClickKey
 import com.ruben.spotitube.constants.LyricsLineSpacingKey

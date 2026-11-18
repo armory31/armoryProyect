@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 
 enum class SettingsLayoutMode {
     COMPACT,

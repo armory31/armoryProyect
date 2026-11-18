@@ -8,13 +8,22 @@ package com.ruben.spotitube.ui.screens.settings
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
+import android.util.Base64
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,13 +34,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -48,6 +60,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -61,6 +74,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,8 +83,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -83,22 +99,31 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.TogetherAllowGuestsToAddTracksKey
 import com.ruben.spotitube.constants.TogetherAllowGuestsToControlPlaybackKey
+import com.ruben.spotitube.constants.TogetherCustomAvatarUriKey
 import com.ruben.spotitube.constants.TogetherDisplayNameKey
 import com.ruben.spotitube.constants.TogetherRequireHostApprovalToJoinKey
 import com.ruben.spotitube.constants.TogetherWelcomeShownKey
+import com.ruben.spotitube.rememberAccountName
+import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.together.TogetherRole
 import com.ruben.spotitube.together.TogetherRoomSettings
 import com.ruben.spotitube.together.TogetherSessionState
 import com.ruben.spotitube.ui.component.TextFieldDialog
 import com.ruben.spotitube.utils.rememberPreference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import com.ruben.spotitube.ui.component.IconButton as AtIconButton
 
 @SuppressLint("LocalContextGetResourceValueCall")
@@ -127,10 +152,19 @@ fun MusicTogetherScreen(
         )
     }
 
-    val (displayName, setDisplayName) = rememberPreference(
+    val (customName, setCustomName) = rememberPreference(
         TogetherDisplayNameKey,
-        defaultValue = Build.MODEL?.takeIf { it.isNotBlank() } ?: context.getString(R.string.app_name),
+        defaultValue = "",
     )
+    val (customAvatar, setCustomAvatar) = rememberPreference(
+        TogetherCustomAvatarUriKey,
+        defaultValue = "",
+    )
+
+    val accountName = rememberAccountName()
+    val accountAvatar = rememberAvatarUrl()
+    val displayName = customName.ifBlank { accountName }
+    val displayAvatar = customAvatar.ifBlank { accountAvatar.orEmpty() }
     val (allowAddTracks, setAllowAddTracksRaw) = rememberPreference(
         TogetherAllowGuestsToAddTracksKey, defaultValue = true
     )
@@ -145,6 +179,11 @@ fun MusicTogetherScreen(
         playerConnection?.service?.togetherSessionState ?: MutableStateFlow(TogetherSessionState.Idle)
     }
     val sessionState by sessionStateFlow.collectAsStateWithLifecycle()
+
+    val avatarsFlow = remember(playerConnection) {
+        playerConnection?.service?.togetherAvatars ?: MutableStateFlow<Map<String, String>>(emptyMap())
+    }
+    val avatars by avatarsFlow.collectAsStateWithLifecycle()
 
     val isHosting = sessionState is TogetherSessionState.HostingOnline
     val isJoining = sessionState is TogetherSessionState.JoiningOnline
@@ -206,12 +245,37 @@ fun MusicTogetherScreen(
     // ── Dialogs ──────────────────────────────────────────────────────────────
 
     if (showNameDialog) {
-        TextFieldDialog(
-            title = { Text(stringResource(R.string.together_display_name)) },
-            placeholder = { Text(stringResource(R.string.together_display_name_placeholder)) },
-            isInputValid = { it.trim().isNotBlank() },
-            onDone = { setDisplayName(it.trim()) },
-            onDismiss = { showNameDialog = false },
+        TogetherProfileDialog(
+            initialName = displayName,
+            accountName = accountName,
+            currentDisplayAvatar = displayAvatar,
+            hasCustomProfile = customName.isNotEmpty() || customAvatar.isNotEmpty(),
+            onConfirm = { newName, pendingUri ->
+                if (newName != accountName) {
+                    setCustomName(newName)
+                } else {
+                    setCustomName("")
+                }
+                if (pendingUri != null) {
+                    val pendingPath = runCatching { Uri.parse(pendingUri).path }.getOrNull()
+                    context.filesDir.listFiles()?.filter { file ->
+                        file.name.startsWith("together_avatar") && file.name.endsWith(".jpg") && file.absolutePath != pendingPath
+                    }?.forEach { it.delete() }
+                    setCustomAvatar(pendingUri)
+                }
+                showNameDialog = false
+            },
+            onResetToAccount = {
+                setCustomName("")
+                setCustomAvatar("")
+                context.filesDir.listFiles()?.filter { file ->
+                    file.name.startsWith("together_avatar") && file.name.endsWith(".jpg")
+                }?.forEach { it.delete() }
+                showNameDialog = false
+            },
+            onDismiss = {
+                showNameDialog = false
+            },
         )
     }
 
@@ -238,7 +302,7 @@ fun MusicTogetherScreen(
             onDone = { raw ->
                 val trimmed = raw.filter { it in '0'..'9' }.take(6)
                 joinInput = trimmed
-                playerConnection?.service?.joinTogetherOnline(trimmed, displayName)
+                playerConnection?.service?.joinTogetherOnline(trimmed, displayName, displayAvatar)
             },
             onDismiss = { showJoinDialog = false },
         )
@@ -313,9 +377,10 @@ fun MusicTogetherScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             ArmoryTopBar(
-                title = stringResource(R.string.music_together),
+                title = { Text(stringResource(R.string.music_together), style = MaterialTheme.typography.headlineMedium, color = ArmoryColors.Gold2, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 onBack = navController::navigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -326,7 +391,7 @@ fun MusicTogetherScreen(
                 .padding(innerPadding)
                 .windowInsetsPadding(
                     LocalPlayerAwareWindowInsets.current.only(
-                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                        WindowInsetsSides.Horizontal
                     )
                 )
                 .verticalScroll(rememberScrollState()),
@@ -335,6 +400,7 @@ fun MusicTogetherScreen(
             // Status card
             StatusCard(
                 state = sessionState,
+                avatars = avatars,
                 onCopyCode = { code ->
                     clipboard.setText(AnnotatedString(code))
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -368,6 +434,7 @@ fun MusicTogetherScreen(
             if (hostRoomState != null && isHostRole) {
                 OnlineParticipantsCard(
                     participants = hostRoomState.participants,
+                    avatars = avatars,
                     hostApprovalEnabled = hostSettings?.requireHostApprovalToJoin == true,
                     onApprove = { pid, approved ->
                         playerConnection?.service?.approveTogetherParticipant(pid, approved)
@@ -383,6 +450,7 @@ fun MusicTogetherScreen(
             if (!isJoinedAsGuest) {
                 HostSectionCard(
                     displayName = displayName,
+                    avatarUrl = displayAvatar,
                     allowAddTracks = allowAddTracks,
                     allowControlPlayback = allowControlPlayback,
                     requireApproval = requireApproval,
@@ -399,7 +467,7 @@ fun MusicTogetherScreen(
                             allowGuestsToControlPlayback = allowControlPlayback,
                             requireHostApprovalToJoin = requireApproval,
                         )
-                        playerConnection?.service?.startTogetherOnlineHost(displayName, settings)
+                        playerConnection?.service?.startTogetherOnlineHost(displayName, settings, displayAvatar)
                     },
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -424,18 +492,20 @@ fun MusicTogetherScreen(
                         joinInput = pasted
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         if (pasted.length == 6) {
-                            playerConnection?.service?.joinTogetherOnline(pasted, displayName)
+                            playerConnection?.service?.joinTogetherOnline(pasted, displayName, displayAvatar)
                         }
                     }
                 },
                 onJoin = {
                     val trimmed = joinInput.trim()
-                    playerConnection?.service?.joinTogetherOnline(trimmed, displayName)
+                    playerConnection?.service?.joinTogetherOnline(trimmed, displayName, displayAvatar)
                 },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp),
             )
+
+            Spacer(Modifier.windowInsetsBottomHeight(LocalPlayerAwareWindowInsets.current))
         }
     }
 }
@@ -445,6 +515,7 @@ fun MusicTogetherScreen(
 @Composable
 private fun HostSectionCard(
     displayName: String,
+    avatarUrl: String? = null,
     allowAddTracks: Boolean,
     allowControlPlayback: Boolean,
     requireApproval: Boolean,
@@ -537,6 +608,7 @@ private fun HostSectionCard(
 
             SettingsItemRow(
                 icon = R.drawable.person,
+                avatarUrl = avatarUrl,
                 title = stringResource(R.string.together_display_name),
                 subtitle = displayName,
                 onClick = onShowNameDialog,
@@ -596,11 +668,11 @@ private fun HostSectionCard(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(Modifier.width(10.dp))
-                    Text(stringResource(R.string.loading), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.loading), fontWeight = FontWeight.SemiBold, color = ArmoryColors.AbsoluteBlack)
                 } else {
                     Icon(painterResource(R.drawable.fire), null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.start_session), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.start_session), fontWeight = FontWeight.SemiBold, color = ArmoryColors.AbsoluteBlack)
                 }
             }
         }
@@ -820,11 +892,24 @@ private fun JoinSectionCard(
     }
 }
 
+@Composable
+private fun rememberAvatarBitmap(base64: String?): androidx.compose.ui.graphics.ImageBitmap? {
+    return remember(base64) {
+        if (base64.isNullOrBlank()) null
+        else runCatching {
+            val bytes = Base64.decode(base64, Base64.NO_WRAP)
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            bitmap?.asImageBitmap()
+        }.getOrNull()
+    }
+}
+
 // ── Status Card ────────────────────────────────────────────────────────────
 
 @Composable
 private fun StatusCard(
     state: TogetherSessionState,
+    avatars: Map<String, String> = emptyMap(),
     onCopyCode: (String) -> Unit,
     onShareCode: (String) -> Unit,
     onLeave: () -> Unit,
@@ -959,7 +1044,8 @@ private fun StatusCard(
                     is TogetherSessionState.Joined -> {
                         if (!isWaitingApproval) {
                             ParticipantsCard(
-                                participants = state.roomState.participants.map { it.name }
+                                participants = state.roomState.participants,
+                                avatars = avatars,
                             )
                         }
                     }
@@ -1027,6 +1113,7 @@ private fun OnlineRoomCodeCard(
 @Composable
 private fun OnlineParticipantsCard(
     participants: List<com.ruben.spotitube.together.TogetherParticipant>,
+    avatars: Map<String, String>,
     hostApprovalEnabled: Boolean,
     onApprove: (participantId: String, approved: Boolean) -> Unit,
     onKick: (participantId: String) -> Unit,
@@ -1106,6 +1193,7 @@ private fun OnlineParticipantsCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
+                        val avatarBitmap = rememberAvatarBitmap(avatars[participant.id])
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
@@ -1113,14 +1201,23 @@ private fun OnlineParticipantsCard(
                                 .background(accent.copy(alpha = 0.14f)),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Icon(
-                                painterResource(
-                                    if (participant.isHost) R.drawable.fire else R.drawable.person
-                                ),
-                                contentDescription = null,
-                                tint = accent,
-                                modifier = Modifier.size(22.dp),
-                            )
+                            if (avatarBitmap != null) {
+                                Image(
+                                    bitmap = avatarBitmap,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            } else {
+                                Icon(
+                                    painterResource(
+                                        if (participant.isHost) R.drawable.fire else R.drawable.person
+                                    ),
+                                    contentDescription = null,
+                                    tint = accent,
+                                    modifier = Modifier.size(22.dp),
+                                )
+                            }
                         }
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
@@ -1172,7 +1269,10 @@ private fun OnlineParticipantsCard(
 }
 
 @Composable
-private fun ParticipantsCard(participants: List<String>) {
+private fun ParticipantsCard(
+    participants: List<com.ruben.spotitube.together.TogetherParticipant>,
+    avatars: Map<String, String>,
+) {
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
@@ -1201,13 +1301,46 @@ private fun ParticipantsCard(participants: List<String>) {
                     fontWeight = FontWeight.SemiBold,
                 )
             }
-            Text(
-                text = participants.joinToString(" · "),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                participants.forEach { p ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        val avatarBitmap = rememberAvatarBitmap(avatars[p.id])
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (avatarBitmap != null) {
+                                Image(
+                                    bitmap = avatarBitmap,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            } else {
+                                Icon(
+                                    painterResource(R.drawable.person),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        }
+                        Text(
+                            text = p.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -1351,6 +1484,7 @@ private fun Divider() = HorizontalDivider(
 @Composable
 private fun SettingsItemRow(
     icon: Int,
+    avatarUrl: String? = null,
     title: String,
     subtitle: String,
     subtitleMaxLines: Int = 1,
@@ -1385,7 +1519,16 @@ private fun SettingsItemRow(
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(painterResource(icon), null, tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f), modifier = Modifier.size(22.dp))
+            if (!avatarUrl.isNullOrEmpty()) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                )
+            } else {
+                Icon(painterResource(icon), null, tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f), modifier = Modifier.size(22.dp))
+            }
         }
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -1409,6 +1552,154 @@ private fun SettingsItemRow(
             )
         }
     }
+}
+
+@Composable
+private fun TogetherProfileDialog(
+    initialName: String,
+    accountName: String,
+    currentDisplayAvatar: String,
+    hasCustomProfile: Boolean,
+    onConfirm: (newName: String, pendingPhotoUri: String?) -> Unit,
+    onResetToAccount: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var nameText by remember { mutableStateOf(initialName) }
+    var pendingPhotoUriStr by remember { mutableStateOf<String?>(null) }
+
+    fun cleanupPending() {
+        pendingPhotoUriStr?.let { pendingUri ->
+            runCatching {
+                val path = Uri.parse(pendingUri).path
+                if (!path.isNullOrEmpty()) File(path).delete()
+            }
+        }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { selectedUri ->
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, selectedUri))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        MediaStore.Images.Media.getBitmap(context.contentResolver, selectedUri)
+                    }
+                    val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 256, 256, true)
+
+                    pendingPhotoUriStr?.let { oldPendingUri ->
+                        runCatching {
+                            val path = Uri.parse(oldPendingUri).path
+                            if (!path.isNullOrEmpty()) File(path).delete()
+                        }
+                    }
+
+                    val avatarFile = File(context.filesDir, "together_avatar_${System.currentTimeMillis()}.jpg")
+                    FileOutputStream(avatarFile).use { out ->
+                        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                    }
+                    val savedUriStr = Uri.fromFile(avatarFile).toString()
+                    withContext(Dispatchers.Main) {
+                        pendingPhotoUriStr = savedUriStr
+                    }
+                } catch (_: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Error al guardar imagen", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = {
+            cleanupPending()
+            onDismiss()
+        },
+        shape = RoundedCornerShape(28.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = { Text(stringResource(R.string.together_edit_profile_title)) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                val avatarToDisplay = pendingPhotoUriStr ?: currentDisplayAvatar
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { imagePickerLauncher.launch("image/*") },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (avatarToDisplay.isNotBlank()) {
+                        AsyncImage(
+                            model = avatarToDisplay,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.person),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(36.dp),
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = nameText,
+                    onValueChange = { nameText = it },
+                    singleLine = true,
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                if (hasCustomProfile) {
+                    TextButton(
+                        onClick = {
+                            cleanupPending()
+                            onResetToAccount()
+                        },
+                    ) {
+                        Text(stringResource(R.string.together_use_account_profile))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val trimmed = nameText.trim()
+                    if (trimmed.isEmpty()) return@Button
+                    onConfirm(trimmed, pendingPhotoUriStr)
+                },
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(stringResource(R.string.ok_button), fontWeight = FontWeight.SemiBold)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    cleanupPending()
+                    onDismiss()
+                },
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(stringResource(R.string.dismiss))
+            }
+        },
+    )
 }
 
 @Composable

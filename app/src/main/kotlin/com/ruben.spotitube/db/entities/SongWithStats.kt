@@ -30,6 +30,7 @@ data class SongStatRow(
 data class ArtistStatRow(
     val artistId: String,
     val playCount: Int,
+    val timeListened: Long,
 )
 
 @Immutable

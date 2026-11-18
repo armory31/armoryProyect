@@ -141,9 +141,6 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
         if (BuildConfig.DEBUG || BuildConfig.BUILD_TYPE == "benchmark") {
             Timber.plant(Timber.DebugTree())
         }
-        try {
-            Timber.plant(com.ruben.spotitube.utils.GlobalLogTree())
-        } catch (_: Exception) {}
 
         applicationScope.launch(Dispatchers.IO) {
             PreferenceStore.start(this@App)
@@ -152,6 +149,7 @@ class App : Application(), SingletonImageLoader.Factory, Configuration.Provider 
             HomeTiming.log("MusicDatabase.warmUp end")
             initializeCriticalSync()
         }
+        com.ruben.spotitube.utils.QuickPicksRebuildScheduler.schedule(this)
         initializeDeferredAsync()
         PerfTiming.endSection("Application.onCreate", appOnCreateStartMs)
     }

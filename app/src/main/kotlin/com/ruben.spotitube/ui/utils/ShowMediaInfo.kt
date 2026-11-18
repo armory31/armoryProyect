@@ -45,8 +45,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.db.entities.Song
@@ -222,24 +222,6 @@ fun ShowMediaInfo(videoId: String) {
                             R.drawable.group,
                             stringResource(R.string.subscribers),
                             info?.subscribers ?: ""
-                        )
-
-                        StatColumn(
-                            R.drawable.visibility,
-                            stringResource(R.string.views),
-                            info?.viewCount?.toInt()?.let { numberFormatter(it) } ?: ""
-                        )
-
-                        StatColumn(
-                            R.drawable.thumbup,
-                            stringResource(R.string.likes),
-                            info?.like?.toInt()?.let { numberFormatter(it) } ?: ""
-                        )
-
-                        StatColumn(
-                            R.drawable.thumbdown,
-                            stringResource(R.string.dislikes),
-                            info?.dislike?.toInt()?.let { numberFormatter(it) } ?: ""
                         )
                     }
                 }

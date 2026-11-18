@@ -8,7 +8,6 @@
 
 package com.ruben.spotitube.db
 
-import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -41,18 +40,10 @@ import com.ruben.spotitube.db.entities.PlaylistTagMap
 import com.ruben.spotitube.db.entities.SearchHistory
 import com.ruben.spotitube.db.entities.SetVideoIdEntity
 import com.ruben.spotitube.db.entities.Song
-import com.ruben.spotitube.db.entities.HistoryAlbumEntity
-import com.ruben.spotitube.db.entities.HistoryArtistEntity
-import com.ruben.spotitube.db.entities.HistoryPlaylistEntity
-import com.ruben.spotitube.db.entities.HistorySongEntity
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
-import com.ruben.spotitube.db.entities.AlbumStatRow
-import com.ruben.spotitube.db.entities.ArtistStatRow
-import com.ruben.spotitube.db.entities.HistoryRangeTotals
-import com.ruben.spotitube.db.entities.SongStatRow
 import com.ruben.spotitube.db.entities.TagEntity
 import com.ruben.spotitube.extensions.reversed
 import com.ruben.spotitube.extensions.toSQLiteQuery
@@ -187,152 +178,6 @@ interface DatabaseDao {
         offset: Int = 0,
     ): Flow<List<Song>> = getSavedSongsRecommendation(limit).map { list -> list.map { it.toSong() } }
 
-    @Query("""
-        SELECT songId AS id, 
-               COUNT(*) AS songCountListened, 
-               COALESCE(SUM(playTimeMs), 0) AS timeListened 
-        FROM historialsong 
-        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp 
-        GROUP BY songId 
-        ORDER BY timeListened DESC 
-        LIMIT :limit OFFSET :offset
-    """)
-    fun mostPlayedSongStatsRaw(
-        fromTimeStamp: Long,
-        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-        limit: Int = 20,
-        offset: Int = 0
-    ): Flow<List<SongStatRow>>
-
-    @Query("""
-        SELECT songId AS id, 
-               COUNT(*) AS songCountListened, 
-               COALESCE(SUM(playTimeMs), 0) AS timeListened 
-        FROM historialsong 
-        GROUP BY songId 
-        ORDER BY songCountListened DESC 
-        LIMIT :limit OFFSET :offset
-    """)
-    fun mostPlayedSongStatsAllTime(
-        limit: Int = 20,
-        offset: Int = 0
-    ): Flow<List<SongStatRow>>
-
-    @Query("SELECT songId FROM historialsong ORDER BY playedAt DESC LIMIT 1")
-    suspend fun getLastHistorySongId(): String?
-
-    @Query("""
-        SELECT COALESCE(SUM(playTimeMs), 0) AS totalTimeListened, 
-               COUNT(*) AS totalSongsPlayed 
-        FROM historialsong 
-        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp
-    """)
-    fun historyRangeTotals(
-        fromTimeStamp: Long,
-        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
-    ): Flow<HistoryRangeTotals>
-
-    fun mostPlayedSongsStats(
-        fromTimeStamp: Long,
-        limit: Int = 20,
-        offset: Int = 0,
-        toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<SongStatRow>> {
-        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
-        return mostPlayedSongStatsRaw(
-            fromTimeStamp = fromTimeStamp,
-            toTimeStamp = toTime,
-            limit = if (limit >= 0) limit else Int.MAX_VALUE,
-            offset = offset
-        )
-    }
-
-    fun mostPlayedSongs(
-        fromTimeStamp: Long,
-        limit: Int = 20,
-        offset: Int = 0,
-        toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<SongStatRow>> {
-        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
-        return mostPlayedSongStatsRaw(
-            fromTimeStamp = fromTimeStamp,
-            toTimeStamp = toTime,
-            limit = if (limit >= 0) limit else Int.MAX_VALUE,
-            offset = offset
-        )
-    }
-
-    @Query("""
-        SELECT artistId, COUNT(*) AS playCount 
-        FROM historialartist 
-        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp 
-        GROUP BY artistId 
-        ORDER BY playCount DESC 
-        LIMIT :limit OFFSET :offset
-    """)
-    fun mostPlayedArtistStatsRaw(
-        fromTimeStamp: Long,
-        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-        limit: Int = 20,
-        offset: Int = 0
-    ): Flow<List<ArtistStatRow>>
-
-    @Query("""
-        SELECT albumId, COUNT(*) AS playCount 
-        FROM historialalbum 
-        WHERE playedAt BETWEEN :fromTimeStamp AND :toTimeStamp 
-        GROUP BY albumId 
-        ORDER BY playCount DESC 
-        LIMIT :limit OFFSET :offset
-    """)
-    fun mostPlayedAlbumStatsRaw(
-        fromTimeStamp: Long,
-        toTimeStamp: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-        limit: Int = 20,
-        offset: Int = 0
-    ): Flow<List<AlbumStatRow>>
-
-    fun mostPlayedArtists(
-        fromTimeStamp: Long,
-        limit: Int = 20,
-        offset: Int = 0,
-        toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Artist>> {
-        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
-        return mostPlayedArtistStatsRaw(
-            fromTimeStamp = fromTimeStamp,
-            toTimeStamp = toTime,
-            limit = if (limit >= 0) limit else Int.MAX_VALUE,
-            offset = offset
-        ).map { rows ->
-            rows.map { row ->
-                Artist(artist = SavedArtistEntity(id = row.artistId, name = row.artistId), songCount = row.playCount)
-            }
-        }.flowOn(Dispatchers.IO)
-    }
-
-    fun mostPlayedAlbums(
-        fromTimeStamp: Long,
-        limit: Int = 20,
-        offset: Int = 0,
-        toTimeStamp: Long? = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli(),
-    ): Flow<List<Album>> {
-        val toTime = toTimeStamp ?: LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
-        return mostPlayedAlbumStatsRaw(
-            fromTimeStamp = fromTimeStamp,
-            toTimeStamp = toTime,
-            limit = if (limit >= 0) limit else Int.MAX_VALUE,
-            offset = offset
-        ).map { rows ->
-            rows.map { row ->
-                Album(
-                    album = SavedAlbumEntity(id = row.albumId, title = row.albumId, songCount = row.playCount, duration = 0),
-                    artists = emptyList(),
-                    songCountListened = row.playCount
-                )
-            }
-        }.flowOn(Dispatchers.IO)
-    }
 
     @Query("SELECT * FROM savedalbum WHERE artistId = :artistId ORDER BY savedAt DESC LIMIT :limit")
     fun getSavedAlbumsByArtistPreview(artistId: String, limit: Int): Flow<List<SavedAlbumEntity>>
@@ -436,6 +281,7 @@ interface DatabaseDao {
         AlbumSortType.SONG_COUNT -> albumsBySongCountAsc()
         AlbumSortType.LENGTH -> albumsByLengthAsc()
         AlbumSortType.PLAY_TIME -> albumsByPlayTimeAsc()
+        AlbumSortType.CUSTOM -> albumsByRowIdAsc()
     }.map { it.reversed(descending) }
 
     fun album(id: String): Flow<Album?> = getSavedAlbumFlow(id).map { it?.toAlbum() }
@@ -559,6 +405,7 @@ interface DatabaseDao {
                 AlbumSortType.SONG_COUNT -> albums.sortedBy { it.album.songCount }
                 AlbumSortType.LENGTH -> albums.sortedBy { it.album.duration }
                 AlbumSortType.PLAY_TIME -> albums
+                AlbumSortType.CUSTOM -> albums
             }.reversed(descending)
         }
 
@@ -573,6 +420,7 @@ interface DatabaseDao {
                 ArtistSortType.NAME -> artists.sortedWith(compareBy(collator) { it.artist.name })
                 ArtistSortType.SONG_COUNT -> artists.sortedBy { it.songCount }
                 ArtistSortType.PLAY_TIME -> artists
+                ArtistSortType.CUSTOM -> artists
             }.reversed(descending)
         }
 
@@ -594,7 +442,7 @@ interface DatabaseDao {
             (SELECT COUNT(*) FROM savedsong) as songCount,
             (SELECT COUNT(*) FROM savedalbum) as albumCount,
             (SELECT COUNT(*) FROM savedartist) as artistCount,
-            (SELECT COALESCE(SUM(playTimeMs), 0) FROM historialsong) as totalPlayTimeMillis
+            0 as totalPlayTimeMillis
     """)
     fun getLibrarySummary(): Flow<LibrarySummary>
 
@@ -729,11 +577,6 @@ interface DatabaseDao {
         list.map { it.toPlaylist() }
     }.flowOn(Dispatchers.IO)
 
-    @Query("SELECT * FROM historialsong ORDER BY playedAt ASC LIMIT 1")
-    fun firstEvent(): Flow<HistorySongEntity?>
-
-    @Query("DELETE FROM historialsong")
-    suspend fun clearListenHistory()
 
     @Transaction
     @Query("SELECT * FROM search_history WHERE `query` LIKE :query || '%' ORDER BY id DESC")
@@ -949,8 +792,6 @@ interface DatabaseDao {
     @Delete
     fun delete(searchHistory: SearchHistory)
 
-    @Query("DELETE FROM historialsong WHERE playedAt = :playedAt AND songId = :songId")
-    fun deleteHistorySong(playedAt: Long, songId: String)
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
@@ -1164,37 +1005,4 @@ interface DatabaseDao {
     @Query("SELECT * FROM download_origin WHERE originType = :type AND originId = :originId LIMIT 1")
     fun downloadOriginInfo(type: String, originId: String): Flow<DownloadOriginEntity?>
 
-    // --- Historial ---
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertHistorySong(historySong: HistorySongEntity)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertHistoryArtist(historyArtist: HistoryArtistEntity)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertHistoryAlbum(historyAlbum: HistoryAlbumEntity)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertHistoryPlaylist(historyPlaylist: HistoryPlaylistEntity)
-
-    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC LIMIT :limit")
-    fun recentHistorySongs(limit: Int): Flow<List<HistorySongEntity>>
-
-    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
-    fun historySongsPagingSource(): PagingSource<Int, HistorySongEntity>
-
-    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC LIMIT :limit")
-    suspend fun getHistorySongsLimited(limit: Int): List<HistorySongEntity>
-
-    @Query("SELECT * FROM historialsong ORDER BY playedAt DESC")
-    suspend fun getHistorySongsDirect(): List<HistorySongEntity>
-
-    @Query("SELECT * FROM historialartist ORDER BY playedAt DESC")
-    fun allHistoryArtists(): Flow<List<HistoryArtistEntity>>
-
-    @Query("SELECT * FROM historialalbum ORDER BY playedAt DESC")
-    fun allHistoryAlbums(): Flow<List<HistoryAlbumEntity>>
-
-    @Query("SELECT * FROM historialplaylist ORDER BY playedAt DESC")
-    fun allHistoryPlaylists(): Flow<List<HistoryPlaylistEntity>>
 }

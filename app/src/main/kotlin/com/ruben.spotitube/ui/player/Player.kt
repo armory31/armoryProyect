@@ -108,7 +108,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_BUFFERING
@@ -120,11 +119,12 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.MiniPlayer
 import com.ruben.spotitube.PlayerStatus
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArtistNameColor
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.BlurRadiusKey
 import com.ruben.spotitube.constants.DisableBlurKey
@@ -207,7 +207,6 @@ fun BottomSheetPlayer(
 
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
     val (blurRadius) = rememberPreference(BlurRadiusKey, 36f)
-    val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
     val (incrementalSeekSkipEnabled) = rememberPreference(SeekExtraSeconds, defaultValue = false)
     var keyboardSkipMultiplier by remember { mutableIntStateOf(1) }
     var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
@@ -498,8 +497,6 @@ fun BottomSheetPlayer(
     val dynamicQueuePeekHeight =
         if (playerDesignStyle == PlayerDesignStyle.V5) {
             0.dp
-        } else if (showCodecOnPlayer) {
-            88.dp
         } else {
             QueuePeekHeight
         }
@@ -1382,6 +1379,7 @@ private fun LittlePlayerContent(
                             Text(
                                 text = "by - $artistLine",
                                 style = MaterialTheme.typography.bodyMedium,
+                                color = ArtistNameColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.basicMarquee(),

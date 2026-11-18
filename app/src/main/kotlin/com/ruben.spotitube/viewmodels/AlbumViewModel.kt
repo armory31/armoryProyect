@@ -15,10 +15,10 @@ import androidx.lifecycle.viewModelScope
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.AlbumWithSongs
 import com.ruben.spotitube.innertube.YouTube
-import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.models.toAlbumWithSongs
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.sync.SyncManager
+import com.ruben.spotitube.utils.AlbumDateCache
 import com.ruben.spotitube.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,8 +75,6 @@ constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    var otherVersions = MutableStateFlow<List<AlbumItem>>(emptyList())
-
     private val _fetchState = MutableStateFlow<FetchState>(FetchState.Pending)
 
     val uiState: StateFlow<AlbumUiState> =
@@ -103,9 +101,11 @@ constructor(
                 .onSuccess { albumPage ->
                     Log.d("SAVED_ALBUM_DEBUG", "AlbumViewModel: Obtenidas ${albumPage.songs.size} canciones desde InnerTube para el browseId $albumId")
                     playlistId.value = albumPage.album.playlistId
-                    otherVersions.value = albumPage.otherVersions
                     onlineAlbumWithSongs.value = albumPage.toAlbumWithSongs()
                     _fetchState.value = FetchState.Success
+                    albumPage.songs.firstOrNull()?.id?.let { firstId ->
+                        viewModelScope.launch { AlbumDateCache.resolveFromSong(albumId, firstId, albumPage.album.year) }
+                    }
                 }.onFailure {
                     reportException(it)
                     val isNotFound = it.message?.contains("NOT_FOUND") == true

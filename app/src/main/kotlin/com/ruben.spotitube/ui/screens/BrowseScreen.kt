@@ -23,8 +23,8 @@ package com.ruben.spotitube.ui.screens
  import androidx.compose.ui.unit.dp
  import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
  import androidx.navigation.NavController
- import com.ruben.spotitube.LocalPlayerAwareWindowInsets
- import com.ruben.spotitube.LocalPlayerConnection
+ import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+ import com.ruben.spotitube.ui.LocalPlayerConnection
  import com.ruben.spotitube.constants.GridThumbnailHeight
  import com.ruben.spotitube.innertube.models.AlbumItem
  import com.ruben.spotitube.innertube.models.ArtistItem

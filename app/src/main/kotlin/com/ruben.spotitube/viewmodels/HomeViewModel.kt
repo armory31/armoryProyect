@@ -18,11 +18,14 @@ import com.ruben.spotitube.constants.QuickPicksKey
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.LocalItem
+import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
+import com.ruben.spotitube.db.entities.SavedSongEntity
 import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.ArtistItem
+import com.ruben.spotitube.innertube.models.AlbumItem
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.toSong
 import com.ruben.spotitube.models.toAlbum
@@ -34,6 +37,11 @@ import com.ruben.spotitube.models.ItemMetadata
 import com.ruben.spotitube.models.SimilarRecommendation
 import com.ruben.spotitube.playback.DownloadUtil
 import com.ruben.spotitube.sync.LibraryStateHolder
+import com.ruben.spotitube.utils.AlbumDateCache
+import com.ruben.spotitube.utils.QuickPickEntry
+import com.ruben.spotitube.utils.QuickPicksPoolBuilder
+import com.ruben.spotitube.utils.QuickPicksPoolStore
+import com.ruben.spotitube.utils.QuickPicksSelector
 import com.ruben.spotitube.utils.SyncUtils
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.get
@@ -96,6 +104,8 @@ class HomeViewModel @Inject constructor(
     private val _keepListening = MutableStateFlow<List<LocalItem>?>(null)
     val keepListening: StateFlow<List<LocalItem>?> = _keepListening.asStateFlow()
 
+    val continueListening: StateFlow<List<com.ruben.spotitube.models.ContinueListeningEntry>> = com.ruben.spotitube.models.ContinueListeningStore.entries
+
     private val _similarRecommendations = MutableStateFlow<List<SimilarRecommendation>?>(null)
     val similarRecommendations: StateFlow<List<SimilarRecommendation>?> = _similarRecommendations.asStateFlow()
 
@@ -114,34 +124,70 @@ class HomeViewModel @Inject constructor(
     private val speedDialCount = java.util.concurrent.atomic.AtomicInteger(0)
     private val isFirstQuickPicksLogged = java.util.concurrent.atomic.AtomicBoolean(false)
 
+    private var lastExhausted = false
+    private var currentEntries: List<QuickPickEntry> = emptyList()
+
+    private suspend fun applyPoolQuickPicks(): Boolean = runCatching {
+        var file = QuickPicksPoolStore.load(context)
+        if (currentEntries.isEmpty() && file != null && !lastExhausted) {
+            currentEntries = file.current
+        }
+
+        if (file == null || lastExhausted) {
+            val built = QuickPicksPoolBuilder.build(context, database)
+            if (built.isNotEmpty()) {
+                QuickPicksPoolStore.save(context, built)
+                file = QuickPicksPoolStore.load(context)
+                currentEntries = emptyList()
+                lastExhausted = false
+            }
+            if (built.isEmpty() && file == null) {
+                return false
+            }
+        }
+
+        if (file == null || file.entries.isEmpty()) {
+            return false
+        }
+
+        val selection = QuickPicksSelector.next(file.entries, currentEntries)
+        QuickPicksPoolStore.replaceEntries(context, selection.remainingPool, selection.batch, file.builtAt)
+        currentEntries = selection.batch
+        lastExhausted = selection.exhausted
+
+        val songs = selection.batch.map { entry ->
+            Song(
+                song = SavedSongEntity(
+                    id = entry.id,
+                    title = entry.title,
+                    artistId = entry.artistId,
+                    artistName = entry.artistName,
+                    duration = entry.duration,
+                    thumbnailUrl = entry.thumbnailUrl,
+                    albumId = null,
+                    albumName = null,
+                    explicit = false,
+                ),
+                artists = listOfNotNull(
+                    entry.artistName?.let { name ->
+                        SavedArtistEntity(
+                            id = entry.artistId.orEmpty(),
+                            name = name,
+                        )
+                    }
+                ),
+            )
+        }
+
+        _quickPicks.value = songs.ifEmpty { null }
+        true
+    }.getOrDefault(false)
+
     private suspend fun getQuickPicks(){
         val n = getQuickPicksCount.incrementAndGet()
         when (quickPicksEnum.first()) {
             QuickPicks.QUICK_PICKS -> {
-                val fromTimeStamp = System.currentTimeMillis() - 86400000L * 30
-                var mostPlayedRows = runCatching {
-                    com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedSongs") {
-                        database.mostPlayedSongs(fromTimeStamp, limit = 20, offset = 0).first()
-                    }
-                }.getOrDefault(emptyList())
-
-                if (mostPlayedRows.size < 10) {
-                    mostPlayedRows = runCatching {
-                        com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedSongStatsAllTime") {
-                            database.mostPlayedSongStatsAllTime(limit = 20, offset = 0).first()
-                        }
-                    }.getOrDefault(emptyList())
-                }
-                HomeTiming.log("getQuickPicks #$n: DB queries done")
-
-                val metadataMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveQuickPicks") {
-                    com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(mostPlayedRows.map { it.id }, timeoutMs = 5000L)
-                }
-                HomeTiming.log("getQuickPicks #$n: resolve done (requested=${mostPlayedRows.size}, resolved=${metadataMap.size})")
-
-                val mostPlayed: List<Song> = mostPlayedRows.mapNotNull { row ->
-                    metadataMap[row.id]?.toSong()
-                }
+                if (applyPoolQuickPicks()) return
 
                 val savedSongs: List<Song> = runCatching {
                     com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.getRandomSavedSongs") {
@@ -149,7 +195,7 @@ class HomeViewModel @Inject constructor(
                     }
                 }.getOrDefault(emptyList())
 
-                val localList: List<Song> = (mostPlayed + savedSongs).distinctBy { it.id }
+                val localList: List<Song> = savedSongs.distinctBy { it.id }
 
                 val ytSongs: List<Song> = _homePage.value?.sections
                     ?.flatMap { it.items }
@@ -173,37 +219,10 @@ class HomeViewModel @Inject constructor(
                     }
                 }
 
-                if (combined.size < 20) {
-                    val lastSongId = runCatching {
-                        com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.getLastHistorySongId") {
-                            database.getLastHistorySongId()
-                        }
-                    }.getOrNull()
-                    if (!lastSongId.isNullOrBlank()) {
-                        val nextSongs = runCatching {
-                            com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("YouTube.nextQuickPicks") {
-                                YouTube.next(WatchEndpoint(videoId = lastSongId)).getOrNull()
-                                    ?.items
-                                    ?.filterIsInstance<SongItem>()
-                                    ?.map { it.toSong() }
-                                    .orEmpty()
-                            }
-                        }.getOrDefault(emptyList())
-                        HomeTiming.log("getQuickPicks #$n: YouTube.next done")
-
-                        for (song in nextSongs) {
-                            if (combined.size >= 20) break
-                            if (combined.none { it.id == song.id }) {
-                                combined.add(song)
-                            }
-                        }
-                    }
-                }
-
                 HomeTiming.log("getQuickPicks #$n: finalSize=${combined.size}")
                 _quickPicks.value = combined.ifEmpty { null }
             }
-            QuickPicks.LAST_LISTEN -> songLoad()
+            QuickPicks.LAST_LISTEN -> Unit
         }
     }
 
@@ -287,7 +306,6 @@ class HomeViewModel @Inject constructor(
         try {
             supervisorScope {
                 val hideVideo = context.dataStore.get(HideVideoKey, false)
-                val fromTimeStamp = System.currentTimeMillis() - 86400000 * 7 * 2
 
                 launch {
                     getQuickPicks()
@@ -301,62 +319,7 @@ class HomeViewModel @Inject constructor(
                 }
                 
                 launch {
-                    val keepListeningRows = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedSongsKeepListening") {
-                        database.mostPlayedSongs(fromTimeStamp, limit = 15, offset = 5).first()
-                    }.shuffled().take(10)
-                    val keepListeningMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveKeepListening") {
-                        com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(keepListeningRows.map { it.id }, timeoutMs = 5000L)
-                    }
-                    val keepListeningSongs: List<Song> = keepListeningRows.mapNotNull { row -> keepListeningMap[row.id]?.toSong() }
-                    val rawAlbums = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedAlbumsKeepListening") {
-                        database.mostPlayedAlbums(fromTimeStamp, limit = 8, offset = 2).first()
-                    }
-                    val albumsMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveAlbumsKeepListening") {
-                        com.ruben.spotitube.utils.HistoryMetadataLoader.resolveAlbums(rawAlbums.map { it.id }, timeoutMs = 5000L)
-                    }
-                    val keepListeningAlbums = rawAlbums.mapNotNull { albumObj ->
-                        albumsMap[albumObj.id]?.let { meta ->
-                            com.ruben.spotitube.db.entities.Album(
-                                album = com.ruben.spotitube.db.entities.SavedAlbumEntity(
-                                    id = albumObj.id,
-                                    title = meta.title,
-                                    artistName = meta.artistName,
-                                    songCount = meta.songCount,
-                                    thumbnailUrl = meta.thumbnailUrl
-                                ),
-                                artists = emptyList()
-                            )
-                        }
-                    }.filter { it.album.thumbnailUrl != null }.shuffled().take(5)
-
-                    val rawArtists = com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Home.mostPlayedArtistsKeepListening") {
-                        database.mostPlayedArtists(fromTimeStamp).first()
-                    }
-                    val artistsMap = com.ruben.spotitube.utils.PerfTiming.measureNetworkCallSuspend("HistoryMetadataLoader.resolveArtistsKeepListening") {
-                        com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtists.map { it.id }, timeoutMs = 5000L)
-                    }
-                    val keepListeningArtists = rawArtists.mapNotNull { artistObj ->
-                        artistsMap[artistObj.id]?.let { meta ->
-                            com.ruben.spotitube.db.entities.Artist(
-                                artist = com.ruben.spotitube.db.entities.SavedArtistEntity(
-                                    id = artistObj.id,
-                                    name = meta.name,
-                                    thumbnailUrl = meta.thumbnailUrl
-                                ),
-                                songCount = artistObj.songCount
-                            )
-                        }
-                    }.filter { it.artist.isYouTubeArtist && it.artist.thumbnailUrl != null }.shuffled().take(5)
-                    _keepListening.value = (keepListeningSongs + keepListeningAlbums + keepListeningArtists)
-                        .distinctBy { item ->
-                            when (item) {
-                                is Song -> "song_${item.id}"
-                                is com.ruben.spotitube.db.entities.Album -> "album_${item.id}"
-                                is com.ruben.spotitube.db.entities.Artist -> "artist_${item.id}"
-                                is com.ruben.spotitube.db.entities.Playlist -> "playlist_${item.id}"
-                            }
-                        }
-                        .shuffled()
+                    _keepListening.value = emptyList()
                     HomeTiming.log("load: keepListening end")
                 }
 
@@ -393,18 +356,32 @@ class HomeViewModel @Inject constructor(
         artist: com.ruben.spotitube.db.entities.Artist,
         hideVideo: Boolean
     ): SimilarRecommendation? {
-        val items = mutableListOf<YTItem>()
+        val items = mutableListOf<AlbumItem>()
         runCatching {
             YouTube.artist(artist.id).onSuccess { page ->
-                items += page.sections.getOrNull(page.sections.size - 2)?.items.orEmpty()
-                items += page.sections.lastOrNull()?.items.orEmpty()
+                items += page.sections.flatMap { it.items }
+                    .filterIsInstance<AlbumItem>()
             }
         }
-        val filtered = items
-            .filterIsInstance<ArtistItem>()
-            .filter { it.id != artist.id }
+        val albums = items
+            .distinctBy { it.id }
             .filterVideo(hideVideo)
-            .shuffled()
+
+        val cal = java.util.Calendar.getInstance()
+        val curYear = cal.get(java.util.Calendar.YEAR)
+        val cutoff = curYear * 12 + cal.get(java.util.Calendar.MONTH) - 5
+        val filtered = albums.filter { album ->
+            val y = album.year ?: return@filter false
+            when {
+                y == curYear -> true
+                y == curYear - 1 && cutoff < curYear * 12 -> {
+                    val idx = AlbumDateCache.monthIndex(AlbumDateCache.resolve(album.id, y))
+                    idx != null && idx >= cutoff
+                }
+                else -> false
+            }
+        }
+
         if (filtered.isEmpty()) return null
         return SimilarRecommendation(
             title = artist,
@@ -416,56 +393,15 @@ class HomeViewModel @Inject constructor(
         try {
             HomeTiming.log("loadSimilarRecommendations start")
             val hideVideo = context.dataStore.get(HideVideoKey, false)
-            val fromTimeStamp = System.currentTimeMillis() - 86400000 * 7 * 2
-            
-            val rawArtistRecs = database.mostPlayedArtists(fromTimeStamp, limit = 10).first()
-            val artistRecsMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolveArtists(rawArtistRecs.map { it.id }, timeoutMs = 5000L)
-            var artistRecommendations = rawArtistRecs.mapNotNull { artistObj ->
-                artistRecsMap[artistObj.id]?.let { meta ->
-                    com.ruben.spotitube.db.entities.Artist(
-                        artist = com.ruben.spotitube.db.entities.SavedArtistEntity(
-                            id = artistObj.id,
-                            name = meta.name,
-                            thumbnailUrl = meta.thumbnailUrl
-                        ),
-                        songCount = artistObj.songCount
-                    )
-                }
-            }.filter { it.artist.isYouTubeArtist }
-                .shuffled().take(3)
-                .mapNotNull { buildArtistRecommendation(it, hideVideo) }
-
-            if (artistRecommendations.isEmpty()) {
-                val savedArtists = database.allSavedArtists().first()
-                    .filter { it.isYouTubeArtist }
-                    .shuffled().take(3)
-                artistRecommendations = savedArtists.mapNotNull { savedArtist ->
-                    buildArtistRecommendation(savedArtist.toArtist(), hideVideo)
-                }
+            val savedArtists = database.allSavedArtists().first()
+                .filter { it.isYouTubeArtist }
+                .shuffled()
+                .take(3)
+            val artistRecommendations = savedArtists.mapNotNull { savedArtist ->
+                buildArtistRecommendation(savedArtist.toArtist(), hideVideo)
             }
 
-            val songRows = database.mostPlayedSongs(fromTimeStamp, limit = 10).first()
-            val songMetadataMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(songRows.map { it.id }, timeoutMs = 5000L)
-            val songRecommendations = songRows.mapNotNull { row -> songMetadataMap[row.id]?.toSong() }
-                .filter { it.album != null }
-                .shuffled().take(2)
-                .mapNotNull { song ->
-                    val endpoint = runCatching {
-                        YouTube.next(WatchEndpoint(videoId = song.id)).getOrNull()?.relatedEndpoint
-                    }.getOrNull() ?: return@mapNotNull null
-                    val page = runCatching {
-                        YouTube.related(endpoint).getOrNull()
-                    }.getOrNull() ?: return@mapNotNull null
-                    SimilarRecommendation(
-                        title = song,
-                        items = page.artists.shuffled().take(12)
-                            .filterVideo(hideVideo)
-                            .shuffled()
-                            .ifEmpty { return@mapNotNull null }
-                    )
-                }
-
-            _similarRecommendations.value = (artistRecommendations + songRecommendations).shuffled()
+            _similarRecommendations.value = artistRecommendations
             HomeTiming.log("loadSimilarRecommendations end")
         } catch (e: CancellationException) {
             throw e
@@ -479,12 +415,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun songLoad() {
-        val songId = database.getLastHistorySongId() ?: return
-        val nextResult = com.ruben.spotitube.innertube.YouTube.next(com.ruben.spotitube.innertube.models.WatchEndpoint(videoId = songId)).getOrNull()
-        val songs = nextResult?.items?.filterIsInstance<com.ruben.spotitube.innertube.models.SongItem>()?.map { it.toSong() }?.take(20) ?: emptyList()
-        _quickPicks.value = songs.ifEmpty { null }
-    }
+
 
     private val _isLoadingMore = MutableStateFlow(false)
     fun loadMoreYouTubeItems(continuation: String?) {
@@ -541,17 +472,7 @@ class HomeViewModel @Inject constructor(
                 }
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            database.firstEvent().collect { firstEvent ->
-                if (firstEvent != null) {
-                    val firstEventMs = firstEvent.playedAt
-                    val daysElapsed = ((System.currentTimeMillis() - firstEventMs) / (1000L * 60 * 60 * 24)).toInt()
-                    _forgottenFavoritesDaysRemaining.value = (30 - daysElapsed).coerceAtLeast(0)
-                } else {
-                    _forgottenFavoritesDaysRemaining.value = 30
-                }
-            }
-        }
+
 
         viewModelScope.launch(Dispatchers.IO) {
             kotlinx.coroutines.delay(3000.milliseconds)

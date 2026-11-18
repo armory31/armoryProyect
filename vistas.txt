@@ -1,0 +1,55 @@
+﻿C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\component\Items.kt:598: viewCountText: String? = null,
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\component\Items.kt:634: viewCountText
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\component\Items.kt:1207: viewCountText: String? = null,
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\component\Items.kt:1249: viewCountText
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\LocalPlaylistScreen.kt:172: val viewCounts by viewModel.viewCounts.collectAsStateWithLifecycle()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\LocalPlaylistScreen.kt:965: viewCountText =
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\LocalPlaylistScreen.kt:966: viewCounts[song.id]?.let { count -> formatCompactCount(count.toLong()) },
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\LocalPlaylistScreen.kt:1094: viewCountText =
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\LocalPlaylistScreen.kt:1095: viewCounts[songWrapper.item.id]?.let { count -> formatCompactCount(count.toLong()) },
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\OnlinePlaylistScreen.kt:147: val viewCounts by viewModel.viewCounts.collectAsStateWithLifecycle()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\OnlinePlaylistScreen.kt:610: viewCountText =
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\screens\playlist\OnlinePlaylistScreen.kt:611: viewCounts[song.item.second.id]?.let { count ->
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\ui\utils\ShowMediaInfo.kt:230: info?.viewCount?.toInt()?.let { numberFormatter(it) } ?: ""
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:109: private val _viewCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:110: val viewCounts = _viewCounts.asStateFlow()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:112: private val viewCountsMutex = Mutex()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:113: private val viewCountsInFlight = mutableSetOf<String>()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:114: private val viewCountsSemaphore = Semaphore(permits = 4)
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:141: prefetchViewCounts(
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:162: private fun prefetchViewCounts(videoIds: List<String>) {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:171: viewCountsMutex.withLock {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:172: if (_viewCounts.value.containsKey(videoId) || viewCountsInFlight.contains(videoId)) {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:175: viewCountsInFlight.add(videoId)
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:183: viewCountsSemaphore.withPermit {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:184: val count = YouTube.getMediaInfo(videoId).getOrNull()?.viewCount
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:186: _viewCounts.update { current -> current + (videoId to count) }
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\LocalPlaylistViewModel.kt:190: viewCountsMutex.withLock { viewCountsInFlight.remove(videoId) }
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:69: private val _viewCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:70: val viewCounts = _viewCounts.asStateFlow()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:72: private val viewCountsMutex = Mutex()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:73: private val viewCountsInFlight = mutableSetOf<String>()
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:74: private val viewCountsSemaphore = Semaphore(permits = 4)
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:99: prefetchViewCounts(playlistContinuationPage.songs.map { song -> song.id })
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:182: prefetchViewCounts(playlistPage.songs.map { song -> song.id })
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:196: private fun prefetchViewCounts(videoIds: List<String>) {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:205: viewCountsMutex.withLock {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:206: if (_viewCounts.value.containsKey(videoId) || viewCountsInFlight.contains(videoId)) {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:209: viewCountsInFlight.add(videoId)
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:217: viewCountsSemaphore.withPermit {
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:218: val count = YouTube.getMediaInfo(videoId).getOrNull()?.viewCount
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:220: _viewCounts.update { current -> current + (videoId to count) }
+C:\Users\danie\StudioProjects\armoryProyect\app\src\main\kotlin\com\ruben.spotitube\viewmodels\OnlinePlaylistViewModel.kt:224: viewCountsMutex.withLock { viewCountsInFlight.remove(videoId) }
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\response\PlayerResponse.kt:87: val viewCount: String,
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\MediaInfo.kt:20: val viewCount: Int? = null,
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\ReturnYouTubeDislikeResponse.kt:20: val viewCount: Int? = null,
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:89: @SerialName("viewCount")
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:90: val viewCount: ViewCount? = null,
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:107: data class ViewCount(
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:108: @SerialName("videoViewCountRenderer")
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:109: val videoViewCountRenderer: VideoViewCountRenderer? = null,
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:112: data class VideoViewCountRenderer(
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:113: @SerialName("viewCount")
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:114: val viewCount: ViewCount? = null,
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\YouTubeDataPage.kt:117: data class ViewCount(
+C:\Users\danie\StudioProjects\armoryProyect\innertube\src\main\kotlin\com\ruben.spotitube\innertube\InnerTube.kt:652: viewCount = returnYouTubeDislikeResponse.viewCount,

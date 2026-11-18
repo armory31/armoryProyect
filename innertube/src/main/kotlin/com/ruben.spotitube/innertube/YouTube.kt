@@ -33,6 +33,7 @@ import com.ruben.spotitube.innertube.models.YouTubeLocale
 import com.ruben.spotitube.innertube.models.getContinuation
 import com.ruben.spotitube.innertube.models.getItems
 import com.ruben.spotitube.innertube.models.oddElements
+import com.ruben.spotitube.innertube.utils.parseUploadDate
 import com.ruben.spotitube.innertube.utils.runCatchingCancellable
 import com.ruben.spotitube.innertube.models.response.AccountMenuResponse
 import com.ruben.spotitube.innertube.models.response.BrowseResponse
@@ -440,50 +441,42 @@ object YouTube {
     }
 
     suspend fun artistItems(endpoint: BrowseEndpoint): Result<ArtistItemsPage> = runCatching {
-        println("ARMORY_DEBUG: YouTube.artistItems solicitando: browseId=${endpoint.browseId}, params=${endpoint.params}")
-        try {
-            val response = innerTube.browse(WEB_REMIX, endpoint.browseId, endpoint.params).body<BrowseResponse>()
-            val gridRenderer = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
+        val response = innerTube.browse(WEB_REMIX, endpoint.browseId, endpoint.params).body<BrowseResponse>()
+        val gridRenderer = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
+            ?.tabRenderer?.content?.sectionListRenderer?.contents?.firstOrNull()
+            ?.gridRenderer
+        if (gridRenderer != null) {
+            ArtistItemsPage(
+                title = gridRenderer.header?.gridHeaderRenderer?.title?.runs?.firstOrNull()?.text.orEmpty(),
+                items = gridRenderer.items.mapNotNull {
+                    it.musicTwoRowItemRenderer?.let { renderer ->
+                        ArtistItemsPage.fromMusicTwoRowItemRenderer(renderer)
+                    }
+                },
+                continuation = gridRenderer.continuations?.getContinuation(),
+            )
+        } else {
+            val musicPlaylistShelfRenderer = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
                 ?.tabRenderer?.content?.sectionListRenderer?.contents?.firstOrNull()
-                ?.gridRenderer
-            val resultPage = if (gridRenderer != null) {
-                ArtistItemsPage(
-                    title = gridRenderer.header?.gridHeaderRenderer?.title?.runs?.firstOrNull()?.text.orEmpty(),
-                    items = gridRenderer.items.mapNotNull {
-                        it.musicTwoRowItemRenderer?.let { renderer ->
-                            ArtistItemsPage.fromMusicTwoRowItemRenderer(renderer)
-                        }
-                    },
-                    continuation = gridRenderer.continuations?.getContinuation(),
-                )
-            } else {
-                val musicPlaylistShelfRenderer = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
-                    ?.tabRenderer?.content?.sectionListRenderer?.contents?.firstOrNull()
-                    ?.musicPlaylistShelfRenderer
-                val musicShelfRenderer = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
-                    ?.tabRenderer?.content?.sectionListRenderer?.contents?.firstOrNull()
-                    ?.musicShelfRenderer
-                val items = (musicPlaylistShelfRenderer?.contents?.getItems() ?: musicShelfRenderer?.contents?.getItems())
-                    ?.mapNotNull { ArtistItemsPage.fromMusicResponsiveListItemRenderer(it) }
-                    .orEmpty()
-                val pageTitle = response.header?.musicHeaderRenderer?.title?.runs?.firstOrNull()?.text
-                    ?: response.header?.musicDetailHeaderRenderer?.title?.runs?.firstOrNull()?.text
-                    ?: musicShelfRenderer?.title?.runs?.firstOrNull()?.text
-                    .orEmpty()
-                val pageContinuation = musicPlaylistShelfRenderer?.contents?.getContinuation()
-                    ?: musicShelfRenderer?.contents?.getContinuation()
+                ?.musicPlaylistShelfRenderer
+            val musicShelfRenderer = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()
+                ?.tabRenderer?.content?.sectionListRenderer?.contents?.firstOrNull()
+                ?.musicShelfRenderer
+            val items = (musicPlaylistShelfRenderer?.contents?.getItems() ?: musicShelfRenderer?.contents?.getItems())
+                ?.mapNotNull { ArtistItemsPage.fromMusicResponsiveListItemRenderer(it) }
+                .orEmpty()
+            val pageTitle = response.header?.musicHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                ?: response.header?.musicDetailHeaderRenderer?.title?.runs?.firstOrNull()?.text
+                ?: musicShelfRenderer?.title?.runs?.firstOrNull()?.text
+                .orEmpty()
+            val pageContinuation = musicPlaylistShelfRenderer?.contents?.getContinuation()
+                ?: musicShelfRenderer?.contents?.getContinuation()
 
-                ArtistItemsPage(
-                    title = pageTitle,
-                    items = items,
-                    continuation = pageContinuation,
-                )
-            }
-            println("ARMORY_DEBUG: YouTube.artistItems respuesta parseada: title='${resultPage.title}', itemsCount=${resultPage.items.size}")
-            resultPage
-        } catch (e: Exception) {
-            println("ARMORY_DEBUG: YouTube.artistItems error durante la solicitud/parsing: ${e.stackTraceToString()}")
-            throw e
+            ArtistItemsPage(
+                title = pageTitle,
+                items = items,
+                continuation = pageContinuation,
+            )
         }
     }
 
@@ -1388,6 +1381,18 @@ object YouTube {
             ?.header?.activeAccountHeaderRenderer
             ?.toAccountInfo()
         accountInfo ?: throw IllegalStateException("Failed to get account info - user may not be logged in")
+    }
+
+    suspend fun releaseDateOfSong(videoId: String, expectedYear: Int?): String? {
+        val text = parseUploadDate(innerTube.getMediaInfo(videoId).getOrNull()?.uploadDate) ?: return null
+        if (expectedYear != null && text.takeLast(4).toIntOrNull() != expectedYear) return null
+        return text
+    }
+
+    suspend fun albumReleaseDate(browseId: String): Result<String?> = runCatchingCancellable {
+        val page = album(browseId).getOrThrow()
+        val firstId = page.songs.firstOrNull()?.id ?: return@runCatchingCancellable null
+        releaseDateOfSong(firstId, page.album.year)
     }
 
     suspend fun getMediaInfo(videoId: String): Result<MediaInfo> = runCatching {

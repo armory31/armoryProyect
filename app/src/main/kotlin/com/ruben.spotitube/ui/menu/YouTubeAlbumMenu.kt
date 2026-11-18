@@ -9,7 +9,6 @@
 package com.ruben.spotitube.ui.menu
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -38,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,11 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSeparatorsKey
 import com.ruben.spotitube.constants.ListItemHeight

@@ -90,9 +90,9 @@ import coil3.request.allowHardware
 import coil3.size.Size
 import coil3.toBitmap
 import com.ruben.spotitube.GoldDivider
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 
 import com.ruben.spotitube.GlobalFont
 import com.ruben.spotitube.R
@@ -1040,6 +1040,7 @@ fun ArtistScreen(
                                         ) { item ->
                                             YouTubeGridItem(
                                                 item = item,
+                                                showReleaseMonth = true,
                                                 isActive = when (item) {
                                                     is SongItem -> mediaMetadata?.id == item.id
                                                     is AlbumItem -> mediaMetadata?.album?.id == item.id

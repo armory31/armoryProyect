@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.ui.utils.isScrollingUp
 
 @Composable

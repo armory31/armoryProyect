@@ -116,7 +116,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.LyricsAnimationStyle
 import com.ruben.spotitube.constants.LyricsAnimationStyleKey

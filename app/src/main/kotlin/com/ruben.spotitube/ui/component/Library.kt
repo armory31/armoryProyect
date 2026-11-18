@@ -36,10 +36,23 @@ fun LibraryArtistListItem(
     menuState: MenuState,
     coroutineScope: CoroutineScope,
     artist: Artist,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showDragHandle: Boolean = false,
+    dragHandleModifier: Modifier = Modifier,
 ) = ArtistListItem(
     artist = artist,
     trailingContent = {
+        if (showDragHandle) {
+            androidx.compose.material3.IconButton(
+                onClick = { },
+                modifier = dragHandleModifier,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.drag_handle),
+                    contentDescription = null,
+                )
+            }
+        }
         androidx.compose.material3.IconButton(
             onClick = {
                 menuState.show {
@@ -99,12 +112,25 @@ fun LibraryAlbumListItem(
     menuState: MenuState,
     album: Album,
     isActive: Boolean = false,
-    isPlaying: Boolean = false
+    isPlaying: Boolean = false,
+    showDragHandle: Boolean = false,
+    dragHandleModifier: Modifier = Modifier,
 ) = AlbumListItem(
     album = album,
     isActive = isActive,
     isPlaying = isPlaying,
     trailingContent = {
+        if (showDragHandle) {
+            androidx.compose.material3.IconButton(
+                onClick = { },
+                modifier = dragHandleModifier,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.drag_handle),
+                    contentDescription = null,
+                )
+            }
+        }
         androidx.compose.material3.IconButton(
             onClick = {
                 menuState.show {

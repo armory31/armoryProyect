@@ -48,8 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ListItemHeight
 import com.ruben.spotitube.extensions.togglePlayPause
@@ -95,7 +95,6 @@ fun YouTubeBrowseScreen(
     val displayTitle = browseResult?.title.takeUnless { it.isNullOrBlank() } ?: passedTitle
 
     val coroutineScope = rememberCoroutineScope()
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {

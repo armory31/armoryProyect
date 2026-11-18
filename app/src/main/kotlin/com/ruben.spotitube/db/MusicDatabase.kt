@@ -30,10 +30,6 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import com.ruben.spotitube.db.entities.DownloadOriginEntity
 import com.ruben.spotitube.db.entities.DownloadedSongEntity
 import com.ruben.spotitube.db.entities.FormatEntity
-import com.ruben.spotitube.db.entities.HistoryAlbumEntity
-import com.ruben.spotitube.db.entities.HistoryArtistEntity
-import com.ruben.spotitube.db.entities.HistoryPlaylistEntity
-import com.ruben.spotitube.db.entities.HistorySongEntity
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.db.entities.PlayCountEntity
 import com.ruben.spotitube.db.entities.PlaylistEntity
@@ -56,7 +52,7 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "MusicDatabase"
-private const val CURRENT_VERSION = 34
+private const val CURRENT_VERSION = 35
 
 class MusicDatabase(
     internal var delegate: InternalDatabase,
@@ -118,7 +114,7 @@ class MusicDatabase(
 
         private fun build(context: Context): InternalDatabase {
             val universalMigrations =
-                (2..33)
+                (2..34)
                     .map { from -> UniversalMigration(context, from, CURRENT_VERSION) }
                     .toTypedArray()
 
@@ -194,10 +190,6 @@ class MusicDatabase(
         SavedArtistEntity::class,
         SavedAlbumEntity::class,
         SavedPlaylistEntity::class,
-        HistorySongEntity::class,
-        HistoryArtistEntity::class,
-        HistoryAlbumEntity::class,
-        HistoryPlaylistEntity::class,
         DownloadedSongEntity::class,
         DownloadOriginEntity::class,
     ],
@@ -479,6 +471,10 @@ private object SchemaTools {
         db.execSQL("PRAGMA foreign_keys=OFF")
         dropNonTableObjects(db)
         db.execSQL("DROP TABLE IF EXISTS related_song_map")
+        db.execSQL("DROP TABLE IF EXISTS historialsong")
+        db.execSQL("DROP TABLE IF EXISTS historialartist")
+        db.execSQL("DROP TABLE IF EXISTS historialalbum")
+        db.execSQL("DROP TABLE IF EXISTS historialplaylist")
 
         expectedTables.forEach { table ->
             ensureTableSchema(db = db, expectedDb = expectedDb, table = table, expectedIndices = expectedIndices)
@@ -821,10 +817,4 @@ class Migration19To20 : AutoMigrationSpec {
 @DeleteColumn.Entries(DeleteColumn(tableName = "song", columnName = "artistName"))
 class Migration20To21 : AutoMigrationSpec
 
-suspend fun MusicDatabase.clearHistoryCompletely() {
-    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-        clearListenHistory()
-        com.ruben.spotitube.utils.HistoryItemMemoryCache.clear()
-    }
-}
 

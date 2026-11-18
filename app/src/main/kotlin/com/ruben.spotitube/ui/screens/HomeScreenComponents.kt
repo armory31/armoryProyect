@@ -15,6 +15,7 @@ import com.ruben.spotitube.ArmoryColors
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -105,6 +106,7 @@ import com.ruben.spotitube.models.SimilarRecommendation
 import com.ruben.spotitube.models.toMediaMetadata
 import com.ruben.spotitube.playback.PlayerConnection
 import com.ruben.spotitube.playback.queues.ListQueue
+import com.ruben.spotitube.models.ContinueListeningEntry
 import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.component.AlbumGridItem
 import com.ruben.spotitube.ui.component.ArtistGridItem
@@ -112,6 +114,7 @@ import com.ruben.spotitube.ui.component.MenuState
 import com.ruben.spotitube.ui.component.NavigationTitle
 import com.ruben.spotitube.ui.component.SongGridItem
 import com.ruben.spotitube.ui.component.SongListItem
+import com.ruben.spotitube.ui.utils.resize
 import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.menu.AlbumMenu
 import com.ruben.spotitube.ui.menu.ArtistMenu
@@ -183,7 +186,7 @@ fun QuickPicksSection(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(song.song.thumbnailUrl)
+                    .data(song.song.thumbnailUrl?.resize(600, 600))
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
@@ -560,6 +563,98 @@ fun KeepListeningSection(
     }
 }
 
+@Composable
+fun ContinueListeningSection(
+    entries: List<ContinueListeningEntry>,
+    playerConnection: PlayerConnection,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val tileSize = 155.dp
+    val spacing = 12.dp
+
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
+        horizontalArrangement = Arrangement.spacedBy(spacing)
+    ) {
+        items(
+            items = entries,
+            key = { "${it.originType}_${it.originId}" }
+        ) { entry ->
+            Box(
+                modifier = Modifier
+                    .width(tileSize)
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(BorderStroke(1.dp, ArmoryColors.SurfaceBorder), RoundedCornerShape(16.dp))
+                    .clickable {
+                        val start = entry.items.indexOfFirst { it.id == entry.currentSongId }.coerceAtLeast(0)
+                        playerConnection.playQueue(
+                            ListQueue(
+                                title = entry.title,
+                                items = entry.items.map { it.toMediaItem() },
+                                startIndex = start,
+                                position = 0L,
+                                originType = entry.originType,
+                                originId = entry.originId,
+                                originTitle = entry.title,
+                                originThumbnailUrl = entry.thumbnailUrl
+                            )
+                        )
+                    }
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(entry.thumbnailUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.7f)
+                                )
+                            )
+                        )
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = entry.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    val n = entry.items.size
+                    Text(
+                        text = pluralStringResource(R.plurals.n_song, n, n),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.75f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
 /**
  * Forgotten Favorites section - horizontal grid of songs
  */
@@ -743,6 +838,7 @@ private fun YouTubeGridItemWrapper(
 ) {
     YouTubeGridItem(
         item = item,
+        showReleaseMonth = true,
         isActive = item.id in listOf(mediaMetadata?.album?.id, mediaMetadata?.id),
         isPlaying = isPlaying,
         coroutineScope = scope,
@@ -918,7 +1014,7 @@ fun SimilarRecommendationsTitle(
             }
         },
         onClick = {
-            navController.navigateSafe("similar_artists/$index")
+            navController.navigateSafe("artist/${recommendation.title.id}")
         },
         modifier = modifier
     )
@@ -948,13 +1044,13 @@ fun LazyListScope.similarRecommendationsContainer(
         ) {
             if (similarRecommendations == null) {
                 NavigationTitle(
-                    title = stringResource(R.string.similar_to),
+                    title = stringResource(R.string.latest_from),
                     modifier = Modifier.padding(top = 24.dp)
                 )
                 HomeLoadingShimmer()
             } else {
                 NavigationTitle(
-                    title = stringResource(R.string.similar_to),
+                    title = stringResource(R.string.latest_from),
                     modifier = Modifier.padding(top = 24.dp)
                 )
 

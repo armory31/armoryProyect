@@ -9,7 +9,9 @@
 package com.ruben.spotitube.ui.screens.playlist
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryArtworkBackdrop
 import com.ruben.spotitube.ArmoryGradients
+import com.ruben.spotitube.MainHeadingColor
 import androidx.compose.material3.ButtonDefaults
 
 import android.annotation.SuppressLint
@@ -29,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,7 +53,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryScrollTopBar
 import com.ruben.spotitube.ArmoryIconButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -60,7 +61,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,15 +70,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -100,18 +97,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
-import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
 import coil3.imageLoader
-import coil3.request.ImageRequest
 import coil3.request.allowHardware
-import coil3.toBitmap
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
-import com.ruben.spotitube.constants.AppBarHeight
 import com.ruben.spotitube.constants.DisableBlurKey
 import com.ruben.spotitube.constants.PlaylistEditLockKey
 import com.ruben.spotitube.constants.PlaylistSongSortDescendingKey
@@ -140,9 +133,7 @@ import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.ui.menu.SelectionSongMenu
 import com.ruben.spotitube.ui.menu.SongMenu
-import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
-import com.ruben.spotitube.ui.utils.formatCompactCount
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
@@ -176,7 +167,7 @@ fun LocalPlaylistScreen(
     val playlist by viewModel.playlist.collectAsStateWithLifecycle()
     val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
     val songs by viewModel.playlistSongs.collectAsStateWithLifecycle()
-    val viewCounts by viewModel.viewCounts.collectAsStateWithLifecycle()
+    val dbSongs by viewModel.playlistSongsDbOrder.collectAsStateWithLifecycle()
     val mutableSongs = remember { mutableStateListOf<PlaylistSongWrapper>() }
     val playlistLength = remember(songs) {
         songs.fastSumBy { it.song.duration }
@@ -206,8 +197,6 @@ fun LocalPlaylistScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // System bars padding
-    val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
-
     var isSearching by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
@@ -248,6 +237,12 @@ fun LocalPlaylistScreen(
         } else {
             mutableSongs
         }
+    }
+    val displayDbIndices = remember(songs, filteredSongs, dbSongs, isSearching) {
+        dbIndicesFor(if (isSearching) filteredSongs else songs, dbSongs)
+    }
+    val selectionDbIndices = remember(filteredSongs, dbSongs) {
+        dbIndicesFor(filteredSongs, dbSongs)
     }
 
     if (isSearching) {
@@ -290,7 +285,7 @@ fun LocalPlaylistScreen(
             EditPlaylistDialog(
                 initialName = playlistData.playlist.name,
                 initialThumbnailUrl = playlistData.playlist.thumbnailUrl,
-                fallbackThumbnails = playlistData.songThumbnails.filterNotNull(),
+                fallbackThumbnails = songs.mapNotNull { it.song.thumbnailUrl }.distinct(),
                 onDismiss = { showEditDialog = false },
                 onSave = { name, thumbnailUrl ->
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
@@ -427,10 +422,9 @@ fun LocalPlaylistScreen(
                 if (viewModel.playlist.value?.playlist?.browseId != null) {
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
                         val playlistSongs = database.getSavedPlaylist(viewModel.playlistId)?.songs ?: emptyList()
-                        val successorIndex = if (from > to) to else to + 1
-                        val successorSetVideoId = playlistSongs.getOrNull(successorIndex)?.setVideoId
+                        val successorSetVideoId = playlistSongs.getOrNull(to + 1)?.setVideoId
 
-                        playlistSongs.getOrNull(from)?.setVideoId?.let { setVideoId ->
+                        playlistSongs.getOrNull(to)?.setVideoId?.let { setVideoId ->
                             YouTube.moveSongPlaylist(
                                 viewModel.playlist.value?.playlist?.browseId!!,
                                 setVideoId,
@@ -444,52 +438,7 @@ fun LocalPlaylistScreen(
         }
     }
 
-    val showTopBarTitle by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0
-        }
-    }
-
-    // Gradient colors state for playlist cover
-    var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = MaterialTheme.colorScheme.background.toArgb() // Inactivado surface para forzar pure black
-    val surfaceColor = MaterialTheme.colorScheme.background // Inactivado surface para forzar pure black
-
-    // Extract gradient colors from playlist cover
-    LaunchedEffect(playlist?.thumbnails) {
-        val thumbnailUrl = playlist?.thumbnails?.firstOrNull()
-        if (thumbnailUrl != null) {
-            val request = ImageRequest.Builder(context)
-                .data(thumbnailUrl)
-                .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
-                .allowHardware(false)
-                .build()
-
-            val result = runCatching {
-                context.imageLoader.execute(request)
-            }.getOrNull()
-
-            if (result != null) {
-                val bitmap = result.image?.toBitmap()
-                if (bitmap != null) {
-                    val palette = withContext(Dispatchers.Default) {
-                        Palette.from(bitmap)
-                            .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                            .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                            .generate()
-                    }
-
-                    val extractedColors = PlayerColorExtractor.extractGradientColors(
-                        palette = palette,
-                        fallbackColor = fallbackColor
-                    )
-                    gradientColors = extractedColors
-                }
-            }
-        } else {
-            gradientColors = emptyList()
-        }
-    }
+    val surfaceColor = MaterialTheme.colorScheme.background
 
     // Calculate gradient opacity based on scroll position
     val gradientAlpha by remember {
@@ -503,131 +452,23 @@ fun LocalPlaylistScreen(
         }
     }
 
-    val transparentAppBar by remember {
-        derivedStateOf {
-            !disableBlur && !selection && !showTopBarTitle
-        }
-    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(surfaceColor),
     ) {
-        // Mesh gradient background layer
-        if (!disableBlur && gradientColors.isNotEmpty() && gradientAlpha > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxSize(0.55f)
-                    .align(Alignment.TopCenter)
-                    .zIndex(-1f)
-                    .drawBehind {
-                        val width = size.width
-                        val height = size.height
-
-                        if (gradientColors.size >= 3) {
-                            val c0 = gradientColors[0]
-                            val c1 = gradientColors[1]
-                            val c2 = gradientColors[2]
-                            val c3 = gradientColors.getOrElse(3) { c0 }
-                            val c4 = gradientColors.getOrElse(4) { c1 }
-                            // Primary color blob - top center
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c0.copy(alpha = gradientAlpha * 0.75f),
-                                        c0.copy(alpha = gradientAlpha * 0.4f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.5f, height * 0.15f),
-                                    radius = width * 0.8f
-                                )
-                            )
-
-                            // Secondary color blob - left side
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c1.copy(alpha = gradientAlpha * 0.55f),
-                                        c1.copy(alpha = gradientAlpha * 0.3f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.1f, height * 0.4f),
-                                    radius = width * 0.6f
-                                )
-                            )
-
-                            // Third color blob - right side
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c2.copy(alpha = gradientAlpha * 0.5f),
-                                        c2.copy(alpha = gradientAlpha * 0.25f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.9f, height * 0.35f),
-                                    radius = width * 0.55f
-                                )
-                            )
-
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c3.copy(alpha = gradientAlpha * 0.35f),
-                                        c3.copy(alpha = gradientAlpha * 0.18f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.25f, height * 0.65f),
-                                    radius = width * 0.75f
-                                )
-                            )
-
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c4.copy(alpha = gradientAlpha * 0.3f),
-                                        c4.copy(alpha = gradientAlpha * 0.15f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.55f, height * 0.85f),
-                                    radius = width * 0.9f
-                                )
-                            )
-                        } else if (gradientColors.isNotEmpty()) {
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        gradientColors[0].copy(alpha = gradientAlpha * 0.7f),
-                                        gradientColors[0].copy(alpha = gradientAlpha * 0.35f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.5f, height * 0.25f),
-                                    radius = width * 0.85f
-                                )
-                            )
-                        }
-
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Transparent,
-                                    surfaceColor.copy(alpha = gradientAlpha * 0.22f),
-                                    surfaceColor.copy(alpha = gradientAlpha * 0.55f),
-                                    surfaceColor
-                                ),
-                                startY = height * 0.4f,
-                                endY = height
-                            )
-                        )
-                    }
-            )
-        }
+        ArmoryArtworkBackdrop(
+            imageUrls = playlist?.thumbnails?.take(4) ?: emptyList(),
+            alpha = gradientAlpha,
+            enabled = !disableBlur,
+            backgroundColor = surfaceColor
+        )
 
         LazyColumn(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         ) {
             playlist?.let { playlist ->
                 if (playlist.songCount == 0 && playlist.playlist.remoteSongCount == 0) {
@@ -642,9 +483,7 @@ fun LocalPlaylistScreen(
                         // Hero Header
                         item(key = "header") {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = systemBarsTopPadding + AppBarHeight),
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 // Playlist Thumbnail(s) - Large centered with shadow
@@ -660,8 +499,7 @@ fun LocalPlaylistScreen(
                                                 .shadow(
                                                     elevation = 24.dp,
                                                     shape = RoundedCornerShape(16.dp),
-                                                    spotColor = gradientColors.getOrNull(0)?.copy(alpha = 0.5f)
-                                                        ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                                 ),
                                             shape = RoundedCornerShape(16.dp)
                                         ) {
@@ -680,8 +518,7 @@ fun LocalPlaylistScreen(
                                                 .shadow(
                                                     elevation = 24.dp,
                                                     shape = RoundedCornerShape(16.dp),
-                                                    spotColor = gradientColors.getOrNull(0)?.copy(alpha = 0.5f)
-                                                        ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                                 ),
                                             shape = RoundedCornerShape(16.dp)
                                         ) {
@@ -729,20 +566,6 @@ fun LocalPlaylistScreen(
                                         }
                                     }
                                 }
-
-                                // Playlist Name
-                                Text(
-                                    text = playlist.playlist.name,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = ArmoryColors.Gold2,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.padding(horizontal = 32.dp)
-                                )
-
-                                Spacer(modifier = Modifier.height(16.dp))
 
                                 // Metadata Row - Song Count, Duration
                                 Row(
@@ -835,6 +658,10 @@ fun LocalPlaylistScreen(
                                                 ListQueue(
                                                     title = playlist.playlist.name,
                                                     items = songs.map { it.toMediaItem() },
+                                                    originType = "playlist",
+                                                    originId = viewModel.playlistId,
+                                                    originTitle = playlist?.playlist?.name,
+                                                    originThumbnailUrl = playlist?.thumbnails?.firstOrNull(),
                                                 ),
                                             )
                                         },
@@ -864,6 +691,10 @@ fun LocalPlaylistScreen(
                                                 ListQueue(
                                                     title = playlist.playlist.name,
                                                     items = songs.shuffled().map { it.toMediaItem() },
+                                                    originType = "playlist",
+                                                    originId = viewModel.playlistId,
+                                                    originTitle = playlist?.playlist?.name,
+                                                    originThumbnailUrl = playlist?.thumbnails?.firstOrNull(),
                                                 ),
                                             )
                                         },
@@ -1097,9 +928,10 @@ fun LocalPlaylistScreen(
                             compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                         }
                     ) {
+                        val dbIndex = displayDbIndices.getOrElse(index) { index }
                         fun deleteFromPlaylist() {
                             coroutineScope.launch(Dispatchers.IO) {
-                                database.removeSongFromPlaylist(viewModel.playlistId, index)
+                                database.removeSongFromPlaylist(viewModel.playlistId, dbIndex)
                             }
                         }
 
@@ -1128,8 +960,6 @@ fun LocalPlaylistScreen(
                         val content: @Composable () -> Unit = {
                             SongListItem(
                                 song = song,
-                                viewCountText =
-                                    viewCounts[song.id]?.let { count -> formatCompactCount(count.toLong()) },
                                 isActive = song.id == mediaMetadata?.id,
                                 isPlaying = isPlaying,
                                 trailingContent = {
@@ -1138,7 +968,7 @@ fun LocalPlaylistScreen(
                                             menuState.show {
                                                 SongMenu(
                                                     originalSong = song,
-                                                    playlistSong = PlaylistSong(viewModel.playlistId, song, index),
+                                                    playlistSong = PlaylistSong(viewModel.playlistId, song, dbIndex),
                                                     playlistBrowseId = playlist?.playlist?.browseId,
                                                     navController = navController,
                                                     onDismiss = menuState::dismiss,
@@ -1179,7 +1009,11 @@ fun LocalPlaylistScreen(
                                                     ListQueue(
                                                         title = playlist!!.playlist.name,
                                                         items = songs.map { it.toMediaItem() },
-                                                        startIndex = index,
+                                                        startIndex = if (isSearching) songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0) else index,
+                                                        originType = "playlist",
+                                                        originId = viewModel.playlistId,
+                                                        originTitle = playlist?.playlist?.name,
+                                                        originThumbnailUrl = playlist?.thumbnails?.firstOrNull(),
                                                     ),
                                                 )
                                             }
@@ -1221,9 +1055,10 @@ fun LocalPlaylistScreen(
                             compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                         }
                     ) {
+                        val dbIndex = selectionDbIndices.getOrElse(index) { index }
                         fun deleteFromPlaylist() {
                             coroutineScope.launch(Dispatchers.IO) {
-                                database.removeSongFromPlaylist(viewModel.playlistId, index)
+                                database.removeSongFromPlaylist(viewModel.playlistId, dbIndex)
                             }
                         }
 
@@ -1252,8 +1087,6 @@ fun LocalPlaylistScreen(
                         val content: @Composable () -> Unit = {
                             SongListItem(
                                 song = songWrapper.item,
-                                viewCountText =
-                                    viewCounts[songWrapper.item.id]?.let { count -> formatCompactCount(count.toLong()) },
                                 isActive = songWrapper.item.id == mediaMetadata?.id,
                                 isPlaying = isPlaying,
                                 trailingContent = {
@@ -1303,7 +1136,11 @@ fun LocalPlaylistScreen(
                                                         ListQueue(
                                                             title = playlist!!.playlist.name,
                                                             items = songs.map { it.toMediaItem() },
-                                                            startIndex = index,
+                                                            startIndex = songs.indexOfFirst { it.id == songWrapper.item.id }.coerceAtLeast(0),
+                                                            originType = "playlist",
+                                                            originId = viewModel.playlistId,
+                                                            originTitle = playlist?.playlist?.name,
+                                                            originThumbnailUrl = playlist?.thumbnails?.firstOrNull(),
                                                         ),
                                                     )
                                                 }
@@ -1359,7 +1196,7 @@ fun LocalPlaylistScreen(
             headerItems = headerItems
         )
 
-        ArmoryTopBar(
+        ArmoryScrollTopBar(
             title = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
@@ -1391,14 +1228,18 @@ fun LocalPlaylistScreen(
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
                     )
-                } else if (showTopBarTitle) {
+                } else {
                     Text(
                         text = playlist?.playlist?.name.orEmpty(),
                         style = MaterialTheme.typography.titleLarge,
-                        color = ArmoryColors.Gold2
+                        color = MainHeadingColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             },
+            listState = lazyListState,
+            forceOpaque = disableBlur || selection,
             onBack = {
                 if (isSearching) {
                     isSearching = false
@@ -1409,9 +1250,8 @@ fun LocalPlaylistScreen(
                     navController.navigateUp()
                 }
             },
-            overImage = transparentAppBar,
-            opaque = !transparentAppBar,
-            actions = {
+            centerTitle = true,
+            actions = { transparentAppBar ->
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
                     ArmoryIconButton(
@@ -1438,7 +1278,7 @@ fun LocalPlaylistScreen(
                                     songSelection = wrappedSongs.filter { it.isSelected }
                                         .map { it.item },
                                     songPosition = wrappedSongs.mapIndexedNotNull { idx, item ->
-                                        if (item.isSelected) PlaylistSong(viewModel.playlistId, item.item, idx) else null
+                                        if (item.isSelected) PlaylistSong(viewModel.playlistId, item.item, selectionDbIndices.getOrElse(idx) { idx }) else null
                                     },
                                     onDismiss = menuState::dismiss,
                                     clearAction = {
@@ -1467,6 +1307,17 @@ fun LocalPlaylistScreen(
                 .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime))
                 .align(Alignment.BottomCenter),
         )
+    }
+}
+
+private fun dbIndicesFor(list: List<Song>, db: List<Song>): List<Int> {
+    val dbPositions = mutableMapOf<String, MutableList<Int>>()
+    db.forEachIndexed { i, s -> dbPositions.getOrPut(s.id) { mutableListOf() }.add(i) }
+    val used = mutableMapOf<String, Int>()
+    return list.mapIndexed { i, s ->
+        val n = used.getOrDefault(s.id, 0)
+        used[s.id] = n + 1
+        dbPositions[s.id]?.getOrNull(n) ?: i
     }
 }
 

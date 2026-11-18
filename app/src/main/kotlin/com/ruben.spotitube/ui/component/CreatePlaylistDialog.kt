@@ -47,8 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.MusicDatabase
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
@@ -305,7 +305,7 @@ suspend fun importCsvPlaylistAndFetchMetadata(
 
             if (songId.isNotBlank()) {
                 if (database.checkInPlaylist(playlistId, songId) == 0) {
-                    val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(listOf(songId), timeoutMs = 5000L)
+                    val resolvedMap = com.ruben.spotitube.utils.SongMetadataLoader.resolve(listOf(songId), timeoutMs = 5000L)
                     val item = resolvedMap[songId]?.let { resolvedSong ->
                         com.ruben.spotitube.db.entities.PlaylistSongItem(
                             id = resolvedSong.id,

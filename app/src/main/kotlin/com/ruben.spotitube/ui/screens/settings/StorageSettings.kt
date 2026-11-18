@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,8 +29,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.BorderStroke
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.db.clearHistoryCompletely
+import com.ruben.spotitube.ArmoryColors
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,8 +50,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.imageLoader
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.MaxCanvasCacheSizeKey
 import com.ruben.spotitube.constants.MaxImageCacheSizeKey
@@ -200,7 +203,7 @@ fun StorageSettings(
     }
 
     androidx.compose.material3.Scaffold(
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        containerColor = ArmoryColors.AbsoluteBlack,
         topBar = {
             ArmoryTopBar(
                 title = stringResource(R.string.storage),
@@ -213,18 +216,32 @@ fun StorageSettings(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(ArmoryColors.AbsoluteBlack)
                 .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
                 .verticalScroll(rememberScrollState())
-                .padding(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            SwitchPreference(
-                title = { Text(stringResource(R.string.smart_trimmer)) },
-                description = stringResource(R.string.smart_trimmer_description),
-                checked = smartTrimmer && isSmartTrimmerAvailable,
-                onCheckedChange = onSmartTrimmerChange,
-                isEnabled = isSmartTrimmerAvailable,
+            StorageOverviewCard(
+                usedBytes = imageCacheSize + playerCacheSize + downloadCacheSize,
             )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                shape = MaterialTheme.shapes.large,
+                border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
+                colors = CardDefaults.cardColors(containerColor = ArmoryColors.SurfaceBlack),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            ) {
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.smart_trimmer)) },
+                    description = stringResource(R.string.smart_trimmer_description),
+                    checked = smartTrimmer && isSmartTrimmerAvailable,
+                    onCheckedChange = onSmartTrimmerChange,
+                    isEnabled = isSmartTrimmerAvailable,
+                )
+            }
 
         // --- Section: Downloads ---
         CacheCard(
@@ -406,36 +423,45 @@ fun StorageSettings(
             )
         }
 
-        var clearHistoryDialog by remember { mutableStateOf(false) }
 
-        CacheCard(
-            icon = R.drawable.history,
-            title = stringResource(R.string.clear_playback_history),
-            description = stringResource(R.string.history),
-            progress = null,
-            actions = {
-                PreferenceEntry(
-                    title = { Text(stringResource(R.string.clear)) },
-                    onClick = { clearHistoryDialog = true },
-                )
-            }
+
+    }
+}
+}
+
+@Composable
+private fun StorageOverviewCard(usedBytes: Long) {
+Card(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 8.dp),
+    shape = RoundedCornerShape(20.dp),
+    border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
+    colors = CardDefaults.cardColors(containerColor = ArmoryColors.SurfaceBlack),
+    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.storage),
+            contentDescription = null,
+            tint = ArmoryColors.Gold1,
+            modifier = Modifier.padding(end = 14.dp),
         )
-
-        if (clearHistoryDialog) {
-            val musicService = LocalPlayerConnection.current?.service
-            ActionPromptDialog(
-                title = stringResource(R.string.clear_playback_history),
-                onDismiss = { clearHistoryDialog = false },
-                onConfirm = {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        musicService?.database?.clearHistoryCompletely()
-                    }
-                    clearHistoryDialog = false
-                },
-                onCancel = { clearHistoryDialog = false },
-                content = {
-                    Text(text = stringResource(R.string.clear_playback_history_dialog))
-                }
+        Column {
+            Text(
+                text = stringResource(R.string.total_storage_usage),
+                style = MaterialTheme.typography.labelMedium,
+                color = ArmoryColors.TextMuted,
+            )
+            Text(
+                text = formatFileSize(usedBytes),
+                style = MaterialTheme.typography.titleLarge,
+                color = ArmoryColors.Gold1,
             )
         }
     }
@@ -454,53 +480,63 @@ fun CacheCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, ArmoryColors.SurfaceBorder),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = ArmoryColors.SurfaceBlack,
         ),
-        shape = MaterialTheme.shapes.large
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(
-                    modifier = Modifier.padding(end = 12.dp),
-                    shape = MaterialTheme.shapes.small,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    modifier = Modifier.padding(end = 14.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, ArmoryColors.Gold2.copy(alpha = 0.32f)),
+                    colors = CardDefaults.cardColors(containerColor = ArmoryColors.Gold2.copy(alpha = 0.1f)),
                 ) {
                     androidx.compose.foundation.layout.Box(modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
                         Icon(
                             painter = painterResource(icon),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = ArmoryColors.Gold1,
                         )
                     }
                 }
-                Column {
-                    Text(title, style = MaterialTheme.typography.titleMedium)
-                    Text(description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = ArmoryColors.Gold1,
+                    )
+                    Text(
+                        description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ArmoryColors.TextMuted,
+                    )
                 }
             }
             if (progress != null) {
-                Spacer(Modifier.padding(top = 8.dp))
+                Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 8.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            .weight(1f)
+                            .padding(end = 8.dp),
+                        color = ArmoryColors.Gold2,
+                        trackColor = ArmoryColors.SurfaceElevated,
                         strokeCap = StrokeCap.Round,
                     )
                     // percent label
                     Text(
                         text = "${(progress * 100).toInt()}%",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = ArmoryColors.Gold1,
                     )
                 }
             }
-            Spacer(Modifier.padding(4.dp))
+            Spacer(Modifier.height(4.dp))
             actions()
         }
     }

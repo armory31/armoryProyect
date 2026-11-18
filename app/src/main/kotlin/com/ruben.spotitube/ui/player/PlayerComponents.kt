@@ -5,13 +5,12 @@
  */
 
 package com.ruben.spotitube.ui.player
-import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.ui.LocalDatabase
 import com.ruben.spotitube.PlayerSliderColors
 import com.ruben.spotitube.ArmoryGradients
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
@@ -58,17 +57,15 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import com.ruben.spotitube.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -78,15 +75,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.C
@@ -117,6 +109,8 @@ import com.ruben.spotitube.ui.utils.highRes
 import com.ruben.spotitube.utils.makeTimeString
 import me.saket.squiggles.SquigglySlider
 import androidx.core.net.toUri
+import com.ruben.spotitube.innertube.YouTube
+import com.ruben.spotitube.innertube.models.ArtistItem
 
 @Composable
 fun PlayerTitleSection(
@@ -165,20 +159,6 @@ fun PlayerTitleSection(
 
     val coroutineScope = rememberCoroutineScope()
     val database = LocalDatabase.current
-    val annotatedString = buildAnnotatedString {
-        mediaMetadata.artists.forEachIndexed { index, artist ->
-            val id = artist.id.orEmpty()
-            val name = artist.name
-            val payload = "$id||$name"
-            val tag = "artist_$index"
-            pushStringAnnotation(tag = tag, annotation = payload)
-            withStyle(SpanStyle(color = textBackgroundColor, fontSize = 16.sp)) {
-                append(name)
-            }
-            pop()
-            if (index != mediaMetadata.artists.lastIndex) append(", ")
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -186,62 +166,63 @@ fun PlayerTitleSection(
             .basicMarquee()
             .padding(end = 12.dp)
     ) {
-        var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-        var clickOffset by remember { mutableStateOf<Offset?>(null) }
-        Text(
-            text = annotatedString,
-            style = MaterialTheme.typography.titleMedium.copy(color = textBackgroundColor),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            onTextLayout = { layoutResult = it },
-            modifier = Modifier
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val tapPosition = event.changes.firstOrNull()?.position
-                            if (tapPosition != null) {
-                                clickOffset = tapPosition
-                            }
-                        }
-                    }
-                }
-                .combinedClickable(
-                    enabled = true,
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                        val tapPosition = clickOffset
-                        val layout = layoutResult
-                        if (tapPosition != null && layout != null) {
-                            val offset = layout.getOffsetForPosition(tapPosition)
-                            annotatedString.getStringAnnotations(offset, offset)
-                                .firstOrNull()
-                                ?.let { ann ->
-                                    val parts = ann.item.split("||", limit = 2)
-                                    val rawId = parts.getOrNull(0).orEmpty()
-                                    val artistName = parts.getOrElse(1) { "" }
-                                    coroutineScope.launch(Dispatchers.IO) {
-                                        val resolvedId = rawId.takeIf { it.startsWith("UC") || it.startsWith("FE") }
-                                            ?: database.artistByName(artistName)?.let { it.channelId ?: it.id }
-                                            ?: rawId
-                                        if (resolvedId.isNotBlank()) {
-                                            withContext(Dispatchers.Main) {
-                                                navController.navigate("artist/$resolvedId")
-                                                state.collapseSoft()
-                                            }
+        Row {
+            mediaMetadata.artists.forEachIndexed { index, artist ->
+                Text(
+                    text = artist.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = textBackgroundColor,
+                        fontSize = 16.sp
+                    ),
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.combinedClickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                            val rawId = artist.id.orEmpty()
+                            val artistName = artist.name
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val resolvedId = rawId.takeIf { it.startsWith("UC") || it.startsWith("FE") }
+                                    ?: database.artistByName(artistName)?.let { (it.channelId ?: it.id).takeIf { id -> id.isNotBlank() } }
+                                    ?: run {
+                                        val items = YouTube.search(artistName, YouTube.SearchFilter.FILTER_ARTIST)
+                                            .getOrNull()?.items?.filterIsInstance<ArtistItem>()
+                                        val matched = items?.firstOrNull { it.title.equals(artistName, ignoreCase = true) }
+                                            ?: items?.firstOrNull()
+                                        matched?.id
+                                    }
+                                    ?: rawId
+                                if (resolvedId.isNotBlank()) {
+                                    withContext(Dispatchers.Main) {
+                                        navController.navigate("artist/$resolvedId") {
+                                            launchSingleTop = true
                                         }
+                                        state.collapseSoft()
                                     }
                                 }
+                            }
+                        },
+                        onLongClick = {
+                            val clip = ClipData.newPlainText("Copied Artist", artist.name)
+                            clipboardManager.setPrimaryClip(clip)
+                            Toast.makeText(context, "Copied Artist", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    onLongClick = {
-                        val clip = ClipData.newPlainText("Copied Artist", annotatedString)
-                        clipboardManager.setPrimaryClip(clip)
-                        Toast.makeText(context, "Copied Artist", Toast.LENGTH_SHORT).show()
-                    }
+                    )
                 )
-        )
+                if (index != mediaMetadata.artists.lastIndex) {
+                    Text(
+                        text = ", ",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = textBackgroundColor,
+                            fontSize = 16.sp
+                        ),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+            }
+        }
     }
 }
 

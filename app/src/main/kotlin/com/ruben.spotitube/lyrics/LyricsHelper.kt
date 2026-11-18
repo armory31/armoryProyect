@@ -9,14 +9,12 @@
 package com.ruben.spotitube.lyrics
 
 import android.content.Context
-import android.util.Log
 import android.util.LruCache
 import com.ruben.spotitube.constants.PreferredLyricsProvider
 import com.ruben.spotitube.constants.PreferredLyricsProviderKey
 import com.ruben.spotitube.db.entities.LyricsEntity.Companion.LYRICS_NOT_FOUND
 import com.ruben.spotitube.extensions.toEnum
 import com.ruben.spotitube.models.MediaMetadata
-import com.ruben.spotitube.utils.GlobalLog
 import com.ruben.spotitube.utils.NetworkConnectivityObserver
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.reportException
@@ -29,6 +27,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
+import timber.log.Timber
 
 class LyricsHelper
 @Inject
@@ -54,11 +53,11 @@ constructor(
 
         val cached = cache.get(mediaMetadata.id)?.firstOrNull()
         if (cached != null) {
-            GlobalLog.append(Log.DEBUG, "LyricsHelper", "Found lyrics in cache for ${mediaMetadata.title}")
+            Timber.tag("LyricsHelper").d("Found lyrics in cache for ${mediaMetadata.title}")
             return cached.lyrics
         }
         
-        GlobalLog.append(Log.DEBUG, "LyricsHelper", "Fetching lyrics for ${mediaMetadata.title} (Artist: ${mediaMetadata.artists.joinToString { it.name }}, Album: ${mediaMetadata.album?.title})")
+        Timber.tag("LyricsHelper").d("Fetching lyrics for ${mediaMetadata.title} (Artist: ${mediaMetadata.artists.joinToString { it.name }}, Album: ${mediaMetadata.album?.title})")
 
         val isNetworkAvailable = try {
             networkConnectivity.isCurrentlyConnected()
@@ -67,7 +66,7 @@ constructor(
         }
         
         if (!isNetworkAvailable) {
-            GlobalLog.append(Log.WARN, "LyricsHelper", "Network unavailable, aborting lyrics fetch")
+            Timber.tag("LyricsHelper").w("Network unavailable, aborting lyrics fetch")
             return LYRICS_NOT_FOUND
         }
 

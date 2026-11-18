@@ -33,10 +33,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSongSortType
 import com.ruben.spotitube.db.entities.Artist

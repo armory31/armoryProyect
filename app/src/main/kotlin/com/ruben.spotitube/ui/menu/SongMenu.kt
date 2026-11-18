@@ -68,11 +68,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ArtistSeparatorsKey
 import com.ruben.spotitube.constants.ExternalDownloaderEnabledKey
@@ -556,38 +556,6 @@ fun SongMenu(
             MenuSurfaceSection(modifier = Modifier.padding(vertical = 6.dp)) {
                 val dividerModifier = Modifier.padding(start = 56.dp)
                 Column {
-                    if (event != null) {
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    text = stringResource(R.string.remove_from_history),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            leadingContent = {
-                                Icon(
-                                    painter = painterResource(R.drawable.delete),
-                                    tint = MaterialTheme.colorScheme.error,
-                                    contentDescription = null,
-                                )
-                            },
-                            modifier =
-                                Modifier.clickable {
-                                    onDismiss()
-                                    database.query {
-                                        deleteHistorySong(event.id, event.songId)
-                                    }
-                                },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        )
-                    }
-
-                    if (event != null) {
-                        HorizontalDivider(
-                            modifier = dividerModifier,
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                        )
-                    }
 
                     if (playlistSong != null) {
                         ListItem(

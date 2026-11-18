@@ -9,7 +9,10 @@
 package com.ruben.spotitube.ui.screens
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryArtworkBackdrop
 import com.ruben.spotitube.ArmoryGradients
+import com.ruben.spotitube.ArtistNameColor
+import com.ruben.spotitube.MainHeadingColor
 import androidx.compose.material3.ButtonDefaults
 
 import android.content.ContentValues
@@ -35,14 +38,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,6 +54,8 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,29 +66,31 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
@@ -95,17 +101,16 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
-import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.size.Size
 import coil3.toBitmap
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.AppBarHeight
 import com.ruben.spotitube.constants.DisableBlurKey
@@ -117,11 +122,11 @@ import com.ruben.spotitube.models.DownloadedSongMetadata
 import com.ruben.spotitube.playback.queues.LocalAlbumRadio
 import com.ruben.spotitube.ui.component.IconButton
 import com.ruben.spotitube.ui.component.LocalMenuState
+import com.ruben.spotitube.ui.component.EmptyPlaceholder
 import com.ruben.spotitube.SectionHeader
-import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryScrollTopBar
 import com.ruben.spotitube.ArmoryIconButton
 import com.ruben.spotitube.ui.component.SongListItem
-import com.ruben.spotitube.ui.component.YouTubeGridItem
 import com.ruben.spotitube.ui.component.shimmer.ButtonPlaceholder
 import com.ruben.spotitube.ui.component.shimmer.ListItemPlaceHolder
 import com.ruben.spotitube.ui.component.shimmer.ShimmerHost
@@ -129,8 +134,7 @@ import com.ruben.spotitube.ui.component.shimmer.TextPlaceholder
 import com.ruben.spotitube.ui.menu.AlbumMenu
 import com.ruben.spotitube.ui.menu.SelectionSongMenu
 import com.ruben.spotitube.ui.menu.SongMenu
-import com.ruben.spotitube.ui.menu.YouTubeAlbumMenu
-import com.ruben.spotitube.ui.theme.PlayerColorExtractor
+import com.ruben.spotitube.utils.AlbumDateCache
 import com.ruben.spotitube.ui.utils.ItemWrapper
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberPreference
@@ -366,57 +370,17 @@ fun AlbumScreen(
     val albumWithSongs by viewModel.albumWithSongs.collectAsStateWithLifecycle()
     val isSaved by viewModel.isSaved.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val otherVersions by viewModel.otherVersions.collectAsStateWithLifecycle()
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
     // System bars padding
     val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
 
-    // Gradient colors state for album cover
-    var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = MaterialTheme.colorScheme.background.toArgb()
     val surfaceColor = MaterialTheme.colorScheme.background
 
     // Estados para descarga de carátula
     var downloadingCover by remember { mutableStateOf(false) }
     var showQualityDialog by remember { mutableStateOf(false) }
-
-    // Extract gradient colors from album cover
-    LaunchedEffect(albumWithSongs?.album?.thumbnailUrl) {
-        val thumbnailUrl = albumWithSongs?.album?.thumbnailUrl
-        if (thumbnailUrl != null) {
-            val request = ImageRequest.Builder(context)
-                .data(thumbnailUrl)
-                .size(Size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE))
-                .allowHardware(false)
-                .build()
-
-            val result = runCatching {
-                context.imageLoader.execute(request)
-            }.getOrNull()
-
-            if (result != null) {
-                val bitmap = result.image?.toBitmap()
-                if (bitmap != null) {
-                    val palette = withContext(Dispatchers.Default) {
-                        Palette.from(bitmap)
-                            .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                            .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                            .generate()
-                    }
-
-                    val extractedColors = PlayerColorExtractor.extractGradientColors(
-                        palette = palette,
-                        fallbackColor = fallbackColor
-                    )
-                    gradientColors = extractedColors
-                }
-            }
-        } else {
-            gradientColors = emptyList()
-        }
-    }
 
     val wrappedSongs = remember(albumWithSongs, hideExplicit) {
         val filteredSongs = if (hideExplicit) {
@@ -427,11 +391,46 @@ fun AlbumScreen(
         filteredSongs.map { item -> ItemWrapper(item) }.toMutableStateList()
     }
 
+    var isSearching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+    val visibleSongs = remember(wrappedSongs, query.text) {
+        val searchText = query.text.trim()
+        wrappedSongs.mapIndexedNotNull { index, songWrapper ->
+            val song = songWrapper.item
+            if (
+                searchText.isEmpty() ||
+                song.title.contains(searchText, ignoreCase = true) ||
+                song.artists.any { it.name.contains(searchText, ignoreCase = true) }
+            ) {
+                index to songWrapper
+            } else {
+                null
+            }
+        }
+    }
+
+    LaunchedEffect(isSearching) {
+        if (isSearching) {
+            focusRequester.requestFocus()
+        } else {
+            focusManager.clearFocus()
+        }
+    }
+
     var selection by remember { mutableStateOf(false) }
 
-    if (selection) {
+    if (selection || isSearching) {
         BackHandler {
-            selection = false
+            if (selection) {
+                selection = false
+            } else {
+                isSearching = false
+                query = TextFieldValue()
+            }
         }
     }
 
@@ -454,133 +453,18 @@ fun AlbumScreen(
         }
     }
 
-    val showTopBarTitle by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0
-        }
-    }
-
-    val transparentAppBar by remember {
-        derivedStateOf {
-            !disableBlur && !selection && !showTopBarTitle
-        }
-    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(surfaceColor),
     ) {
-        // Mesh gradient background layer
-        if (!disableBlur && gradientColors.isNotEmpty() && gradientAlpha > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxSize(0.55f)
-                    .align(Alignment.TopCenter)
-                    .zIndex(-1f)
-                    .drawBehind {
-                        val width = size.width
-                        val height = size.height
-
-                        if (gradientColors.size >= 3) {
-                            val c0 = gradientColors[0]
-                            val c1 = gradientColors[1]
-                            val c2 = gradientColors[2]
-                            val c3 = gradientColors.getOrElse(3) { c0 }
-                            val c4 = gradientColors.getOrElse(4) { c1 }
-                            // Primary color blob - top center (stronger)
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c0.copy(alpha = gradientAlpha * 0.75f),
-                                        c0.copy(alpha = gradientAlpha * 0.4f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.5f, height * 0.15f),
-                                    radius = width * 0.8f
-                                )
-                            )
-
-                            // Secondary color blob - left side
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c1.copy(alpha = gradientAlpha * 0.55f),
-                                        c1.copy(alpha = gradientAlpha * 0.3f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.1f, height * 0.4f),
-                                    radius = width * 0.6f
-                                )
-                            )
-
-                            // Third color blob - right side
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c2.copy(alpha = gradientAlpha * 0.5f),
-                                        c2.copy(alpha = gradientAlpha * 0.25f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.9f, height * 0.35f),
-                                    radius = width * 0.55f
-                                )
-                            )
-
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c3.copy(alpha = gradientAlpha * 0.35f),
-                                        c3.copy(alpha = gradientAlpha * 0.18f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.25f, height * 0.65f),
-                                    radius = width * 0.75f
-                                )
-                            )
-
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c4.copy(alpha = gradientAlpha * 0.3f),
-                                        c4.copy(alpha = gradientAlpha * 0.15f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.55f, height * 0.85f),
-                                    radius = width * 0.9f
-                                )
-                            )
-                        } else if (gradientColors.isNotEmpty()) {
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        gradientColors[0].copy(alpha = gradientAlpha * 0.7f),
-                                        gradientColors[0].copy(alpha = gradientAlpha * 0.35f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.5f, height * 0.25f),
-                                    radius = width * 0.85f
-                                )
-                            )
-                        }
-
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Transparent,
-                                    surfaceColor.copy(alpha = gradientAlpha * 0.22f),
-                                    surfaceColor.copy(alpha = gradientAlpha * 0.55f),
-                                    surfaceColor
-                                ),
-                                startY = height * 0.4f,
-                                endY = height
-                            )
-                        )
-                    }
-            )
-        }
+        ArmoryArtworkBackdrop(
+            imageUrls = listOf(albumWithSongs?.album?.thumbnailUrl),
+            alpha = gradientAlpha,
+            enabled = !disableBlur,
+            backgroundColor = surfaceColor
+        )
 
         LazyColumn(
             state = lazyListState,
@@ -590,15 +474,14 @@ fun AlbumScreen(
             val albumWithSongs = albumWithSongs
             val hasSongs = albumWithSongs?.songs?.isNotEmpty() == true
             if (hasSongs) {
-                // Hero Header
-                item(
-                    key = "header",
-                    contentType = "header"
-                ) {
+                if (!isSearching) {
+                    // Hero Header
+                    item(
+                        key = "header",
+                        contentType = "header"
+                    ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = systemBarsTopPadding + AppBarHeight),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Album Art - Large centered with shadow and rounded corners
@@ -612,8 +495,7 @@ fun AlbumScreen(
                                     .shadow(
                                         elevation = 24.dp,
                                         shape = RoundedCornerShape(16.dp),
-                                        spotColor = gradientColors.getOrNull(0)?.copy(alpha = 0.5f)
-                                            ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                     ),
                                 shape = RoundedCornerShape(16.dp)
                             ) {
@@ -673,27 +555,13 @@ fun AlbumScreen(
                             }
                         }
 
-                        // Album Title
-                        Text(
-                            text = albumWithSongs.album.title,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = ArmoryColors.Gold2,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(horizontal = 32.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         // Artist Names (Clickable)
                         Text(
                             text = buildAnnotatedString {
                                 withStyle(
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Normal,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = ArtistNameColor
                                     ).toSpanStyle()
                                 ) {
                                     albumWithSongs.artists.fastForEachIndexed { index, artist ->
@@ -727,7 +595,7 @@ fun AlbumScreen(
                             albumWithSongs.album.year?.let { year ->
                                 MetadataChip(
                                     icon = R.drawable.calendar_today,
-                                    text = year.toString(),
+                                    text = AlbumDateCache.get(viewModel.albumId) ?: year.toString(),
                                     textColor = ArmoryColors.TextGold,
                                     iconTint = ArmoryColors.TextGold
                                 )
@@ -955,121 +823,88 @@ fun AlbumScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
-
-                // Songs Section Header
-                item(
-                    key = "songs_header",
-                    contentType = "section_header"
-                ) {
-                    SectionHeader(
-                        text = stringResource(R.string.songs),
-                    )
                 }
 
-                // Songs List
-                itemsIndexed(
-                    items = wrappedSongs,
-                    key = { index, song -> "${index}_${song.item.id}" },
-                    contentType = { _, _ -> "song_item" },
-                ) { index, songWrapper ->
-                    SongListItem(
-                        song = songWrapper.item,
-                        albumIndex = index + 1,
-                        isActive = songWrapper.item.id == mediaMetadata?.id,
-                        isPlaying = isPlaying,
-                        showInLibraryIcon = true,
-                        trailingContent = {
-                            IconButton(
-                                onClick = {
-                                    menuState.show {
-                                        SongMenu(
-                                            originalSong = songWrapper.item,
-                                            navController = navController,
-                                            onDismiss = menuState::dismiss,
-                                        )
-                                    }
-                                },
-                                onLongClick = {}
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.more_vert),
-                                    contentDescription = null,
-                                )
-                            }
-                        },
-                        isSelected = songWrapper.isSelected && selection,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .combinedClickable(
-                                onClick = {
-                                    if (!selection) {
-                                        if (songWrapper.item.id == mediaMetadata?.id) {
-                                            playerConnection.player.togglePlayPause()
-                                        } else {
-                                            playerConnection.service.getAutomix(playlistId)
-                                            playerConnection.playQueue(
-                                                LocalAlbumRadio(albumWithSongs, startIndex = index),
-                                            )
-                                        }
-                                    } else {
-                                        songWrapper.isSelected = !songWrapper.isSelected
-                                    }
-                                },
-                                onLongClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (!selection) {
-                                        selection = true
-                                    }
-                                    wrappedSongs.forEach { it.isSelected = false }
-                                    songWrapper.isSelected = true
-                                },
-                            ),
-                    )
-                }
-
-                // Other Versions Section
-                if (otherVersions.isNotEmpty()) {
+                if (!isSearching) {
+                    // Songs Section Header
                     item(
-                        key = "other_versions_header",
+                        key = "songs_header",
                         contentType = "section_header"
                     ) {
                         SectionHeader(
-                            text = stringResource(R.string.other_versions),
+                            text = stringResource(R.string.songs),
                         )
                     }
-                    item(
-                        key = "other_versions_list",
-                        contentType = "row"
-                    ) {
-                        LazyRow {
-                            items(
-                                items = otherVersions.distinctBy { it.id },
-                                key = { it.id },
-                                contentType = { "album_card" },
-                            ) { item ->
-                                YouTubeGridItem(
-                                    item = item,
-                                    isActive = mediaMetadata?.album?.id == item.id,
-                                    isPlaying = isPlaying,
-                                    coroutineScope = scope,
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { navController.navigate("album/${item.id}") },
-                                            onLongClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                menuState.show {
-                                                    YouTubeAlbumMenu(
-                                                        albumItem = item,
-                                                        navController = navController,
-                                                        onDismiss = menuState::dismiss,
-                                                    )
-                                                }
-                                            },
-                                        )
-                                        .animateItem(),
-                                )
-                            }
-                        }
+                }
+
+                if (visibleSongs.isEmpty() && isSearching) {
+                    item(key = "no_search_results") {
+                        EmptyPlaceholder(
+                            icon = R.drawable.search,
+                            text = stringResource(R.string.no_results_found),
+                        )
+                    }
+                } else {
+                    // Songs List
+                    itemsIndexed(
+                        items = visibleSongs,
+                        key = { _, entry -> "${entry.first}_${entry.second.item.id}" },
+                        contentType = { _, _ -> "song_item" },
+                    ) { _, entry ->
+                        val (index, songWrapper) = entry
+                        SongListItem(
+                            song = songWrapper.item,
+                            albumIndex = index + 1,
+                            isActive = songWrapper.item.id == mediaMetadata?.id,
+                            isPlaying = isPlaying,
+                            showInLibraryIcon = true,
+                            trailingContent = {
+                                IconButton(
+                                    onClick = {
+                                        menuState.show {
+                                            SongMenu(
+                                                originalSong = songWrapper.item,
+                                                navController = navController,
+                                                onDismiss = menuState::dismiss,
+                                            )
+                                        }
+                                    },
+                                    onLongClick = {}
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.more_vert),
+                                        contentDescription = null,
+                                    )
+                                }
+                            },
+                            isSelected = songWrapper.isSelected && selection,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    onClick = {
+                                        if (!selection) {
+                                            if (songWrapper.item.id == mediaMetadata?.id) {
+                                                playerConnection.player.togglePlayPause()
+                                            } else {
+                                                playerConnection.service.getAutomix(playlistId)
+                                                playerConnection.playQueue(
+                                                    LocalAlbumRadio(albumWithSongs, startIndex = index),
+                                                )
+                                            }
+                                        } else {
+                                            songWrapper.isSelected = !songWrapper.isSelected
+                                        }
+                                    },
+                                    onLongClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        if (!selection) {
+                                            selection = true
+                                        }
+                                        wrappedSongs.forEach { it.isSelected = false }
+                                        songWrapper.isSelected = true
+                                    },
+                                ),
+                        )
                     }
                 }
             } else {
@@ -1225,37 +1060,63 @@ fun AlbumScreen(
             }
         }
 
-        ArmoryTopBar(
-            modifier = Modifier.align(Alignment.TopCenter),
+        ArmoryScrollTopBar(
             title = {
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
                     Text(
                         text = pluralStringResource(R.plurals.n_song, count, count),
                         style = MaterialTheme.typography.titleLarge,
-                        color = ArmoryColors.Gold2
+                        color = MainHeadingColor
                     )
-                } else if (showTopBarTitle) {
+                } else if (isSearching) {
+                    TextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.search),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.titleMedium,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
+                    )
+                } else {
                     Text(
                         text = albumWithSongs?.album?.title.orEmpty(),
                         style = MaterialTheme.typography.titleLarge,
-                        color = ArmoryColors.Gold2,
+                        color = MainHeadingColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             },
+            listState = lazyListState,
+            forceOpaque = disableBlur || selection,
             onBack = {
                 if (selection) {
                     selection = false
+                } else if (isSearching) {
+                    isSearching = false
+                    query = TextFieldValue()
                 } else {
                     navController.navigateUp()
                 }
             },
-            overImage = transparentAppBar,
-            opaque = !transparentAppBar,
-            scrollBehavior = scrollBehavior,
-            actions = {
+            centerTitle = true,
+            actions = { transparentAppBar ->
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
                     ArmoryIconButton(
@@ -1284,6 +1145,16 @@ fun AlbumScreen(
                                     clearAction = { selection = false }
                                 )
                             }
+                        },
+                        overImage = transparentAppBar
+                    )
+                } else if (!isSearching && wrappedSongs.size > 1) {
+                    ArmoryIconButton(
+                        painter = painterResource(R.drawable.search),
+                        contentDescription = "Buscar",
+                        onClick = {
+                            query = TextFieldValue()
+                            isSearching = true
                         },
                         overImage = transparentAppBar
                     )

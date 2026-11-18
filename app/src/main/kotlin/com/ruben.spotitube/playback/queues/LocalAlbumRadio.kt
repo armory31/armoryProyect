@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 
 class LocalAlbumRadio(
-    private val albumWithSongs: AlbumWithSongs,
+    val albumWithSongs: AlbumWithSongs,
     private val startIndex: Int = 0,
 ) : Queue {
     override val preloadItem: MediaMetadata? = null

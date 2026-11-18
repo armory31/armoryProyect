@@ -38,8 +38,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause
@@ -133,11 +133,6 @@ fun PlaylistSuggestionsSection(
         ) {
             NavigationTitle(
                 title = stringResource(R.string.you_might_like),
-                subtitle = currentSuggestions?.let { s ->
-                    if (s.totalQueries > 1) {
-                        "${s.currentQueryIndex + 1} / ${s.totalQueries}"
-                    } else null
-                },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -241,17 +236,36 @@ fun PlaylistSuggestionsSection(
                         color = MaterialTheme.colorScheme.primary
                     )
                 } else {
-                    TextButton(
-                        onClick = { viewModel.resetAndLoadPlaylistSuggestions() }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.sync),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Text(text = stringResource(R.string.refresh_suggestions))
+                        if (currentSuggestions.hasMore) {
+                            TextButton(
+                                onClick = { viewModel.loadMoreSuggestions() }
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.expand_more),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                    Text(text = stringResource(R.string.suggestions_show_more))
+                                }
+                            }
+                        }
+                        TextButton(
+                            onClick = { viewModel.resetAndLoadPlaylistSuggestions() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(R.drawable.sync),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(text = stringResource(R.string.refresh_suggestions))
+                            }
                         }
                     }
                 }

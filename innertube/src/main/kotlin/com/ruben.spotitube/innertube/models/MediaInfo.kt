@@ -17,7 +17,4 @@ data class MediaInfo(
     val description: String? = null,
     val uploadDate: String? = null,
     val subscribers: String? = null,
-    val viewCount: Int? = null,
-    val like: Int? = null,
-    val dislike: Int? = null,
 )

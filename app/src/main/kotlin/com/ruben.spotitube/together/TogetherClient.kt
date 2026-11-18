@@ -64,7 +64,7 @@ class TogetherClient(
 
     fun serverNowMs(): Long = System.currentTimeMillis() + serverTimeOffsetMs
 
-    fun connectOnline(sessionId: String, displayName: String) {
+    fun connectOnline(sessionId: String, displayName: String, photoBase64: String = "") {
         scope.launch {
             disconnect()
             _state.value = TogetherClientState.ConnectingRemote(sessionId)
@@ -83,7 +83,11 @@ class TogetherClient(
             try {
                 inboxRef.removeValue().await()
                 guestRef.onDisconnect().removeValue().await()
+                sessionRef.child("profiles").child(uid).onDisconnect().removeValue().await()
                 guestRef.setValue(mapOf("displayName" to displayName.trim().ifBlank { "Guest" })).await()
+                if (photoBase64.isNotBlank()) {
+                    sessionRef.child("profiles").child(uid).setValue(photoBase64).await()
+                }
                 onlineSessionId = sessionId
                 onlineUid = uid
                 onlineGuestRef = guestRef
@@ -127,6 +131,7 @@ class TogetherClient(
         onlineInboxRef = null
         if (activeSessionId != null && uid != null) {
             try {
+                runCatching { TogetherFirebase.session(activeSessionId).child("profiles").child(uid).removeValue().await() }
                 guestRef?.removeValue()?.await()
             } catch (t: Throwable) {
                 _events.tryEmit(TogetherClientEvent.Error("Failed to remove guest from session", t))

@@ -58,9 +58,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import com.ruben.spotitube.utils.AlbumDateCache
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -85,6 +85,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.media3.common.MediaItem
@@ -96,10 +97,11 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ArmoryGradients
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.CropThumbnailToSquareKey
 import com.ruben.spotitube.constants.DisableBlurKey
@@ -121,9 +123,11 @@ import com.ruben.spotitube.innertube.models.ArtistItem
 import com.ruben.spotitube.innertube.models.PlaylistItem
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.innertube.models.YTItem
+import com.ruben.spotitube.innertube.models.WatchEndpoint
 import com.ruben.spotitube.models.ItemMetadata
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.playback.queues.LocalAlbumRadio
+import com.ruben.spotitube.playback.queues.YouTubeQueue
 import com.ruben.spotitube.ui.utils.resize
 import com.ruben.spotitube.utils.joinByBullet
 import com.ruben.spotitube.utils.makeTimeString
@@ -595,7 +599,6 @@ fun SongListItem(
     song: Song,
     modifier: Modifier = Modifier,
     albumIndex: Int? = null,
-    viewCountText: String? = null,
     metadata: ItemMetadata? = null,
     showSavedIcon: Boolean = true,
     showInLibraryIcon: Boolean = false,
@@ -630,8 +633,7 @@ fun SongListItem(
             title = song.song.title,
             subtitle = joinByBullet(
                 song.artists.joinToString { it.name },
-                makeTimeString(song.song.duration * 1000L),
-                viewCountText
+                makeTimeString(song.song.duration * 1000L)
             ),
             badges = badges,
             thumbnailContent = {
@@ -817,7 +819,7 @@ fun AlbumListItem(
     subtitle = joinByBullet(
         album.artists.joinToString { it.name },
         pluralStringResource(R.plurals.n_song, album.album.songCount, album.album.songCount),
-        album.album.year?.toString()
+        (AlbumDateCache.get(album.id) ?: album.album.year?.toString())
     ),
     badges = badges,
     thumbnailContent = {
@@ -870,7 +872,7 @@ fun AlbumGridItem(
     },
     subtitle = {
         val artistNames = album.artists.joinToString { it.name }.ifEmpty { album.album.artistName.orEmpty() }
-        val subtitleText = joinByBullet(artistNames, album.album.year?.toString())
+        val subtitleText = joinByBullet(artistNames, (AlbumDateCache.get(album.id) ?: album.album.year?.toString()))
         if (subtitleText.isNotBlank()) {
             Text(
                 text = subtitleText,
@@ -1200,16 +1202,22 @@ fun MediaMetadataListItem(
 }
 
 @Composable
+private fun albumDateText(albumId: String, year: Int?, fetch: Boolean): String? {
+    if (fetch) LaunchedEffect(albumId) { AlbumDateCache.resolve(albumId, year) }
+    return AlbumDateCache.get(albumId) ?: year?.toString()
+}
+
+@Composable
 fun YouTubeListItem(
     item: YTItem,
     modifier: Modifier = Modifier,
     albumIndex: Int? = null,
-    viewCountText: String? = null,
     metadata: ItemMetadata? = null,
     isSelected: Boolean = false,
     isActive: Boolean = false,
     isPlaying: Boolean = false,
     isSwipeable: Boolean = true,
+    showReleaseMonth: Boolean = false,
     trailingContent: @Composable RowScope.() -> Unit = {},
     badges: @Composable RowScope.() -> Unit = {
         val libraryStateHolder = LocalLibraryStateHolder.current
@@ -1220,10 +1228,11 @@ fun YouTubeListItem(
 
         if ((item is SongItem && isSaved) ||
             (item is AlbumItem && isAlbumSaved) ||
-            (item is ArtistItem && isArtistSaved) ||
             (item is PlaylistItem && isPlaylistSaved)
         ) {
             Icon.Favorite()
+        } else if (item is ArtistItem && isArtistSaved) {
+            ArmorySubscribedPill()
         }
         if (item.explicit) Icon.Explicit()
 
@@ -1244,10 +1253,9 @@ fun YouTubeListItem(
             subtitle = when (item) {
                 is SongItem -> joinByBullet(
                     item.artists.joinToString { it.name },
-                    makeTimeString(item.duration?.times(1000L)),
-                    viewCountText
+                    makeTimeString(item.duration?.times(1000L))
                 )
-                is AlbumItem -> joinByBullet(item.artists?.joinToString { it.name }, item.year?.toString())
+                is AlbumItem -> joinByBullet(item.artists?.joinToString { it.name }, albumDateText(item.id, item.year, showReleaseMonth))
                 is ArtistItem -> null
                 is PlaylistItem -> joinByBullet(item.author?.name, item.songCountText)
             },
@@ -1296,10 +1304,11 @@ fun YouTubeGridItem(
 
         if ((item is SongItem && isSaved) ||
             (item is AlbumItem && isAlbumSaved) ||
-            (item is ArtistItem && isArtistSaved) ||
             (item is PlaylistItem && isPlaylistSaved)
         ) {
             Icon.Favorite()
+        } else if (item is ArtistItem && isArtistSaved) {
+            ArmorySubscribedPill()
         }
         if (item.explicit) Icon.Explicit()
         if (item is SongItem) {
@@ -1314,6 +1323,7 @@ fun YouTubeGridItem(
     isActive: Boolean = false,
     isPlaying: Boolean = false,
     fillMaxWidth: Boolean = false,
+    showReleaseMonth: Boolean = false,
 ) = GridItem(
     title = {
         Text(
@@ -1328,7 +1338,7 @@ fun YouTubeGridItem(
     subtitle = {
         val subtitle = when (item) {
             is SongItem -> joinByBullet(item.artists.joinToString { it.name }, makeTimeString(item.duration?.times(1000L)))
-            is AlbumItem -> joinByBullet(item.artists?.joinToString { it.name }, item.year?.toString())
+            is AlbumItem -> joinByBullet(item.artists?.joinToString { it.name }, albumDateText(item.id, item.year, showReleaseMonth))
             is ArtistItem -> null
             is PlaylistItem -> joinByBullet(item.author?.name, item.songCountText)
         }
@@ -1343,9 +1353,16 @@ fun YouTubeGridItem(
     },
     badges = badges,
     thumbnailContent = {
-        val database = LocalDatabase.current
         val playerConnection = LocalPlayerConnection.current ?: return@GridItem
+        val playScope = coroutineScope ?: rememberCoroutineScope()
         val shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(GridThumbnailCornerRadius)
+        val playEndpoint = when (item) {
+            is AlbumItem -> item.playlistId
+                .takeIf(String::isNotBlank)
+                ?.let { WatchEndpoint(playlistId = it) }
+            is PlaylistItem -> item.playEndpoint
+            else -> null
+        }
 
         ItemThumbnail(
             thumbnailUrl = item.thumbnail,
@@ -1362,20 +1379,24 @@ fun YouTubeGridItem(
         }
 
         AlbumPlayButton(
-            visible = item is AlbumItem && !isActive,
+            visible = (item is AlbumItem || playEndpoint != null) && !isActive,
             onClick = {
-                coroutineScope?.launch(Dispatchers.IO) {
-                    var albumWithSongs = database.albumWithSongs(item.id).first()
-                    if (albumWithSongs?.songs.isNullOrEmpty()) {
-                        YouTube.album(item.id).onSuccess { albumPage ->
-                            database.withTransaction { insert(albumPage) }
-                            albumWithSongs = database.albumWithSongs(item.id).first()
-                        }.onFailure { reportException(it) }
-                    }
-                    albumWithSongs?.let {
-                        withContext(Dispatchers.Main) {
-                            playerConnection.playQueue(LocalAlbumRadio(it))
-                        }
+                if (playEndpoint != null) {
+                    playerConnection.playQueue(YouTubeQueue(playEndpoint))
+                } else if (item is AlbumItem) {
+                    playScope.launch {
+                        YouTube.album(item.id, withSongs = false)
+                            .onSuccess { albumPage ->
+                                val playlistId = albumPage.album.playlistId
+                                if (playlistId.isNotBlank()) {
+                                    playerConnection.playQueue(
+                                        YouTubeQueue(WatchEndpoint(playlistId = playlistId))
+                                    )
+                                } else {
+                                    reportException(IllegalStateException("Missing playlist ID for album ${item.id}"))
+                                }
+                            }
+                            .onFailure { reportException(it) }
                     }
                 }
             }
@@ -1933,6 +1954,37 @@ data class Quadruple<A, B, C, D>(
     val third: C,
     val fourth: D
 )
+
+@Composable
+private fun RowScope.ArmorySubscribedPill() {
+    Row(
+        modifier = Modifier
+            .weight(1f, fill = false)
+            .height(22.dp)
+            .clip(CircleShape)
+            .background(ArmoryGradients.MetallicGold)
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides ArmoryColors.AbsoluteBlack) {
+            Icon(
+                painter = painterResource(R.drawable.done),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = stringResource(R.string.subscribed),
+                style = MaterialTheme.typography.labelLarge,
+                fontSize = 11.sp,
+                lineHeight = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
 
 private object Icon {
     @Composable

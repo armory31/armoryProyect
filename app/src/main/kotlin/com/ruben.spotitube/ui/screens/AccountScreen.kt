@@ -75,10 +75,10 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.BuildConfig
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.LoginActivity
 import com.ruben.spotitube.R
 import com.ruben.spotitube.playback.MusicService
@@ -148,16 +148,19 @@ fun AccountScreen(
                         MediaStore.Images.Media.getBitmap(context.contentResolver, selectedUri)
                     }
                     val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 256, 256, true)
-                    val avatarFile = File(context.filesDir, "avatar.jpg")
+                    val avatarFile = File(context.filesDir, "avatar_${System.currentTimeMillis()}.jpg")
                     FileOutputStream(avatarFile).use { out ->
                         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                     }
                     val savedUriStr = Uri.fromFile(avatarFile).toString()
                     withContext(Dispatchers.Main) {
-                        onAccountAvatarUriChange(savedUriStr)
                         session.saveAvatarUri(savedUriStr)
+                        onAccountAvatarUriChange(savedUriStr)
                         Toast.makeText(context, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show()
                     }
+                    context.filesDir.listFiles()?.filter { file ->
+                        file.name.startsWith("avatar") && file.name.endsWith(".jpg") && file.name != avatarFile.name
+                    }?.forEach { it.delete() }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "Error al guardar imagen", Toast.LENGTH_SHORT).show()
@@ -275,7 +278,11 @@ fun AccountScreen(
                         (context as? Activity)?.finish()
                         context.startActivity(Intent(context, LoginActivity::class.java))
                     } else {
-                        Toast.makeText(context, R.string.logout_no_connection_warning, Toast.LENGTH_LONG).show()
+                        if (syncManager.profilePushFailed) {
+                            Toast.makeText(context, R.string.profile_push_failed_warning, Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(context, R.string.logout_no_connection_warning, Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             },
@@ -436,8 +443,14 @@ fun AccountScreen(
                                 isBackupLoading = true
                                 try {
                                     if (isInternetAvailable(context)) {
-                                        syncManager.pushLibraryToCloud()
-                                        Toast.makeText(context, "Copia de seguridad guardada con éxito", Toast.LENGTH_SHORT).show()
+                                        val pushSuccess = syncManager.pushLibraryToCloud()
+                                        if (!pushSuccess) {
+                                            Toast.makeText(context, "Error al guardar copia", Toast.LENGTH_SHORT).show()
+                                        } else if (syncManager.profilePushFailed) {
+                                            Toast.makeText(context, R.string.profile_push_failed_warning, Toast.LENGTH_LONG).show()
+                                        } else {
+                                            Toast.makeText(context, "Copia de seguridad guardada con éxito", Toast.LENGTH_SHORT).show()
+                                        }
                                     } else {
                                         Toast.makeText(context, "Sin conexión a internet", Toast.LENGTH_SHORT).show()
                                     }
@@ -474,9 +487,7 @@ fun AccountScreen(
                         ) {
                             exportCsvLauncher.launch("playlists_armory.csv")
                         },
-                        AccountSettingItem(R.drawable.favorite, "Mi Año en Música", "Resumen anual de tus canciones y artistas") { navController.navigate("year_in_music") },
-                        AccountSettingItem(R.drawable.equalizer, "Estadísticas", "Tus hábitos de reproducción y tiempos escuchados") { navController.navigate("stats") },
-                        AccountSettingItem(R.drawable.queue_music, "Historial de Reproducción", "Registro de canciones reproducidas recientemente") { navController.navigate("history") },
+                    ) + listOf(
                         AccountSettingItem(
                             R.drawable.logout,
                             stringResource(R.string.action_logout),
@@ -535,7 +546,6 @@ fun AccountScreen(
                 Column {
                     val settingsItems = listOf(
                         AccountSettingItem(R.drawable.storage, stringResource(R.string.storage), stringResource(R.string.cache)) { navController.navigate("settings/storage") },
-                        AccountSettingItem(R.drawable.experiment, stringResource(R.string.experiment_settings), stringResource(R.string.misc)) { navController.navigate("settings/misc") },
                         AccountSettingItem(R.drawable.update, stringResource(R.string.updates), BuildConfig.VERSION_NAME) { navController.navigate("settings/update") },
                     )
 

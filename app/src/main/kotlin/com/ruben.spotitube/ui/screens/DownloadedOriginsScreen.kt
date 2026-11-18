@@ -32,8 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.ui.component.EmptyPlaceholder

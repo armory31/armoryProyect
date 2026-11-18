@@ -9,24 +9,15 @@
 package com.ruben.spotitube.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -39,24 +30,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.ArmoryGradients
 import com.ruben.spotitube.ArmoryHeader
 import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.ui.component.LocalMenuState
 import com.ruben.spotitube.ui.component.NavigationTitle
-import com.ruben.spotitube.ui.utils.SnapLayoutInfoProvider
-import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.HomeViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -88,10 +73,6 @@ fun HomeScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     val quickPicks by viewModel.quickPicks.collectAsStateWithLifecycle()
-    val speedDialItems by viewModel.speedDialItems.collectAsStateWithLifecycle()
-    val forgottenFavorites by viewModel.forgottenFavorites.collectAsStateWithLifecycle()
-    val forgottenFavoritesDaysRemaining by viewModel.forgottenFavoritesDaysRemaining.collectAsStateWithLifecycle()
-    val keepListening by viewModel.keepListening.collectAsStateWithLifecycle()
     val homePage by viewModel.homePage.collectAsStateWithLifecycle()
     val allItemsMetadata by viewModel.allItemsMetadata.collectAsStateWithLifecycle()
 
@@ -129,8 +110,6 @@ fun HomeScreen(
         }
     }
 
-    val forgottenFavoritesLazyGridState = rememberLazyGridState()
-
     val accountImageUrl by viewModel.accountImageUrl.collectAsStateWithLifecycle()
     val savedAvatarUrl = rememberAvatarUrl()
     val url = savedAvatarUrl ?: accountImageUrl.takeIf { !it.isNullOrEmpty() }
@@ -158,10 +137,6 @@ fun HomeScreen(
             }
     }
 
-    LaunchedEffect(forgottenFavorites) {
-        forgottenFavoritesLazyGridState.scrollToItem(0)
-    }
-
     // CONTENEDOR PLANO ABSOLUTO PARA ARMORY
     Box(
         modifier = Modifier
@@ -174,7 +149,7 @@ fun HomeScreen(
                 onSettings = { navController.navigate("account") }
             )
 
-            BoxWithConstraints(
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .pullToRefresh(
@@ -183,20 +158,6 @@ fun HomeScreen(
                         onRefresh = viewModel::refresh
                     )
             ) {
-                val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
-                val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-                
-                // Optimizamos el SnapLayoutInfoProvider envolviéndolo en remember con dependencias precisas
-                // para evitar cómputos pesados redundantes que jankean el Main Thread en cada frame de scroll.
-                val forgottenFavoritesSnapLayoutInfoProvider = remember(forgottenFavoritesLazyGridState, horizontalLazyGridItemWidthFactor) {
-                    SnapLayoutInfoProvider(
-                        lazyGridState = forgottenFavoritesLazyGridState,
-                        positionInLayout = { layoutSize, itemSize ->
-                            (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                        }
-                    )
-                }
-
                 LazyColumn(
                     state = lazylistState,
                     modifier = Modifier.fillMaxSize(),
@@ -227,132 +188,9 @@ fun HomeScreen(
                         }
                     }
 
-                    // 2. Marcado rápido (Speed Dial)
-                    item(
-                        key = "speed_dial",
-                        contentType = "section"
-                    ) {
-                        NavigationTitle(
-                            title = "Marcado rápido",
-                            modifier = Modifier.padding(top = 24.dp)
-                        )
-                        if (speedDialItems.isEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                    .border(BorderStroke(1.5.dp, ArmoryGradients.MetallicCopper), RoundedCornerShape(16.dp))
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No hay elementos marcados. Usa el menú de cualquier canción, álbum o playlist para añadirlo a Marcado rápido.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        } else {
-                            SpeedDialSection(
-                                speedDialItems = speedDialItems,
-                                mediaMetadata = mediaMetadata,
-                                isPlaying = isPlaying,
-                                navController = navController,
-                                playerConnection = playerConnection,
-                                menuState = menuState,
-                                haptic = haptic,
-                                metadataMap = allItemsMetadata
-                            )
-                        }
-                    }
 
-                    // 3. Sigue escuchando (Keep Listening)
-                    item(
-                        key = "keep_listening",
-                        contentType = "section"
-                    ) {
-                        NavigationTitle(
-                            title = "Sigue escuchando",
-                            modifier = Modifier.padding(top = 24.dp)
-                        )
-                        val keepListeningList = remember(keepListening) { keepListening?.take(4) }
-                        if (keepListeningList.isNullOrEmpty()) {
-                             HomeLoadingShimmer()
-                        } else {
-                            KeepListeningSection(
-                                keepListening = keepListeningList,
-                                mediaMetadata = mediaMetadata,
-                                isPlaying = isPlaying,
-                                navController = navController,
-                                playerConnection = playerConnection,
-                                menuState = menuState,
-                                haptic = haptic,
-                                scope = scope,
-                                metadataMap = allItemsMetadata
-                            )
-                        }
-                    }
 
-                    // 4. Tus favoritos del pasado (Forgotten Favorites)
-                    item(
-                        key = "forgotten_favorites",
-                        contentType = "section"
-                    ) {
-                        NavigationTitle(
-                            title = "Tus favoritos del pasado",
-                            modifier = Modifier.padding(top = 24.dp)
-                        )
-                        if (forgottenFavorites.isNullOrEmpty()) {
-                            val remaining = forgottenFavoritesDaysRemaining ?: 30
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                    .border(BorderStroke(1.5.dp, ArmoryGradients.MetallicCopper), RoundedCornerShape(16.dp))
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Text(
-                                        text = "⏳ Desbloqueando en $remaining días",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ArmoryColors.Gold2,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Text(
-                                        text = "Se requieren 30 días de historial para calcular tus favoritos del pasado.",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        } else {
-                            ForgottenFavoritesSection(
-                                forgottenFavorites = forgottenFavorites!!,
-                                mediaMetadata = mediaMetadata,
-                                isPlaying = isPlaying,
-                                horizontalLazyGridItemWidth = horizontalLazyGridItemWidth,
-                                lazyGridState = forgottenFavoritesLazyGridState,
-                                snapLayoutInfoProvider = forgottenFavoritesSnapLayoutInfoProvider,
-                                navController = navController,
-                                playerConnection = playerConnection,
-                                menuState = menuState,
-                                haptic = haptic,
-                                metadataMap = allItemsMetadata
-                            )
-                        }
-                    }
-
-                    // 6. Recomendaciones Similares (Similar to...)
+                    // 6. Lo nuevo de
                     similarRecommendationsContainer(
                         viewModel = viewModel,
                         mediaMetadata = mediaMetadata,

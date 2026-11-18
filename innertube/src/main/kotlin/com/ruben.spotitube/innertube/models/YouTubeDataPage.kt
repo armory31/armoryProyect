@@ -86,8 +86,6 @@ data class YouTubeDataPage(
                         data class VideoPrimaryInfoRenderer(
                             @SerialName("title")
                             val title: Title? = null,
-                            @SerialName("viewCount")
-                            val viewCount: ViewCount? = null,
                             @SerialName("dateText")
                             val dateText: DateText? = null,
                         ) {
@@ -101,24 +99,6 @@ data class YouTubeDataPage(
                                     @SerialName("text")
                                     val text: String? = null,
                                 )
-                            }
-
-                            @Serializable
-                            data class ViewCount(
-                                @SerialName("videoViewCountRenderer")
-                                val videoViewCountRenderer: VideoViewCountRenderer? = null,
-                            ) {
-                                @Serializable
-                                data class VideoViewCountRenderer(
-                                    @SerialName("viewCount")
-                                    val viewCount: ViewCount? = null,
-                                ) {
-                                    @Serializable
-                                    data class ViewCount(
-                                        @SerialName("simpleText")
-                                        val simpleText: String? = null,
-                                    )
-                                }
                             }
 
                             @Serializable

@@ -59,7 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.ui.LocalDatabase
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.LyricsEntity
 import com.ruben.spotitube.lyrics.LyricsUtils.isTtml

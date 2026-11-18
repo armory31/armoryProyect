@@ -8,7 +8,6 @@
 
 package com.ruben.spotitube.ui.menu
 
-import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,9 +34,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.models.toSavedArtistEntity
 import com.ruben.spotitube.playback.queues.YouTubeQueue

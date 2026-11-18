@@ -81,7 +81,7 @@ import androidx.media3.common.Player
 import androidx.window.core.layout.WindowWidthSizeClass
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.canvas.models.CanvasArtwork
 import com.ruben.spotitube.constants.CropThumbnailToSquareKey

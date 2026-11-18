@@ -68,8 +68,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.constants.ListItemHeight
@@ -140,7 +140,7 @@ fun ChartsScreen(
     Scaffold(
         topBar = {
             ArmoryTopBar(
-                title = stringResource(R.string.charts),
+                title = stringResource(R.string.charts_title),
                 onBack = navController::navigateUp
             )
         }

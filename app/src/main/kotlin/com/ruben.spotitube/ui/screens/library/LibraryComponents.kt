@@ -47,20 +47,20 @@ fun LibraryShortcutsRow(
     onClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
+    Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
     ) {
-        items(
-            items = shortcuts,
-            key = { it.id }
-        ) { shortcut ->
+        shortcuts.forEach { shortcut ->
             LibraryPinnedCollectionTile(
                 title = shortcut.title,
                 iconRes = shortcut.iconRes,
                 accentColor = shortcut.accentColor,
-                modifier = Modifier.combinedClickable(onClick = { onClick(shortcut.route) }),
+                modifier = Modifier
+                    .weight(1f)
+                    .combinedClickable(onClick = { onClick(shortcut.route) }),
             )
         }
     }

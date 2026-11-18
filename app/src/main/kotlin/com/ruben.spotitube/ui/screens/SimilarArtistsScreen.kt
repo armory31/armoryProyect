@@ -26,7 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.extensions.navigateSafe
 import com.ruben.spotitube.innertube.models.ArtistItem
 import com.ruben.spotitube.ui.component.YouTubeListItem

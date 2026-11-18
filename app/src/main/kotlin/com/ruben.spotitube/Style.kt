@@ -38,6 +38,7 @@ import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.Typography
@@ -62,13 +63,18 @@ import androidx.palette.graphics.Palette
 // ── 1. TIPOGRAFÍA Y JERARQUÍA ────────────────────────────────────────────────
 val GlobalFont = FontFamily(Font(R.font.baskerville))
 
+val MainHeadingColor = ArmoryColors.Gold2
+val SectionHeadingColor = ArmoryColors.Gold1
+val ArtistNameColor = SectionHeadingColor
+val SubsectionAndMetadataColor = ArmoryColors.Gold0
+
 private val displayStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 32.sp, lineHeight = 40.sp, brush = ArmoryGradients.HeaderGold)
-private val headlineStyle = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 32.sp, color = ArmoryColors.TextGold)
-private val sectionStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 28.sp, color = ArmoryColors.TextGold)
+private val headlineStyle = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 32.sp, color = MainHeadingColor)
+private val sectionStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 28.sp, color = SectionHeadingColor)
 private val titleStyle    = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 18.sp, lineHeight = 24.sp, color = ArmoryColors.TextPrimary)
 private val bodyStyle     = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, color = ArmoryColors.TextSecondary)
-private val labelStyle    = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp)
-private val captionStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp, color = ArmoryColors.TextMuted)
+private val labelStyle    = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp, color = SubsectionAndMetadataColor)
+private val captionStyle  = TextStyle(fontFamily = GlobalFont, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp, color = SubsectionAndMetadataColor)
 
 val AppTypography = Typography(
     displayLarge = displayStyle,
@@ -98,6 +104,7 @@ object ArmoryColors {
     val SurfaceBorderMuted = Color(0xFF222222)
     val SuccessGreen    = Color(0xFF43B581)
 
+    val Gold0 = Color(0xFFF2DDAF)
     val Gold1 = Color(0xFFE6C687)
     val Gold2 = Color(0xFFD4AF37)
     val Gold3 = Color(0xFFB8860B)
@@ -579,20 +586,47 @@ fun ArmoryTopBar(
     opaque: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     modifier: Modifier = Modifier,
+    centerTitle: Boolean = false,
+    containerAlpha: Float? = null,
     actions: @Composable RowScope.() -> Unit = {}
-) = TopAppBar(
-    modifier = modifier.wrapContentHeight(Alignment.Top),
-    title = { Text(title, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-    navigationIcon = {
+) {
+    val titleContent: @Composable () -> Unit = {
+        Text(title, color = MainHeadingColor, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+    val navigationContent: @Composable () -> Unit = {
         if (onBack != null) IconButton(
             onClick = onBack,
             modifier = if (overImage) Modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else Modifier
         ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.Gold2) }
-    },
-    actions = actions,
-    scrollBehavior = scrollBehavior,
-    colors = TopAppBarDefaults.topAppBarColors(containerColor = if (opaque) ArmoryColors.Background else Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
-)
+    }
+    val colors = TopAppBarDefaults.topAppBarColors(
+        containerColor = containerAlpha?.let {
+            ArmoryColors.Background.copy(alpha = it.coerceIn(0f, 1f))
+        } ?: if (opaque) ArmoryColors.Background else Color.Transparent,
+        scrolledContainerColor = containerAlpha?.let {
+            ArmoryColors.Background.copy(alpha = it.coerceIn(0f, 1f))
+        } ?: ArmoryColors.Background
+    )
+    if (centerTitle) {
+        CenterAlignedTopAppBar(
+            modifier = modifier.wrapContentHeight(Alignment.Top),
+            title = titleContent,
+            navigationIcon = navigationContent,
+            actions = actions,
+            scrollBehavior = scrollBehavior,
+            colors = colors
+        )
+    } else {
+        TopAppBar(
+            modifier = modifier.wrapContentHeight(Alignment.Top),
+            title = titleContent,
+            navigationIcon = navigationContent,
+            actions = actions,
+            scrollBehavior = scrollBehavior,
+            colors = colors
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -603,20 +637,44 @@ fun ArmoryTopBar(
     opaque: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     modifier: Modifier = Modifier,
+    centerTitle: Boolean = false,
+    containerAlpha: Float? = null,
     actions: @Composable RowScope.() -> Unit = {}
-) = TopAppBar(
-    modifier = modifier.wrapContentHeight(Alignment.Top),
-    title = title,
-    navigationIcon = {
+) {
+    val navigationContent: @Composable () -> Unit = {
         if (onBack != null) IconButton(
             onClick = onBack,
             modifier = if (overImage) Modifier.background(ArmoryColors.AbsoluteBlack.copy(alpha = 0.5f), CircleShape) else Modifier
         ) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Atrás", tint = ArmoryColors.Gold2) }
-    },
-    actions = actions,
-    scrollBehavior = scrollBehavior,
-    colors = TopAppBarDefaults.topAppBarColors(containerColor = if (opaque) ArmoryColors.Background else Color.Transparent, scrolledContainerColor = ArmoryColors.Background),
-)
+    }
+    val colors = TopAppBarDefaults.topAppBarColors(
+        containerColor = containerAlpha?.let {
+            ArmoryColors.Background.copy(alpha = it.coerceIn(0f, 1f))
+        } ?: if (opaque) ArmoryColors.Background else Color.Transparent,
+        scrolledContainerColor = containerAlpha?.let {
+            ArmoryColors.Background.copy(alpha = it.coerceIn(0f, 1f))
+        } ?: ArmoryColors.Background
+    )
+    if (centerTitle) {
+        CenterAlignedTopAppBar(
+            modifier = modifier.wrapContentHeight(Alignment.Top),
+            title = title,
+            navigationIcon = navigationContent,
+            actions = actions,
+            scrollBehavior = scrollBehavior,
+            colors = colors
+        )
+    } else {
+        TopAppBar(
+            modifier = modifier.wrapContentHeight(Alignment.Top),
+            title = title,
+            navigationIcon = navigationContent,
+            actions = actions,
+            scrollBehavior = scrollBehavior,
+            colors = colors
+        )
+    }
+}
 
 @Composable
 fun SectionHeader(
@@ -639,6 +697,7 @@ fun SectionHeader(
     } else {
         Text(
             text = text,
+            color = SectionHeadingColor,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -663,6 +722,6 @@ fun ArmoryButton(
     CompositionLocalProvider(LocalContentColor provides ArmoryColors.AbsoluteBlack) {
         if (icon != null) { Icon(icon, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)) }
         if (painter != null) { Icon(painter, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)) }
-        Text(text, style = MaterialTheme.typography.labelLarge)
+        Text(text, color = ArmoryColors.AbsoluteBlack, style = MaterialTheme.typography.labelLarge)
     }
 }

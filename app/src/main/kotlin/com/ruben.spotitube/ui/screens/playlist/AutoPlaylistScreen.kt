@@ -9,7 +9,9 @@
 package com.ruben.spotitube.ui.screens.playlist
 
 import com.ruben.spotitube.ArmoryColors
+import com.ruben.spotitube.ArmoryArtworkBackdrop
 import com.ruben.spotitube.ArmoryGradients
+import com.ruben.spotitube.MainHeadingColor
 import androidx.compose.material3.ButtonDefaults
 
 import androidx.activity.compose.BackHandler
@@ -28,7 +30,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -45,7 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import com.ruben.spotitube.ArmoryTopBar
+import com.ruben.spotitube.ArmoryScrollTopBar
 import com.ruben.spotitube.ArmoryIconButton
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -53,7 +54,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,14 +63,11 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -89,15 +86,12 @@ import androidx.compose.ui.util.fastSumBy
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
-import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
 import coil3.imageLoader
-import coil3.request.ImageRequest
 import coil3.request.allowHardware
-import coil3.toBitmap
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.AutoPlaylistSongSortDescendingKey
 import com.ruben.spotitube.constants.AutoPlaylistSongSortType
@@ -119,15 +113,12 @@ import com.ruben.spotitube.ui.component.SongListItem
 import com.ruben.spotitube.ui.component.SortHeader
 import com.ruben.spotitube.ui.menu.SelectionSongMenu
 import com.ruben.spotitube.ui.menu.SongMenu
-import com.ruben.spotitube.ui.theme.PlayerColorExtractor
 import com.ruben.spotitube.ui.utils.ItemWrapper
 import com.ruben.spotitube.utils.makeTimeString
 import com.ruben.spotitube.utils.rememberEnumPreference
 import com.ruben.spotitube.utils.rememberPreference
 import com.ruben.spotitube.viewmodels.AutoPlaylistViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Composable
 fun AutoPlaylistScreen(
@@ -254,48 +245,7 @@ fun AutoPlaylistScreen(
 
     val lazyListState = rememberLazyListState()
 
-    // Gradient colors state for playlist cover
-    var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-
-    // Capture fallback color in composable context
-    val fallbackColor = MaterialTheme.colorScheme.background.toArgb() // Inactivado surface para forzar pure black
-    val surfaceColor = MaterialTheme.colorScheme.background // Inactivado surface para forzar pure black
-
-    // Extract gradient colors from playlist cover (first song thumbnail)
-    LaunchedEffect(songs) {
-        val thumbnailUrl = songs?.firstOrNull()?.song?.thumbnailUrl
-        if (thumbnailUrl != null) {
-            val request = ImageRequest.Builder(context)
-                .data(thumbnailUrl)
-                .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
-                .allowHardware(false)
-                .build()
-
-            val result = runCatching {
-                context.imageLoader.execute(request)
-            }.getOrNull()
-
-            if (result != null) {
-                val bitmap = result.image?.toBitmap()
-                if (bitmap != null) {
-                    val palette = withContext(Dispatchers.Default) {
-                        Palette.from(bitmap)
-                            .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                            .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                            .generate()
-                    }
-
-                    val extractedColors = PlayerColorExtractor.extractGradientColors(
-                        palette = palette,
-                        fallbackColor = fallbackColor
-                    )
-                    gradientColors = extractedColors
-                }
-            }
-        } else {
-            gradientColors = emptyList()
-        }
-    }
+    val surfaceColor = MaterialTheme.colorScheme.background
 
     // Calculate gradient opacity based on scroll position
     val gradientAlpha by remember {
@@ -309,17 +259,6 @@ fun AutoPlaylistScreen(
         }
     }
 
-    val showTopBarTitle by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0
-        }
-    }
-
-    val transparentAppBar by remember {
-        derivedStateOf {
-            !disableBlur && !selection && !showTopBarTitle
-        }
-    }
 
     val headerItems by remember {
         derivedStateOf {
@@ -329,124 +268,22 @@ fun AutoPlaylistScreen(
     }
 
     // System bars padding
-    val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(surfaceColor),
     ) {
-        // Mesh gradient background layer
-        if (!disableBlur && gradientColors.isNotEmpty() && gradientAlpha > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawBehind {
-                        val width = size.width
-                        val height = size.height * 0.55f
-
-                        if (gradientColors.size >= 3) {
-                            val c0 = gradientColors[0]
-                            val c1 = gradientColors[1]
-                            val c2 = gradientColors[2]
-                            val c3 = gradientColors.getOrElse(3) { c0 }
-                            val c4 = gradientColors.getOrElse(4) { c1 }
-                            // Primary color blob - top center
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c0.copy(alpha = gradientAlpha * 0.75f),
-                                        c0.copy(alpha = gradientAlpha * 0.4f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.5f, height * 0.15f),
-                                    radius = width * 0.8f
-                                )
-                            )
-
-                            // Secondary color blob - left side
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c1.copy(alpha = gradientAlpha * 0.55f),
-                                        c1.copy(alpha = gradientAlpha * 0.3f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.1f, height * 0.4f),
-                                    radius = width * 0.6f
-                                )
-                            )
-
-                            // Third color blob - right side
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c2.copy(alpha = gradientAlpha * 0.5f),
-                                        c2.copy(alpha = gradientAlpha * 0.25f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.9f, height * 0.35f),
-                                    radius = width * 0.55f
-                                )
-                            )
-
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c3.copy(alpha = gradientAlpha * 0.35f),
-                                        c3.copy(alpha = gradientAlpha * 0.18f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.25f, height * 0.65f),
-                                    radius = width * 0.75f
-                                )
-                            )
-
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        c4.copy(alpha = gradientAlpha * 0.3f),
-                                        c4.copy(alpha = gradientAlpha * 0.15f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.55f, height * 0.85f),
-                                    radius = width * 0.9f
-                                )
-                            )
-                        } else if (gradientColors.isNotEmpty()) {
-                            drawRect(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        gradientColors[0].copy(alpha = gradientAlpha * 0.7f),
-                                        gradientColors[0].copy(alpha = gradientAlpha * 0.35f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(width * 0.5f, height * 0.25f),
-                                    radius = width * 0.85f
-                                )
-                            )
-                        }
-
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Transparent,
-                                    surfaceColor.copy(alpha = gradientAlpha * 0.22f),
-                                    surfaceColor.copy(alpha = gradientAlpha * 0.55f),
-                                    surfaceColor
-                                ),
-                                startY = size.height * 0.35f,
-                                endY = size.height
-                            )
-                        )
-                    }
-            )
-        }
+        ArmoryArtworkBackdrop(
+            imageUrls = listOf(songs?.firstOrNull()?.song?.thumbnailUrl),
+            alpha = gradientAlpha,
+            enabled = !disableBlur,
+            backgroundColor = surfaceColor
+        )
 
         LazyColumn(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         ) {
             if (songs != null) {
                 if (songs!!.isEmpty()) {
@@ -464,7 +301,7 @@ fun AutoPlaylistScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = systemBarsTopPadding + 48.dp)
+                                    .padding(top = 8.dp)
                                     .padding(horizontal = 24.dp)
                                     .padding(bottom = 16.dp)
                             ) {
@@ -488,21 +325,6 @@ fun AutoPlaylistScreen(
                                             .clip(RoundedCornerShape(16.dp))
                                     )
                                 }
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                // Playlist title
-                                Text(
-                                    text = playlist,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = ArmoryColors.Gold2,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
 
                                 // Metadata chips row
                                 Row(
@@ -807,7 +629,7 @@ fun AutoPlaylistScreen(
             headerItems = headerItems
         )
 
-        ArmoryTopBar(
+        ArmoryScrollTopBar(
             title = {
                 when {
                     selection -> {
@@ -815,7 +637,7 @@ fun AutoPlaylistScreen(
                         Text(
                             text = pluralStringResource(R.plurals.n_song, count, count),
                             style = MaterialTheme.typography.titleLarge,
-                            color = ArmoryColors.Gold2
+                            color = MainHeadingColor
                         )
                     }
                     isSearching -> {
@@ -843,15 +665,19 @@ fun AutoPlaylistScreen(
                                 .focusRequester(focusRequester)
                         )
                     }
-                    showTopBarTitle -> {
+                    else -> {
                         Text(
                             text = playlist,
                             style = MaterialTheme.typography.titleLarge,
-                            color = ArmoryColors.Gold2
+                            color = MainHeadingColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
             },
+            listState = lazyListState,
+            forceOpaque = disableBlur || selection,
             onBack = {
                 when {
                     isSearching -> {
@@ -867,9 +693,8 @@ fun AutoPlaylistScreen(
                     }
                 }
             },
-            overImage = transparentAppBar,
-            opaque = !transparentAppBar,
-            actions = {
+            centerTitle = true,
+            actions = { transparentAppBar ->
                 if (selection) {
                     val count = wrappedSongs.count { it.isSelected }
                     ArmoryIconButton(

@@ -84,6 +84,12 @@ class TogetherOnlineHost(
         }
     }
 
+    suspend fun publishProfile(photoBase64: String) {
+        if (photoBase64.isBlank()) return
+        if (!connected) return
+        runCatching { sessionRef.child("profiles").child(hostId).setValue(photoBase64).await() }
+    }
+
     suspend fun disconnect() {
         var failure: Throwable? = null
         try {
@@ -354,6 +360,7 @@ class TogetherOnlineHost(
         if (removed != null) {
             try {
                 guestsRef.child(uid).removeValue().await()
+                runCatching { sessionRef.child("profiles").child(uid).removeValue().await() }
             } catch (t: Throwable) {
                 onEvent?.invoke(TogetherServerEvent.Error("Failed to remove guest", t))
             }

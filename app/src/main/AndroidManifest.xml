@@ -75,6 +75,7 @@
                 <data android:scheme="armory" android:host="album" />
                 <data android:scheme="armory" android:host="artist" />
                 <data android:scheme="armory" android:host="playlist" />
+                <data android:scheme="armory" android:host="together" />
             </intent-filter>
 
             <intent-filter android:autoVerify="true">

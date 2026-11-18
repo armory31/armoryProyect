@@ -25,8 +25,6 @@ import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.YTItem
 import com.ruben.spotitube.innertube.models.filterVideo
 import com.ruben.spotitube.models.PlaylistSuggestion
-import com.ruben.spotitube.models.PlaylistSuggestionPage
-import com.ruben.spotitube.models.PlaylistSuggestionQuery
 import com.ruben.spotitube.sync.LibraryStateHolder
 import com.ruben.spotitube.sync.SyncManager
 import com.ruben.spotitube.utils.PlaylistSuggestionQueryBuilder
@@ -47,12 +45,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.text.Collator
 import java.util.Locale
@@ -89,7 +84,11 @@ constructor(
             when (sortType) {
                 PlaylistSongSortType.CUSTOM -> songs
                 PlaylistSongSortType.CREATE_DATE -> songs
-                PlaylistSongSortType.NAME -> songs.sortedBy { it.song.title }
+                PlaylistSongSortType.NAME -> {
+                    val collator = Collator.getInstance(Locale.getDefault())
+                    collator.strength = Collator.PRIMARY
+                    songs.sortedWith(compareBy(collator) { it.song.title })
+                }
                 PlaylistSongSortType.ARTIST -> {
                     val collator = Collator.getInstance(Locale.getDefault())
                     collator.strength = Collator.PRIMARY
@@ -98,13 +97,11 @@ constructor(
                 PlaylistSongSortType.PLAY_TIME -> songs
             }.reversed(sortDescending && sortType != PlaylistSongSortType.CUSTOM)
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    
-    private val _viewCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
-    val viewCounts = _viewCounts.asStateFlow()
 
-    private val viewCountsMutex = Mutex()
-    private val viewCountsInFlight = mutableSetOf<String>()
-    private val viewCountsSemaphore = Semaphore(permits = 4)
+    val playlistSongsDbOrder: StateFlow<List<Song>> =
+        database
+            .playlistSongs(playlistId)
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     // Playlist Suggestions State
     private val _playlistSuggestions = MutableStateFlow<PlaylistSuggestion?>(null)
@@ -112,36 +109,23 @@ constructor(
         val songIds = songs.map { it.id }.toSet()
         val filteredItems = suggestions?.items?.filter { it.id !in songIds } ?: emptyList()
         suggestions?.copy(
-            items = filteredItems.take(10)
+            items = filteredItems
         )
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
     
     private val _isLoadingSuggestions = MutableStateFlow(false)
     val isLoadingSuggestions = _isLoadingSuggestions.asStateFlow()
     
-    private val suggestionQueries = MutableStateFlow<List<PlaylistSuggestionQuery>>(emptyList())
-    private val currentSuggestionQueryIndex = MutableStateFlow(0)
     private val suggestionsCacheTimestamp = MutableStateFlow(0L)
-    private val suggestedSongIds = MutableStateFlow<Set<String>>(emptySet())
+
+    private var allPackItems: List<YTItem> = emptyList()
+    private var shownCount = 10
+    private val excludedSongIds = mutableSetOf<String>()
     
     // Mutex to prevent concurrent suggestion loading
     private val suggestionLoadMutex = Mutex()
-    
-    // Cache for current suggestion page
-    private var currentSuggestionPage: PlaylistSuggestionPage? = null
 
     init {
-        viewModelScope.launch {
-            playlistSongs.collect { songs ->
-                prefetchViewCounts(
-                    songs
-                        .asSequence()
-                        .map { it.id }
-                        .toList()
-                )
-            }
-        }
-        
         // Autoload suggestions when playlist or songs change
         viewModelScope.launch {
             combine(playlist, playlistSongs) { playlist, songs ->
@@ -150,51 +134,6 @@ constructor(
                 playlist?.let { 
                     loadPlaylistSuggestions()
                 }
-            }
-        }
-
-        // Auto-refresh suggestions when they become empty
-        viewModelScope.launch {
-            playlistSuggestions.collect { suggestions ->
-                if (suggestions != null && suggestions.items.isEmpty() && suggestions.hasMore && !_isLoadingSuggestions.value) {
-                    loadMoreSuggestions()
-                }
-            }
-        }
-    }
-
-    private fun prefetchViewCounts(videoIds: List<String>) {
-        val uniqueIds = videoIds.distinct().filter { it.isNotBlank() }
-        if (uniqueIds.isEmpty()) return
-
-        viewModelScope.launch(Dispatchers.IO) {
-            coroutineScope {
-                uniqueIds.map { videoId ->
-                    async {
-                        val shouldFetch =
-                            viewCountsMutex.withLock {
-                                if (_viewCounts.value.containsKey(videoId) || viewCountsInFlight.contains(videoId)) {
-                                    false
-                                } else {
-                                    viewCountsInFlight.add(videoId)
-                                    true
-                                }
-                            }
-
-                        if (!shouldFetch) return@async
-
-                        try {
-                            viewCountsSemaphore.withPermit {
-                                val count = YouTube.getMediaInfo(videoId).getOrNull()?.viewCount
-                                if (count != null && count >= 0) {
-                                    _viewCounts.update { current -> current + (videoId to count) }
-                                }
-                            }
-                        } finally {
-                            viewCountsMutex.withLock { viewCountsInFlight.remove(videoId) }
-                        }
-                    }
-                }.awaitAll()
             }
         }
     }
@@ -224,24 +163,17 @@ constructor(
                 
                 _isLoadingSuggestions.value = true
                 
-                // Clear state for refresh
                 _playlistSuggestions.value = null
-                currentSuggestionQueryIndex.value = 0
-                // Keep previously suggested IDs to avoid showing them again on refresh
-                // but ensure songs already in playlist are always included in the filter
-                suggestedSongIds.value += currentSongs.map { it.id }.toSet()
+                allPackItems = emptyList()
+                shownCount = 10
                 suggestionsCacheTimestamp.value = 0L
-                currentSuggestionPage = null
-                
+
                 try {
-                    // Build suggestion queries
                     val queries = PlaylistSuggestionQueryBuilder.buildSuggestionQueries(
                         playlistName = currentPlaylist.playlist.name,
                         playlistSongs = currentSongs
                     )
-                    suggestionQueries.value = queries
-                    suggestionsCacheTimestamp.value = System.currentTimeMillis()
-                    
+
                     if (queries.isEmpty()) {
                         _playlistSuggestions.value = PlaylistSuggestion(
                             items = emptyList(),
@@ -254,9 +186,31 @@ constructor(
                         return@withLock
                     }
                     
-                    // Load first page of suggestions
-                    loadNextSuggestionPage()
+                    val currentSongIds = currentSongs.map { it.id }.toSet()
+                    val rawItems = coroutineScope {
+                        queries.map { suggestionQuery ->
+                            async {
+                                YouTube.search(suggestionQuery.query, YouTube.SearchFilter.FILTER_SONG).getOrNull()?.items ?: emptyList()
+                            }
+                        }.awaitAll().flatten()
+                    }
+
+                    val filteredItems = filterSuggestionItems(rawItems, currentSongIds)
+                    val shuffledPack = filteredItems.shuffled()
+
+                    allPackItems = shuffledPack
+                    shuffledPack.forEach { excludedSongIds.add(it.id) }
+
+                    suggestionsCacheTimestamp.value = System.currentTimeMillis()
                     
+                    _playlistSuggestions.value = PlaylistSuggestion(
+                        items = allPackItems.take(shownCount),
+                        continuation = null,
+                        currentQueryIndex = 0,
+                        totalQueries = queries.size,
+                        query = queries.firstOrNull()?.query ?: "",
+                        hasMore = allPackItems.size > shownCount
+                    )
                 } catch (e: Exception) {
                     reportException(e)
                     if (_playlistSuggestions.value == null) {
@@ -280,36 +234,21 @@ constructor(
         viewModelScope.launch {
             suggestionLoadMutex.withLock {
                 if (_isLoadingSuggestions.value) return@withLock
-                
                 val currentSuggestions = _playlistSuggestions.value ?: return@withLock
-                val queries = suggestionQueries.value
-                
-                try {
-                    // If we have a continuation, load more from current query
-                    currentSuggestionPage?.continuation?.let { continuation ->
-                        _isLoadingSuggestions.value = true
-                        loadMoreFromContinuation(continuation)
-                        return@withLock
-                    }
-                    
-                    // Otherwise, move to next query
-                    val nextIndex = currentSuggestionQueryIndex.value + 1
-                    if (nextIndex < queries.size) {
-                        _isLoadingSuggestions.value = true
-                        currentSuggestionQueryIndex.value = nextIndex
-                        loadNextSuggestionPage()
-                    } else {
-                        // No more queries and no continuation
-                        _playlistSuggestions.value = currentSuggestions.copy(hasMore = false)
-                    }
-                } finally {
-                    _isLoadingSuggestions.value = false
-                }
+
+                shownCount += 10
+                val newItems = allPackItems.take(shownCount)
+                _playlistSuggestions.value = currentSuggestions.copy(
+                    items = newItems,
+                    hasMore = allPackItems.size > shownCount
+                )
             }
         }
     }
     
     fun resetAndLoadPlaylistSuggestions() {
+        allPackItems = emptyList()
+        shownCount = 10
         loadPlaylistSuggestions(forceReset = true)
     }
     
@@ -317,7 +256,7 @@ constructor(
      * Mark a suggested song as added to prevent it from appearing again
      */
     fun markSuggestionAsAdded(songId: String) {
-        suggestedSongIds.value += songId
+        excludedSongIds.add(songId)
         
         // Also remove from current suggestions list
         val currentSuggestions = _playlistSuggestions.value
@@ -383,8 +322,8 @@ constructor(
                 return false
             }
             
-            // Update suggested song IDs to avoid duplicates
-            suggestedSongIds.value += song.id
+            // Update excluded song IDs to avoid duplicates
+            excludedSongIds.add(song.id)
             
             true
         } catch (e: Exception) {
@@ -392,132 +331,15 @@ constructor(
             false
         }
     }
-    
-    private suspend fun loadNextSuggestionPage() {
-        val queries = suggestionQueries.value
-        val currentIndex = currentSuggestionQueryIndex.value
-        
-        if (currentIndex >= queries.size) return
-        
-        val currentQuery = queries[currentIndex]
-        
-        try {
-            val searchFilter = YouTube.SearchFilter.FILTER_SONG
-            
-            val result = YouTube.search(currentQuery.query, searchFilter).getOrNull()
-                ?: return
-            
-            val filteredItems = filterSuggestionItems(result.items).shuffled().take(10)
-            
-            // If we got no new items after filtering, try to load more if available
-            if (filteredItems.isEmpty() && (result.continuation != null || currentIndex < queries.size - 1)) {
-                result.continuation?.let { continuationValue ->
-                    loadMoreFromContinuation(continuationValue)
-                } ?: run {
-                    currentSuggestionQueryIndex.value = currentIndex + 1
-                    loadNextSuggestionPage()
-                }
-                return
-            }
-            
-            currentSuggestionPage = PlaylistSuggestionPage(
-                items = filteredItems,
-                continuation = result.continuation
-            )
 
-            // Update suggested song IDs to avoid duplicates
-            val newIds = filteredItems.map { item: YTItem -> item.id }.toSet()
-            suggestedSongIds.value += newIds
-
-            // Update suggestions state
-            val currentSuggestions = _playlistSuggestions.value
-            val newSuggestions = if (currentSuggestions == null) {
-                filteredItems
-            } else {
-                currentSuggestions.items + filteredItems
-            }
-            
-            _playlistSuggestions.value = PlaylistSuggestion(
-                items = newSuggestions,
-                continuation = result.continuation,
-                currentQueryIndex = currentIndex,
-                totalQueries = queries.size,
-                query = currentQuery.query,
-                hasMore = result.continuation != null || currentIndex < queries.size - 1
-            )
-            
-        } catch (e: Exception) {
-            reportException(e)
-        }
-    }
-    
-    private suspend fun loadMoreFromContinuation(continuation: String) {
-        try {
-            val result = YouTube.searchContinuation(continuation).getOrNull()
-                ?: return
-            
-            val filteredItems = filterSuggestionItems(result.items).shuffled().take(10)
-            
-            // If we got no new items after filtering, try to move to next query if available
-            if (filteredItems.isEmpty()) {
-                val currentSuggestions = _playlistSuggestions.value
-                val queries = suggestionQueries.value
-                val currentIndex = currentSuggestionQueryIndex.value
-                
-                result.continuation?.let { continuationValue ->
-                    loadMoreFromContinuation(continuationValue)
-                } ?: run {
-                    if (currentIndex < queries.size - 1) {
-                        currentSuggestionQueryIndex.value = currentIndex + 1
-                        loadNextSuggestionPage()
-                    } else {
-                        // No more items and no more queries
-                        if (currentSuggestions != null) {
-                            _playlistSuggestions.value = currentSuggestions.copy(hasMore = false)
-                        }
-                    }
-                }
-                return
-            }
-            
-            currentSuggestionPage = PlaylistSuggestionPage(
-                items = filteredItems,
-                continuation = result.continuation
-            )
-            
-            // Update suggested song IDs to avoid duplicates
-            val moreIds = filteredItems.map { item: YTItem -> item.id }.toSet()
-            suggestedSongIds.value += moreIds
-            
-            // Update suggestions state
-            val currentSuggestions = _playlistSuggestions.value
-            if (currentSuggestions == null) {
-                _playlistSuggestions.value = PlaylistSuggestion(
-                    items = filteredItems,
-                    continuation = result.continuation,
-                    currentQueryIndex = currentSuggestionQueryIndex.value,
-                    totalQueries = suggestionQueries.value.size,
-                    query = suggestionQueries.value.getOrNull(currentSuggestionQueryIndex.value)?.query ?: "",
-                    hasMore = result.continuation != null || currentSuggestionQueryIndex.value < suggestionQueries.value.size - 1
-                )
-            } else {
-                _playlistSuggestions.value = currentSuggestions.copy(
-                    items = currentSuggestions.items + filteredItems,
-                    continuation = result.continuation,
-                    hasMore = result.continuation != null || currentSuggestions.currentQueryIndex < suggestionQueries.value.size - 1
-                )
-            }
-        } catch (e: Exception) {
-            reportException(e)
-        }
-    }
-
-    private suspend fun filterSuggestionItems(items: List<YTItem>): List<YTItem> {
+    private suspend fun filterSuggestionItems(items: List<YTItem>, currentSongIds: Set<String>): List<YTItem> {
         val hideVideos = context.dataStore.data.first()[HideVideoKey] ?: false
 
-        var filteredItems = items.filter { item ->
-            item.id !in suggestedSongIds.value
-        }
+        var filteredItems = items
+            .distinctBy { it.id }
+            .filter { item ->
+                item.id !in currentSongIds && item.id !in excludedSongIds
+            }
 
         if (hideVideos) {
             filteredItems = filteredItems.filterVideo()

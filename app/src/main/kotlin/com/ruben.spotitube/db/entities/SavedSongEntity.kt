@@ -32,15 +32,18 @@ data class SavedSongEntity(
     var artistNormalized: String = normalizeForSearch(artistName)
 
     fun toSong(): Song {
-        val artistEntity = artistName?.let {
-            SavedArtistEntity(
-                id = artistId ?: "",
-                name = it
-            )
-        }
+        val artistsList = artistName?.split(", ")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.mapIndexed { index, name ->
+                SavedArtistEntity(
+                    id = if (index == 0) artistId ?: "" else "",
+                    name = name
+                )
+            }.orEmpty()
         return Song(
             song = this,
-            artists = if (artistEntity != null) listOf(artistEntity) else emptyList()
+            artists = artistsList
         )
     }
 }

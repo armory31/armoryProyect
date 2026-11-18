@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
 
 @Composable

@@ -1,6 +1,5 @@
 package com.ruben.spotitube
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -16,13 +15,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,12 +53,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +69,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.ruben.spotitube.constants.AccountAvatarUriKey
+import com.ruben.spotitube.constants.AccountNameKey
 import com.ruben.spotitube.utils.SessionManager
 import com.ruben.spotitube.utils.rememberPreference
 import androidx.compose.ui.unit.sp
@@ -74,6 +80,119 @@ import coil3.request.crossfade
 import com.ruben.spotitube.models.MediaMetadata
 
 enum class PlayerStatus { PLAYING, PAUSED, LOADING }
+
+private fun scrollTopBarState(
+    listState: LazyListState,
+    forceOpaque: Boolean,
+    fadeDistance: Float
+): ArmoryScrollTopBarState {
+    val alpha = when {
+        forceOpaque -> 1f
+        listState.firstVisibleItemIndex > 0 -> 1f
+        else -> (listState.firstVisibleItemScrollOffset / fadeDistance)
+            .coerceIn(0f, 1f)
+    }
+    return ArmoryScrollTopBarState(
+        backgroundAlpha = alpha,
+        overImage = !forceOpaque &&
+            listState.firstVisibleItemIndex == 0 &&
+            listState.firstVisibleItemScrollOffset == 0
+    )
+}
+
+data class ArmoryScrollTopBarState(
+    val backgroundAlpha: Float,
+    val overImage: Boolean
+)
+
+@Composable
+fun ArmoryScrollTopBar(
+    title: @Composable () -> Unit,
+    listState: LazyListState,
+    forceOpaque: Boolean,
+    onBack: (() -> Unit)? = null,
+    centerTitle: Boolean = false,
+    actions: @Composable RowScope.(overImage: Boolean) -> Unit = {}
+) {
+    val fadeDistance = with(LocalDensity.current) { 360.dp.toPx() }
+    val state by remember(listState, fadeDistance, forceOpaque) {
+        derivedStateOf {
+            scrollTopBarState(listState, forceOpaque, fadeDistance)
+        }
+    }
+    ArmoryTopBar(
+        title = title,
+        onBack = onBack,
+        overImage = state.overImage,
+        opaque = state.backgroundAlpha >= 1f,
+        centerTitle = centerTitle,
+        containerAlpha = state.backgroundAlpha,
+        actions = { actions(state.overImage) }
+    )
+}
+
+@Composable
+fun ArmoryArtworkBackdrop(
+    imageUrls: List<String?>,
+    alpha: Float,
+    enabled: Boolean,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val artworkUrls = remember(imageUrls) {
+        imageUrls.filterNotNull().filter(String::isNotBlank).take(4)
+    }
+
+    Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+        if (enabled && artworkUrls.isNotEmpty() && alpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .align(Alignment.TopCenter)
+                    .graphicsLayer { this.alpha = alpha }
+            ) {
+                val positions = listOf(
+                    Alignment.TopStart,
+                    Alignment.TopEnd,
+                    Alignment.BottomStart,
+                    Alignment.BottomEnd
+                )
+                artworkUrls.forEachIndexed { index, url ->
+                    AsyncImage(
+                        model = url,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = Modifier
+                            .then(
+                                if (artworkUrls.size == 1) Modifier.fillMaxSize()
+                                else Modifier
+                                    .align(positions[index])
+                                    .fillMaxWidth(0.5f)
+                                    .fillMaxHeight(0.5f)
+                            )
+                            .blur(36.dp)
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { this.alpha = alpha }
+                    .background(
+                        Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0f to Color.Transparent,
+                                0.55f to Color.Transparent,
+                                0.82f to backgroundColor.copy(alpha = 0.65f),
+                                1f to backgroundColor
+                            )
+                        )
+                    )
+            )
+        }
+    }
+}
 
 // ── Thumbnail con Estilo ARMORY ──────────────────────────────────────────────
 @Composable
@@ -103,6 +222,20 @@ fun rememberAvatarUrl(): String? {
         }
     }
     return rawUrl.takeIf { it.isNotBlank() }
+}
+
+@Composable
+fun rememberAccountName(): String {
+    val context = LocalContext.current
+    val session = remember(context) { SessionManager(context) }
+    val (accountNamePref) = rememberPreference(AccountNameKey, "")
+    val currentUser = remember { FirebaseAuth.getInstance().currentUser }
+
+    return session.getNombre().takeIf { it.isNotBlank() && it != "Usuario" }
+        ?: accountNamePref.takeIf { it.isNotBlank() }
+        ?: currentUser?.displayName?.takeIf { it.isNotBlank() }
+        ?: currentUser?.email?.substringBefore("@")?.takeIf { it.isNotBlank() }
+        ?: "Usuario"
 }
 
 // ── Header ARMORY ───────────────────────────────────────────────────────────
@@ -153,7 +286,6 @@ fun ArmoryHeader(
                     onClick = onSettings,
                     modifier = Modifier.size(40.dp).border(1.dp, ArmoryColors.SurfaceBorder, CircleShape)
                 ) {
-                    Log.d("AvatarDbg", "avatarUrl=[$avatarUrl] nullOrBlank=${avatarUrl.isNullOrBlank()}") // TEMP-DEBUG
                     if (avatarUrl.isNullOrBlank()) {
                         ArmoryIcon(Icons.Filled.Person, "Cuenta")
                     } else {
@@ -162,8 +294,6 @@ fun ArmoryHeader(
                             contentDescription = "Cuenta",
                             modifier = Modifier.size(28.dp).clip(CircleShape),
                             contentScale = ContentScale.Crop,
-                            onError = { Log.d("AvatarDbg", "ERROR: ${it.result.throwable}") }, // TEMP-DEBUG
-                            onSuccess = { Log.d("AvatarDbg", "OK") }, // TEMP-DEBUG
                             error = { ArmoryIcon(Icons.Filled.Person, "Cuenta") },
                         )
                     }

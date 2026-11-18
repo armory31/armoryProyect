@@ -55,19 +55,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.ui.LocalDatabase
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.ui.component.CreatePlaylistDialog
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.PlaylistListItem
-import com.ruben.spotitube.utils.HistoryItemMemoryCache
-import com.ruben.spotitube.utils.rememberPreference
+import com.ruben.spotitube.utils.SongItemMemoryCache
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.milliseconds
 
 internal fun playlistsForAddToPlaylist(playlists: List<Playlist>): List<Playlist> =
     playlists.filter { it.playlist.isEditable }
@@ -112,8 +109,8 @@ fun AddToPlaylistDialog(
                     explicit = meta.explicit
                 )
             } else {
-                val songItem = HistoryItemMemoryCache.get(meta.id)
-                    ?: com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(listOf(meta.id), timeoutMs = 3000L)[meta.id]
+                val songItem = SongItemMemoryCache.get(meta.id)
+                    ?: com.ruben.spotitube.utils.SongMetadataLoader.resolve(listOf(meta.id), timeoutMs = 3000L)[meta.id]
                 songItem?.let {
                     com.ruben.spotitube.db.entities.PlaylistSongItem(
                         id = it.id,

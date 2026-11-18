@@ -120,6 +120,7 @@ fun LibraryArtistsScreen(
                         ArtistSortType.NAME -> R.string.sort_by_name
                         ArtistSortType.SONG_COUNT -> R.string.sort_by_song_count
                         ArtistSortType.PLAY_TIME -> R.string.sort_by_play_time
+                        ArtistSortType.CUSTOM -> R.string.sort_by_custom
                     }
                 },
             )

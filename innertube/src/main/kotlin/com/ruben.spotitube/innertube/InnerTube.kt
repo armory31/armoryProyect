@@ -11,7 +11,6 @@ package com.ruben.spotitube.innertube
 import com.ruben.spotitube.innertube.models.Context
 import com.ruben.spotitube.innertube.models.MediaInfo
 import com.ruben.spotitube.innertube.models.PlaylistDeleteBody
-import com.ruben.spotitube.innertube.models.ReturnYouTubeDislikeResponse
 import com.ruben.spotitube.innertube.models.YouTubeClient
 import com.ruben.spotitube.innertube.models.YouTubeLocale
 import com.ruben.spotitube.innertube.models.body.*
@@ -578,13 +577,6 @@ class InnerTube {
         }
     }
 
-    private suspend fun returnYouTubeDislike(videoId: String) = withRetry {
-        httpClient.get("https://returnyoutubedislikeapi.com/Votes?videoId=$videoId") {
-            contentType(ContentType.Application.Json)
-        }
-    }
-
-
     suspend fun getMediaInfo(videoId: String): Result<MediaInfo> =
         runCatching {
             val response = next(client = YouTubeClient.WEB, videoId, null, null, null, null, null).body<NextResponse>()
@@ -606,9 +598,6 @@ class InnerTube {
                     ?.find {
                         it?.videoPrimaryInfoRenderer != null
                     }?.videoPrimaryInfoRenderer
-
-            val returnYouTubeDislikeResponse =
-                returnYouTubeDislike(videoId).body<ReturnYouTubeDislikeResponse>()
 
             return@runCatching MediaInfo(
                 videoId = videoId,
@@ -649,9 +638,6 @@ class InnerTube {
                         ?.subscriberCountText
                         ?.simpleText?.split(" ")?.firstOrNull(),
                 uploadDate = baseForTitle?.dateText?.simpleText,
-                viewCount = returnYouTubeDislikeResponse.viewCount,
-                like = returnYouTubeDislikeResponse.likes,
-                dislike = returnYouTubeDislikeResponse.dislikes,
             )
 
         }

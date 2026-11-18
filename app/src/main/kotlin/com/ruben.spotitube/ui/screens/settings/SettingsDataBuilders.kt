@@ -125,16 +125,6 @@ fun buildSettingsGroups(
                     }
                     add(
                         SettingsItem(
-                            icon = painterResource(R.drawable.experiment),
-                            title = stringResource(R.string.experiment_settings),
-                            subtitle = stringResource(R.string.misc),
-                            accentColor = MaterialTheme.colorScheme.tertiary,
-                            keywords = listOf("experimental", "debug", "developer", "labs", "internal"),
-                            onClick = { resetSearch(); navController.navigate("settings/misc") },
-                        ),
-                    )
-                    add(
-                        SettingsItem(
                             icon = painterResource(R.drawable.update),
                             title = stringResource(R.string.updates),
                             subtitle = if (hasUpdate) {

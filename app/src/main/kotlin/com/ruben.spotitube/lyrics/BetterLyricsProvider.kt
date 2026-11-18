@@ -9,17 +9,16 @@
 package com.ruben.spotitube.lyrics
 
 import android.content.Context
-import android.util.Log
 import com.ruben.spotitube.betterlyrics.BetterLyrics
 import com.ruben.spotitube.constants.EnableBetterLyricsKey
-import com.ruben.spotitube.utils.GlobalLog
 import com.ruben.spotitube.utils.dataStore
 import com.ruben.spotitube.utils.get
+import timber.log.Timber
 
 object BetterLyricsProvider : LyricsProvider {
     init {
         BetterLyrics.logger = { message ->
-            GlobalLog.append(Log.INFO, "BetterLyrics", message)
+            Timber.tag("BetterLyrics").i(message)
         }
     }
 

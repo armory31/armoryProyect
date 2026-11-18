@@ -44,7 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.AppTypography
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.ArmoryHeader
 import com.ruben.spotitube.rememberAvatarUrl
 import com.ruben.spotitube.ui.component.shimmer.ShimmerHost

@@ -31,7 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.ui.LocalDatabase
 import com.ruben.spotitube.R
 import com.ruben.spotitube.db.entities.SavedPlaylistEntity
 import com.ruben.spotitube.ui.component.DefaultDialog
@@ -158,7 +158,7 @@ fun ImportPlaylistDialog(
 
                         val playlist = database.playlist(playlistId).firstOrNull()
                         if (playlist != null) {
-                            val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(ids, timeoutMs = 5000L)
+                            val resolvedMap = com.ruben.spotitube.utils.SongMetadataLoader.resolve(ids, timeoutMs = 5000L)
                             val items = ids.mapNotNull { id ->
                                 resolvedMap[id]?.let { songItem ->
                                     com.ruben.spotitube.db.entities.PlaylistSongItem(
@@ -247,7 +247,7 @@ fun ImportPlaylistDialog(
                                     if (newSongIds.isEmpty()) {
                                         showMessage(context.getString(R.string.playlist_synced))
                                     } else {
-                                        val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(newSongIds, timeoutMs = 5000L)
+                                        val resolvedMap = com.ruben.spotitube.utils.SongMetadataLoader.resolve(newSongIds, timeoutMs = 5000L)
                                         val items = newSongIds.mapNotNull { id ->
                                             resolvedMap[id]?.let { songItem ->
                                                 com.ruben.spotitube.db.entities.PlaylistSongItem(
@@ -313,7 +313,7 @@ fun ImportPlaylistDialog(
 
                                 val playlist = database.playlist(playlistId).firstOrNull()
                                 if (playlist != null) {
-                                    val resolvedMap = com.ruben.spotitube.utils.HistoryMetadataLoader.resolve(ids, timeoutMs = 5000L)
+                                    val resolvedMap = com.ruben.spotitube.utils.SongMetadataLoader.resolve(ids, timeoutMs = 5000L)
                                     val items = ids.mapNotNull { id ->
                                         resolvedMap[id]?.let { songItem ->
                                             com.ruben.spotitube.db.entities.PlaylistSongItem(

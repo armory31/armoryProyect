@@ -38,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,11 +49,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.offline.Download
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalDownloadUtil
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
-import com.ruben.spotitube.LocalSyncManager
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalDownloadUtil
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.SpeedDialSongIdsKey
 import com.ruben.spotitube.utils.rememberPreference
@@ -165,7 +164,7 @@ fun PlaylistMenu(
         EditPlaylistDialog(
             initialName = playlist.playlist.name,
             initialThumbnailUrl = playlist.playlist.thumbnailUrl,
-            fallbackThumbnails = playlist.songThumbnails.filterNotNull(),
+            fallbackThumbnails = songs.mapNotNull { it.song.thumbnailUrl }.distinct(),
             onDismiss = { showEditDialog = false },
             onSave = { name, thumbnailUrl ->
                 onDismiss()

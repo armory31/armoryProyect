@@ -62,7 +62,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -71,7 +70,6 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.Player
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.R
-import com.ruben.spotitube.db.entities.FormatEntity
 import com.ruben.spotitube.models.MediaMetadata
 import com.ruben.spotitube.ui.component.ActionPromptDialog
 import com.ruben.spotitube.ui.component.BottomSheetState
@@ -400,52 +398,13 @@ fun SleepTimerDialog(
     )
 }
 
-/**
- * Codec information row displayed when showCodecOnPlayer is enabled.
- */
-@Composable
-fun CodecInfoRow(
-    codec: String,
-    bitrate: String,
-    fileSize: String,
-    textColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 30.dp, end = 30.dp, top = 6.dp, bottom = 2.dp)
-    ) {
-        Text(
-            text = buildString {
-                append(codec)
-                if (bitrate != "Unknown") {
-                    append(" • ")
-                    append(bitrate)
-                }
-                if (fileSize.isNotEmpty()) {
-                    append(" • ")
-                    append(fileSize)
-                }
-            },
-            style = MaterialTheme.typography.labelSmall,
-            fontFamily = FontFamily.Monospace,
-            color = textColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
+
 
 /**
  * V2 Design Style collapsed queue content.
  */
 @Composable
 fun QueueCollapsedContentV2(
-    showCodecOnPlayer: Boolean,
-    currentFormat: FormatEntity?,
     textBackgroundColor: Color,
     textButtonColor: Color,
     iconButtonColor: Color,
@@ -461,54 +420,6 @@ fun QueueCollapsedContentV2(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (showCodecOnPlayer && currentFormat != null) {
-            val codec =
-                currentFormat.codecs
-                    .takeIf { it.isNotBlank() }
-                    ?: currentFormat.mimeType.substringAfter("/", missingDelimiterValue = currentFormat.mimeType).uppercase()
-
-            val container =
-                currentFormat.mimeType.substringAfter("/", missingDelimiterValue = currentFormat.mimeType).uppercase()
-
-            val codecLabel =
-                if (container.isNotBlank() && !codec.equals(container, ignoreCase = true)) {
-                    "$codec ($container)"
-                } else {
-                    codec
-                }
-
-            val bitrate =
-                if (currentFormat.bitrate > 0) {
-                    "${currentFormat.bitrate / 1000} kbps"
-                } else {
-                    "Unknown"
-                }
-
-            val sampleRateText =
-                currentFormat.sampleRate?.takeIf { it > 0 }?.let { sampleRate ->
-                    val khz = (sampleRate / 100.0).roundToInt() / 10.0
-                    "$khz kHz"
-                }
-
-            val fileSizeText =
-                if (currentFormat.contentLength > 0) {
-                    "${(currentFormat.contentLength / 1024.0 / 1024.0).roundToInt()} MB"
-                } else {
-                    ""
-                }
-
-            val extraText =
-                listOfNotNull(sampleRateText, fileSizeText.takeIf { it.isNotBlank() })
-                    .joinToString(separator = " • ")
-
-            CodecInfoRow(
-                codec = codecLabel,
-                bitrate = bitrate,
-                fileSize = extraText,
-                textColor = textBackgroundColor.copy(alpha = 0.7f),
-            )
-        }
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -679,8 +590,6 @@ fun QueueCollapsedContentV2(
  */
 @Composable
 fun QueueCollapsedContentV3(
-    showCodecOnPlayer: Boolean,
-    currentFormat: FormatEntity?,
     textBackgroundColor: Color,
     sleepTimerEnabled: Boolean,
     sleepTimerTimeLeft: Long,
@@ -691,18 +600,6 @@ fun QueueCollapsedContentV3(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (showCodecOnPlayer && currentFormat != null) {
-            val codec = currentFormat.mimeType.substringAfter("/").uppercase()
-            val bitrate = "${currentFormat.bitrate / 1000} kbps"
-
-            CodecInfoRow(
-                codec = codec,
-                bitrate = bitrate,
-                fileSize = "",
-                textColor = textBackgroundColor.copy(alpha = 0.5f)
-            )
-        }
-
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
@@ -823,8 +720,6 @@ fun QueueCollapsedContentV3(
  */
 @Composable
 fun QueueCollapsedContentV1(
-    showCodecOnPlayer: Boolean,
-    currentFormat: FormatEntity?,
     textBackgroundColor: Color,
     sleepTimerEnabled: Boolean,
     sleepTimerTimeLeft: Long,
@@ -834,21 +729,6 @@ fun QueueCollapsedContentV1(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (showCodecOnPlayer && currentFormat != null) {
-            val codec = currentFormat.mimeType.substringAfter("/").uppercase()
-            val bitrate = "${currentFormat.bitrate / 1000} kbps"
-            val fileSize = if (currentFormat.contentLength > 0) {
-                "${(currentFormat.contentLength / 1024.0 / 1024.0).roundToInt()} MB"
-            } else ""
-
-            CodecInfoRow(
-                codec = codec,
-                bitrate = bitrate,
-                fileSize = fileSize,
-                textColor = textBackgroundColor.copy(alpha = 0.7f)
-            )
-        }
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -968,8 +848,6 @@ fun QueueCollapsedContentV1(
  */
 @Composable
 fun QueueCollapsedContentV4(
-    showCodecOnPlayer: Boolean,
-    currentFormat: FormatEntity?,
     textBackgroundColor: Color,
     textButtonColor: Color,
     iconButtonColor: Color,
@@ -982,21 +860,6 @@ fun QueueCollapsedContentV4(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (showCodecOnPlayer && currentFormat != null) {
-            val codec = currentFormat.mimeType.substringAfter("/").uppercase()
-            val bitrate = "${currentFormat.bitrate / 1000} kbps"
-            val fileSize = if (currentFormat.contentLength > 0) {
-                "${(currentFormat.contentLength / 1024.0 / 1024.0).roundToInt()} MB"
-            } else ""
-
-            CodecInfoRow(
-                codec = codec,
-                bitrate = bitrate,
-                fileSize = fileSize,
-                textColor = textBackgroundColor.copy(alpha = 0.6f)
-            )
-        }
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -1122,8 +985,6 @@ fun QueueCollapsedContentV4(
 
 @Composable
 fun QueueCollapsedContentV7(
-    showCodecOnPlayer: Boolean,
-    currentFormat: FormatEntity?,
     textBackgroundColor: Color,
     onExpandQueue: () -> Unit,
     onShowLyrics: () -> Unit,
@@ -1132,21 +993,6 @@ fun QueueCollapsedContentV7(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (showCodecOnPlayer && currentFormat != null) {
-            val codec = currentFormat.mimeType.substringAfter("/").uppercase()
-            val bitrate = "${currentFormat.bitrate / 1000} kbps"
-            val fileSize = if (currentFormat.contentLength > 0) {
-                "${(currentFormat.contentLength / 1024.0 / 1024.0).roundToInt()} MB"
-            } else ""
-
-            CodecInfoRow(
-                codec = codec,
-                bitrate = bitrate,
-                fileSize = fileSize,
-                textColor = textBackgroundColor.copy(alpha = 0.6f)
-            )
-        }
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,

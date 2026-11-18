@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import com.ruben.spotitube.LocalDatabase
+import com.ruben.spotitube.ui.LocalDatabase
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.ListThumbnailSize
 import com.ruben.spotitube.db.entities.Playlist
@@ -47,6 +47,7 @@ import com.ruben.spotitube.db.entities.Song
 import com.ruben.spotitube.innertube.YouTube
 import com.ruben.spotitube.innertube.models.SongItem
 import com.ruben.spotitube.models.toSavedSongEntity
+import com.ruben.spotitube.ui.LocalSyncManager
 import com.ruben.spotitube.ui.component.CreatePlaylistDialog
 import com.ruben.spotitube.ui.component.DefaultDialog
 import com.ruben.spotitube.ui.component.ListDialog
@@ -76,7 +77,7 @@ fun AddToPlaylistDialogOnline(
     onStatusChange: (String) -> Unit = {}
 ) {
     val database = LocalDatabase.current
-    val syncManager = com.ruben.spotitube.LocalSyncManager.current
+    val syncManager = LocalSyncManager.current
     val coroutineScope = rememberCoroutineScope()
     var allPlaylists by remember { mutableStateOf(emptyList<Playlist>()) }
     val playlists = remember(allPlaylists) { playlistsForAddToPlaylist(allPlaylists).asReversed() }

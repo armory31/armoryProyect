@@ -19,11 +19,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
+import com.ruben.spotitube.constants.AlbumCustomOrderKey
 import com.ruben.spotitube.constants.AlbumFilter
 import com.ruben.spotitube.constants.AlbumFilterKey
 import com.ruben.spotitube.constants.AlbumSortDescendingKey
 import com.ruben.spotitube.constants.AlbumSortType
 import com.ruben.spotitube.constants.AlbumSortTypeKey
+import com.ruben.spotitube.constants.ArtistCustomOrderKey
 import com.ruben.spotitube.constants.ArtistFilter
 import com.ruben.spotitube.constants.ArtistFilterKey
 import com.ruben.spotitube.constants.ArtistSongSortDescendingKey
@@ -35,9 +37,11 @@ import com.ruben.spotitube.constants.ArtistSortTypeKey
 import com.ruben.spotitube.constants.HideExplicitKey
 import com.ruben.spotitube.constants.HideVideoKey
 import com.ruben.spotitube.constants.LibraryFilter
+import com.ruben.spotitube.constants.PlaylistCustomOrderKey
 import com.ruben.spotitube.constants.PlaylistSortDescendingKey
 import com.ruben.spotitube.constants.PlaylistSortType
 import com.ruben.spotitube.constants.PlaylistSortTypeKey
+import androidx.datastore.preferences.core.edit
 import com.ruben.spotitube.constants.SongFilter
 import com.ruben.spotitube.constants.SongFilterKey
 import com.ruben.spotitube.constants.SongSortDescendingKey
@@ -65,7 +69,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -126,7 +129,7 @@ constructor(
 class LibraryArtistsViewModel
 @Inject
 constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     database: MusicDatabase,
     private val libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
@@ -136,13 +139,17 @@ constructor(
     val allArtists =
         context.dataStore.data
             .map {
-                Triple(
-                    it[ArtistFilterKey].toEnum(ArtistFilter.SAVED),
-                    it[ArtistSortTypeKey].toEnum(ArtistSortType.CREATE_DATE),
-                    it[ArtistSortDescendingKey] ?: true,
+                Pair(
+                    Triple(
+                        it[ArtistFilterKey].toEnum(ArtistFilter.SAVED),
+                        it[ArtistSortTypeKey].toEnum(ArtistSortType.CREATE_DATE),
+                        it[ArtistSortDescendingKey] ?: true,
+                    ),
+                    it[ArtistCustomOrderKey] ?: "",
                 )
             }.distinctUntilChanged()
-            .flatMapLatest { (filter, sortType, descending) ->
+            .flatMapLatest { (filterSort, orderString) ->
+                val (filter, sortType, descending) = filterSort
                 when (filter) {
                     ArtistFilter.LIBRARY,
                     ArtistFilter.SAVED -> libraryStateHolder.getLibraryArtists().map { artists ->
@@ -151,17 +158,33 @@ constructor(
                             ArtistSortType.NAME -> artists.sortedBy { it.artist.name }
                             ArtistSortType.SONG_COUNT -> artists.sortedBy { it.songCount }
                             ArtistSortType.PLAY_TIME -> artists.sortedBy { it.timeListened ?: 0 }
-                        }.let { if (descending) it.reversed() else it }
+                            ArtistSortType.CUSTOM -> {
+                                if (orderString.isNotEmpty()) {
+                                    val orderMap = orderString.split(",").withIndex().associate { it.value to it.index }
+                                    artists.sortedBy { orderMap[it.id] ?: Int.MAX_VALUE }
+                                } else {
+                                    artists
+                                }
+                            }
+                        }.let { if (descending && sortType != ArtistSortType.CUSTOM) it.reversed() else it }
                     }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun saveArtistOrder(ids: List<String>) {
+        viewModelScope.launch {
+            context.dataStore.edit {
+                it[ArtistCustomOrderKey] = ids.joinToString(",")
+            }
+        }
+    }
 }
 
 @HiltViewModel
 class LibraryAlbumsViewModel
 @Inject
 constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     database: MusicDatabase,
     downloadUtil: DownloadUtil,
     private val libraryStateHolder: LibraryStateHolder
@@ -172,16 +195,17 @@ constructor(
     val allAlbums =
         context.dataStore.data
             .map {
-                Pair(
+                Triple(
                     Triple(
                         it[AlbumFilterKey].toEnum(AlbumFilter.SAVED),
                         it[AlbumSortTypeKey].toEnum(AlbumSortType.CREATE_DATE),
                         it[AlbumSortDescendingKey] ?: true,
                     ),
+                    it[AlbumCustomOrderKey] ?: "",
                     it[HideExplicitKey] ?: false
                 )
             }.distinctUntilChanged()
-            .flatMapLatest { (filterSort, hideExplicit) ->
+            .flatMapLatest { (filterSort, orderString, hideExplicit) ->
                 val (filter, sortType, descending) = filterSort
                 when (filter) {
                     AlbumFilter.DOWNLOADED ->
@@ -223,7 +247,15 @@ constructor(
                             AlbumSortType.LENGTH -> albums.sortedBy { it.album.duration }
                             AlbumSortType.PLAY_TIME -> albums.sortedBy { it.timeListened ?: 0L }
                             AlbumSortType.ARTIST -> albums.sortedBy { it.artists.joinToString { a -> a.name } }
-                        }.let { if (descending) it.reversed() else it }
+                            AlbumSortType.CUSTOM -> {
+                                if (orderString.isNotEmpty()) {
+                                    val orderMap = orderString.split(",").withIndex().associate { it.value to it.index }
+                                    albums.sortedBy { orderMap[it.id] ?: Int.MAX_VALUE }
+                                } else {
+                                    albums
+                                }
+                            }
+                        }.let { if (descending && sortType != AlbumSortType.CUSTOM) it.reversed() else it }
                     }
                 }
             }.onEach { albumsList ->
@@ -267,24 +299,42 @@ constructor(
             }
         }
     }
+
+    fun saveAlbumOrder(ids: List<String>) {
+        viewModelScope.launch {
+            context.dataStore.edit {
+                it[AlbumCustomOrderKey] = ids.joinToString(",")
+            }
+        }
+    }
 }
 
 @HiltViewModel
 class LibraryPlaylistsViewModel
 @Inject
 constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     database: MusicDatabase,
 ) : ViewModel() {
     val allPlaylists =
         context.dataStore.data
             .map {
-                it[PlaylistSortTypeKey].toEnum(PlaylistSortType.CUSTOM) to (it[PlaylistSortDescendingKey]
-                    ?: true)
+                Triple(
+                    it[PlaylistSortTypeKey].toEnum(PlaylistSortType.CUSTOM),
+                    it[PlaylistSortDescendingKey] ?: true,
+                    it[PlaylistCustomOrderKey] ?: ""
+                )
             }.distinctUntilChanged()
-            .flatMapLatest { (sortType, descending) ->
+            .flatMapLatest { (sortType, descending, orderString) ->
                 com.ruben.spotitube.utils.PerfTiming.measureRoomQuery("Library.playlists") {
                     database.playlists(sortType, descending)
+                }.map { list ->
+                    if (sortType == PlaylistSortType.CUSTOM && orderString.isNotEmpty()) {
+                        val orderMap = orderString.split(",").withIndex().associate { it.value to it.index }
+                        list.sortedBy { orderMap[it.id] ?: Int.MAX_VALUE }
+                    } else {
+                        list
+                    }
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -292,6 +342,14 @@ constructor(
         context.dataStore.data
             .map { it[TopSize] ?: "50" }
             .distinctUntilChanged()
+
+    fun savePlaylistOrder(ids: List<String>) {
+        viewModelScope.launch {
+            context.dataStore.edit {
+                it[PlaylistCustomOrderKey] = ids.joinToString(",")
+            }
+        }
+    }
 }
 
 @HiltViewModel

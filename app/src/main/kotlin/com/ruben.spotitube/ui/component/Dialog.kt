@@ -12,6 +12,7 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil3.compose.AsyncImage
 import androidx.navigation.NavController
 import com.ruben.spotitube.R
 import com.ruben.spotitube.ui.screens.settings.AccountSettings
@@ -574,6 +577,57 @@ fun EditPlaylistDialog(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            val songCovers = remember(fallbackThumbnails) {
+                fallbackThumbnails.distinct()
+            }
+            if (songCovers.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.choose_song_cover),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    songCovers.forEach { coverUrl ->
+                        val shape = RoundedCornerShape(8.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(shape)
+                                .border(
+                                    width = if (thumbnailUrl == coverUrl) 2.dp else 1.dp,
+                                    color = if (thumbnailUrl == coverUrl) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.outlineVariant
+                                    },
+                                    shape = shape
+                                )
+                                .clickable {
+                                    if (thumbnailUrl != coverUrl) {
+                                        releasePersistablePermissionIfPossible(thumbnailUrl)
+                                        thumbnailUrl = coverUrl
+                                    }
+                                }
+                        ) {
+                            AsyncImage(
+                                model = coverUrl,
+                                contentDescription = stringResource(R.string.choose_song_cover),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             if (!thumbnailUrl.isNullOrBlank()) {
                 Button(

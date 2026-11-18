@@ -24,7 +24,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.milliseconds
 
-object HistoryMetadataLoader {
+object SongMetadataLoader {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val inFlightSongs = ConcurrentHashMap<String, Deferred<Unit>>()
@@ -32,9 +32,9 @@ object HistoryMetadataLoader {
     private val inFlightAlbums = ConcurrentHashMap<String, Deferred<Unit>>()
 
     fun loadMetadataForIds(ids: List<String>): Job? {
-        val uniqueIds = ids.distinct().filter { 
-            HistoryItemMemoryCache.get(it) == null && 
-            !HistoryItemMemoryCache.isFailedRecently(it) && 
+        val uniqueIds = ids.distinct().filter {
+            SongItemMemoryCache.get(it) == null &&
+            !SongItemMemoryCache.isFailedRecently(it) &&
             !inFlightSongs.containsKey(it)
         }
         if (uniqueIds.isEmpty()) return null
@@ -47,17 +47,17 @@ object HistoryMetadataLoader {
                 uniqueIds.chunked(50).forEach { chunk ->
                     if (!isActive) return@forEach
                     YouTube.queue(chunk).onSuccess { songItems ->
-                        HistoryItemMemoryCache.putAll(songItems)
+                        SongItemMemoryCache.putAll(songItems)
                         val returnedIds = songItems.map { it.id }.toSet()
                         if (isActive) {
                             chunk.filterNot { returnedIds.contains(it) }.forEach {
-                                HistoryItemMemoryCache.markFailed(it)
+                                SongItemMemoryCache.markFailed(it)
                             }
                         }
                     }.onFailure { throwable ->
                         if (throwable !is CancellationException) {
                             if (isActive) {
-                                chunk.forEach { HistoryItemMemoryCache.markFailed(it) }
+                                chunk.forEach { SongItemMemoryCache.markFailed(it) }
                             }
                         }
                     }
@@ -76,11 +76,11 @@ object HistoryMetadataLoader {
         if (distinctIds.isEmpty()) return@withContext emptyMap()
 
         withTimeoutOrNull(300.milliseconds) {
-            HistoryDiskCache.awaitLoaded()
+            MetadataDiskCache.awaitLoaded()
         }
 
-        val memHitIds = distinctIds.filter { HistoryItemMemoryCache.get(it) != null }
-        val remainingIds = distinctIds.filter { HistoryItemMemoryCache.get(it) == null && !HistoryItemMemoryCache.isFailedRecently(it) }
+        val memHitIds = distinctIds.filter { SongItemMemoryCache.get(it) != null }
+        val remainingIds = distinctIds.filter { SongItemMemoryCache.get(it) == null && !SongItemMemoryCache.isFailedRecently(it) }
 
         val inFlightSharedIds = remainingIds.filter { inFlightSongs.containsKey(it) }
         val neededNetworkIds = remainingIds.filter { !inFlightSongs.containsKey(it) }
@@ -102,14 +102,14 @@ object HistoryMetadataLoader {
                 scope.launch {
                     try {
                         YouTube.queue(chunk).onSuccess { songItems ->
-                            HistoryItemMemoryCache.putAll(songItems)
+                            SongItemMemoryCache.putAll(songItems)
                             val returnedIds = songItems.map { it.id }.toSet()
                             chunk.filterNot { returnedIds.contains(it) }.forEach {
-                                HistoryItemMemoryCache.markFailed(it)
+                                SongItemMemoryCache.markFailed(it)
                             }
                         }.onFailure { throwable ->
                             if (throwable !is CancellationException) {
-                                chunk.forEach { HistoryItemMemoryCache.markFailed(it) }
+                                chunk.forEach { SongItemMemoryCache.markFailed(it) }
                             }
                         }
                     } finally {
@@ -131,7 +131,7 @@ object HistoryMetadataLoader {
         }
 
         distinctIds.mapNotNull { id ->
-            HistoryItemMemoryCache.get(id)?.let { id to it }
+            SongItemMemoryCache.get(id)?.let { id to it }
         }.toMap()
     }
 
@@ -140,11 +140,11 @@ object HistoryMetadataLoader {
         if (distinctIds.isEmpty()) return@withContext emptyMap()
 
         withTimeoutOrNull(300.milliseconds) {
-            HistoryDiskCache.awaitLoaded()
+            MetadataDiskCache.awaitLoaded()
         }
 
-        val memHitIds = distinctIds.filter { HistoryArtistMemoryCache.get(it) != null }
-        val remainingIds = distinctIds.filter { HistoryArtistMemoryCache.get(it) == null }
+        val memHitIds = distinctIds.filter { ArtistMemoryCache.get(it) != null }
+        val remainingIds = distinctIds.filter { ArtistMemoryCache.get(it) == null }
 
         val inFlightSharedIds = remainingIds.filter { inFlightArtists.containsKey(it) }
         val neededNetworkIds = remainingIds.filter { !inFlightArtists.containsKey(it) }
@@ -169,7 +169,7 @@ object HistoryMetadataLoader {
                                 name = page.artist.title,
                                 thumbnailUrl = page.artist.thumbnail?.resize(544, 544)
                             )
-                            HistoryArtistMemoryCache.put(artistId, meta)
+                            ArtistMemoryCache.put(artistId, meta)
                         }
                     } finally {
                         inFlightArtists.remove(artistId)
@@ -188,7 +188,7 @@ object HistoryMetadataLoader {
         }
 
         distinctIds.mapNotNull { id ->
-            HistoryArtistMemoryCache.get(id)?.let { id to it }
+            ArtistMemoryCache.get(id)?.let { id to it }
         }.toMap()
     }
 
@@ -197,11 +197,11 @@ object HistoryMetadataLoader {
         if (distinctIds.isEmpty()) return@withContext emptyMap()
 
         withTimeoutOrNull(300.milliseconds) {
-            HistoryDiskCache.awaitLoaded()
+            MetadataDiskCache.awaitLoaded()
         }
 
-        val memHitIds = distinctIds.filter { HistoryAlbumMemoryCache.get(it) != null }
-        val remainingIds = distinctIds.filter { HistoryAlbumMemoryCache.get(it) == null }
+        val memHitIds = distinctIds.filter { AlbumMemoryCache.get(it) != null }
+        val remainingIds = distinctIds.filter { AlbumMemoryCache.get(it) == null }
 
         val inFlightSharedIds = remainingIds.filter { inFlightAlbums.containsKey(it) }
         val neededNetworkIds = remainingIds.filter { !inFlightAlbums.containsKey(it) }
@@ -228,7 +228,7 @@ object HistoryMetadataLoader {
                                 thumbnailUrl = page.album.thumbnail?.resize(544, 544),
                                 songCount = page.songs.size
                             )
-                            HistoryAlbumMemoryCache.put(albumId, meta)
+                            AlbumMemoryCache.put(albumId, meta)
                         }
                     } finally {
                         inFlightAlbums.remove(albumId)
@@ -247,7 +247,7 @@ object HistoryMetadataLoader {
         }
 
         distinctIds.mapNotNull { id ->
-            HistoryAlbumMemoryCache.get(id)?.let { id to it }
+            AlbumMemoryCache.get(id)?.let { id to it }
         }.toMap()
     }
 }

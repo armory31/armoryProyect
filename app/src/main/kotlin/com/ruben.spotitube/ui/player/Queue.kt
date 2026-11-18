@@ -76,13 +76,12 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import androidx.navigation.NavController
-import com.ruben.spotitube.LocalLibraryStateHolder
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalLibraryStateHolder
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.AutoLoadMoreKey
 import com.ruben.spotitube.constants.ListItemHeight
@@ -144,8 +143,6 @@ fun Queue(
     val libraryStateHolder = LocalLibraryStateHolder.current
     val isSavedInLibrary by libraryStateHolder.isSavedSong(mediaMetadata?.id ?: "").collectAsStateWithLifecycle(initialValue = false)
 
-    val currentFormat by playerConnection.currentFormat.collectAsStateWithLifecycle(initialValue = null)
-
     val selectedSongs = remember { mutableStateListOf<MediaMetadata>() }
     val selectedItems = remember { mutableStateListOf<Timeline.Window>() }
     var selection by remember { mutableStateOf(false) }
@@ -182,11 +179,6 @@ fun Queue(
     }
     var sleepTimerTimeLeft by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
 
-    val (showCodecOnPlayer) = rememberPreference(
-        key = booleanPreferencesKey("show_codec_on_player"),
-        defaultValue = false
-    )
-
     LaunchedEffect(sleepTimerEnabled) {
         if (sleepTimerEnabled) {
             while (isActive) {
@@ -208,8 +200,6 @@ fun Queue(
             when (playerDesignStyle) {
                 PlayerDesignStyle.V2 -> {
                     QueueCollapsedContentV2(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         textButtonColor = textButtonColor,
                         iconButtonColor = iconButtonColor,
@@ -249,8 +239,6 @@ fun Queue(
 
                 PlayerDesignStyle.V3 -> {
                     QueueCollapsedContentV3(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         sleepTimerEnabled = sleepTimerEnabled,
                         sleepTimerTimeLeft = sleepTimerTimeLeft,
@@ -285,8 +273,6 @@ fun Queue(
 
                 PlayerDesignStyle.V5 -> {
                     QueueCollapsedContentV3(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         sleepTimerEnabled = sleepTimerEnabled,
                         sleepTimerTimeLeft = sleepTimerTimeLeft,
@@ -321,8 +307,6 @@ fun Queue(
 
                 PlayerDesignStyle.V4 -> {
                     QueueCollapsedContentV4(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         textButtonColor = textButtonColor,
                         iconButtonColor = iconButtonColor,
@@ -343,8 +327,6 @@ fun Queue(
 
                 PlayerDesignStyle.V1 -> {
                     QueueCollapsedContentV1(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         sleepTimerEnabled = sleepTimerEnabled,
                         sleepTimerTimeLeft = sleepTimerTimeLeft,
@@ -362,8 +344,6 @@ fun Queue(
 
                 PlayerDesignStyle.V6 -> {
                     QueueCollapsedContentV4(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         textButtonColor = textButtonColor,
                         iconButtonColor = iconButtonColor,
@@ -395,8 +375,6 @@ fun Queue(
                             ?.productName?.toString() ?: "Speaker"
                     }
                     QueueCollapsedContentV7(
-                        showCodecOnPlayer = showCodecOnPlayer,
-                        currentFormat = currentFormat,
                         textBackgroundColor = textBackgroundColor,
                         onExpandQueue = { state.expandSoft() },
                         onShowLyrics = onShowLyrics,

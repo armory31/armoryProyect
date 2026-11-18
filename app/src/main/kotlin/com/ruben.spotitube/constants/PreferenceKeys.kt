@@ -58,6 +58,7 @@ val ProxyTypeKey = stringPreferencesKey("proxyType")
 val StreamBypassProxyKey = booleanPreferencesKey("streamBypassProxy")
 
 val TogetherDisplayNameKey = stringPreferencesKey("together_display_name")
+val TogetherCustomAvatarUriKey = stringPreferencesKey("together_custom_avatar_uri")
 val TogetherClientIdKey = stringPreferencesKey("together_client_id")
 val TogetherAllowGuestsToAddTracksKey = booleanPreferencesKey("together_allow_guests_add_tracks")
 val TogetherAllowGuestsToControlPlaybackKey = booleanPreferencesKey("together_allow_guests_control_playback")
@@ -138,6 +139,9 @@ val AlbumSortTypeKey = stringPreferencesKey("albumSortType")
 val AlbumSortDescendingKey = booleanPreferencesKey("albumSortDescending")
 val PlaylistSortTypeKey = stringPreferencesKey("playlistSortType")
 val PlaylistSortDescendingKey = booleanPreferencesKey("playlistSortDescending")
+val PlaylistCustomOrderKey = stringPreferencesKey("playlistCustomOrder")
+val AlbumCustomOrderKey = stringPreferencesKey("albumCustomOrder")
+val ArtistCustomOrderKey = stringPreferencesKey("artistCustomOrder")
 val ArtistSongSortTypeKey = stringPreferencesKey("artistSongSortType")
 val ArtistSongSortDescendingKey = booleanPreferencesKey("artistSongSortDescending")
 val MixSortTypeKey = stringPreferencesKey("mixSortType")
@@ -225,6 +229,7 @@ enum class ArtistSortType {
     NAME,
     SONG_COUNT,
     PLAY_TIME,
+    CUSTOM,
 }
 
 enum class ArtistSongSortType {
@@ -241,6 +246,7 @@ enum class AlbumSortType {
     SONG_COUNT,
     LENGTH,
     PLAY_TIME,
+    CUSTOM,
 }
 
 enum class PlaylistSortType {

@@ -26,10 +26,7 @@ import com.ruben.spotitube.ui.screens.playlist.AutoPlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.CachePlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.LocalPlaylistScreen
 import com.ruben.spotitube.ui.screens.playlist.OnlinePlaylistScreen
-import com.ruben.spotitube.ui.screens.playlist.TopPlaylistScreen
 import com.ruben.spotitube.ui.screens.search.OnlineSearchResult
-import com.ruben.spotitube.ui.screens.settings.ChangelogScreen
-import com.ruben.spotitube.ui.screens.settings.DebugSettings
 import com.ruben.spotitube.ui.screens.settings.IntegrationScreen
 import com.ruben.spotitube.ui.screens.settings.MusicTogetherScreen
 import com.ruben.spotitube.ui.screens.settings.SettingsScreen
@@ -61,15 +58,6 @@ fun NavGraphBuilder.navigationBuilder(
         Screens.Library.route,
     ) {
         LibraryScreen(navController)
-    }
-    composable("history") {
-        HistoryScreen(navController)
-    }
-    composable("stats") {
-        StatsScreen(navController)
-    }
-    composable("year_in_music") {
-        YearInMusicScreen(navController)
     }
     composable(Screens.MoodAndGenres.route) {
         MoodAndGenresScreen(navController)
@@ -242,17 +230,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         CachePlaylistScreen(navController, scrollBehavior)
     }
-    composable(
-        route = "top_playlist/{top}",
-        arguments =
-            listOf(
-                navArgument("top") {
-                    type = NavType.StringType
-                },
-            ),
-    ) {
-        TopPlaylistScreen(navController, scrollBehavior)
-    }
+
     composable(
         route = "youtube_browse/{browseId}?params={params}&title={title}",
         arguments =
@@ -302,16 +280,9 @@ fun NavGraphBuilder.navigationBuilder(
         val initialCode = backStackEntry.arguments?.getString("code")
         MusicTogetherScreen(navController, scrollBehavior, initialCode = initialCode)
     }
-    composable("settings/misc") {
-        DebugSettings(navController)
-    }
     composable("settings/update") {
         UpdateScreen(navController, scrollBehavior)
     }
-    composable("settings/changelog") {
-        ChangelogScreen(navController, scrollBehavior)
-    }
-
     composable(
         route = "downloaded_origin/{type}/{originId}",
         arguments = listOf(

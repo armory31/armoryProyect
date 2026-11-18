@@ -45,7 +45,6 @@ constructor(
     val itemsPage = MutableStateFlow<ItemsPage?>(null)
 
     init {
-        android.util.Log.d("ARMORY_DEBUG", "ArtistItemsViewModel init: browseId=$browseId, params=$params, passedTitle=$passedTitle")
         itemsPage.value = null
         viewModelScope.launch {
             YouTube
@@ -55,7 +54,6 @@ constructor(
                         params = params,
                     ),
                 ).onSuccess { artistItemsPage ->
-                    android.util.Log.d("ARMORY_DEBUG", "ArtistItemsViewModel éxito: title='${artistItemsPage.title}', itemsCount=${artistItemsPage.items.size}")
                     if (artistItemsPage.title.isNotBlank()) {
                         title.value = artistItemsPage.title
                     }
@@ -67,7 +65,6 @@ constructor(
                             continuation = artistItemsPage.continuation,
                         )
                 }.onFailure {
-                    android.util.Log.e("ARMORY_DEBUG", "ArtistItemsViewModel fallo al cargar items para browseId=$browseId, params=$params", it)
                     reportException(it)
                     itemsPage.value = ItemsPage(items = emptyList(), continuation = null)
                 }

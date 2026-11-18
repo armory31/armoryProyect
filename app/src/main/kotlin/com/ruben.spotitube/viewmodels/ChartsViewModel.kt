@@ -15,6 +15,7 @@ import com.ruben.spotitube.constants.RegionGroup
 import com.ruben.spotitube.constants.parseRegionGroups
 import com.ruben.spotitube.constants.serializeRegionGroups
 import com.ruben.spotitube.innertube.YouTube
+import com.ruben.spotitube.innertube.models.ArtistItem
 import com.ruben.spotitube.innertube.pages.ChartsPage
 import com.ruben.spotitube.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -103,6 +104,7 @@ class ChartsViewModel @Inject constructor(
                         anySuccessfulRequest = true
                     }
                     val groupItems = results.flatMap { page -> page.sections.flatMap { it.items } }
+                        .filter { it !is ArtistItem }
                         .distinctBy { it.id }
 
                     if (groupItems.isNotEmpty()) {

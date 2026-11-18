@@ -43,8 +43,8 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.ArmoryGradients
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.extensions.toMediaItem
 import com.ruben.spotitube.extensions.togglePlayPause

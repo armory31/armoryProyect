@@ -1,0 +1,44 @@
+﻿
+.idea\workspace.xml:117:      <change beforePath="$PROJECT_DIR$/innertube/src/main/kotlin/com/ruben.spotitube/innertube/models/ReturnYouTubeDislikeResponse.kt" beforeDir="false" 
+/>
+innertube\src\main\kotlin\com\ruben.spotitube\innertube\models\response\PlayerResponse.kt:87:        val viewCount: String,
+.descriptions.xml:15233:If you use a custom &lt;code&gt;AppComponentFactory&lt;/code&gt; to instantiate app components yourself, consider disabling this Lint issue in order to 
+avoid false positives.&lt;br&gt;&lt;br&gt;Issue id: Instantiatable&lt;/body&gt;&lt;/html&gt;</inspection><inspection shortName="AndroidLintScrollViewCount" 
+defaultSeverity="WARNING" displayName="ScrollView can have only one child" enabled="true" pluginId="org.jetbrains.android" pluginVersion="261.26222.65.2614.16379836" 
+isGlobalTool="true">&lt;html&gt;&lt;body&gt;&lt;code&gt;ScrollView&lt;/code&gt; can have only one child&lt;br&gt;&lt;br&gt;A &lt;code&gt;ScrollView&lt;/code&gt; can only have one 
+child widget. If you want more children, wrap them in a container layout.&lt;br&gt;&lt;br&gt;Issue id: ScrollViewCount&lt;/body&gt;&lt;/html&gt;</inspection><inspection 
+shortName="AndroidLintManifestOrder" defaultSeverity="WARNING" displayName="Incorrect order of elements in manifest" enabled="true" pluginId="org.jetbrains.android" 
+pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Incorrect order of elements in manifest&lt;br&gt;&lt;br&gt;The 
+&lt;code&gt;&amp;lt;application&gt;&lt;/code&gt; tag should appear after the elements which declare which version you need, which features you need, which libraries you need, and 
+so on. In the past there have been subtle bugs (such as themes not getting applied correctly) when the &lt;code&gt;&amp;lt;application&gt;&lt;/code&gt; tag appears before some of 
+these other elements, so it's best to order your manifest in the logical dependency order.&lt;br&gt;&lt;br&gt;Issue id: 
+ManifestOrder&lt;/body&gt;&lt;/html&gt;</inspection><inspection shortName="AndroidLintStateListReachable" defaultSeverity="WARNING" displayName="Unreachable state in a 
+&lt;selector&gt;" enabled="true" pluginId="org.jetbrains.android" pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Unreachable state in a 
+&lt;code&gt;&amp;lt;selector&gt;&lt;/code&gt;&lt;br&gt;&lt;br&gt;In a selector, only the last child in the state list should omit a state qualifier. If not, all subsequent items 
+in the list will be ignored since the given item will match all.&lt;br&gt;&lt;br&gt;Issue id: StateListReachable&lt;/body&gt;&lt;/html&gt;</inspection><inspection 
+shortName="AndroidLintHalfFloat" defaultSeverity="ERROR" displayName="Incorrect Half Float" enabled="true" pluginId="org.jetbrains.android" 
+pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Incorrect Half Float&lt;br&gt;&lt;br&gt;Half-precision floating point are stored in a short 
+data type, and should be manipulated using the &lt;code&gt;android.util.Half&lt;/code&gt; class. This check flags usages where it appears that these values are used 
+incorrectly.&lt;br&gt;&lt;br&gt;Issue id: HalfFloat&lt;/body&gt;&lt;/html&gt;</inspection><inspection shortName="AndroidLintWrongThread" defaultSeverity="ERROR" 
+displayName="Wrong Thread" enabled="false" pluginId="org.jetbrains.android" pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Wrong 
+Thread&lt;br&gt;&lt;br&gt;Ensures that a method which expects to be called on a specific thread, is actually called from that thread. For example, calls on methods in widgets 
+should always be made on the UI thread.&lt;br&gt;&lt;br&gt;Issue id: WrongThread&lt;br&gt;&lt;br&gt;&lt;a href="https://developer.android.com/guide/components/processes-and-thread
+s.html#Threads"&gt;https://developer.android.com/guide/components/processes-and-threads.html#Threads&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</inspection><inspection 
+shortName="AndroidLintMotionSceneFileValidationError" defaultSeverity="ERROR" displayName="Validation errors in MotionScene files" enabled="true" pluginId="org.jetbrains.android" 
+pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Validation errors in &lt;code&gt;MotionScene&lt;/code&gt; files&lt;br&gt;&lt;br&gt;A motion 
+scene file specifies the animations used in a &lt;code&gt;MotionLayout&lt;/code&gt;. This check performs various serious correctness checks in a motion scene 
+file.&lt;br&gt;&lt;br&gt;Issue id: MotionSceneFileValidationError&lt;/body&gt;&lt;/html&gt;</inspection><inspection shortName="AndroidLintMissingConstraints" 
+defaultSeverity="ERROR" displayName="Missing Constraints in ConstraintLayout" enabled="true" pluginId="org.jetbrains.android" pluginVersion="261.26222.65.2614.16379836" 
+isGlobalTool="true">&lt;html&gt;&lt;body&gt;Missing Constraints in ConstraintLayout&lt;br&gt;&lt;br&gt;The layout editor allows you to place widgets anywhere on the canvas, and 
+it records the current position with designtime attributes (such as &lt;code&gt;layout_editor_absoluteX&lt;/code&gt;). These attributes are &lt;b&gt;not&lt;/b&gt; applied at 
+runtime, so if you push your layout on a device, the widgets may appear in a different location than shown in the editor. To fix this, make sure a widget has both horizontal and 
+vertical constraints by dragging from the edge connections.&lt;br&gt;&lt;br&gt;Issue id: MissingConstraints&lt;/body&gt;&lt;/html&gt;</inspection><inspection 
+shortName="AndroidLintWrongViewCast" defaultSeverity="ERROR" displayName="Mismatched view type" enabled="true" pluginId="org.jetbrains.android" 
+pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Mismatched view type&lt;br&gt;&lt;br&gt;Keeps track of the view types associated with ids 
+and if it finds a usage of the id in the Java code it ensures that it is treated as the same type.&lt;br&gt;&lt;br&gt;Issue id: 
+WrongViewCast&lt;/body&gt;&lt;/html&gt;</inspection><inspection shortName="AndroidLintSelectedPhotoAccess" defaultSeverity="WARNING" displayName="Behavior change when requesting 
+photo library access" enabled="true" pluginId="org.jetbrains.android" pluginVersion="261.26222.65.2614.16379836" isGlobalTool="true">&lt;html&gt;&lt;body&gt;Behavior change when 
+requesting photo library access&lt;br&gt;&lt;br&gt;Selected Photo Access is a new ability for users to share partial access to their photo library when apps request access to 
+their device storage on Android 14+.&lt;br/&gt;
+
+

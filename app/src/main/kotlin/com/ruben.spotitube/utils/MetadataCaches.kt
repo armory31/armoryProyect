@@ -99,7 +99,7 @@ private fun SerializableSongItem.toSongItem() = SongItem(
     explicit = explicit,
 )
 
-object HistoryDiskCache {
+object MetadataDiskCache {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val isLoaded = CompletableDeferred<Unit>()
@@ -133,7 +133,7 @@ object HistoryDiskCache {
                     val items = json.decodeFromString<List<SerializableSongItem>>(text)
                     val valid = items.filter { (now - it.timestamp) <= maxAgeMs }.take(500)
                     valid.forEach { dto ->
-                        HistoryItemMemoryCache.putFromDisk(dto.toSongItem())
+                        SongItemMemoryCache.putFromDisk(dto.toSongItem())
                     }
                     songsCount = valid.size
                 }
@@ -147,7 +147,7 @@ object HistoryDiskCache {
                     val items = json.decodeFromString<List<SerializableArtistMetadata>>(text)
                     val valid = items.filter { (now - it.timestamp) <= maxAgeMs }.take(300)
                     valid.forEach { dto ->
-                        HistoryArtistMemoryCache.putFromDisk(ArtistMetadata(dto.id, dto.name, dto.thumbnailUrl))
+                        ArtistMemoryCache.putFromDisk(ArtistMetadata(dto.id, dto.name, dto.thumbnailUrl))
                     }
                     artistsCount = valid.size
                 }
@@ -161,7 +161,7 @@ object HistoryDiskCache {
                     val items = json.decodeFromString<List<SerializableAlbumMetadata>>(text)
                     val valid = items.filter { (now - it.timestamp) <= maxAgeMs }.take(300)
                     valid.forEach { dto ->
-                        HistoryAlbumMemoryCache.putFromDisk(AlbumMetadata(dto.id, dto.title, dto.artistName, dto.thumbnailUrl, dto.songCount))
+                        AlbumMemoryCache.putFromDisk(AlbumMetadata(dto.id, dto.title, dto.artistName, dto.thumbnailUrl, dto.songCount))
                     }
                     albumsCount = valid.size
                 }
@@ -194,19 +194,19 @@ object HistoryDiskCache {
             val now = System.currentTimeMillis()
 
             // Songs
-            val songsList = HistoryItemMemoryCache.getAllForDisk().take(500).map { it.toSerializable(now) }
+            val songsList = SongItemMemoryCache.getAllForDisk().take(500).map { it.toSerializable(now) }
             songsCount = songsList.size
             writeAtomic(File(cacheDir, "metadata_songs.json"), json.encodeToString(songsList))
 
             // Artists
-            val artistsList = HistoryArtistMemoryCache.getAllForDisk().take(300).map {
+            val artistsList = ArtistMemoryCache.getAllForDisk().take(300).map {
                 SerializableArtistMetadata(it.id, it.name, it.thumbnailUrl, now)
             }
             artistsCount = artistsList.size
             writeAtomic(File(cacheDir, "metadata_artists.json"), json.encodeToString(artistsList))
 
             // Albums
-            val albumsList = HistoryAlbumMemoryCache.getAllForDisk().take(300).map {
+            val albumsList = AlbumMemoryCache.getAllForDisk().take(300).map {
                 SerializableAlbumMetadata(it.id, it.title, it.artistName, it.thumbnailUrl, it.songCount, now)
             }
             albumsCount = albumsList.size
@@ -239,7 +239,7 @@ object HistoryDiskCache {
     }
 }
 
-object HistoryItemMemoryCache {
+object SongItemMemoryCache {
     private const val MAX_ITEMS = 500
     private const val FAILED_RETRY_INTERVAL_MS = 3 * 60 * 1000L // 3 minutes
 
@@ -286,7 +286,7 @@ object HistoryItemMemoryCache {
         failedIdsWithTime.remove(videoId)
         lruMap.put(videoId, item)
         cache[videoId] = item
-        HistoryDiskCache.notifyChanged()
+        MetadataDiskCache.notifyChanged()
     }
 
     @Synchronized
@@ -297,7 +297,7 @@ object HistoryItemMemoryCache {
             lruMap.put(item.id, item)
             cache[item.id] = item
         }
-        HistoryDiskCache.notifyChanged()
+        MetadataDiskCache.notifyChanged()
     }
 
     @Synchronized
@@ -317,11 +317,11 @@ object HistoryItemMemoryCache {
         lruMap.evictAll()
         cache.clear()
         failedIdsWithTime.clear()
-        HistoryDiskCache.clearDisk()
+        MetadataDiskCache.clearDisk()
     }
 }
 
-object HistoryArtistMemoryCache {
+object ArtistMemoryCache {
     private const val MAX_ITEMS = 300
     private val lruMap = object : LruCache<String, ArtistMetadata>(MAX_ITEMS) {
         override fun entryRemoved(evicted: Boolean, key: String?, oldValue: ArtistMetadata?, newValue: ArtistMetadata?) {
@@ -341,7 +341,7 @@ object HistoryArtistMemoryCache {
     fun put(artistId: String, item: ArtistMetadata) {
         lruMap.put(artistId, item)
         cache[artistId] = item
-        HistoryDiskCache.notifyChanged()
+        MetadataDiskCache.notifyChanged()
     }
 
     @Synchronized
@@ -356,7 +356,7 @@ object HistoryArtistMemoryCache {
     }
 }
 
-object HistoryAlbumMemoryCache {
+object AlbumMemoryCache {
     private const val MAX_ITEMS = 300
     private val lruMap = object : LruCache<String, AlbumMetadata>(MAX_ITEMS) {
         override fun entryRemoved(evicted: Boolean, key: String?, oldValue: AlbumMetadata?, newValue: AlbumMetadata?) {
@@ -376,7 +376,7 @@ object HistoryAlbumMemoryCache {
     fun put(albumId: String, item: AlbumMetadata) {
         lruMap.put(albumId, item)
         cache[albumId] = item
-        HistoryDiskCache.notifyChanged()
+        MetadataDiskCache.notifyChanged()
     }
 
     @Synchronized

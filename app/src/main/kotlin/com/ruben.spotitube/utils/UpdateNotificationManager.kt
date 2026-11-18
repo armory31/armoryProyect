@@ -26,11 +26,8 @@ import androidx.work.WorkManager
 import com.ruben.spotitube.BuildConfig
 import com.ruben.spotitube.MainActivity
 import com.ruben.spotitube.R
-import com.ruben.spotitube.constants.EnableUpdateNotificationKey
 import com.ruben.spotitube.constants.LastNotifiedVersionKey
 import com.ruben.spotitube.constants.LastUpdateCheckKey
-import com.ruben.spotitube.constants.UpdateChannel
-import com.ruben.spotitube.constants.UpdateChannelKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -106,21 +103,7 @@ object UpdateNotificationManager {
             try {
                 val dataStore = context.dataStore
 
-                val isEnabled = dataStore.data.map { it[EnableUpdateNotificationKey] ?: false }.first()
-                if (!isEnabled) {
-                    cancelPeriodicUpdateCheck(context)
-                    return@launch
-                }
-
                 schedulePeriodicUpdateCheck(context)
-
-                val updateChannel = dataStore.data.map { 
-                    it[UpdateChannelKey]?.let { value -> 
-                        try { UpdateChannel.valueOf(value) } catch (_: Exception) { UpdateChannel.STABLE }
-                    } ?: UpdateChannel.STABLE
-                }.first()
-
-                if (updateChannel == UpdateChannel.NIGHTLY) return@launch
 
                 val lastCheck = dataStore.data.map { it[LastUpdateCheckKey] ?: 0L }.first()
                 val now = System.currentTimeMillis()

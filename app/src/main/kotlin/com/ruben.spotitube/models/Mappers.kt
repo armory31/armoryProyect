@@ -8,9 +8,6 @@ package com.ruben.spotitube.models
 
 import com.ruben.spotitube.db.entities.Album
 import com.ruben.spotitube.db.entities.AlbumWithSongs
-import com.ruben.spotitube.db.entities.HistoryAlbumEntity
-import com.ruben.spotitube.db.entities.HistoryArtistEntity
-import com.ruben.spotitube.db.entities.HistorySongEntity
 import com.ruben.spotitube.db.entities.SavedAlbumEntity
 import com.ruben.spotitube.db.entities.SavedArtistEntity
 import com.ruben.spotitube.db.entities.SavedSongEntity
@@ -92,53 +89,4 @@ fun ArtistItem.toSavedArtistEntity(): SavedArtistEntity = SavedArtistEntity(
     name = title,
     thumbnailUrl = thumbnail?.resize(544, 544),
     channelId = channelId,
-)
-
-// --- History Entities Mappers ---
-
-fun SongItem.toHistorySongEntity(timestamp: Long = System.currentTimeMillis()): HistorySongEntity = HistorySongEntity(
-    playedAt = timestamp,
-    songId = id,
-    duration = duration ?: -1,
-    playTimeMs = 0L,
-)
-
-fun SavedSongEntity.toHistorySongEntity(timestamp: Long = System.currentTimeMillis()): HistorySongEntity = HistorySongEntity(
-    playedAt = timestamp,
-    songId = id,
-    duration = duration,
-    playTimeMs = 0L,
-)
-
-fun MediaMetadata.toHistorySongEntity(timestamp: Long = System.currentTimeMillis()): HistorySongEntity = HistorySongEntity(
-    playedAt = timestamp,
-    songId = id,
-    duration = duration,
-    playTimeMs = 0L,
-)
-
-fun AlbumItem.toHistoryAlbumEntity(timestamp: Long = System.currentTimeMillis()): HistoryAlbumEntity = HistoryAlbumEntity(
-    playedAt = timestamp,
-    albumId = browseId.ifEmpty { id },
-    artistId = artists?.firstOrNull()?.id,
-)
-
-fun SavedAlbumEntity.toHistoryAlbumEntity(timestamp: Long = System.currentTimeMillis()): HistoryAlbumEntity = HistoryAlbumEntity(
-    playedAt = timestamp,
-    albumId = id,
-    artistId = artistId,
-)
-
-fun ArtistItem.toHistoryArtistEntity(timestamp: Long = System.currentTimeMillis()): HistoryArtistEntity = HistoryArtistEntity(
-    playedAt = timestamp,
-    artistId = id,
-    name = title,
-    thumbnailUrl = thumbnail,
-)
-
-fun SavedArtistEntity.toHistoryArtistEntity(timestamp: Long = System.currentTimeMillis()): HistoryArtistEntity = HistoryArtistEntity(
-    playedAt = timestamp,
-    artistId = id,
-    name = name,
-    thumbnailUrl = thumbnailUrl,
 )

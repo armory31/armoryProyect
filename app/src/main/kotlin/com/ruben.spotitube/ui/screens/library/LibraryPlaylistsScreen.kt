@@ -57,8 +57,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil3.compose.AsyncImage
 import com.ruben.spotitube.ArmoryColors
 import com.ruben.spotitube.ArmoryFilterChip
-import com.ruben.spotitube.LocalDatabase
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalDatabase
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.PlaylistSortDescendingKey
 import com.ruben.spotitube.constants.PlaylistSortType
@@ -66,11 +66,16 @@ import com.ruben.spotitube.constants.PlaylistSortTypeKey
 import com.ruben.spotitube.constants.PlaylistTagsFilterKey
 import com.ruben.spotitube.constants.ShowCachedPlaylistKey
 import com.ruben.spotitube.constants.ShowSavedPlaylistKey
-import com.ruben.spotitube.constants.ShowTopPlaylistKey
+import com.ruben.spotitube.constants.AlbumSortType
+import com.ruben.spotitube.constants.AlbumSortTypeKey
+import com.ruben.spotitube.constants.ArtistSortType
+import com.ruben.spotitube.constants.ArtistSortTypeKey
+import com.ruben.spotitube.db.entities.Album
+import com.ruben.spotitube.db.entities.Artist
 import com.ruben.spotitube.db.entities.Playlist
 import com.ruben.spotitube.db.entities.PlaylistEntity
 import com.ruben.spotitube.extensions.move
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.constants.LibraryFilter
 import com.ruben.spotitube.db.entities.DownloadOriginType
 import com.ruben.spotitube.db.entities.DownloadedOriginRow
@@ -225,11 +230,9 @@ fun LibraryPlaylistsScreen(
         )
     }
 
-    val topSize by viewModel.topValue.collectAsStateWithLifecycle(initialValue = "50")
     val savedTitle = stringResource(R.string.liked)
     val downloadedTitle = stringResource(R.string.offline)
     val cachedTitle = stringResource(R.string.cached_playlist)
-    val topTitle = stringResource(R.string.my_top) + " $topSize"
 
     val savedPlaylist = remember(savedTitle) {
         Playlist(
@@ -245,13 +248,6 @@ fun LibraryPlaylistsScreen(
             songThumbnails = emptyList(),
         )
     }
-    val topPlaylist = remember(topTitle) {
-        Playlist(
-            playlist = PlaylistEntity(id = "AUTO_TOP_PLAYLISTS", name = topTitle, isEditable = false),
-            songCount = 0,
-            songThumbnails = emptyList(),
-        )
-    }
     val cachePlaylist = remember(cachedTitle) {
         Playlist(
             playlist = PlaylistEntity(id = "AUTO_CACHED_PLAYLISTS", name = cachedTitle, isEditable = false),
@@ -261,7 +257,6 @@ fun LibraryPlaylistsScreen(
     }
 
     val (showLiked) = rememberPreference(ShowSavedPlaylistKey, true)
-    val (showTop) = rememberPreference(ShowTopPlaylistKey, true)
     val (showCached) = rememberPreference(ShowCachedPlaylistKey, true)
 
     val shortcuts = buildList {
@@ -296,68 +291,111 @@ fun LibraryPlaylistsScreen(
                 ),
             )
         }
-        if (showTop) {
-            add(
-                LibraryShortcutItem(
-                    id = "top",
-                    title = topPlaylist.playlist.name,
-                    iconRes = R.drawable.trending_up,
-                    route = "top_playlist/$topSize",
-                    accentColor = ArmoryColors.Gold1,
-                ),
-            )
-        }
     }
 
     val lazyListState = rememberLazyListState()
     val canEnterReorderMode = sortType == PlaylistSortType.CUSTOM && selectedTagIds.isEmpty()
     var reorderEnabled by rememberSaveable { mutableStateOf(false) }
-    val canReorderPlaylists = canEnterReorderMode && reorderEnabled
-    val playlistSectionLeadingItems = 3 + if (shortcuts.isNotEmpty()) 1 else 0
+    val canReorderPlaylists = canEnterReorderMode && reorderEnabled && filterType == LibraryFilter.PLAYLISTS && !showDownloadedOrigins
+    val canReorderAlbums = reorderEnabled && filterType == LibraryFilter.ALBUMS && !showDownloadedOrigins
+    val canReorderArtists = reorderEnabled && filterType == LibraryFilter.ARTISTS
+    val playlistSectionLeadingItems = 4 + if (shortcuts.isNotEmpty()) 1 else 0
     val mutableVisiblePlaylists = remember { mutableStateListOf<Playlist>() }
+    val mutableAlbums = remember { mutableStateListOf<Album>() }
+    val mutableArtists = remember { mutableStateListOf<Artist>() }
+    val (_, setAlbumSortType) = rememberEnumPreference(AlbumSortTypeKey, AlbumSortType.CREATE_DATE)
+    val (_, setArtistSortType) = rememberEnumPreference(ArtistSortTypeKey, ArtistSortType.CREATE_DATE)
     var dragInfo by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val reorderableState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         scrollThresholdPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
     ) { from, to ->
-        if (!canReorderPlaylists) return@rememberReorderableLazyListState
         if (from.index < playlistSectionLeadingItems || to.index < playlistSectionLeadingItems) {
             return@rememberReorderableLazyListState
         }
 
         val fromIndex = from.index - playlistSectionLeadingItems
         val toIndex = to.index - playlistSectionLeadingItems
-        if (fromIndex !in mutableVisiblePlaylists.indices || toIndex !in mutableVisiblePlaylists.indices) {
-            return@rememberReorderableLazyListState
-        }
 
-        val currentDragInfo = dragInfo
-        dragInfo = if (currentDragInfo == null) fromIndex to toIndex else currentDragInfo.first to toIndex
-        mutableVisiblePlaylists.move(fromIndex, toIndex)
+        when {
+            canReorderPlaylists -> {
+                if (fromIndex !in mutableVisiblePlaylists.indices || toIndex !in mutableVisiblePlaylists.indices) {
+                    return@rememberReorderableLazyListState
+                }
+                val currentDragInfo = dragInfo
+                dragInfo = if (currentDragInfo == null) fromIndex to toIndex else currentDragInfo.first to toIndex
+                mutableVisiblePlaylists.move(fromIndex, toIndex)
+            }
+            canReorderAlbums -> {
+                if (fromIndex !in mutableAlbums.indices || toIndex !in mutableAlbums.indices) {
+                    return@rememberReorderableLazyListState
+                }
+                val currentDragInfo = dragInfo
+                dragInfo = if (currentDragInfo == null) fromIndex to toIndex else currentDragInfo.first to toIndex
+                mutableAlbums.move(fromIndex, toIndex)
+            }
+            canReorderArtists -> {
+                if (fromIndex !in mutableArtists.indices || toIndex !in mutableArtists.indices) {
+                    return@rememberReorderableLazyListState
+                }
+                val currentDragInfo = dragInfo
+                dragInfo = if (currentDragInfo == null) fromIndex to toIndex else currentDragInfo.first to toIndex
+                mutableArtists.move(fromIndex, toIndex)
+            }
+            else -> return@rememberReorderableLazyListState
+        }
     }
 
-    LaunchedEffect(visiblePlaylists, canReorderPlaylists, reorderableState.isAnyItemDragging, dragInfo) {
+    LaunchedEffect(visiblePlaylists, albums, artists, canReorderPlaylists, canReorderAlbums, canReorderArtists, reorderableState.isAnyItemDragging, dragInfo) {
+        val distinctAlbums = albums.distinctBy { it.id }
+
         if (!canReorderPlaylists) {
             mutableVisiblePlaylists.clear()
             mutableVisiblePlaylists.addAll(visiblePlaylists)
-            return@LaunchedEffect
-        }
-
-        if (!reorderableState.isAnyItemDragging && dragInfo == null) {
+        } else if (!reorderableState.isAnyItemDragging && dragInfo == null) {
             mutableVisiblePlaylists.clear()
             mutableVisiblePlaylists.addAll(visiblePlaylists)
         }
+
+        if (!canReorderAlbums) {
+            mutableAlbums.clear()
+            mutableAlbums.addAll(distinctAlbums)
+        } else if (!reorderableState.isAnyItemDragging && dragInfo == null) {
+            mutableAlbums.clear()
+            mutableAlbums.addAll(distinctAlbums)
+        }
+
+        if (!canReorderArtists) {
+            mutableArtists.clear()
+            mutableArtists.addAll(artists)
+        } else if (!reorderableState.isAnyItemDragging && dragInfo == null) {
+            mutableArtists.clear()
+            mutableArtists.addAll(artists)
+        }
     }
 
-    LaunchedEffect(reorderableState.isAnyItemDragging, canReorderPlaylists) {
-        if (!canReorderPlaylists || reorderableState.isAnyItemDragging) return@LaunchedEffect
+    LaunchedEffect(reorderableState.isAnyItemDragging, canReorderPlaylists, canReorderAlbums, canReorderArtists) {
+        if (!(canReorderPlaylists || canReorderAlbums || canReorderArtists) || reorderableState.isAnyItemDragging) return@LaunchedEffect
 
         dragInfo ?: return@LaunchedEffect
+        when {
+            canReorderPlaylists -> viewModel.savePlaylistOrder(mutableVisiblePlaylists.map { it.id })
+            canReorderAlbums -> albumsViewModel.saveAlbumOrder(mutableAlbums.map { it.id })
+            canReorderArtists -> artistsViewModel.saveArtistOrder(mutableArtists.map { it.id })
+        }
         dragInfo = null
     }
 
     LaunchedEffect(canEnterReorderMode) {
         if (!canEnterReorderMode) reorderEnabled = false
+    }
+
+    LaunchedEffect(canReorderAlbums) {
+        if (canReorderAlbums) setAlbumSortType(AlbumSortType.CUSTOM)
+    }
+
+    LaunchedEffect(canReorderArtists) {
+        if (canReorderArtists) setArtistSortType(ArtistSortType.CUSTOM)
     }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -500,20 +538,45 @@ fun LibraryPlaylistsScreen(
                         }
                     }
                     LibraryFilter.ALBUMS -> {
-                        items(
-                            items = albums.distinctBy { it.id },
-                            key = { "album_${it.id}" }
-                        ) { album ->
-                            LibraryAlbumListItem(
-                                navController = navController,
-                                menuState = menuState,
-                                album = album,
-                                isActive = album.id == mediaMetadata?.album?.id,
-                                isPlaying = isPlaying ?: false,
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .animateItem()
-                            )
+                        if (canReorderAlbums) {
+                            itemsIndexed(
+                                items = mutableAlbums,
+                                key = { _, a -> "album_${a.id}" },
+                            ) { _, album ->
+                                ReorderableItem(
+                                    state = reorderableState,
+                                    key = "album_${album.id}",
+                                ) {
+                                    LibraryAlbumListItem(
+                                        navController = navController,
+                                        menuState = menuState,
+                                        album = album,
+                                        isActive = album.id == mediaMetadata?.album?.id,
+                                        isPlaying = isPlaying ?: false,
+                                        showDragHandle = true,
+                                        dragHandleModifier = Modifier.draggableHandle(),
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp)
+                                            .animateItem(),
+                                    )
+                                }
+                            }
+                        } else {
+                            items(
+                                items = albums.distinctBy { it.id },
+                                key = { "album_${it.id}" },
+                            ) { album ->
+                                LibraryAlbumListItem(
+                                    navController = navController,
+                                    menuState = menuState,
+                                    album = album,
+                                    isActive = album.id == mediaMetadata?.album?.id,
+                                    isPlaying = isPlaying ?: false,
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .animateItem(),
+                                )
+                            }
                         }
                     }
                     else -> {}
@@ -521,19 +584,43 @@ fun LibraryPlaylistsScreen(
             }
 
             if (filterType == LibraryFilter.ARTISTS) {
-                items(
-                    items = artists,
-                    key = { "artist_${it.id}" }
-                ) { artist ->
-                    LibraryArtistListItem(
-                        navController = navController,
-                        menuState = menuState,
-                        coroutineScope = coroutineScope,
-                        artist = artist,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .animateItem()
-                    )
+                if (canReorderArtists) {
+                    itemsIndexed(
+                        items = mutableArtists,
+                        key = { _, artist -> "artist_${artist.id}" },
+                    ) { _, artist ->
+                        ReorderableItem(
+                            state = reorderableState,
+                            key = "artist_${artist.id}",
+                        ) {
+                            LibraryArtistListItem(
+                                navController = navController,
+                                menuState = menuState,
+                                coroutineScope = coroutineScope,
+                                artist = artist,
+                                showDragHandle = true,
+                                dragHandleModifier = Modifier.draggableHandle(),
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .animateItem(),
+                            )
+                        }
+                    }
+                } else {
+                    items(
+                        items = artists,
+                        key = { "artist_${it.id}" },
+                    ) { artist ->
+                        LibraryArtistListItem(
+                            navController = navController,
+                            menuState = menuState,
+                            coroutineScope = coroutineScope,
+                            artist = artist,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .animateItem(),
+                        )
+                    }
                 }
             } else if (showDownloadedOrigins) {
                 if (downloadedOrigins.isEmpty()) {
@@ -577,7 +664,14 @@ private fun LibraryFilterChipsRow(
             ArmoryFilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(label, style = MaterialTheme.typography.labelLarge) },
+                label = {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = if (selectedFilter == filter) ArmoryColors.AbsoluteBlack else ArmoryColors.Gold0
+                        )
+                    )
+                },
                 modifier = Modifier.weight(1f),
             )
         }

@@ -30,7 +30,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -41,7 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.ruben.spotitube.ArmoryColors
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.constants.AlbumFilter
 import com.ruben.spotitube.constants.AlbumFilterKey
@@ -135,6 +134,7 @@ fun LibraryAlbumsScreen(
                         AlbumSortType.SONG_COUNT -> R.string.sort_by_song_count
                         AlbumSortType.LENGTH -> R.string.sort_by_length
                         AlbumSortType.PLAY_TIME -> R.string.sort_by_play_time
+                        AlbumSortType.CUSTOM -> R.string.sort_by_custom
                     }
                 },
             )

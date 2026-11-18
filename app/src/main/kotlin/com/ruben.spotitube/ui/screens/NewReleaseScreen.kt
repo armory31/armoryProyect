@@ -74,8 +74,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.ruben.spotitube.ArmoryIcon
 import com.ruben.spotitube.ArmoryTopBar
-import com.ruben.spotitube.LocalPlayerAwareWindowInsets
-import com.ruben.spotitube.LocalPlayerConnection
+import com.ruben.spotitube.ui.LocalPlayerAwareWindowInsets
+import com.ruben.spotitube.ui.LocalPlayerConnection
 import com.ruben.spotitube.R
 import com.ruben.spotitube.SectionHeader
 import com.ruben.spotitube.constants.getGroupsSummaryText
@@ -293,7 +293,6 @@ private fun NewReleaseGroupsContent(
                     Text(
                         text = stringResource(titleRes),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 4.dp)
                     )
 
